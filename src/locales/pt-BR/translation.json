@@ -1,0 +1,112 @@
+{
+  "brand": {
+    "tagline": "Experiência residencial elevada através do design e tecnologia."
+  },
+  "feature": {
+    "concierge": {
+      "title": "Assessor 24/7",
+      "desc": "Assistência personalizada para cada detalhe do seu dia."
+    },
+    "privacy": {
+      "title": "Privacidade",
+      "desc": "Sua segurança e dados protegidos com rigor."
+    }
+  },
+  "form": {
+    "title": "Solicitar Acesso",
+    "subtitle": "Preencha os dados abaixo para iniciar sua jornada.",
+    "submit": "Enviar Solicitação"
+  },
+  "field": {
+    "name": {
+      "label": "Nome Completo",
+      "placeholder": "Ex: Julian Santos"
+    },
+    "email": {
+      "label": "E-mail"
+    },
+    "identifier": {
+      "label": "E-mail ou CPF",
+      "placeholder": "ex: joao@email.com"
+    },
+    "password": {
+      "label": "Senha"
+    }
+  },
+  "already": {
+    "have": {
+      "account": "Já possui uma conta? <lnk>Fazer Login</lnk>"
+    }
+  },
+  "login": {
+    "welcome": "Bem-vindo à Mora",
+    "tagline": "Experiência de",
+    "tagline2": "Viver em Fluxo.",
+    "description": "Acesse o seu concierge digital e gerencie seu estilo de vida com a elegância que você merece.",
+    "community": "Junte-se à nossa comunidade exclusiva.",
+    "title": "Entrar na Mora",
+    "subtitle": "Insira suas credenciais de acesso.",
+    "forgot": "Esqueceu a senha?",
+    "submit": "Acessar Minha Conta",
+    "noAccount": "Ainda não faz parte?",
+    "requestAccess": "Solicitar Acesso"
+  },
+  "footer": {
+    "privacy": "Privacidade",
+    "terms": "Termos"
+  },
+  "recovery": {
+    "left": {
+      "description": "Recupere seu acesso com segurança e volte a viver com a elegância que você merece."
+    },
+    "support": "Precisa de ajuda imediata?",
+    "concierge": "Entre em contato com o <span>Mora</span>.",
+    "title": "Recuperação de Senha",
+    "description": "Insira seu e-mail abaixo. Enviaremos um link seguro para você redefinir seu acesso.",
+    "email": {
+      "label": "Endereço de E-mail",
+      "placeholder": "exemplo@mora.com"
+    },
+    "submit": "Enviar Link de Redefinição",
+    "back": "Voltar para o Login"
+  },
+  "perfil": {
+    "header": {
+      "titulo": "Bem-vindo ao seu",
+      "espaco": "espaço",
+      "subtitulo": "Gerencie sua residência com a elegância de um concierge digital."
+    },
+    "nome": "João Silva",
+    "unidade": "Torre A • Unidade 102",
+    "verificado": "Residente Verificado",
+    "taxa": {
+      "label": "Taxa de Condomínio",
+      "status": "Status: Pago (Ref. Outubro)"
+    },
+    "config": {
+      "titulo": "Configurações da Conta"
+    },
+    "conta": {
+      "titulo": "Detalhes da Conta",
+      "desc": "Informações pessoais e de residência"
+    },
+    "privacidade": {
+      "titulo": "Privacidade e Segurança",
+      "desc": "Senha, biometria e acessos"
+    },
+    "familia": {
+      "titulo": "Família e Convidados",
+      "desc": "Gerencie quem pode acessar sua unidade"
+    },
+    "cobranca": {
+      "titulo": "Histórico de Cobrança",
+      "desc": "Faturas anteriores e comprovantes"
+    },
+    "sair": "Sair da Conta",
+    "footer": {
+      "copy": "© 2024 CondoConcierge by Mora System. Todos os direitos reservados.",
+      "privacidade": "Privacidade",
+      "termos": "Termos"
+    }
+  }
+}

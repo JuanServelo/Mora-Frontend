@@ -1,0 +1,108 @@
+﻿/* src/index.css */
+@import "tailwindcss";
+
+/* ================================================================
+   THEME — Material Design 3 dark palette + typography + radius
+   ================================================================ */
+@theme {
+  /* Colors */
+  --color-surface-dim:                  #141218;
+  --color-on-secondary-fixed:           #251a00;
+  --color-on-background:                #e7e0e9;
+  --color-tertiary-container:           #369fa4;
+  --color-surface-container-lowest:     #0f0d13;
+  --color-surface-bright:               #3b383f;
+  --color-secondary-container:          #5d4604;
+  --color-on-tertiary-fixed:            #002021;
+  --color-outline:                      #8a9293;
+  --color-inverse-primary:              #36666a;
+  --color-surface-container:            #211e25;
+  --color-surface-container-high:       #2b292f;
+  --color-on-tertiary-fixed-variant:    #004f52;
+  --color-surface-container-highest:    #36343a;
+  --color-on-primary-fixed-variant:     #1c4e52;
+  --color-surface:                      #141218;
+  --color-error-container:              #93000a;
+  --color-error:                        #ffb4ab;
+  --color-on-secondary-fixed-variant:   #5a4302;
+  --color-primary:                      #9fcfd4;
+  --color-tertiary-fixed:               #91f2f7;
+  --color-inverse-on-surface:           #322f36;
+  --color-primary-container:            #6a999e;
+  --color-outline-variant:              #404849;
+  --color-on-primary-fixed:             #002022;
+  --color-on-primary:                   #00363b;
+  --color-tertiary-fixed-dim:           #74d6db;
+  --color-surface-tint:                 #9fcfd4;
+  --color-on-tertiary:                  #003739;
+  --color-on-primary-container:         #003033;
+  --color-background:                   #141218;
+  --color-secondary:                    #e5c277;
+  --color-on-surface:                   #e7e0e9;
+  --color-on-secondary:                 #3f2e00;
+  --color-on-surface-variant:           #c0c8c9;
+  --color-surface-container-low:        #1d1a21;
+  --color-secondary-fixed-dim:          #e5c277;
+  --color-secondary-fixed:              #ffdf9b;
+  --color-on-error-container:           #ffdad6;
+  --color-on-secondary-container:       #d5b46b;
+  --color-primary-fixed-dim:            #9fcfd4;
+  --color-on-error:                     #690005;
+  --color-tertiary:                     #74d6db;
+  --color-surface-variant:              #36343a;
+  --color-primary-fixed:                #baebf0;
+  --color-inverse-surface:              #e7e0e9;
+  --color-on-tertiary-container:        #003032;
+
+  /* Typography */
+  --font-headline: "Manrope", sans-serif;
+  --font-body:     "Inter", sans-serif;
+  --font-label:    "Inter", sans-serif;
+
+  /* Border radius */
+  --radius-DEFAULT: 0.25rem;
+  --radius-lg:      0.5rem;
+  --radius-xl:      0.75rem;
+  --radius-full:    9999px;
+}
+
+/* ================================================================
+   GLOBAL BASE
+   ================================================================ */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Material Symbols icon variable settings */
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+/* ================================================================
+   CUSTOM UTILITIES
+   ================================================================ */
+@utility glass-panel {
+  background: rgba(54, 52, 58, 0.4);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+}
+
+@utility glass-card {
+  background: rgba(54, 52, 58, 0.4);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+@utility bg-mesh {
+  background-image:
+    radial-gradient(at 0% 0%,     rgba(159, 207, 212, 0.15) 0px, transparent 50%),
+    radial-gradient(at 100% 0%,   rgba(229, 194, 119, 0.1)  0px, transparent 50%),
+    radial-gradient(at 100% 100%, rgba(159, 207, 212, 0.1)  0px, transparent 50%),
+    radial-gradient(at 0% 100%,   rgba(20, 18, 24, 1)       0px, transparent 50%);
+}

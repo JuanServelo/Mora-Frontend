@@ -1,0 +1,59 @@
+msgid ""
+msgstr ""
+"POT-Creation-Date: 2026-04-05 16:08-0300\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: @lingui/cli\n"
+"Language: en\n"
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Plural-Forms: \n"
+
+#. js-lingui-explicit-id
+#: src/components/organisms/BrandHero/index.jsx:28
+msgid "feature.concierge.desc"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/components/organisms/BrandHero/index.jsx:25
+msgid "feature.concierge.title"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/components/organisms/RequestAccessForm/index.jsx:68
+msgid "form.submit"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/components/organisms/BrandHero/index.jsx:13
+msgid "brand.tagline"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/components/organisms/RequestAccessForm/index.jsx:75
+msgid "already.have.account"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/components/organisms/RequestAccessForm/index.jsx:26
+msgid "form.subtitle"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/components/organisms/BrandHero/index.jsx:38
+msgid "feature.privacy.title"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/components/organisms/RequestAccessForm/index.jsx:23
+msgid "form.title"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/components/organisms/BrandHero/index.jsx:41
+msgid "feature.privacy.desc"
+msgstr ""

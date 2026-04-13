@@ -1,0 +1,112 @@
+{
+  "brand": {
+    "tagline": "Elevated residential experience through design and technology."
+  },
+  "feature": {
+    "concierge": {
+      "title": "24/7 Advisor",
+      "desc": "Personalized assistance for every detail of your day."
+    },
+    "privacy": {
+      "title": "Privacy",
+      "desc": "Your security and data protected with rigor."
+    }
+  },
+  "form": {
+    "title": "Request Access",
+    "subtitle": "Fill in the details below to start your journey.",
+    "submit": "Submit Request"
+  },
+  "field": {
+    "name": {
+      "label": "Full Name",
+      "placeholder": "E.g.: Julian Santos"
+    },
+    "email": {
+      "label": "E-mail"
+    },
+    "identifier": {
+      "label": "E-mail or CPF",
+      "placeholder": "e.g.: john@email.com"
+    },
+    "password": {
+      "label": "Password"
+    }
+  },
+  "already": {
+    "have": {
+      "account": "Already have an account? <lnk>Sign In</lnk>"
+    }
+  },
+  "login": {
+    "welcome": "Welcome to Mora",
+    "tagline": "Experience of",
+    "tagline2": "Living in Flow.",
+    "description": "Access your digital concierge and manage your lifestyle with the elegance you deserve.",
+    "community": "Join our exclusive community.",
+    "title": "Sign in to Mora",
+    "subtitle": "Enter your access credentials.",
+    "forgot": "Forgot your password?",
+    "submit": "Access My Account",
+    "noAccount": "Not a member yet?",
+    "requestAccess": "Request Access"
+  },
+  "footer": {
+    "privacy": "Privacy",
+    "terms": "Terms"
+  },
+  "perfil": {
+    "header": {
+      "titulo": "Welcome to your",
+      "espaco": "space",
+      "subtitulo": "Manage your residence with the elegance of a digital concierge."
+    },
+    "nome": "João Silva",
+    "unidade": "Tower A • Unit 102",
+    "verificado": "Verified Resident",
+    "taxa": {
+      "label": "Condo Fee",
+      "status": "Status: Paid (Ref. October)"
+    },
+    "config": {
+      "titulo": "Account Settings"
+    },
+    "conta": {
+      "titulo": "Account Details",
+      "desc": "Personal and residence information"
+    },
+    "privacidade": {
+      "titulo": "Privacy & Security",
+      "desc": "Password, biometrics and access"
+    },
+    "familia": {
+      "titulo": "Family & Guests",
+      "desc": "Manage who can access your unit"
+    },
+    "cobranca": {
+      "titulo": "Billing History",
+      "desc": "Previous invoices and receipts"
+    },
+    "sair": "Sign Out",
+    "footer": {
+      "copy": "© 2024 CondoConcierge by Mora System. All rights reserved.",
+      "privacidade": "Privacy",
+      "termos": "Terms"
+    }
+  },
+  "recovery": {
+    "left": {
+      "description": "Recover your access securely and return to living with the elegance you deserve."
+    },
+    "support": "Need immediate help?",
+    "concierge": "Contact <span>Mora</span>.",
+    "title": "Password Recovery",
+    "description": "Enter your email below. We will send you a secure link to reset your access.",
+    "email": {
+      "label": "Email Address",
+      "placeholder": "example@mora.com"
+    },
+    "submit": "Send Reset Link",
+    "back": "Back to Login"
+  }
+}
