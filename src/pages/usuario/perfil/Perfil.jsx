@@ -1,6 +1,8 @@
 // src/pages/perfil/Perfil.jsx
 import { useState, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { useAuth } from "../../../contexts/AuthContext";
 import { Icone } from "../../../components/icones/Icone";
 import { DetalhesContaView } from "./DetalhesContaView";
 import { PrivacidadeView } from "./PrivacidadeView";
@@ -55,6 +57,8 @@ const TITULOS_VIEW = {
 
 export function Perfil() {
   const { t } = useTranslation();
+  const { usuario, logout } = useAuth();
+  const navigate = useNavigate();
   const [activeView, setActiveView] = useState(null);
   const lastViewRef = useRef(null);
   if (activeView !== null) lastViewRef.current = activeView;
@@ -91,10 +95,10 @@ export function Perfil() {
               </div>
 
               <h2 className="font-headline text-2xl font-bold text-on-surface">
-                {t("perfil.nome")}
+                {usuario?.nome || t("perfil.nome")}
               </h2>
               <p className="text-primary-container font-medium mb-4 text-sm">
-                {t("perfil.unidade")}
+                {usuario?.email || t("perfil.unidade")}
               </p>
 
               <div className="flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full border border-primary/20">
@@ -194,7 +198,10 @@ export function Perfil() {
 
                       {/* Logout */}
                       <div className="pt-8 mt-8 border-t border-outline-variant/15">
-                        <button className="w-full flex items-center justify-center gap-3 p-5 rounded-full border border-error/20 text-error hover:bg-error/10 transition-all duration-300 font-bold tracking-wide cursor-pointer">
+                        <button
+                          onClick={() => { logout(); navigate("/login"); }}
+                          className="w-full flex items-center justify-center gap-3 p-5 rounded-full border border-error/20 text-error hover:bg-error/10 transition-all duration-300 font-bold tracking-wide cursor-pointer"
+                        >
                           <Icone name="logout" />
                           {t("perfil.sair")}
                         </button>

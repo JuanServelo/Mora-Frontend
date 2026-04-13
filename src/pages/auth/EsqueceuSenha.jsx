@@ -1,15 +1,41 @@
 // src/pages/auth/EsqueceuSenha.jsx
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation, Trans } from "react-i18next";
+import { useAuth } from "../../contexts/AuthContext";
 import { Campo } from "../../components/campos/Campo";
 import { Botao } from "../../components/botoes/Botao";
 import { Icone } from "../../components/icones/Icone";
 
 export function EsqueceuSenha() {
   const { t } = useTranslation();
+  const { esqueciSenha } = useAuth();
+  const [enviado, setEnviado] = useState(false);
+  const [erro, setErro] = useState("");
+  const [carregando, setCarregando] = useState(false);
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
+    setErro("");
+    setCarregando(true);
+
+    const form = new FormData(e.target);
+    const email = form.get("email-recuperacao")?.trim();
+
+    if (!email) {
+      setErro("Informe seu e-mail.");
+      setCarregando(false);
+      return;
+    }
+
+    try {
+      await esqueciSenha(email);
+      setEnviado(true);
+    } catch (err) {
+      setErro(err.response?.data?.mensagem || "Erro ao enviar e-mail.");
+    } finally {
+      setCarregando(false);
+    }
   }
 
   return (
@@ -63,22 +89,37 @@ export function EsqueceuSenha() {
                 </p>
               </div>
 
-              {/* Formulário */}
-              <form className="space-y-5" onSubmit={handleSubmit}>
-                <Campo
-                  id="email-recuperacao"
-                  label={t("recovery.email.label")}
-                  type="email"
-                  placeholder={t("recovery.email.placeholder")}
-                  icon="mail"
-                />
-                <div className="pt-1">
-                  <Botao type="submit">
-                    {t("recovery.submit")}
-                    <Icone name="arrow_forward" className="text-xl" />
-                  </Botao>
+              {enviado ? (
+                <div className="text-center space-y-3 py-4">
+                  <Icone name="mark_email_read" className="text-primary text-4xl" />
+                  <p className="text-on-surface font-semibold">E-mail enviado!</p>
+                  <p className="text-on-surface-variant text-sm">
+                    Se o e-mail estiver cadastrado, voce recebera um link de recuperacao.
+                  </p>
                 </div>
-              </form>
+              ) : (
+                <form className="space-y-5" onSubmit={handleSubmit}>
+                  <Campo
+                    id="email-recuperacao"
+                    name="email-recuperacao"
+                    label={t("recovery.email.label")}
+                    type="email"
+                    placeholder={t("recovery.email.placeholder")}
+                    icon="mail"
+                  />
+
+                  {erro && (
+                    <p className="text-error text-sm font-medium">{erro}</p>
+                  )}
+
+                  <div className="pt-1">
+                    <Botao type="submit" disabled={carregando}>
+                      {carregando ? "Enviando..." : t("recovery.submit")}
+                      {!carregando && <Icone name="arrow_forward" className="text-xl" />}
+                    </Botao>
+                  </div>
+                </form>
+              )}
 
               {/* Voltar para login */}
               <div className="mt-8 pt-6 border-t border-outline-variant/10 text-center">

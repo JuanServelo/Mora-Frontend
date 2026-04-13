@@ -1,44 +1,9 @@
 // src/pages/adm/GerenciarUsuarios.jsx
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import api from "../../services/api";
 import { Icone } from "../../components/icones/Icone";
 import { Campo } from "../../components/campos/Campo";
 import { Botao } from "../../components/botoes/Botao";
-
-const USUARIOS_MOCK = [
-  {
-    id: 1,
-    nome: "João Silva",
-    email: "joao@mora.com",
-    bloco: "A",
-    apartamento: "102",
-    vaga: "A-12",
-    logins: ["joao@mora.com"],
-    status: "ativo",
-    condominio: { valor: "R$ 1.240,00", pago: true, vencimento: "10/04/2026" },
-  },
-  {
-    id: 2,
-    nome: "Maria Lima",
-    email: "maria@mora.com",
-    bloco: "B",
-    apartamento: "304",
-    vaga: "B-07",
-    logins: ["maria@mora.com", "marido@mora.com"],
-    status: "ativo",
-    condominio: { valor: "R$ 1.240,00", pago: false, vencimento: "10/04/2026" },
-  },
-  {
-    id: 3,
-    nome: "Carlos Andrade",
-    email: "carlos@mora.com",
-    bloco: "A",
-    apartamento: "201",
-    vaga: null,
-    logins: ["carlos@mora.com"],
-    status: "pendente",
-    condominio: { valor: "R$ 1.240,00", pago: false, vencimento: "10/04/2026" },
-  },
-];
 
 const MESES = [
   "Janeiro",
@@ -64,8 +29,33 @@ const STATUS_STYLE = {
 
 // ─────────────────────────────────────────────
 export function GerenciarUsuarios() {
-  const [usuarios, setUsuarios] = useState(USUARIOS_MOCK);
+  const [usuarios, setUsuarios] = useState([]);
+  const [carregando, setCarregando] = useState(true);
   const [busca, setBusca] = useState("");
+
+  useEffect(() => {
+    api
+      .get("/api/users")
+      .then((res) => {
+        const lista = (res.data.usuarios || []).map((u) => ({
+          id: u.id,
+          nome: u.nome,
+          email: u.email,
+          role: u.role,
+          provider: u.provider,
+          bloco: u.bloco || "-",
+          apartamento: u.apartamento || "-",
+          vaga: u.vaga || null,
+          logins: [u.email],
+          status: u.role === "admin" ? "ativo" : "ativo",
+          createdAt: u.createdAt,
+          condominio: { valor: "R$ 1.240,00", pago: false, vencimento: "-" },
+        }));
+        setUsuarios(lista);
+      })
+      .catch((err) => console.error("Erro ao carregar usuarios:", err))
+      .finally(() => setCarregando(false));
+  }, []);
   const [editando, setEditando] = useState(null);
   const [expandido, setExpandido] = useState(null);
   const [criando, setCriando] = useState(false);
@@ -86,18 +76,36 @@ export function GerenciarUsuarios() {
     setEditando(null);
   }
 
-  function salvarEdicao(id, dados) {
-    setUsuarios((us) => us.map((u) => (u.id === id ? { ...u, ...dados } : u)));
-    setEditando(null);
+  async function salvarEdicao(id, dados) {
+    try {
+      const res = await api.put(`/api/users/${id}`, dados);
+      const u = res.data.usuario;
+      setUsuarios((us) =>
+        us.map((usr) => (usr.id === id ? { ...usr, nome: u.nome, email: u.email, role: u.role, ...dados } : usr)),
+      );
+      setEditando(null);
+    } catch (err) {
+      console.error("Erro ao salvar:", err);
+    }
   }
 
-  function criarUsuario(dados) {
-    const novoId = Math.max(...usuarios.map((u) => u.id)) + 1;
-    setUsuarios((us) => [
-      ...us,
-      { id: novoId, ...dados, logins: [dados.email], status: "pendente" },
-    ]);
-    setCriando(false);
+  async function criarUsuario(dados) {
+    try {
+      const res = await api.post("/api/users", {
+        nome: dados.nome,
+        email: dados.email,
+        senha: dados.senha || "123456",
+        role: "user",
+      });
+      const u = res.data.usuario;
+      setUsuarios((us) => [
+        { id: u.id, nome: u.nome, email: u.email, role: u.role, provider: u.provider, bloco: dados.bloco || "-", apartamento: dados.apartamento || "-", vaga: dados.vaga || null, logins: [u.email], status: "ativo", createdAt: u.createdAt, condominio: { valor: "R$ 1.240,00", pago: false, vencimento: "-" } },
+        ...us,
+      ]);
+      setCriando(false);
+    } catch (err) {
+      console.error("Erro ao criar:", err);
+    }
   }
 
   return (

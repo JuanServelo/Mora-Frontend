@@ -6,6 +6,7 @@ import { EsqueceuSenha } from "../pages/auth/EsqueceuSenha";
 import { Perfil } from "../pages/usuario/perfil/Perfil";
 import { GerenciarUsuarios } from "../pages/adm/GerenciarUsuarios";
 import { AppLayout } from "../layouts/AppLayout";
+import { ProtectedRoute } from "./ProtectedRoute";
 
 export const router = createBrowserRouter([
   {
@@ -25,9 +26,13 @@ export const router = createBrowserRouter([
     path: "/esqueceu-senha",
     element: <EsqueceuSenha />,
   },
-  // Páginas do app — com navbar
+  // Páginas do app — com navbar, protegidas
   {
-    element: <AppLayout />,
+    element: (
+      <ProtectedRoute>
+        <AppLayout />
+      </ProtectedRoute>
+    ),
     children: [
       { path: "/perfil", element: <Perfil /> },
       { path: "/adm/usuarios", element: <GerenciarUsuarios /> },

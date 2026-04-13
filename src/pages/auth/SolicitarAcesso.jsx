@@ -1,15 +1,49 @@
-﻿// src/pages/auth/SolicitarAcesso.jsx
-import { Link } from "react-router-dom";
+// src/pages/auth/SolicitarAcesso.jsx
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { useTranslation, Trans } from "react-i18next";
+import { useAuth } from "../../contexts/AuthContext";
 import { CartaoRecurso } from "../../components/cards/CartaoRecurso";
 import { Campo } from "../../components/campos/Campo";
 import { Botao } from "../../components/botoes/Botao";
 
 export function SolicitarAcesso() {
   const { t } = useTranslation();
+  const { registrar } = useAuth();
+  const navigate = useNavigate();
+  const [erro, setErro] = useState("");
+  const [carregando, setCarregando] = useState(false);
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
+    setErro("");
+    setCarregando(true);
+
+    const form = new FormData(e.target);
+    const nome = form.get("nome-completo")?.trim();
+    const email = form.get("email")?.trim();
+    const senha = form.get("senha")?.trim();
+
+    if (!nome || !email || !senha) {
+      setErro("Preencha todos os campos.");
+      setCarregando(false);
+      return;
+    }
+
+    if (senha.length < 6) {
+      setErro("Senha deve ter no minimo 6 caracteres.");
+      setCarregando(false);
+      return;
+    }
+
+    try {
+      await registrar(nome, email, senha);
+      navigate("/perfil");
+    } catch (err) {
+      setErro(err.response?.data?.mensagem || "Erro ao solicitar acesso.");
+    } finally {
+      setCarregando(false);
+    }
   }
 
   return (
@@ -60,20 +94,35 @@ export function SolicitarAcesso() {
               <form className="space-y-6" onSubmit={handleSubmit}>
                 <Campo
                   id="nome-completo"
+                  name="nome-completo"
                   label={t("field.name.label")}
                   placeholder={t("field.name.placeholder")}
                   icon="person"
                 />
                 <Campo
                   id="email"
+                  name="email"
                   label={t("field.email.label")}
                   type="email"
                   placeholder="julian@exemplo.com"
                   icon="mail"
                 />
+                <Campo
+                  id="senha"
+                  name="senha"
+                  label="Senha"
+                  type="password"
+                  placeholder="Min. 6 caracteres"
+                  icon="lock"
+                />
+
+                {erro && (
+                  <p className="text-error text-sm font-medium">{erro}</p>
+                )}
+
                 <div className="pt-4">
-                  <Botao type="submit">
-                    {t("form.submit")}
+                  <Botao type="submit" disabled={carregando}>
+                    {carregando ? "Criando conta..." : t("form.submit")}
                   </Botao>
                 </div>
               </form>

@@ -1,15 +1,42 @@
 // src/pages/auth/Login.jsx
-import { Link } from "react-router-dom";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { useAuth } from "../../contexts/AuthContext";
 import { Campo } from "../../components/campos/Campo";
 import { Botao } from "../../components/botoes/Botao";
 import { Icone } from "../../components/icones/Icone";
 
 export function Login() {
   const { t } = useTranslation();
+  const { login } = useAuth();
+  const navigate = useNavigate();
+  const [erro, setErro] = useState("");
+  const [carregando, setCarregando] = useState(false);
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
+    setErro("");
+    setCarregando(true);
+
+    const form = new FormData(e.target);
+    const email = form.get("identificador")?.trim();
+    const senha = form.get("senha")?.trim();
+
+    if (!email || !senha) {
+      setErro("Preencha todos os campos.");
+      setCarregando(false);
+      return;
+    }
+
+    try {
+      await login(email, senha);
+      navigate("/perfil");
+    } catch (err) {
+      setErro(err.response?.data?.mensagem || "Erro ao fazer login.");
+    } finally {
+      setCarregando(false);
+    }
   }
 
   return (
@@ -71,6 +98,7 @@ export function Login() {
               <form className="space-y-5" onSubmit={handleSubmit}>
                 <Campo
                   id="identificador"
+                  name="identificador"
                   label={t("field.identifier.label")}
                   placeholder={t("field.identifier.placeholder")}
                   icon="person"
@@ -99,6 +127,7 @@ export function Login() {
                     />
                     <input
                       id="senha"
+                      name="senha"
                       type="password"
                       placeholder="••••••••"
                       className="w-full bg-surface-container-highest/40 border-none rounded-xl py-4 pl-12 pr-4 text-on-surface placeholder:text-outline-variant focus:ring-2 focus:ring-primary/50 focus:outline-none backdrop-blur-sm transition-all"
@@ -106,10 +135,14 @@ export function Login() {
                   </div>
                 </div>
 
+                {erro && (
+                  <p className="text-error text-sm font-medium">{erro}</p>
+                )}
+
                 <div className="pt-2">
-                  <Botao type="submit">
-                    {t("login.submit")}
-                    <Icone name="arrow_forward" className="text-xl" />
+                  <Botao type="submit" disabled={carregando}>
+                    {carregando ? "Entrando..." : t("login.submit")}
+                    {!carregando && <Icone name="arrow_forward" className="text-xl" />}
                   </Botao>
                 </div>
               </form>
