@@ -16,44 +16,268 @@ msgstr ""
 #. js-lingui-explicit-id
 #: src/components/organisms/BrandHero/index.jsx:28
 msgid "feature.concierge.desc"
-msgstr ""
+msgstr "Personalized assistance for every detail of your day."
 
 #. js-lingui-explicit-id
 #: src/components/organisms/BrandHero/index.jsx:25
 msgid "feature.concierge.title"
-msgstr ""
+msgstr "24/7 Advisor"
 
 #. js-lingui-explicit-id
 #: src/components/organisms/RequestAccessForm/index.jsx:68
 msgid "form.submit"
-msgstr ""
+msgstr "Submit Request"
 
 #. js-lingui-explicit-id
 #: src/components/organisms/BrandHero/index.jsx:13
 msgid "brand.tagline"
-msgstr ""
+msgstr "Elevated residential experience through design and technology."
 
 #. js-lingui-explicit-id
 #: src/components/organisms/RequestAccessForm/index.jsx:75
 msgid "already.have.account"
-msgstr ""
+msgstr "Already have an account? <0>Sign In</0>"
 
 #. js-lingui-explicit-id
 #: src/components/organisms/RequestAccessForm/index.jsx:26
 msgid "form.subtitle"
-msgstr ""
+msgstr "Fill in the details below to start your journey."
 
 #. js-lingui-explicit-id
 #: src/components/organisms/BrandHero/index.jsx:38
 msgid "feature.privacy.title"
-msgstr ""
+msgstr "Privacy"
 
 #. js-lingui-explicit-id
 #: src/components/organisms/RequestAccessForm/index.jsx:23
 msgid "form.title"
-msgstr ""
+msgstr "Request Access"
 
 #. js-lingui-explicit-id
 #: src/components/organisms/BrandHero/index.jsx:41
 msgid "feature.privacy.desc"
-msgstr ""
+msgstr "Your security and data protected with rigor."
+
+#. js-lingui-explicit-id
+msgid "field.name.label"
+msgstr "Full Name"
+
+#. js-lingui-explicit-id
+msgid "field.name.placeholder"
+msgstr "Ex: Julian Santos"
+
+#. js-lingui-explicit-id
+msgid "field.email.label"
+msgstr "E-mail"
+
+#. js-lingui-explicit-id
+msgid "field.tower.label"
+msgstr "Tower"
+
+#. js-lingui-explicit-id
+msgid "field.unit.label"
+msgstr "Unit"
+
+#. js-lingui-explicit-id
+msgid "field.identifier.label"
+msgstr "E-mail or ID"
+
+#. js-lingui-explicit-id
+msgid "field.identifier.placeholder"
+msgstr "ex: john@email.com"
+
+#. js-lingui-explicit-id
+msgid "field.password.label"
+msgstr "Password"
+
+#. js-lingui-explicit-id
+msgid "login.welcome"
+msgstr "Welcome to Mora"
+
+#. js-lingui-explicit-id
+msgid "login.tagline"
+msgstr "Experience of"
+
+#. js-lingui-explicit-id
+msgid "login.tagline2"
+msgstr "Living in Flow."
+
+#. js-lingui-explicit-id
+msgid "login.description"
+msgstr "Access your digital concierge and manage your lifestyle with the elegance you deserve."
+
+#. js-lingui-explicit-id
+msgid "login.community"
+msgstr "Join our exclusive community."
+
+#. js-lingui-explicit-id
+msgid "login.title"
+msgstr "Sign in to Mora"
+
+#. js-lingui-explicit-id
+msgid "login.subtitle"
+msgstr "Enter your access credentials."
+
+#. js-lingui-explicit-id
+msgid "login.forgot"
+msgstr "Forgot password?"
+
+#. js-lingui-explicit-id
+msgid "login.submit"
+msgstr "Access My Account"
+
+#. js-lingui-explicit-id
+msgid "login.no.account"
+msgstr "Not a member yet?"
+
+#. js-lingui-explicit-id
+msgid "login.request.access"
+msgstr "Request Access"
+
+#. js-lingui-explicit-id
+msgid "footer.privacy"
+msgstr "Privacy"
+
+#. js-lingui-explicit-id
+msgid "footer.terms"
+msgstr "Terms"
+
+#. js-lingui-explicit-id
+msgid "recovery.tagline"
+msgstr "Liquid Elegance"
+
+#. js-lingui-explicit-id
+msgid "recovery.left.description"
+msgstr "Recover your access securely and return to living with the elegance you deserve."
+
+#. js-lingui-explicit-id
+msgid "recovery.title"
+msgstr "Password Recovery"
+
+#. js-lingui-explicit-id
+msgid "recovery.description"
+msgstr "Enter your email below. We will send you a secure link to reset your access."
+
+#. js-lingui-explicit-id
+msgid "recovery.email.label"
+msgstr "Email Address"
+
+#. js-lingui-explicit-id
+msgid "recovery.email.placeholder"
+msgstr "example@mora.com"
+
+#. js-lingui-explicit-id
+msgid "recovery.submit"
+msgstr "Send Reset Link"
+
+#. js-lingui-explicit-id
+msgid "recovery.back"
+msgstr "Back to Login"
+
+#. js-lingui-explicit-id
+msgid "recovery.support"
+msgstr "Need immediate help?"
+
+#. js-lingui-explicit-id
+msgid "recovery.concierge"
+msgstr "Contact the <0>Mora Concierge</0>."
+
+#. js-lingui-explicit-id
+msgid "perfil.header.titulo"
+msgstr "Welcome to your"
+
+#. js-lingui-explicit-id
+msgid "perfil.header.espaco"
+msgstr "space"
+
+#. js-lingui-explicit-id
+msgid "perfil.header.subtitulo"
+msgstr "Manage your residence with the elegance of a digital concierge."
+
+#. js-lingui-explicit-id
+msgid "perfil.nome"
+msgstr "João Silva"
+
+#. js-lingui-explicit-id
+msgid "perfil.unidade"
+msgstr "Tower A • Unit 102"
+
+#. js-lingui-explicit-id
+msgid "perfil.verificado"
+msgstr "Verified Resident"
+
+#. js-lingui-explicit-id
+msgid "perfil.taxa.label"
+msgstr "Condo Fee"
+
+#. js-lingui-explicit-id
+msgid "perfil.taxa.status"
+msgstr "Status: Paid (Oct. Ref)"
+
+#. js-lingui-explicit-id
+msgid "perfil.config.titulo"
+msgstr "Account Settings"
+
+#. js-lingui-explicit-id
+msgid "perfil.conta.titulo"
+msgstr "Account Details"
+
+#. js-lingui-explicit-id
+msgid "perfil.conta.desc"
+msgstr "Personal and residence information"
+
+#. js-lingui-explicit-id
+msgid "perfil.privacidade.titulo"
+msgstr "Privacy & Security"
+
+#. js-lingui-explicit-id
+msgid "perfil.privacidade.desc"
+msgstr "Password, biometrics and access"
+
+#. js-lingui-explicit-id
+msgid "perfil.familia.titulo"
+msgstr "Family & Guests"
+
+#. js-lingui-explicit-id
+msgid "perfil.familia.desc"
+msgstr "Manage who can access your unit"
+
+#. js-lingui-explicit-id
+msgid "perfil.cobranca.titulo"
+msgstr "Billing History"
+
+#. js-lingui-explicit-id
+msgid "perfil.cobranca.desc"
+msgstr "Previous invoices and receipts"
+
+#. js-lingui-explicit-id
+msgid "perfil.sair"
+msgstr "Sign Out"
+
+#. js-lingui-explicit-id
+msgid "perfil.ajuda.titulo"
+msgstr "Help Center"
+
+#. js-lingui-explicit-id
+msgid "perfil.ajuda.desc"
+msgstr "Questions about the rules?"
+
+#. js-lingui-explicit-id
+msgid "perfil.exclusive.titulo"
+msgstr "Mora Exclusive"
+
+#. js-lingui-explicit-id
+msgid "perfil.exclusive.desc"
+msgstr "Discover new benefits."
+
+#. js-lingui-explicit-id
+msgid "perfil.footer.copy"
+msgstr "© 2024 CondoConcierge by Mora System. All rights reserved."
+
+#. js-lingui-explicit-id
+msgid "perfil.footer.privacidade"
+msgstr "Privacy"
+
+#. js-lingui-explicit-id
+msgid "perfil.footer.termos"
+msgstr "Terms"
