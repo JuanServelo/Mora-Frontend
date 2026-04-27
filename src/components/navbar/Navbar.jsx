@@ -1,17 +1,30 @@
 // src/components/navbar/Navbar.jsx
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Icone } from "../icones/Icone";
+// import moraLogo from "../../assets/Mora.png";
+// import moraLogo2 from "../../assets/Mora2.png";
+import moraLogo3 from "../../assets/Mora3.png";
 
 const NAV_LINKS_LEFT = [
   { label: "Início", to: "/inicio" },
   { label: "Serviços", to: "/servicos" },
-  { label: "Contatos", to: "/contatos" },
+  { label: "Comodidades", to: "/comodidades" },
+  { label: "Espaços", to: "/espacos" },
+  { label: "Reclamações", to: "/reclamacoes" },
 ];
 
 const NAV_LINKS_RIGHT = [
-  { label: "Comodidades", to: "/comodidades" },
   { label: "Perfil", to: "/perfil" },
+];
+
+const ADM_LINKS = [
+  { label: "Usuários", to: "/adm/usuarios", icon: "manage_accounts", description: "Gerenciar moradores" },
+  { label: "Estruturas", to: "/adm/estruturas", icon: "apartment", description: "Blocos e apartamentos" },
+  { label: "Reuniões", to: "/adm/reunioes", icon: "groups", description: "Reuniões e votações" },
+  { label: "Espaços", to: "/adm/espacos", icon: "deck", description: "Gerenciar áreas comuns" },
+  { label: "Reclamações", to: "/adm/reclamacoes", icon: "report", description: "Gestão de reclamações" },
+  { label: "Vagas", to: "/adm/vagas", icon: "local_parking", description: "Vagas de garagem" },
 ];
 
 function NavLink({ to, children }) {
@@ -33,6 +46,83 @@ function NavLink({ to, children }) {
   );
 }
 
+function AdminMenu() {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+  const { pathname } = useLocation();
+  const admActive = ADM_LINKS.some((l) => pathname === l.to);
+
+  useEffect(() => {
+    function handleClick(e) {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        onClick={() => setOpen((o) => !o)}
+        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-200 cursor-pointer
+          ${admActive || open
+            ? "text-primary bg-primary/10"
+            : "text-on-surface-variant hover:text-on-surface hover:bg-white/5"
+          }`}
+      >
+        <Icone name="admin_panel_settings" className="text-base" />
+        <span>Admin</span>
+        <Icone
+          name="expand_more"
+          className={`text-base transition-transform duration-200 ${open ? "rotate-180" : ""}`}
+        />
+      </button>
+
+      {open && (
+        <div className="absolute top-[calc(100%+10px)] left-1/2 -translate-x-1/2 w-72 rounded-2xl overflow-hidden z-50 shadow-[0_16px_48px_rgba(0,0,0,0.6)]" style={{ background: "rgba(18,18,24,0.97)", backdropFilter: "blur(24px)", border: "1px solid rgba(255,255,255,0.08)" }}>
+          {/* Header do painel */}
+          <div className="px-4 py-3 border-b border-white/5">
+            <p className="text-xs font-semibold uppercase tracking-widest text-on-surface-variant">
+              Painel Administrativo
+            </p>
+          </div>
+
+          {/* Links */}
+          <div className="p-2 space-y-0.5">
+            {ADM_LINKS.map((link) => {
+              const active = pathname === link.to;
+              return (
+                <Link
+                  key={link.to}
+                  to={link.to}
+                  onClick={() => setOpen(false)}
+                  className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group
+                    ${active
+                      ? "bg-primary/10 text-primary"
+                      : "text-on-surface-variant hover:bg-white/5 hover:text-on-surface"
+                    }`}
+                >
+                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all
+                    ${active ? "bg-primary/15" : "bg-surface-container-highest/50 group-hover:bg-primary/10"}`}>
+                    <Icone name={link.icon} className={`text-lg ${active ? "text-primary" : "group-hover:text-primary"}`} />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold leading-tight">{link.label}</p>
+                    <p className="text-xs opacity-60 leading-tight">{link.description}</p>
+                  </div>
+                  {active && (
+                    <Icone name="arrow_forward_ios" className="text-xs text-primary ml-auto" />
+                  )}
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function Navbar() {
   const [darkMode, setDarkMode] = useState(true);
 
@@ -46,14 +136,15 @@ export function Navbar() {
               {l.label}
             </NavLink>
           ))}
+          <AdminMenu />
         </div>
 
         {/* Centro — Logo */}
         <Link
           to="/perfil"
-          className="shrink-0 mx-4 font-headline text-xl font-extrabold tracking-tighter bg-gradient-to-br from-primary to-primary-container bg-clip-text text-transparent hover:opacity-80 transition-opacity"
+          className="shrink-0 mx-4 hover:opacity-80 transition-opacity"
         >
-          Mora
+          <img src={moraLogo3} alt="Mora" className="h-8 w-auto" />
         </Link>
 
         {/* Direita */}

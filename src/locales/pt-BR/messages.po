@@ -57,3 +57,227 @@ msgstr "Solicitar Acesso"
 #: src/components/organisms/BrandHero/index.jsx:41
 msgid "feature.privacy.desc"
 msgstr "Sua segurança e dados protegidos com rigor."
+
+#. js-lingui-explicit-id
+msgid "field.name.label"
+msgstr "Nome Completo"
+
+#. js-lingui-explicit-id
+msgid "field.name.placeholder"
+msgstr "Ex: Julian Santos"
+
+#. js-lingui-explicit-id
+msgid "field.email.label"
+msgstr "E-mail"
+
+#. js-lingui-explicit-id
+msgid "field.tower.label"
+msgstr "Torre"
+
+#. js-lingui-explicit-id
+msgid "field.unit.label"
+msgstr "Unidade"
+
+#. js-lingui-explicit-id
+msgid "field.identifier.label"
+msgstr "E-mail ou CPF"
+
+#. js-lingui-explicit-id
+msgid "field.identifier.placeholder"
+msgstr "ex: joao@email.com"
+
+#. js-lingui-explicit-id
+msgid "field.password.label"
+msgstr "Senha"
+
+#. js-lingui-explicit-id
+msgid "login.welcome"
+msgstr "Bem-vindo à Mora"
+
+#. js-lingui-explicit-id
+msgid "login.tagline"
+msgstr "Experiência de"
+
+#. js-lingui-explicit-id
+msgid "login.tagline2"
+msgstr "Viver em Fluxo."
+
+#. js-lingui-explicit-id
+msgid "login.description"
+msgstr "Acesse o seu assessor digital e gerencie seu estilo de vida com a elegância que você merece."
+
+#. js-lingui-explicit-id
+msgid "login.community"
+msgstr "Junte-se à nossa comunidade exclusiva."
+
+#. js-lingui-explicit-id
+msgid "login.title"
+msgstr "Entrar na Mora"
+
+#. js-lingui-explicit-id
+msgid "login.subtitle"
+msgstr "Insira suas credenciais de acesso."
+
+#. js-lingui-explicit-id
+msgid "login.forgot"
+msgstr "Esqueceu a senha?"
+
+#. js-lingui-explicit-id
+msgid "login.submit"
+msgstr "Acessar Minha Conta"
+
+#. js-lingui-explicit-id
+msgid "login.no.account"
+msgstr "Ainda não faz parte?"
+
+#. js-lingui-explicit-id
+msgid "login.request.access"
+msgstr "Solicitar Acesso"
+
+#. js-lingui-explicit-id
+msgid "footer.privacy"
+msgstr "Privacidade"
+
+#. js-lingui-explicit-id
+msgid "footer.terms"
+msgstr "Termos"
+
+#. js-lingui-explicit-id
+msgid "recovery.tagline"
+msgstr "Liquid Elegance"
+
+#. js-lingui-explicit-id
+msgid "recovery.left.description"
+msgstr "Recupere seu acesso com segurança e volte a viver com a elegância que você merece."
+
+#. js-lingui-explicit-id
+msgid "recovery.title"
+msgstr "Recuperação de Senha"
+
+#. js-lingui-explicit-id
+msgid "recovery.description"
+msgstr "Insira seu e-mail abaixo. Enviaremos um link seguro para você redefinir seu acesso."
+
+#. js-lingui-explicit-id
+msgid "recovery.email.label"
+msgstr "Endereço de E-mail"
+
+#. js-lingui-explicit-id
+msgid "recovery.email.placeholder"
+msgstr "exemplo@mora.com"
+
+#. js-lingui-explicit-id
+msgid "recovery.submit"
+msgstr "Enviar Link de Redefinição"
+
+#. js-lingui-explicit-id
+msgid "recovery.back"
+msgstr "Voltar para o Login"
+
+#. js-lingui-explicit-id
+msgid "recovery.support"
+msgstr "Precisa de ajuda imediata?"
+
+#. js-lingui-explicit-id
+msgid "recovery.concierge"
+msgstr "Entre em contato com o <0>Mora</0>."
+
+#. js-lingui-explicit-id
+msgid "perfil.header.titulo"
+msgstr "Bem-vindo ao seu"
+
+#. js-lingui-explicit-id
+msgid "perfil.header.espaco"
+msgstr "espaço"
+
+#. js-lingui-explicit-id
+msgid "perfil.header.subtitulo"
+msgstr "Gerencie sua residência com a elegância de um assessor digital."
+
+#. js-lingui-explicit-id
+msgid "perfil.nome"
+msgstr "João Silva"
+
+#. js-lingui-explicit-id
+msgid "perfil.unidade"
+msgstr "Torre A • Unidade 102"
+
+#. js-lingui-explicit-id
+msgid "perfil.verificado"
+msgstr "Residente Verificado"
+
+#. js-lingui-explicit-id
+msgid "perfil.taxa.label"
+msgstr "Taxa de Condomínio"
+
+#. js-lingui-explicit-id
+msgid "perfil.taxa.status"
+msgstr "Status: Pago (Ref. Outubro)"
+
+#. js-lingui-explicit-id
+msgid "perfil.config.titulo"
+msgstr "Configurações da Conta"
+
+#. js-lingui-explicit-id
+msgid "perfil.conta.titulo"
+msgstr "Detalhes da Conta"
+
+#. js-lingui-explicit-id
+msgid "perfil.conta.desc"
+msgstr "Informações pessoais e de residência"
+
+#. js-lingui-explicit-id
+msgid "perfil.privacidade.titulo"
+msgstr "Privacidade e Segurança"
+
+#. js-lingui-explicit-id
+msgid "perfil.privacidade.desc"
+msgstr "Senha, biometria e acessos"
+
+#. js-lingui-explicit-id
+msgid "perfil.familia.titulo"
+msgstr "Família e Convidados"
+
+#. js-lingui-explicit-id
+msgid "perfil.familia.desc"
+msgstr "Gerencie quem pode acessar sua unidade"
+
+#. js-lingui-explicit-id
+msgid "perfil.cobranca.titulo"
+msgstr "Histórico de Cobrança"
+
+#. js-lingui-explicit-id
+msgid "perfil.cobranca.desc"
+msgstr "Faturas anteriores e comprovantes"
+
+#. js-lingui-explicit-id
+msgid "perfil.sair"
+msgstr "Sair da Conta"
+
+#. js-lingui-explicit-id
+msgid "perfil.ajuda.titulo"
+msgstr "Central de Ajuda"
+
+#. js-lingui-explicit-id
+msgid "perfil.ajuda.desc"
+msgstr "Dúvidas sobre o regulamento?"
+
+#. js-lingui-explicit-id
+msgid "perfil.exclusive.titulo"
+msgstr "Mora Exclusive"
+
+#. js-lingui-explicit-id
+msgid "perfil.exclusive.desc"
+msgstr "Descubra novos benefícios."
+
+#. js-lingui-explicit-id
+msgid "perfil.footer.copy"
+msgstr "© 2024 by Mora System. Todos os direitos reservados."
+
+#. js-lingui-explicit-id
+msgid "perfil.footer.privacidade"
+msgstr "Privacidade"
+
+#. js-lingui-explicit-id
+msgid "perfil.footer.termos"
+msgstr "Termos"
