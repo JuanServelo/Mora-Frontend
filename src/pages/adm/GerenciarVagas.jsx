@@ -1,111 +1,98 @@
 // src/pages/adm/GerenciarVagas.jsx
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { vagaApi, apartamentoApi } from "../../services/estruturasApi";
 import { Icone } from "../../components/icones/Icone";
 import { Campo } from "../../components/campos/Campo";
 import { Botao } from "../../components/botoes/Botao";
 
 // ─── enums / helpers ────────────────────────────────
-const SPOT_STATUS = ["AVAILABLE", "OCCUPIED", "UNDER_MAINTENANCE", "INACTIVE"];
-
 const statusConfig = {
-  AVAILABLE: {
-    label: "Disponível",
+  true: {
+    label: "Ativa",
     color: "bg-primary/10 text-primary",
     icon: "check_circle",
   },
-  OCCUPIED: {
-    label: "Ocupada",
-    color: "bg-tertiary/10 text-tertiary",
-    icon: "directions_car",
-  },
-  UNDER_MAINTENANCE: {
-    label: "Em Manutenção",
-    color: "bg-error/10 text-error",
-    icon: "construction",
-  },
-  INACTIVE: {
+  false: {
     label: "Inativa",
-    color: "bg-outline/10 text-outline",
+    color: "bg-error/10 text-error",
     icon: "block",
   },
 };
 
-const VAGAS_MOCK = [
-  {
-    id: 1,
-    spotIdentifier: "Vaga 01 - Setor A",
-    unitIdentifier: "Apto 101",
-    status: "OCCUPIED",
-  },
-  {
-    id: 2,
-    spotIdentifier: "Vaga 02 - Setor A",
-    unitIdentifier: "Apto 202",
-    status: "AVAILABLE",
-  },
-  {
-    id: 3,
-    spotIdentifier: "Vaga 03 - Setor A",
-    unitIdentifier: null,
-    status: "AVAILABLE",
-  },
-  {
-    id: 4,
-    spotIdentifier: "Vaga 01 - Setor B",
-    unitIdentifier: "Apto 305",
-    status: "UNDER_MAINTENANCE",
-  },
-  {
-    id: 5,
-    spotIdentifier: "Vaga 02 - Setor B",
-    unitIdentifier: null,
-    status: "INACTIVE",
-  },
-];
-
 // ════════════════════════════════════════════
 export function GerenciarVagas() {
-  const [vagas, setVagas] = useState(VAGAS_MOCK);
+  const [vagas, setVagas] = useState([]);
+  const [apartamentos, setApartamentos] = useState([]);
+  const [carregando, setCarregando] = useState(true);
   const [criando, setCriando] = useState(false);
   const [filtroStatus, setFiltroStatus] = useState("TODOS");
   const [busca, setBusca] = useState("");
-  const [form, setForm] = useState({ spotIdentifier: "", unitIdentifier: "", status: "AVAILABLE" });
+  const [form, setForm] = useState({ numero: "", localizacao: "", tipo: "", apartamentoId: "" });
+
+  useEffect(() => {
+    carregarDados();
+  }, []);
+
+  const carregarDados = async () => {
+    try {
+      const [vagasRes, aptsRes] = await Promise.all([
+        vagaApi.listarTodas(),
+        apartamentoApi.listarTodos(),
+      ]);
+      setVagas(vagasRes.data || []);
+      setApartamentos(aptsRes.data || []);
+    } catch (err) {
+      console.error("Erro ao carregar dados:", err);
+    } finally {
+      setCarregando(false);
+    }
+  };
 
   const handleForm = (e) => {
     const { name, value } = e.target;
     setForm((f) => ({ ...f, [name]: value }));
   };
 
-  const criarVaga = (e) => {
+  const criarVaga = async (e) => {
     e.preventDefault();
-    if (vagas.some((v) => v.spotIdentifier === form.spotIdentifier)) {
-      alert("Já existe uma vaga com esse identificador.");
-      return;
+    try {
+      const res = await vagaApi.cadastrar(form);
+      setVagas((prev) => [res.data, ...prev]);
+      setCriando(false);
+      setForm({ numero: "", localizacao: "", tipo: "", apartamentoId: "" });
+    } catch (err) {
+      console.error("Erro ao criar vaga:", err);
     }
-    setVagas((prev) => [...prev, { id: Date.now(), ...form }]);
-    setCriando(false);
-    setForm({ spotIdentifier: "", unitIdentifier: "", status: "AVAILABLE" });
   };
 
-  const mudarStatus = (id, novoStatus) => {
-    setVagas((prev) =>
-      prev.map((v) => (v.id === id ? { ...v, status: novoStatus } : v))
-    );
+  const mudarStatus = async (id, novoStatus) => {
+    try {
+      if (novoStatus) {
+        await vagaApi.ativar(id);
+      } else {
+        await vagaApi.desativar(id);
+      }
+      setVagas((prev) =>
+        prev.map((v) => (v.id === id ? { ...v, ativa: novoStatus } : v))
+      );
+    } catch (err) {
+      console.error("Erro ao atualizar status:", err);
+    }
   };
 
   const vagasFiltradas = vagas
-    .filter((v) => filtroStatus === "TODOS" || v.status === filtroStatus)
+    .filter((v) => filtroStatus === "TODOS" || (filtroStatus === "ativa" ? v.ativa : !v.ativa))
     .filter(
       (v) =>
         busca === "" ||
-        v.spotIdentifier.toLowerCase().includes(busca.toLowerCase()) ||
-        (v.unitIdentifier ?? "").toLowerCase().includes(busca.toLowerCase())
+        v.numero.toLowerCase().includes(busca.toLowerCase()) ||
+        v.localizacao?.toLowerCase().includes(busca.toLowerCase())
     );
 
-  const contadores = SPOT_STATUS.reduce(
-    (acc, s) => ({ ...acc, [s]: vagas.filter((v) => v.status === s).length }),
-    {}
-  );
+  const contadores = {
+    ativa: vagas.filter((v) => v.ativa).length,
+    inativa: vagas.filter((v) => !v.ativa).length,
+  };
 
   return (
     <div className="min-h-screen w-full pt-4 pb-20 px-6">
@@ -133,25 +120,27 @@ export function GerenciarVagas() {
         </header>
 
         {/* Cards resumo */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {SPOT_STATUS.map((s) => {
-            const cfg = statusConfig[s];
+        <div className="grid grid-cols-2 md:grid-cols-2 gap-4">
+          {[
+            { id: "ativa", label: "Ativas", color: "primary", icon: "check_circle" },
+            { id: "inativa", label: "Inativas", color: "error", icon: "block" },
+          ].map((s) => {
             return (
               <button
-                key={s}
-                onClick={() => setFiltroStatus(filtroStatus === s ? "TODOS" : s)}
+                key={s.id}
+                onClick={() => setFiltroStatus(filtroStatus === s.id ? "TODOS" : s.id)}
                 className={`glass-panel rounded-2xl p-4 flex items-center gap-3 cursor-pointer transition-all hover:scale-[1.02] text-left ${
-                  filtroStatus === s ? "ring-2 ring-primary/40" : ""
+                  filtroStatus === s.id ? "ring-2 ring-primary/40" : ""
                 }`}
               >
-                <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${cfg.color}`}>
-                  <Icone name={cfg.icon} className="text-lg" />
+                <div className={`w-9 h-9 rounded-xl flex items-center justify-center bg-${s.color}/10 text-${s.color}`}>
+                  <Icone name={s.icon} className="text-lg" />
                 </div>
                 <div>
                   <p className="text-xl font-extrabold text-on-surface font-headline">
-                    {contadores[s] ?? 0}
+                    {contadores[s.id] ?? 0}
                   </p>
-                  <p className="text-xs text-on-surface-variant leading-tight">{cfg.label}</p>
+                  <p className="text-xs text-on-surface-variant leading-tight">{s.label}</p>
                 </div>
               </button>
             );
@@ -165,37 +154,53 @@ export function GerenciarVagas() {
             <form onSubmit={criarVaga} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Campo
-                  label="Identificador da vaga"
-                  name="spotIdentifier"
-                  value={form.spotIdentifier}
+                  label="Número da vaga"
+                  name="numero"
+                  value={form.numero}
                   onChange={handleForm}
-                  placeholder="Ex: Vaga 12 - Setor A"
+                  placeholder="Ex: 12"
                   required
                 />
                 <Campo
-                  label="Unidade vinculada (opcional)"
-                  name="unitIdentifier"
-                  value={form.unitIdentifier}
+                  label="Localização"
+                  name="localizacao"
+                  value={form.localizacao}
                   onChange={handleForm}
-                  placeholder="Ex: Apto 203"
+                  placeholder="Ex: Setor A - Térreo"
                 />
               </div>
-              <div className="space-y-2">
-                <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant ml-1">
-                  Status inicial
-                </label>
-                <div className="relative w-fit">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant ml-1">
+                    Tipo
+                  </label>
                   <select
-                    name="status"
-                    value={form.status}
+                    name="tipo"
+                    value={form.tipo}
                     onChange={handleForm}
                     className="appearance-none bg-surface-container-highest/50 border border-white/10 rounded-xl py-3 pl-4 pr-10 text-on-surface focus:ring-2 focus:ring-primary/50 focus:outline-none transition-all cursor-pointer"
                   >
-                    {SPOT_STATUS.map((s) => (
-                      <option key={s} value={s}>{statusConfig[s].label}</option>
-                    ))}
+                    <option value="">Selecione um tipo</option>
+                    <option value="Coberta">Coberta</option>
+                    <option value="Descoberta">Descoberta</option>
                   </select>
                   <Icone name="expand_more" className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-lg" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant ml-1">
+                    Apartamento (opcional)
+                  </label>
+                  <select
+                    name="apartamentoId"
+                    value={form.apartamentoId}
+                    onChange={handleForm}
+                    className="appearance-none bg-surface-container-highest/50 border border-white/10 rounded-xl py-3 pl-4 pr-10 text-on-surface focus:ring-2 focus:ring-primary/50 focus:outline-none transition-all cursor-pointer"
+                  >
+                    <option value="">Nenhum apartamento</option>
+                    {apartamentos.map((apt) => (
+                      <option key={apt.id} value={apt.id}>{apt.numero} - Bloco {apt.bloco?.nome}</option>
+                    ))}
+                  </select>
                 </div>
               </div>
               <div className="flex gap-3 justify-end pt-2">
@@ -239,10 +244,11 @@ export function GerenciarVagas() {
         {/* Grid de vagas */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
           {vagasFiltradas.map((vaga) => {
-            const cfg = statusConfig[vaga.status];
+            const cfg = statusConfig[vaga.ativa];
+            const apartamento = apartamentos.find(apt => apt.id === vaga.apartamentoId);
             return (
               <div key={vaga.id} className="glass-panel rounded-2xl p-5 space-y-4 flex flex-col">
-                {/* Ícone + ID */}
+                {/* Ícone + Status */}
                 <div className="flex items-start justify-between">
                   <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${cfg.color}`}>
                     <Icone name={cfg.icon} className="text-xl" />
@@ -254,33 +260,32 @@ export function GerenciarVagas() {
 
                 {/* Infos */}
                 <div>
-                  <p className="font-semibold text-on-surface text-sm leading-tight">{vaga.spotIdentifier}</p>
-                  <p className="text-xs text-on-surface-variant mt-1">
-                    {vaga.unitIdentifier ? (
-                      <>
-                        <Icone name="home" className="text-xs mr-1" />
-                        {vaga.unitIdentifier}
-                      </>
-                    ) : (
-                      <span className="opacity-50">Sem unidade vinculada</span>
-                    )}
-                  </p>
+                  <p className="font-semibold text-on-surface text-sm leading-tight">Vaga {vaga.numero}</p>
+                  <p className="text-xs text-on-surface-variant mt-1">{vaga.localizacao}</p>
+                  {vaga.tipo && (
+                    <p className="text-xs text-on-surface-variant">{vaga.tipo}</p>
+                  )}
+                  {apartamento ? (
+                    <p className="text-xs text-primary mt-2 font-semibold">
+                      <Icone name="home" className="text-xs mr-1 inline" />
+                      Apt {apartamento.numero}
+                    </p>
+                  ) : (
+                    <p className="text-xs text-on-surface-variant mt-2 opacity-50">Sem apartamento</p>
+                  )}
                 </div>
 
                 {/* Ações de status */}
                 <div className="mt-auto pt-2 border-t border-white/5">
-                  <p className="text-xs text-on-surface-variant mb-2">Alterar status:</p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {SPOT_STATUS.filter((s) => s !== vaga.status).map((s) => (
-                      <button
-                        key={s}
-                        onClick={() => mudarStatus(vaga.id, s)}
-                        className={`text-xs font-semibold px-2.5 py-1 rounded-lg border transition-all cursor-pointer hover:opacity-80 ${statusConfig[s].color} border-current/10`}
-                        title={`Marcar como ${statusConfig[s].label}`}
-                      >
-                        {statusConfig[s].label}
-                      </button>
-                    ))}
+                  <p className="text-xs text-on-surface-variant mb-2">Mudar status:</p>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => mudarStatus(vaga.id, !vaga.ativa)}
+                      className={`text-xs font-semibold px-2.5 py-1 rounded-lg border transition-all cursor-pointer hover:opacity-80 ${statusConfig[!vaga.ativa].color} border-current/10`}
+                      title={`Marcar como ${statusConfig[!vaga.ativa].label}`}
+                    >
+                      {statusConfig[!vaga.ativa].label}
+                    </button>
                   </div>
                 </div>
               </div>
@@ -288,7 +293,7 @@ export function GerenciarVagas() {
           })}
         </div>
 
-        {vagasFiltradas.length === 0 && (
+        {vagasFiltradas.length === 0 && !carregando && (
           <div className="glass-panel rounded-2xl py-16 flex flex-col items-center gap-3 text-on-surface-variant">
             <Icone name="local_parking" className="text-5xl opacity-30" />
             <p className="text-sm">Nenhuma vaga encontrada.</p>

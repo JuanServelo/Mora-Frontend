@@ -8,4 +8,13 @@ export default defineConfig({
     react(),
     tailwindcss(),
   ],
+  server: {
+    proxy: {
+      "/portaria-api": {
+        target: "http://localhost:8090",
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/portaria-api/, ""),
+      },
+    },
+  },
 });

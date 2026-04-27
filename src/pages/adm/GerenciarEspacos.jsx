@@ -1,6 +1,7 @@
 // src/pages/adm/GerenciarEspacos.jsx
 // Página ADMIN — gerenciamento de Áreas Comuns (criar, editar, mudar status, excluir)
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { areaComunApi } from "../../services/estruturasApi";
 import { Icone } from "../../components/icones/Icone";
 import { Campo } from "../../components/campos/Campo";
 import { Botao } from "../../components/botoes/Botao";
@@ -21,104 +22,84 @@ function TextArea({ label, ...props }) {
   );
 }
 
-const STATUS_AREA = ["Ativo", "Em Manutenção", "Desativado"];
-
-const statusColor = (s) => {
-  if (s === "Ativo") return "bg-primary/10 text-primary";
-  if (s === "Em Manutenção") return "bg-tertiary/10 text-tertiary";
+const statusColor = (ativo) => {
+  if (ativo) return "bg-primary/10 text-primary";
   return "bg-error/10 text-error";
 };
 
 const FORM_INICIAL = {
   nome: "",
   descricao: "",
-  capacidade: "",
-  minDiasAntecedencia: "",
-  maxDiasAntecedencia: "",
+  tipo: "",
+  localizacao: "",
+  capacidadeMaxima: "",
+  area: "",
+  podeReservar: false,
   taxaLocacao: "",
-  taxaLimpeza: "",
-  taxaCancelamento: "",
-  horarioSilencio: "",
-  exigeListaConvidados: false,
-  regras: "",
-  status: "Ativo",
+  informacoesLimpeza: "",
+  politicaCancelamento: "",
+  observacoes: "",
 };
 
-const AREAS_MOCK = [
-  {
-    id: 1,
-    nome: "Salão de Festas",
-    descricao: "Salão climatizado com cozinha completa",
-    capacidade: 80,
-    minDiasAntecedencia: 3,
-    maxDiasAntecedencia: 30,
-    taxaLocacao: 200,
-    taxaLimpeza: 50,
-    taxaCancelamento: 30,
-    horarioSilencio: 22,
-    exigeListaConvidados: true,
-    regras: "Proibido som acima de 80dB após as 22h.",
-    status: "Ativo",
-  },
-  {
-    id: 2,
-    nome: "Churrasqueira",
-    descricao: "Área de churrasco coberta com mesas",
-    capacidade: 30,
-    minDiasAntecedencia: 2,
-    maxDiasAntecedencia: 20,
-    taxaLocacao: 100,
-    taxaLimpeza: 30,
-    taxaCancelamento: 20,
-    horarioSilencio: 22,
-    exigeListaConvidados: false,
-    regras: "Limpar a grelha após o uso.",
-    status: "Ativo",
-  },
-  {
-    id: 3,
-    nome: "Academia",
-    descricao: "Equipamentos de musculação e cardio",
-    capacidade: 15,
-    minDiasAntecedencia: 0,
-    maxDiasAntecedencia: 7,
-    taxaLocacao: 0,
-    taxaLimpeza: 0,
-    taxaCancelamento: 0,
-    horarioSilencio: 22,
-    exigeListaConvidados: false,
-    regras: "Uso exclusivo de moradores. Trazer toalha.",
-    status: "Em Manutenção",
-  },
-];
+const TIPOS_AREA = ["PISCINA", "SALAO_FESTAS", "ACADEMIA", "CHURRASQUEIRA", "QUADRA", "PLAYGROUND", "GYM", "OUTRO"];
 
 export function GerenciarEspacos() {
-  const [areas, setAreas] = useState(AREAS_MOCK);
+  const [areas, setAreas] = useState([]);
+  const [carregando, setCarregando] = useState(true);
   const [criando, setCriando] = useState(false);
   const [expandido, setExpandido] = useState(null);
   const [editando, setEditando] = useState(null);
   const [form, setForm] = useState(FORM_INICIAL);
+
+  useEffect(() => {
+    carregarAreas();
+  }, []);
+
+  const carregarAreas = async () => {
+    try {
+      const res = await areaComunApi.listarTodas();
+      setAreas(res.data || []);
+    } catch (err) {
+      console.error("Erro ao carregar áreas comuns:", err);
+    } finally {
+      setCarregando(false);
+    }
+  };
 
   const handleForm = (e) => {
     const { name, value, type, checked } = e.target;
     setForm((f) => ({ ...f, [name]: type === "checkbox" ? checked : value }));
   };
 
-  const salvar = (e) => {
+  const salvar = async (e) => {
     e.preventDefault();
-    if (editando) {
-      setAreas((prev) => prev.map((a) => (a.id === editando ? { ...form, id: editando } : a)));
-      setEditando(null);
-    } else {
-      setAreas((prev) => [...prev, { ...form, id: Date.now() }]);
-      setCriando(false);
+    try {
+      if (editando) {
+        await areaComunApi.atualizar(editando, form);
+        setAreas((prev) =>
+          prev.map((a) => (a.id === editando ? { ...form, id: editando } : a))
+        );
+        setEditando(null);
+      } else {
+        const res = await areaComunApi.cadastrar(form);
+        setAreas((prev) => [res.data, ...prev]);
+        setCriando(false);
+      }
+      setForm(FORM_INICIAL);
+    } catch (err) {
+      console.error("Erro ao salvar:", err);
     }
-    setForm(FORM_INICIAL);
   };
 
-  const excluir = (id) => {
-    setAreas((prev) => prev.filter((a) => a.id !== id));
-    if (expandido === id) setExpandido(null);
+  const excluir = async (id) => {
+    if (!confirm("Tem certeza que deseja excluir?")) return;
+    try {
+      await areaComunApi.desativar(id);
+      setAreas((prev) => prev.filter((a) => a.id !== id));
+      if (expandido === id) setExpandido(null);
+    } catch (err) {
+      console.error("Erro ao excluir:", err);
+    }
   };
 
   const iniciarEdicao = (area) => {
@@ -127,8 +108,19 @@ export function GerenciarEspacos() {
     setCriando(false);
   };
 
-  const mudarStatus = (id, novoStatus) => {
-    setAreas((prev) => prev.map((a) => (a.id === id ? { ...a, status: novoStatus } : a)));
+  const mudarStatus = async (id, novoAtivo) => {
+    try {
+      if (novoAtivo) {
+        await areaComunApi.ativar(id);
+      } else {
+        await areaComunApi.desativar(id);
+      }
+      setAreas((prev) =>
+        prev.map((a) => (a.id === id ? { ...a, ativo: novoAtivo } : a))
+      );
+    } catch (err) {
+      console.error("Erro ao atualizar status:", err);
+    }
   };
 
   return (
@@ -166,29 +158,29 @@ export function GerenciarEspacos() {
             <form onSubmit={salvar} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Campo label="Nome" name="nome" value={form.nome} onChange={handleForm} placeholder="Ex: Salão de Festas" required />
-                <Campo label="Capacidade (pessoas)" name="capacidade" type="number" value={form.capacidade} onChange={handleForm} placeholder="80" />
-              </div>
-              <TextArea label="Descrição" name="descricao" value={form.descricao} onChange={handleForm} rows={2} placeholder="Descreva o espaço..." />
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <Campo label="Min. dias antecedência" name="minDiasAntecedencia" type="number" value={form.minDiasAntecedencia} onChange={handleForm} placeholder="2" />
-                <Campo label="Máx. dias antecedência" name="maxDiasAntecedencia" type="number" value={form.maxDiasAntecedencia} onChange={handleForm} placeholder="30" />
-                <Campo label="Taxa locação (R$)" name="taxaLocacao" type="number" value={form.taxaLocacao} onChange={handleForm} placeholder="200" />
-                <Campo label="Taxa limpeza (R$)" name="taxaLimpeza" type="number" value={form.taxaLimpeza} onChange={handleForm} placeholder="50" />
-              </div>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                <Campo label="Taxa cancelamento (R$)" name="taxaCancelamento" type="number" value={form.taxaCancelamento} onChange={handleForm} placeholder="30" />
-                <Campo label="Horário silêncio (h)" name="horarioSilencio" type="number" value={form.horarioSilencio} onChange={handleForm} placeholder="22" />
                 <div className="space-y-2">
-                  <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant ml-1">Status</label>
-                  <select name="status" value={form.status} onChange={handleForm} className="w-full bg-surface-container-highest/40 border-none rounded-xl py-3 px-4 text-on-surface focus:ring-2 focus:ring-primary/50 focus:outline-none backdrop-blur-sm transition-all">
-                    {STATUS_AREA.map((s) => <option key={s} value={s}>{s}</option>)}
+                  <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant ml-1">Tipo</label>
+                  <select name="tipo" value={form.tipo} onChange={handleForm} className="w-full bg-surface-container-highest/40 border-none rounded-xl py-3 px-4 text-on-surface focus:ring-2 focus:ring-primary/50 focus:outline-none backdrop-blur-sm transition-all" required>
+                    <option value="">Selecione um tipo</option>
+                    {TIPOS_AREA.map((t) => <option key={t} value={t}>{t}</option>)}
                   </select>
                 </div>
               </div>
-              <TextArea label="Regras de uso" name="regras" value={form.regras} onChange={handleForm} rows={3} placeholder="Descreva as regras de uso..." />
+              <TextArea label="Descrição" name="descricao" value={form.descricao} onChange={handleForm} rows={2} placeholder="Descreva o espaço..." />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Campo label="Localização" name="localizacao" value={form.localizacao} onChange={handleForm} placeholder="Ex: Térreo - Bloco A" />
+                <Campo label="Capacidade máxima (pessoas)" name="capacidadeMaxima" type="number" value={form.capacidadeMaxima} onChange={handleForm} placeholder="80" />
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <Campo label="Área (m²)" name="area" type="number" value={form.area} onChange={handleForm} placeholder="150" />
+                <Campo label="Taxa locação (R$)" name="taxaLocacao" type="number" step="0.01" value={form.taxaLocacao} onChange={handleForm} placeholder="200.00" />
+              </div>
+              <TextArea label="Informações de limpeza" name="informacoesLimpeza" value={form.informacoesLimpeza} onChange={handleForm} rows={2} placeholder="Descreva regras de limpeza..." />
+              <TextArea label="Política de cancelamento" name="politicaCancelamento" value={form.politicaCancelamento} onChange={handleForm} rows={2} placeholder="Descreva a política de cancelamento..." />
+              <TextArea label="Observações" name="observacoes" value={form.observacoes} onChange={handleForm} rows={2} placeholder="Observações adicionais..." />
               <div className="flex items-center gap-3">
-                <input type="checkbox" id="exigeConvidados" name="exigeListaConvidados" checked={form.exigeListaConvidados} onChange={handleForm} className="w-4 h-4 accent-primary rounded" />
-                <label htmlFor="exigeConvidados" className="text-sm text-on-surface-variant">Exige lista de convidados</label>
+                <input type="checkbox" id="podeReservar" name="podeReservar" checked={form.podeReservar} onChange={handleForm} className="w-4 h-4 accent-primary rounded" />
+                <label htmlFor="podeReservar" className="text-sm text-on-surface-variant">Permite reservas</label>
               </div>
               <div className="flex gap-3 justify-end pt-2">
                 <button type="button" onClick={() => { setCriando(false); setEditando(null); setForm(FORM_INICIAL); }} className="px-5 py-2.5 rounded-xl text-sm font-semibold text-on-surface-variant hover:bg-white/5 transition-all cursor-pointer">Cancelar</button>
@@ -201,8 +193,8 @@ export function GerenciarEspacos() {
         <div className="grid grid-cols-3 gap-4">
           {[
             { label: "Total de áreas", valor: areas.length, icon: "meeting_room", color: "primary" },
-            { label: "Ativas", valor: areas.filter((a) => a.status === "Ativo").length, icon: "check_circle", color: "primary" },
-            { label: "Em manutenção", valor: areas.filter((a) => a.status === "Em Manutenção").length, icon: "construction", color: "tertiary" },
+            { label: "Ativas", valor: areas.filter((a) => a.ativo).length, icon: "check_circle", color: "primary" },
+            { label: "Inativas", valor: areas.filter((a) => !a.ativo).length, icon: "block", color: "error" },
           ].map((c) => (
             <div key={c.label} className="glass-panel rounded-2xl p-5 flex items-center gap-4">
               <div className={`w-12 h-12 rounded-xl bg-${c.color}/10 flex items-center justify-center`}>
@@ -230,7 +222,7 @@ export function GerenciarEspacos() {
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <span className={`text-xs font-semibold px-3 py-1 rounded-full ${statusColor(area.status)}`}>{area.status}</span>
+                  <span className={`text-xs font-semibold px-3 py-1 rounded-full ${statusColor(area.ativo)}`}>{area.ativo ? "Ativo" : "Inativo"}</span>
                   <Icone name={expandido === area.id ? "expand_less" : "expand_more"} className="text-on-surface-variant text-xl" />
                 </div>
               </button>
@@ -239,14 +231,12 @@ export function GerenciarEspacos() {
                 <div className="px-6 pb-5 border-t border-white/5 pt-4 space-y-4">
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                     {[
-                      { label: "Capacidade", valor: `${area.capacidade} pessoas` },
-                      { label: "Taxa Locação", valor: `R$ ${area.taxaLocacao}` },
-                      { label: "Taxa Limpeza", valor: `R$ ${area.taxaLimpeza}` },
-                      { label: "Taxa Cancelamento", valor: `R$ ${area.taxaCancelamento}` },
-                      { label: "Antecedência mín.", valor: `${area.minDiasAntecedencia} dias` },
-                      { label: "Antecedência máx.", valor: `${area.maxDiasAntecedencia} dias` },
-                      { label: "Horário silêncio", valor: `${area.horarioSilencio}h` },
-                      { label: "Lista de convidados", valor: area.exigeListaConvidados ? "Obrigatória" : "Não exigida" },
+                      { label: "Tipo", valor: area.tipo },
+                      { label: "Localização", valor: area.localizacao },
+                      { label: "Capacidade", valor: `${area.capacidadeMaxima} pessoas` },
+                      { label: "Área", valor: `${area.area}m²` },
+                      { label: "Taxa Locação", valor: `R$ ${area.taxaLocacao?.toFixed(2) || "0.00"}` },
+                      { label: "Reservas", valor: area.podeReservar ? "Sim" : "Não" },
                     ].map((item) => (
                       <div key={item.label} className="bg-surface-container-highest/30 rounded-xl p-3">
                         <p className="text-xs text-on-surface-variant mb-1">{item.label}</p>
@@ -254,18 +244,22 @@ export function GerenciarEspacos() {
                       </div>
                     ))}
                   </div>
-                  {area.regras && (
+                  {area.informacoesLimpeza && (
                     <div>
-                      <p className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant mb-1">Regras</p>
-                      <p className="text-sm text-on-surface bg-surface-container-highest/30 rounded-xl p-3">{area.regras}</p>
+                      <p className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant mb-1">Informações de Limpeza</p>
+                      <p className="text-sm text-on-surface bg-surface-container-highest/30 rounded-xl p-3">{area.informacoesLimpeza}</p>
+                    </div>
+                  )}
+                  {area.politicaCancelamento && (
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant mb-1">Política de Cancelamento</p>
+                      <p className="text-sm text-on-surface bg-surface-container-highest/30 rounded-xl p-3">{area.politicaCancelamento}</p>
                     </div>
                   )}
                   <div className="flex flex-wrap gap-2 pt-1">
-                    {STATUS_AREA.filter((s) => s !== area.status).map((s) => (
-                      <button key={s} onClick={() => mudarStatus(area.id, s)} className={`text-xs font-semibold px-3 py-1.5 rounded-lg border transition-all cursor-pointer ${statusColor(s)} border-current/20 hover:opacity-80`}>
-                        Marcar como {s}
-                      </button>
-                    ))}
+                    <button onClick={() => mudarStatus(area.id, !area.ativo)} className={`text-xs font-semibold px-3 py-1.5 rounded-lg border transition-all cursor-pointer ${statusColor(!area.ativo)} border-current/20 hover:opacity-80`}>
+                      Marcar como {!area.ativo ? "Ativo" : "Inativo"}
+                    </button>
                     <button onClick={() => iniciarEdicao(area)} className="flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-lg bg-white/5 text-on-surface-variant hover:text-on-surface hover:bg-white/10 transition-all cursor-pointer">
                       <Icone name="edit" className="text-sm" /> Editar
                     </button>
@@ -278,7 +272,7 @@ export function GerenciarEspacos() {
             </div>
           ))}
 
-          {areas.length === 0 && (
+          {areas.length === 0 && !carregando && (
             <div className="glass-panel rounded-2xl py-16 flex flex-col items-center gap-3 text-on-surface-variant">
               <Icone name="meeting_room" className="text-5xl opacity-30" />
               <p className="text-sm">Nenhuma área cadastrada.</p>
