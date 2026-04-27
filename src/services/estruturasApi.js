@@ -2,7 +2,7 @@
 import axios from "axios";
 
 const estruturasApi = axios.create({
-  baseURL: import.meta.env.VITE_PORTARIA_API_URL || "http://localhost:8090",
+  baseURL: import.meta.env.VITE_PORTARIA_API_URL || "/portaria-api",
 });
 
 estruturasApi.interceptors.request.use((config) => {
@@ -31,9 +31,9 @@ export const apartamentoApi = {
   listarPorBloco: (blocoId) => estruturasApi.get(`/apartamentos/bloco/${blocoId}`),
   listarPorBlocoAtivos: (blocoId) => estruturasApi.get(`/apartamentos/bloco/${blocoId}/ativos`),
   cadastrar: (data, blocoId) =>
-    estruturasApi.post(`/apartamentos/cadastrar?blocoId=${blocoId}`, data),
+    estruturasApi.post("/apartamentos/cadastrar", { ...data, blocoId }),
   atualizar: (id, data, blocoId) =>
-    estruturasApi.put(`/apartamentos/${id}?blocoId=${blocoId}`, data),
+    estruturasApi.put(`/apartamentos/${id}`, { ...data, blocoId }),
   ativar: (id) => estruturasApi.put(`/apartamentos/${id}/ativar`),
   desativar: (id) => estruturasApi.put(`/apartamentos/${id}/desativar`),
   deletar: (id) => estruturasApi.delete(`/apartamentos/${id}`),
@@ -49,4 +49,18 @@ export const areaComunApi = {
   ativar: (id) => estruturasApi.put(`/areas-comuns/${id}/ativar`),
   desativar: (id) => estruturasApi.put(`/areas-comuns/${id}/desativar`),
   deletar: (id) => estruturasApi.delete(`/areas-comuns/${id}`),
+};
+
+export const vagaApi = {
+  listar: () => estruturasApi.get("/vagas"),
+  listarTodas: () => estruturasApi.get("/vagas/todas"),
+  buscar: (id) => estruturasApi.get(`/vagas/${id}`),
+  listarPorApartamento: (apartamentoId) => estruturasApi.get(`/vagas/apartamento/${apartamentoId}`),
+  cadastrar: (data, apartamentoId) =>
+    estruturasApi.post(`/vagas/cadastrar?apartamentoId=${apartamentoId}`, data),
+  atualizar: (id, data, apartamentoId) =>
+    estruturasApi.put(`/vagas/${id}?apartamentoId=${apartamentoId}`, data),
+  ativar: (id) => estruturasApi.put(`/vagas/${id}/ativar`),
+  desativar: (id) => estruturasApi.put(`/vagas/${id}/desativar`),
+  deletar: (id) => estruturasApi.delete(`/vagas/${id}`),
 };

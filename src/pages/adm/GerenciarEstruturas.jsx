@@ -1,6 +1,7 @@
 // src/pages/adm/GerenciarEstruturas.jsx
 import { useState, useEffect } from "react";
 import { blocoApi, apartamentoApi, areaComunApi } from "../../services/estruturasApi";
+import { vagaApi } from "../../services/portariaApi";
 import { Icone } from "../../components/icones/Icone";
 import { Campo } from "../../components/campos/Campo";
 import { Botao } from "../../components/botoes/Botao";
@@ -13,7 +14,7 @@ const statusStyle = (ativo) =>
 
 // ════════════════════════════════════════════
 export function GerenciarEstruturas() {
-  const [aba, setAba] = useState("blocos"); // blocos | apartamentos | areas-comuns
+  const [aba, setAba] = useState("blocos"); // blocos | apartamentos | areas-comuns | vagas
 
   return (
     <div className="min-h-screen w-full pt-4 pb-20 px-6">
@@ -39,6 +40,7 @@ export function GerenciarEstruturas() {
             { id: "blocos", label: "Blocos", icon: "apartment" },
             { id: "apartamentos", label: "Apartamentos", icon: "door_front" },
             { id: "areas-comuns", label: "Áreas Comuns", icon: "pool" },
+            { id: "vagas", label: "Vagas", icon: "local_parking" },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -59,6 +61,7 @@ export function GerenciarEstruturas() {
         {aba === "blocos" && <AbaBlocos />}
         {aba === "apartamentos" && <AbaApartamentos />}
         {aba === "areas-comuns" && <AbaAreasComuns />}
+        {aba === "vagas" && <AbaVagas />}
       </div>
     </div>
   );
@@ -321,6 +324,8 @@ function AbaApartamentos() {
   const [criando, setCriando] = useState(false);
   const [expandido, setExpandido] = useState(null);
   const [editando, setEditando] = useState(null);
+  const [erroCriar, setErroCriar] = useState("");
+  const [erroEditar, setErroEditar] = useState("");
 
   useEffect(() => {
     Promise.all([apartamentoApi.listarTodos(), blocoApi.listar()])
@@ -340,22 +345,24 @@ function AbaApartamentos() {
   });
 
   async function handleCriar(dados, blocoId) {
+    setErroCriar("");
     try {
       const res = await apartamentoApi.cadastrar(dados, blocoId);
       setApartamentos((prev) => [res.data, ...prev]);
       setCriando(false);
     } catch (err) {
-      console.error("Erro ao criar apartamento:", err);
+      setErroCriar(err.response?.data?.erro || "Erro ao criar apartamento.");
     }
   }
 
   async function handleAtualizar(id, dados, blocoId) {
+    setErroEditar("");
     try {
       const res = await apartamentoApi.atualizar(id, dados, blocoId);
       setApartamentos((prev) => prev.map((a) => (a.id === id ? res.data : a)));
       setEditando(null);
     } catch (err) {
-      console.error("Erro ao atualizar apartamento:", err);
+      setErroEditar(err.response?.data?.erro || "Erro ao atualizar apartamento.");
     }
   }
 
@@ -393,7 +400,7 @@ function AbaApartamentos() {
           </div>
         </div>
         <button
-          onClick={() => { setCriando((c) => !c); setExpandido(null); setEditando(null); }}
+          onClick={() => { setCriando((c) => !c); setExpandido(null); setEditando(null); setErroCriar(""); setErroEditar(""); }}
           className={`flex items-center gap-2 px-5 py-3 rounded-2xl font-semibold text-sm transition-all duration-200 cursor-pointer border ${
             criando ? "border-error/30 text-error hover:bg-error/10" : "border-primary/30 text-primary hover:bg-primary/10"
           }`}
@@ -412,7 +419,7 @@ function AbaApartamentos() {
             </div>
             <h2 className="font-headline text-xl font-bold text-on-surface">Novo Apartamento</h2>
           </div>
-          <FormApartamento blocos={blocos} onSalvar={handleCriar} onCancelar={() => setCriando(false)} />
+          <FormApartamento blocos={blocos} onSalvar={handleCriar} onCancelar={() => { setCriando(false); setErroCriar(""); }} erro={erroCriar} />
         </div>
       )}
 
@@ -489,7 +496,8 @@ function AbaApartamentos() {
                       inicial={apt}
                       blocos={blocos}
                       onSalvar={(dados, blocoId) => handleAtualizar(apt.id, dados, blocoId)}
-                      onCancelar={() => setEditando(null)}
+                      onCancelar={() => { setEditando(null); setErroEditar(""); }}
+                      erro={erroEditar}
                     />
                   ) : (
                     <DetalhesApartamento apt={apt} onEditar={() => setEditando(apt.id)} onToggleAtivo={() => handleToggleAtivo(apt)} />
@@ -504,7 +512,7 @@ function AbaApartamentos() {
   );
 }
 
-function FormApartamento({ inicial, blocos, onSalvar, onCancelar }) {
+function FormApartamento({ inicial, blocos, onSalvar, onCancelar, erro }) {
   const [form, setForm] = useState({
     numero: inicial?.numero || "",
     andar: inicial?.andar || "",
@@ -551,6 +559,7 @@ function FormApartamento({ inicial, blocos, onSalvar, onCancelar }) {
         <Campo id="apt-area" label="Área total (m²)" type="number" placeholder="Ex: 65.5" value={form.areaMxComTotal} onChange={(e) => set("areaMxComTotal", e.target.value)} />
         <Campo id="apt-obs" label="Observações" placeholder="Opcional" value={form.observacoes} onChange={(e) => set("observacoes", e.target.value)} />
       </div>
+      {erro && <p className="text-error text-xs">{erro}</p>}
       <div className="flex gap-3 pt-2">
         <Botao type="submit">{inicial ? "Salvar alterações" : "Cadastrar apartamento"}</Botao>
         <button type="button" onClick={onCancelar} className="flex-1 py-4 rounded-full border border-outline-variant/30 text-on-surface-variant hover:bg-white/5 font-semibold transition-all cursor-pointer">
