@@ -5,22 +5,6 @@ import { Icone } from "../../components/icones/Icone";
 import { Campo } from "../../components/campos/Campo";
 import { Botao } from "../../components/botoes/Botao";
 
-const MESES = [
-  "Janeiro",
-  "Fevereiro",
-  "Março",
-  "Abril",
-  "Maio",
-  "Junho",
-  "Julho",
-  "Agosto",
-  "Setembro",
-  "Outubro",
-  "Novembro",
-  "Dezembro",
-];
-const MES_ATUAL = MESES[new Date().getMonth()];
-
 const STATUS_STYLE = {
   ativo: "bg-primary/10 text-primary",
   pendente: "bg-secondary/10 text-secondary",
@@ -43,13 +27,12 @@ export function GerenciarUsuarios() {
           email: u.email,
           role: u.role,
           provider: u.provider,
-          bloco: u.bloco || "-",
-          apartamento: u.apartamento || "-",
-          vaga: u.vaga || null,
+          bloco: u.bloco ?? "",
+          apartamento: u.apartamento ?? "",
+          vaga: u.vaga ?? null,
           logins: [u.email],
           status: u.role === "admin" ? "ativo" : "ativo",
           createdAt: u.createdAt,
-          condominio: { valor: "R$ 1.240,00", pago: false, vencimento: "-" },
         }));
         setUsuarios(lista);
       })
@@ -60,9 +43,6 @@ export function GerenciarUsuarios() {
   const [expandido, setExpandido] = useState(null);
   const [criando, setCriando] = useState(false);
   const [aba, setAba] = useState("gerenciamento"); // gerenciamento | financeiro
-  const [ordenacaoCond, setOrdenacaoCond] = useState("todos");
-  const [sortCond, setSortCond] = useState("nome");
-
   const filtrados = usuarios.filter(
     (u) =>
       u.nome.toLowerCase().includes(busca.toLowerCase()) ||
@@ -78,10 +58,23 @@ export function GerenciarUsuarios() {
 
   async function salvarEdicao(id, dados) {
     try {
-      const res = await api.put(`/api/users/${id}`, dados);
+      const { status: _st, logins: _lg, ...payload } = dados;
+      const res = await api.put(`/api/users/${id}`, payload);
       const u = res.data.usuario;
       setUsuarios((us) =>
-        us.map((usr) => (usr.id === id ? { ...usr, nome: u.nome, email: u.email, role: u.role, ...dados } : usr)),
+        us.map((usr) =>
+          usr.id === id
+            ? {
+                ...usr,
+                nome: u.nome,
+                email: u.email,
+                role: u.role,
+                bloco: u.bloco ?? "",
+                apartamento: u.apartamento ?? "",
+                vaga: u.vaga ?? null,
+              }
+            : usr,
+        ),
       );
       setEditando(null);
     } catch (err) {
@@ -94,12 +87,27 @@ export function GerenciarUsuarios() {
       const res = await api.post("/api/users", {
         nome: dados.nome,
         email: dados.email,
-        senha: dados.senha || "123456",
+        senha: dados.senha,
         role: "user",
+        bloco: dados.bloco || undefined,
+        apartamento: dados.apartamento || undefined,
+        vaga: dados.vaga || undefined,
       });
       const u = res.data.usuario;
       setUsuarios((us) => [
-        { id: u.id, nome: u.nome, email: u.email, role: u.role, provider: u.provider, bloco: dados.bloco || "-", apartamento: dados.apartamento || "-", vaga: dados.vaga || null, logins: [u.email], status: "ativo", createdAt: u.createdAt, condominio: { valor: "R$ 1.240,00", pago: false, vencimento: "-" } },
+        {
+          id: u.id,
+          nome: u.nome,
+          email: u.email,
+          role: u.role,
+          provider: u.provider,
+          bloco: u.bloco ?? "",
+          apartamento: u.apartamento ?? "",
+          vaga: u.vaga ?? null,
+          logins: [u.email],
+          status: "ativo",
+          createdAt: u.createdAt,
+        },
         ...us,
       ]);
       setCriando(false);
@@ -271,8 +279,8 @@ export function GerenciarUsuarios() {
 
                     <div className="hidden sm:flex gap-6 text-sm shrink-0">
                       {[
-                        { label: "Bloco", value: usuario.bloco },
-                        { label: "Apt", value: usuario.apartamento },
+                        { label: "Bloco", value: usuario.bloco || "—" },
+                        { label: "Apt", value: usuario.apartamento || "—" },
                         { label: "Vaga", value: usuario.vaga ?? "—" },
                       ].map((col) => (
                         <div key={col.label} className="text-center">
@@ -322,208 +330,23 @@ export function GerenciarUsuarios() {
         )}
 
         {/* ── Aba: Financeiro ── */}
-        {aba === "financeiro" && (
-          <SecaoCondominio
-            usuarios={usuarios}
-            filtro={ordenacaoCond}
-            setFiltro={setOrdenacaoCond}
-            sort={sortCond}
-            setSort={setSortCond}
-          />
-        )}
+        {aba === "financeiro" && <SecaoCondominio />}
       </div>
     </div>
   );
 }
 
 // ─────────────────────────────────────────────
-function SecaoCondominio({ usuarios, filtro, setFiltro, sort, setSort }) {
-  const [busca, setBusca] = useState("");
-  const pagos = usuarios.filter((u) => u.condominio?.pago).length;
-  const pendentes = usuarios.filter((u) => !u.condominio?.pago).length;
-
-  const lista = usuarios
-    .filter((u) => {
-      if (filtro === "pago") return u.condominio?.pago;
-      if (filtro === "pendente") return !u.condominio?.pago;
-      return true;
-    })
-    .filter((u) => {
-      if (!busca) return true;
-      const q = busca.toLowerCase();
-      return (
-        u.nome.toLowerCase().includes(q) ||
-        u.email.toLowerCase().includes(q) ||
-        u.bloco.toLowerCase().includes(q) ||
-        u.apartamento.includes(q)
-      );
-    })
-    .sort((a, b) => {
-      if (sort === "bloco")
-        return `${a.bloco}${a.apartamento}`.localeCompare(
-          `${b.bloco}${b.apartamento}`,
-        );
-      if (sort === "status")
-        return a.condominio?.pago === b.condominio?.pago
-          ? 0
-          : a.condominio?.pago
-            ? -1
-            : 1;
-      return a.nome.localeCompare(b.nome);
-    });
-
-  const FILTROS = [
-    { id: "todos", label: "Todos", count: usuarios.length },
-    { id: "pago", label: "Pagos", count: pagos },
-    { id: "pendente", label: "Pendentes", count: pendentes },
-  ];
-
-  const SORTS = [
-    { id: "nome", label: "Nome" },
-    { id: "bloco", label: "Bloco / Apt" },
-    { id: "status", label: "Status pag." },
-  ];
-
+function SecaoCondominio() {
   return (
-    <div className="glass-panel rounded-3xl p-6 lg:p-8 space-y-5">
-      {/* Header da seção */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-secondary/10 flex items-center justify-center shrink-0">
-            <Icone name="payments" className="text-secondary" />
-          </div>
-          <div>
-            <h2 className="font-headline text-xl font-bold text-on-surface">
-              Condomínio — {MES_ATUAL}
-            </h2>
-            <p className="text-on-surface-variant text-xs">
-              {pagos} pagos · {pendentes} pendentes
-            </p>
-          </div>
-        </div>
-
-        {/* Mini-progress bar */}
-        <div className="sm:w-48 shrink-0">
-          <div className="flex justify-between text-xs text-on-surface-variant mb-1">
-            <span>
-              {Math.round((pagos / (usuarios.length || 1)) * 100)}% pagos
-            </span>
-            <span>
-              {pagos}/{usuarios.length}
-            </span>
-          </div>
-          <div className="h-2 rounded-full bg-surface-container-highest overflow-hidden">
-            <div
-              className="h-full rounded-full bg-gradient-to-r from-primary to-tertiary transition-all duration-500"
-              style={{ width: `${(pagos / (usuarios.length || 1)) * 100}%` }}
-            />
-          </div>
-        </div>
+    <div className="glass-panel rounded-3xl p-8 lg:p-10 text-center max-w-2xl mx-auto">
+      <div className="w-14 h-14 rounded-2xl bg-secondary/10 flex items-center justify-center mx-auto mb-4">
+        <Icone name="payments" className="text-secondary text-3xl" />
       </div>
-
-      {/* Barra de busca */}
-      <div className="max-w-md">
-        <Campo
-          id="busca-cond"
-          placeholder="Buscar por nome, e-mail, bloco ou apt..."
-          icon="search"
-          value={busca}
-          onChange={(e) => setBusca(e.target.value)}
-        />
-      </div>
-
-      {/* Controles: filtro + ordenação */}
-      <div className="flex flex-wrap gap-3 items-center justify-between">
-        <div className="flex gap-2 flex-wrap">
-          {FILTROS.map((f) => (
-            <button
-              key={f.id}
-              onClick={() => setFiltro(f.id)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer border ${
-                filtro === f.id
-                  ? "border-primary bg-primary/10 text-primary"
-                  : "border-outline-variant/20 text-on-surface-variant hover:border-primary/30"
-              }`}
-            >
-              {f.label}
-              <span className="bg-surface-container-highest rounded-full px-1.5 py-0.5 text-[10px]">
-                {f.count}
-              </span>
-            </button>
-          ))}
-        </div>
-
-        <div className="flex items-center gap-2 text-xs text-on-surface-variant">
-          <Icone name="sort" className="text-base" />
-          <span className="shrink-0">Ordenar por:</span>
-          <div className="flex gap-1">
-            {SORTS.map((s) => (
-              <button
-                key={s.id}
-                onClick={() => setSort(s.id)}
-                className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all cursor-pointer ${
-                  sort === s.id
-                    ? "bg-primary/10 text-primary"
-                    : "text-on-surface-variant hover:text-on-surface"
-                }`}
-              >
-                {s.label}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Tabela */}
-      <div className="space-y-2">
-        {lista.map((u) => {
-          const pago = u.condominio?.pago;
-          return (
-            <div
-              key={u.id}
-              className="flex items-center gap-3 p-3 rounded-2xl hover:bg-white/5 transition-all"
-            >
-              <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                <Icone name="person" className="text-primary text-base" />
-              </div>
-
-              <div className="flex-1 min-w-0">
-                <p className="text-on-surface text-sm font-semibold truncate">
-                  {u.nome}
-                </p>
-                <p className="text-on-surface-variant text-xs">
-                  Bloco {u.bloco} · Apt {u.apartamento}
-                </p>
-              </div>
-
-              <div className="hidden sm:block text-right shrink-0">
-                <p className="text-on-surface text-sm font-bold">
-                  {u.condominio?.valor}
-                </p>
-                <p className="text-on-surface-variant text-xs">
-                  Venc. {u.condominio?.vencimento}
-                </p>
-              </div>
-
-              {/* Badge pago/pendente (somente leitura) */}
-              <div
-                className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider border ${
-                  pago
-                    ? "border-primary/30 bg-primary/10 text-primary"
-                    : "border-error/30 bg-error/10 text-error"
-                }`}
-              >
-                <Icone
-                  name={pago ? "check_circle" : "cancel"}
-                  className="text-base"
-                  style={pago ? { fontVariationSettings: "'FILL' 1" } : {}}
-                />
-                {pago ? "Pago" : "Pendente"}
-              </div>
-            </div>
-          );
-        })}
-      </div>
+      <h2 className="font-headline text-lg font-bold text-on-surface mb-2">Financeiro</h2>
+      <p className="text-on-surface-variant text-sm leading-relaxed">
+        Valores de condomínio e status de pagamento serão carregados aqui após integração com o módulo de cobranças. Esta sprint não utiliza valores financeiros fictícios no código do frontend.
+      </p>
     </div>
   );
 }
@@ -554,10 +377,10 @@ function DetalhesUsuario({ usuario, onEditar }) {
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
-          { label: "Bloco", value: usuario.bloco, icon: "domain" },
+          { label: "Bloco", value: usuario.bloco || "—", icon: "domain" },
           {
             label: "Apartamento",
-            value: usuario.apartamento,
+            value: usuario.apartamento || "—",
             icon: "meeting_room",
           },
           {
@@ -749,6 +572,7 @@ function FormNovoUsuario({ onSalvar, onCancelar }) {
   const [form, setForm] = useState({
     nome: "",
     email: "",
+    senha: "",
     bloco: "",
     apartamento: "",
     vaga: "",
@@ -763,6 +587,8 @@ function FormNovoUsuario({ onSalvar, onCancelar }) {
     if (
       !form.nome.trim() ||
       !form.email.trim() ||
+      !form.senha.trim() ||
+      form.senha.trim().length < 6 ||
       !form.bloco.trim() ||
       !form.apartamento.trim()
     )
@@ -770,6 +596,7 @@ function FormNovoUsuario({ onSalvar, onCancelar }) {
     onSalvar({
       nome: form.nome.trim(),
       email: form.email.trim(),
+      senha: form.senha.trim(),
       bloco: form.bloco.trim(),
       apartamento: form.apartamento.trim(),
       vaga: form.vaga.trim() || null,
@@ -796,6 +623,16 @@ function FormNovoUsuario({ onSalvar, onCancelar }) {
           icon="mail"
           value={form.email}
           onChange={(e) => set("email", e.target.value)}
+        />
+        <Campo
+          id="novo-senha"
+          label="Senha inicial *"
+          type="password"
+          placeholder="Mínimo 6 caracteres"
+          icon="lock"
+          value={form.senha}
+          onChange={(e) => set("senha", e.target.value)}
+          autoComplete="new-password"
         />
       </div>
 

@@ -1,0 +1,38 @@
+[
+  {
+    "icon": "support_agent",
+    "titulo": "Portaria e acesso",
+    "descricao": "Controle de visitantes, encomendas e liberação de acesso. Horário de atendimento conforme regimento interno.",
+    "tags": ["Plantão", "Interfonia"]
+  },
+  {
+    "icon": "cleaning_services",
+    "titulo": "Limpeza e conservação",
+    "descricao": "Áreas comuns, halls e elevadores com cronograma definido pela administração.",
+    "tags": ["Áreas comuns", "Playground"]
+  },
+  {
+    "icon": "build",
+    "titulo": "Manutenção predial",
+    "descricao": "Elétrica, hidráulica, elevadores e áreas técnicas com prestadores credenciados.",
+    "tags": ["Emergências", "Preventiva"]
+  },
+  {
+    "icon": "local_shipping",
+    "titulo": "Encomendas e mudanças",
+    "descricao": "Recebimento de volumes e agendamento de mudanças nas janelas permitidas pelo condomínio.",
+    "tags": ["Balcão", "Agendamento"]
+  },
+  {
+    "icon": "water_drop",
+    "titulo": "Reservatórios e água",
+    "descricao": "Manutenção de bombas e caixas de água com laudos quando aplicável.",
+    "tags": ["Conformidade", "Laudos"]
+  },
+  {
+    "icon": "electrical_services",
+    "titulo": "Energia e iluminação",
+    "descricao": "Iluminação de garagem e áreas externas conforme projeto elétrico do condomínio.",
+    "tags": ["LED", "Economia"]
+  }
+]

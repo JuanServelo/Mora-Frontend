@@ -1,5 +1,6 @@
 // src/pages/adm/GerenciarReclamacoes.jsx
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { reclamacoesApi } from "../../services/reclamacoesApi";
 import { Icone } from "../../components/icones/Icone";
 
 // ─── helpers ────────────────────────────────
@@ -55,79 +56,46 @@ const catLabel = (c) =>
     .toLowerCase()
     .replace(/\b\w/g, (l) => l.toUpperCase());
 
-const RECLAMACOES_MOCK = [
-  {
-    id: 1,
-    protocolNumber: "REC-001",
-    category: "BARULHO",
-    description: "Barulho excessivo no apartamento 301 após as 22h todos os finais de semana.",
-    residentId: "morador-42",
-    attachmentUrl: null,
-    status: "PENDENTE",
-    createdAt: "2026-04-20T14:30",
-    interactions: [],
-  },
-  {
-    id: 2,
-    protocolNumber: "REC-002",
-    category: "INFRAESTRUTURA",
-    description: "Infiltração no teto do corredor do 2° andar. A mancha está aumentando.",
-    residentId: "morador-17",
-    attachmentUrl: "https://exemplo.com/foto.jpg",
-    status: "EM_ANALISE",
-    createdAt: "2026-04-18T09:00",
-    interactions: [
-      {
-        id: 1,
-        response: "Equipe de manutenção foi acionada e vistoriará o local esta semana.",
-        status: "EM_ANALISE",
-      },
-    ],
-  },
-  {
-    id: 3,
-    protocolNumber: "REC-003",
-    category: "LIMPEZA",
-    description: "Área de lazer com lixo acumulado por mais de 3 dias.",
-    residentId: "morador-08",
-    attachmentUrl: null,
-    status: "RESOLVIDO",
-    createdAt: "2026-04-10T11:15",
-    interactions: [
-      {
-        id: 1,
-        response: "Equipe de limpeza realocada para a área. Problema resolvido.",
-        status: "RESOLVIDO",
-      },
-    ],
-  },
-];
-
 // ════════════════════════════════════════════
 export function GerenciarReclamacoes() {
-  const [reclamacoes, setReclamacoes] = useState(RECLAMACOES_MOCK);
+  const [reclamacoes, setReclamacoes] = useState([]);
+  const [carregando, setCarregando] = useState(true);
   const [expandido, setExpandido] = useState(null);
   const [respostaPendente, setRespostaPendente] = useState({}); // { [id]: { text, status } }
   const [filtroStatus, setFiltroStatus] = useState("TODOS");
 
-  const responder = (id) => {
+  useEffect(() => {
+    let ok = true;
+    (async () => {
+      try {
+        const res = await reclamacoesApi.listarTodas();
+        if (ok) setReclamacoes(res.data.reclamacoes || []);
+      } catch (e) {
+        console.error(e);
+        if (ok) setReclamacoes([]);
+      } finally {
+        if (ok) setCarregando(false);
+      }
+    })();
+    return () => {
+      ok = false;
+    };
+  }, []);
+
+  const responder = async (id) => {
     const r = respostaPendente[id];
-    if (!r?.text) return;
-    setReclamacoes((prev) =>
-      prev.map((rec) =>
-        rec.id === id
-          ? {
-              ...rec,
-              status: r.status,
-              interactions: [
-                ...rec.interactions,
-                { id: Date.now(), response: r.text, status: r.status },
-              ],
-            }
-          : rec
-      )
-    );
-    setRespostaPendente((prev) => ({ ...prev, [id]: { text: "", status: "EM_ANALISE" } }));
+    if (!r?.text?.trim()) return;
+    try {
+      const res = await reclamacoesApi.atualizarAdmin(id, {
+        response: r.text.trim(),
+        status: r.status || "EM_ANALISE",
+      });
+      const atual = res.data.reclamacao;
+      setReclamacoes((prev) => prev.map((rec) => (rec.id === id ? atual : rec)));
+      setRespostaPendente((prev) => ({ ...prev, [id]: { text: "", status: "EM_ANALISE" } }));
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   const recFiltradas =
@@ -139,6 +107,14 @@ export function GerenciarReclamacoes() {
     (acc, s) => ({ ...acc, [s]: reclamacoes.filter((r) => r.status === s).length }),
     {}
   );
+
+  if (carregando) {
+    return (
+      <div className="min-h-screen w-full pt-4 pb-20 px-6">
+        <div className="max-w-6xl mx-auto py-20 text-center text-on-surface-variant text-sm">Carregando…</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen w-full pt-4 pb-20 px-6">
@@ -240,7 +216,9 @@ export function GerenciarReclamacoes() {
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                     <div className="bg-surface-container-highest/30 rounded-xl p-3">
                       <p className="text-xs text-on-surface-variant mb-1">Morador</p>
-                      <p className="text-sm font-semibold text-on-surface">{rec.residentId}</p>
+                      <p className="text-sm font-semibold text-on-surface">
+                        {rec.usuario?.nome || rec.usuario?.email || rec.residentId || "—"}
+                      </p>
                     </div>
                     <div className="bg-surface-container-highest/30 rounded-xl p-3">
                       <p className="text-xs text-on-surface-variant mb-1">Registrada em</p>
@@ -269,13 +247,13 @@ export function GerenciarReclamacoes() {
                   </div>
 
                   {/* Histórico de interações */}
-                  {rec.interactions.length > 0 && (
+                  {(rec.interactions?.length ?? 0) > 0 && (
                     <div>
                       <p className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant mb-2">
                         Histórico de respostas
                       </p>
                       <div className="space-y-2">
-                        {rec.interactions.map((i) => (
+                        {(rec.interactions || []).map((i) => (
                           <div key={i.id} className="bg-surface-container-highest/30 rounded-xl p-3 border-l-2 border-primary/40">
                             <p className="text-sm text-on-surface">{i.response}</p>
                             <span className={`mt-1 inline-block text-xs font-semibold px-2 py-0.5 rounded-full ${statusColor(i.status)}`}>
@@ -323,6 +301,7 @@ export function GerenciarReclamacoes() {
                           <Icone name="expand_more" className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-lg" />
                         </div>
                         <button
+                          type="button"
                           onClick={() => responder(rec.id)}
                           className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary/15 text-primary font-semibold text-sm hover:bg-primary/25 transition-all cursor-pointer"
                         >
