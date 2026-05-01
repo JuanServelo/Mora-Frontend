@@ -1,6 +1,7 @@
 // src/pages/adm/GerenciarUsuarios.jsx
 import { useState, useEffect } from "react";
 import api from "../../services/api";
+import { blocoApi, apartamentoApi } from "../../services/estruturasApi";
 import { Icone } from "../../components/icones/Icone";
 import { Campo } from "../../components/campos/Campo";
 import { Botao } from "../../components/botoes/Botao";
@@ -14,14 +15,15 @@ const STATUS_STYLE = {
 // ─────────────────────────────────────────────
 export function GerenciarUsuarios() {
   const [usuarios, setUsuarios] = useState([]);
+  const [blocos, setBlocos] = useState([]);
+  const [apartamentos, setApartamentos] = useState([]);
   const [carregando, setCarregando] = useState(true);
   const [busca, setBusca] = useState("");
 
   useEffect(() => {
-    api
-      .get("/api/users")
-      .then((res) => {
-        const lista = (res.data.usuarios || []).map((u) => ({
+    Promise.all([api.get("/api/users"), blocoApi.listar(), apartamentoApi.listar()])
+      .then(([usersRes, blocosRes, aptsRes]) => {
+        const lista = (usersRes.data.usuarios || []).map((u) => ({
           id: u.id,
           nome: u.nome,
           email: u.email,
@@ -35,8 +37,10 @@ export function GerenciarUsuarios() {
           createdAt: u.createdAt,
         }));
         setUsuarios(lista);
+        setBlocos(blocosRes.data);
+        setApartamentos(aptsRes.data);
       })
-      .catch((err) => console.error("Erro ao carregar usuarios:", err))
+      .catch((err) => console.error("Erro ao carregar dados:", err))
       .finally(() => setCarregando(false));
   }, []);
   const [editando, setEditando] = useState(null);
@@ -227,6 +231,8 @@ export function GerenciarUsuarios() {
                   </h2>
                 </div>
                 <FormNovoUsuario
+                  blocos={blocos}
+                  apartamentos={apartamentos}
                   onSalvar={criarUsuario}
                   onCancelar={() => setCriando(false)}
                 />
@@ -312,6 +318,8 @@ export function GerenciarUsuarios() {
                       {editando === usuario.id ? (
                         <FormEdicao
                           usuario={usuario}
+                          blocos={blocos}
+                          apartamentos={apartamentos}
                           onSalvar={(dados) => salvarEdicao(usuario.id, dados)}
                           onCancelar={() => setEditando(null)}
                         />
@@ -417,15 +425,49 @@ function DetalhesUsuario({ usuario, onEditar }) {
 }
 
 // ─────────────────────────────────────────────
-function FormEdicao({ usuario, onSalvar, onCancelar }) {
+function FormEdicao({ usuario, blocos, apartamentos, onSalvar, onCancelar }) {
+  const blocoInicial = blocos.find((b) => b.nome === usuario.bloco);
+  const [blocoId, setBlocoId] = useState(blocoInicial?.id ?? "");
+  const [aptId, setAptId] = useState(() => {
+    if (!blocoInicial) return "";
+    return apartamentos.find((a) => a.numero === usuario.apartamento && a.blocoId === blocoInicial.id)?.id ?? "";
+  });
   const [form, setForm] = useState({
-    bloco: usuario.bloco,
-    apartamento: usuario.apartamento,
     vaga: usuario.vaga ?? "",
     status: usuario.status,
     novoLogin: "",
     logins: [...usuario.logins],
   });
+
+  // Resolve initial selections when data loads after mount
+  useEffect(() => {
+    if (!blocoId && blocos.length > 0) {
+      const b = blocos.find((b) => b.nome === usuario.bloco);
+      if (b) setBlocoId(b.id);
+    }
+  }, [blocos]);
+
+  useEffect(() => {
+    if (blocoId && !aptId && apartamentos.length > 0) {
+      const a = apartamentos.find((a) => a.numero === usuario.apartamento && a.blocoId === blocoId);
+      if (a) setAptId(a.id);
+    }
+  }, [blocoId, apartamentos]);
+
+  const aptsFiltrados = blocoId ? apartamentos.filter((a) => a.blocoId === blocoId) : apartamentos;
+
+  function handleBlocoChange(newBlocoId) {
+    setBlocoId(newBlocoId);
+    setAptId("");
+  }
+
+  function handleAptChange(newAptId) {
+    setAptId(newAptId);
+    if (newAptId) {
+      const apt = apartamentos.find((a) => a.id === newAptId);
+      if (apt?.blocoId) setBlocoId(apt.blocoId);
+    }
+  }
 
   function set(field, value) {
     setForm((f) => ({ ...f, [field]: value }));
@@ -443,25 +485,38 @@ function FormEdicao({ usuario, onSalvar, onCancelar }) {
     setForm((f) => ({ ...f, logins: f.logins.filter((l) => l !== login) }));
   }
 
+  const selectCls = "w-full bg-surface-container-highest/40 border-none rounded-xl py-4 px-4 text-on-surface focus:ring-2 focus:ring-primary/50 focus:outline-none backdrop-blur-sm transition-all disabled:opacity-40";
+  const labelCls = "text-xs font-semibold uppercase tracking-wider text-on-surface-variant ml-1";
+
   return (
     <div className="space-y-5">
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <Campo
-          id="edit-bloco"
-          label="Bloco"
-          placeholder="A"
-          icon="domain"
-          value={form.bloco}
-          onChange={(e) => set("bloco", e.target.value)}
-        />
-        <Campo
-          id="edit-apt"
-          label="Apartamento"
-          placeholder="102"
-          icon="meeting_room"
-          value={form.apartamento}
-          onChange={(e) => set("apartamento", e.target.value)}
-        />
+        <div className="space-y-2">
+          <label className={labelCls}>Bloco</label>
+          <select value={blocoId} onChange={(e) => handleBlocoChange(e.target.value)} className={selectCls}>
+            <option value="">— Sem vínculo —</option>
+            {blocos.map((b) => (
+              <option key={b.id} value={b.id}>{b.nome}</option>
+            ))}
+          </select>
+        </div>
+        <div className="space-y-2">
+          <label className={labelCls}>Apartamento</label>
+          <select
+            value={aptId}
+            onChange={(e) => handleAptChange(e.target.value)}
+            disabled={aptsFiltrados.length === 0}
+            className={selectCls}
+          >
+            <option value="">— Selecione —</option>
+            {aptsFiltrados.map((a) => (
+              <option key={a.id} value={a.id}>Apto {a.numero}{a.andar != null ? ` · ${a.andar}º andar` : ""}</option>
+            ))}
+          </select>
+          {blocoId && aptsFiltrados.length === 0 && (
+            <p className="text-xs text-error ml-1">Nenhum apartamento neste bloco</p>
+          )}
+        </div>
         <Campo
           id="edit-vaga"
           label="Vaga"
@@ -543,15 +598,17 @@ function FormEdicao({ usuario, onSalvar, onCancelar }) {
       <div className="flex gap-3 pt-2">
         <Botao
           type="button"
-          onClick={() =>
+          onClick={() => {
+            const blocoSel = blocos.find((b) => b.id === blocoId);
+            const aptSel = apartamentos.find((a) => a.id === aptId);
             onSalvar({
-              bloco: form.bloco,
-              apartamento: form.apartamento,
+              bloco: blocoSel?.nome ?? "",
+              apartamento: aptSel?.numero ?? "",
               vaga: form.vaga || null,
               status: form.status,
               logins: form.logins,
-            })
-          }
+            });
+          }}
         >
           Salvar Alterações
           <Icone name="check" className="text-xl" />
@@ -568,15 +625,29 @@ function FormEdicao({ usuario, onSalvar, onCancelar }) {
 }
 
 // ─────────────────────────────────────────────
-function FormNovoUsuario({ onSalvar, onCancelar }) {
-  const [form, setForm] = useState({
-    nome: "",
-    email: "",
-    senha: "",
-    bloco: "",
-    apartamento: "",
-    vaga: "",
-  });
+function FormNovoUsuario({ blocos, apartamentos, onSalvar, onCancelar }) {
+  const [form, setForm] = useState({ nome: "", email: "", senha: "", vaga: "" });
+  const [blocoId, setBlocoId] = useState("");
+  const [aptId, setAptId] = useState("");
+
+  useEffect(() => {
+    if (!blocoId && blocos.length > 0) setBlocoId(blocos[0].id);
+  }, [blocos]);
+
+  const aptsFiltrados = blocoId ? apartamentos.filter((a) => a.blocoId === blocoId) : apartamentos;
+
+  function handleBlocoChange(newBlocoId) {
+    setBlocoId(newBlocoId);
+    setAptId("");
+  }
+
+  function handleAptChange(newAptId) {
+    setAptId(newAptId);
+    if (newAptId) {
+      const apt = apartamentos.find((a) => a.id === newAptId);
+      if (apt?.blocoId) setBlocoId(apt.blocoId);
+    }
+  }
 
   function set(field, value) {
     setForm((f) => ({ ...f, [field]: value }));
@@ -584,28 +655,26 @@ function FormNovoUsuario({ onSalvar, onCancelar }) {
 
   function handleSubmit(e) {
     e.preventDefault();
-    if (
-      !form.nome.trim() ||
-      !form.email.trim() ||
-      !form.senha.trim() ||
-      form.senha.trim().length < 6 ||
-      !form.bloco.trim() ||
-      !form.apartamento.trim()
-    )
+    if (!form.nome.trim() || !form.email.trim() || !form.senha.trim() || form.senha.trim().length < 6 || !blocoId || !aptId)
       return;
+    const blocoSel = blocos.find((b) => b.id === blocoId);
+    const aptSel = apartamentos.find((a) => a.id === aptId);
     onSalvar({
       nome: form.nome.trim(),
       email: form.email.trim(),
       senha: form.senha.trim(),
-      bloco: form.bloco.trim(),
-      apartamento: form.apartamento.trim(),
+      bloco: blocoSel?.nome ?? "",
+      apartamento: aptSel?.numero ?? "",
       vaga: form.vaga.trim() || null,
     });
   }
 
+  const selectCls = "w-full bg-surface-container-highest/40 border-none rounded-xl py-4 px-4 text-on-surface focus:ring-2 focus:ring-primary/50 focus:outline-none backdrop-blur-sm transition-all disabled:opacity-40";
+  const labelCls = "text-xs font-semibold uppercase tracking-wider text-on-surface-variant ml-1";
+
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
-      {/* Nome + E-mail */}
+      {/* Nome + E-mail + Senha */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <Campo
           id="novo-nome"
@@ -638,22 +707,33 @@ function FormNovoUsuario({ onSalvar, onCancelar }) {
 
       {/* Bloco + Apt + Vaga */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <Campo
-          id="novo-bloco"
-          label="Bloco *"
-          placeholder="A"
-          icon="domain"
-          value={form.bloco}
-          onChange={(e) => set("bloco", e.target.value)}
-        />
-        <Campo
-          id="novo-apt"
-          label="Apartamento *"
-          placeholder="102"
-          icon="meeting_room"
-          value={form.apartamento}
-          onChange={(e) => set("apartamento", e.target.value)}
-        />
+        <div className="space-y-2">
+          <label className={labelCls}>Bloco *</label>
+          <select value={blocoId} onChange={(e) => handleBlocoChange(e.target.value)} required className={selectCls}>
+            <option value="">— Selecione o bloco —</option>
+            {blocos.map((b) => (
+              <option key={b.id} value={b.id}>{b.nome}</option>
+            ))}
+          </select>
+        </div>
+        <div className="space-y-2">
+          <label className={labelCls}>Apartamento *</label>
+          <select
+            value={aptId}
+            onChange={(e) => handleAptChange(e.target.value)}
+            required
+            disabled={aptsFiltrados.length === 0}
+            className={selectCls}
+          >
+            <option value="">— Selecione o apt —</option>
+            {aptsFiltrados.map((a) => (
+              <option key={a.id} value={a.id}>Apto {a.numero}{a.andar != null ? ` · ${a.andar}º andar` : ""}</option>
+            ))}
+          </select>
+          {blocoId && aptsFiltrados.length === 0 && (
+            <p className="text-xs text-error ml-1">Nenhum apartamento neste bloco</p>
+          )}
+        </div>
         <Campo
           id="novo-vaga"
           label="Vaga"

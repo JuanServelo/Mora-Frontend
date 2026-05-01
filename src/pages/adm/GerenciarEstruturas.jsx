@@ -340,18 +340,21 @@ function AbaApartamentos() {
   const filtrados = apartamentos.filter((a) => {
     const q = busca.toLowerCase();
     const matchBusca = a.numero.toLowerCase().includes(q) || String(a.andar).includes(q);
-    const matchBloco = filtroBlocoId === "todos" || a.bloco?.id === filtroBlocoId;
+    const matchBloco = filtroBlocoId === "todos" || a.blocoId === filtroBlocoId;
     return matchBusca && matchBloco;
   });
 
   async function handleCriar(dados, blocoId) {
     setErroCriar("");
+    console.log("[cadastrar] payload:", { ...dados, blocoId });
     try {
       const res = await apartamentoApi.cadastrar(dados, blocoId);
       setApartamentos((prev) => [res.data, ...prev]);
       setCriando(false);
     } catch (err) {
-      setErroCriar(err.response?.data?.erro || "Erro ao criar apartamento.");
+      const d = err.response?.data;
+      console.error("[cadastrar] erro backend:", d);
+      setErroCriar(d?.erro || (d?.erros ? Object.values(d.erros).join("; ") : null) || "Erro ao criar apartamento.");
     }
   }
 
@@ -362,7 +365,8 @@ function AbaApartamentos() {
       setApartamentos((prev) => prev.map((a) => (a.id === id ? res.data : a)));
       setEditando(null);
     } catch (err) {
-      setErroEditar(err.response?.data?.erro || "Erro ao atualizar apartamento.");
+      const d = err.response?.data;
+      setErroEditar(d?.erro || (d?.erros ? Object.values(d.erros).join("; ") : null) || "Erro ao atualizar apartamento.");
     }
   }
 
@@ -467,7 +471,7 @@ function AbaApartamentos() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-on-surface font-semibold truncate">Apt {apt.numero}</p>
-                  <p className="text-on-surface-variant text-sm truncate">{apt.bloco?.nome ?? "—"}</p>
+                  <p className="text-on-surface-variant text-sm truncate">{apt.blocoNome ?? "—"}</p>
                 </div>
                 <div className="hidden sm:flex gap-6 text-sm shrink-0">
                   {[
@@ -520,7 +524,13 @@ function FormApartamento({ inicial, blocos, onSalvar, onCancelar, erro }) {
     areaMxComTotal: inicial?.areaMxComTotal || "",
     observacoes: inicial?.observacoes || "",
   });
-  const [blocoId, setBlocoId] = useState(inicial?.bloco?.id || (blocos[0]?.id ?? ""));
+  const [blocoId, setBlocoId] = useState(inicial?.blocoId || (blocos[0]?.id ?? ""));
+
+  useEffect(() => {
+    if (!blocoId && blocos.length > 0) {
+      setBlocoId(blocos[0].id);
+    }
+  }, [blocos]);
 
   function set(field, value) { setForm((f) => ({ ...f, [field]: value })); }
 
@@ -575,7 +585,7 @@ function DetalhesApartamento({ apt, onEditar, onToggleAtivo }) {
     <div className="space-y-4">
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
         {[
-          { label: "Bloco", value: apt.bloco?.nome ?? "—" },
+          { label: "Bloco", value: apt.blocoNome ?? "—" },
           { label: "Número", value: apt.numero },
           { label: "Andar", value: apt.andar ?? "—" },
           { label: "Quartos", value: apt.quartos ?? "—" },
