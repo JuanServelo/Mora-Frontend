@@ -38,7 +38,7 @@ export function SolicitarAcesso() {
 
     try {
       await registrar(nome, email, senha);
-      navigate("/perfil");
+      navigate("/inicio");
     } catch (err) {
       setErro(err.response?.data?.mensagem || "Erro ao solicitar acesso.");
     } finally {

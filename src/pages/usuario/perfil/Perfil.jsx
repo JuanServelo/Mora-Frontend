@@ -127,7 +127,7 @@ export function Perfil() {
                 />
               </div>
               <div className="text-2xl font-headline font-bold text-on-surface mb-1">
-                R$ 1.240,00
+                —
               </div>
               <div className="text-xs text-primary font-medium">
                 {t("perfil.taxa.status")}

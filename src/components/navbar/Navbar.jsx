@@ -2,6 +2,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Icone } from "../icones/Icone";
+import { useAuth } from "../../contexts/AuthContext";
 // import moraLogo from "../../assets/Mora.png";
 // import moraLogo2 from "../../assets/Mora2.png";
 import moraLogo3 from "../../assets/Mora3.png";
@@ -125,23 +126,31 @@ function AdminMenu() {
 
 export function Navbar() {
   const [darkMode, setDarkMode] = useState(true);
+  const { usuario } = useAuth();
+  const role = String(usuario?.role || "").toLowerCase();
+  const isAdmin = role === "admin";
+  const hasUnitAssociation = Boolean(usuario?.bloco) && Boolean(usuario?.apartamento);
+  const isRestrictedUser = Boolean(usuario) && !isAdmin && !hasUnitAssociation;
+  const visibleLeftLinks = isRestrictedUser
+    ? []
+    : NAV_LINKS_LEFT;
 
   return (
     <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-[94%] max-w-4xl px-1">
       <nav className="glass-panel rounded-full px-4 py-2.5 flex items-center shadow-[0_8px_32px_rgba(0,0,0,0.3)]">
         {/* Esquerda */}
         <div className="flex-1 flex items-center gap-0.5">
-          {NAV_LINKS_LEFT.map((l) => (
+          {visibleLeftLinks.map((l) => (
             <NavLink key={l.to} to={l.to}>
               {l.label}
             </NavLink>
           ))}
-          <AdminMenu />
+          {!isRestrictedUser && <AdminMenu />}
         </div>
 
         {/* Centro — Logo */}
         <Link
-          to="/perfil"
+          to={isRestrictedUser ? "/perfil" : "/inicio"}
           className="shrink-0 mx-4 hover:opacity-80 transition-opacity"
         >
           <img src={moraLogo3} alt="Mora" className="h-8 w-auto" />

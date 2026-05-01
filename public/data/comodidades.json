@@ -1,0 +1,50 @@
+[
+  {
+    "icon": "pool",
+    "titulo": "Piscina",
+    "desc": "Adulto e infantil com horário regulamentado e área de convivência.",
+    "destaque": "Regulamento"
+  },
+  {
+    "icon": "fitness_center",
+    "titulo": "Academia",
+    "desc": "Equipamentos de musculação e cardio para moradores conforme regras do condomínio.",
+    "destaque": "Acesso"
+  },
+  {
+    "icon": "spa",
+    "titulo": "Sauna",
+    "desc": "Ambiente com capacidade e horários definidos em assembleia.",
+    "destaque": "Agendamento"
+  },
+  {
+    "icon": "park",
+    "titulo": "Área verde",
+    "desc": "Paisagismo e espaços ao ar livre para uso coletivo.",
+    "destaque": "Convivência"
+  },
+  {
+    "icon": "sports_tennis",
+    "titulo": "Quadra",
+    "desc": "Esportiva multipurpose — consulte regras de uso no regulamento interno.",
+    "destaque": "Horários"
+  },
+  {
+    "icon": "child_friendly",
+    "titulo": "Playground",
+    "desc": "Área infantil com normas de segurança e supervisão dos responsáveis.",
+    "destaque": "Segurança"
+  },
+  {
+    "icon": "roofing",
+    "titulo": "Terraço social",
+    "desc": "Vista e uso conforme reserva quando aplicável.",
+    "destaque": "Reserva"
+  },
+  {
+    "icon": "local_cafe",
+    "titulo": "Coworking",
+    "desc": "Espaço para trabalho quando existente no projeto do condomínio.",
+    "destaque": "Regras"
+  }
+]
