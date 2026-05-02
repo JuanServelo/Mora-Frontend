@@ -25,7 +25,7 @@ const ADM_LINKS = [
   { label: "Reuniões", to: "/adm/reunioes", icon: "groups", description: "Reuniões e votações" },
   { label: "Espaços", to: "/adm/espacos", icon: "deck", description: "Gerenciar áreas comuns" },
   { label: "Reclamações", to: "/adm/reclamacoes", icon: "report", description: "Gestão de reclamações" },
-  { label: "Vagas", to: "/adm/vagas", icon: "local_parking", description: "Vagas de garagem" },
+  { label: "Entregas", to: "/adm/entregas", icon: "inventory_2", description: "Gestão de entregas" },
 ];
 
 function NavLink({ to, children }) {

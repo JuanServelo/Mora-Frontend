@@ -10,7 +10,7 @@ import { GerenciarEstruturas } from "../pages/adm/GerenciarEstruturas";
 import { GerenciarReunioes } from "../pages/adm/GerenciarReunioes";
 import { GerenciarEspacos } from "../pages/adm/GerenciarEspacos";
 import { GerenciarReclamacoes } from "../pages/adm/GerenciarReclamacoes";
-import { GerenciarVagas } from "../pages/adm/GerenciarVagas";
+import { GerenciarEntregas } from "../pages/adm/GerenciarEntregas";
 import { MinhasReservas } from "../pages/usuario/MinhasReservas";
 import { MinhasReclamacoes } from "../pages/usuario/MinhasReclamacoes";
 import { Inicio } from "../pages/inicio/Inicio";
@@ -57,7 +57,7 @@ export const router = createBrowserRouter([
       { path: "/adm/reunioes", element: <GerenciarReunioes /> },
       { path: "/adm/espacos", element: <GerenciarEspacos /> },
       { path: "/adm/reclamacoes", element: <GerenciarReclamacoes /> },
-      { path: "/adm/vagas", element: <GerenciarVagas /> },
+      { path: "/adm/entregas", element: <GerenciarEntregas /> },
     ],
   },
 ]);
