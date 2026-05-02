@@ -912,3 +912,333 @@ function DetalhesAreaComum({ area, onEditar, onToggleAtivo }) {
     </div>
   );
 }
+
+// ════════════════════════════════════════════
+// ABA: VAGAS
+// ════════════════════════════════════════════
+function AbaVagas() {
+  const [vagas, setVagas] = useState([]);
+  const [apartamentos, setApartamentos] = useState([]);
+  const [carregando, setCarregando] = useState(true);
+  const [busca, setBusca] = useState("");
+  const [filtroAptId, setFiltroAptId] = useState("todos");
+  const [criando, setCriando] = useState(false);
+  const [expandido, setExpandido] = useState(null);
+  const [editando, setEditando] = useState(null);
+  const [erroCriar, setErroCriar] = useState("");
+  const [erroEditar, setErroEditar] = useState("");
+
+  useEffect(() => {
+    Promise.all([vagaApi.listarTodas(), apartamentoApi.listarTodos()])
+      .then(([resVagas, resApts]) => {
+        setVagas(resVagas.data);
+        setApartamentos(resApts.data);
+      })
+      .catch((err) => console.error("Erro ao carregar vagas:", err))
+      .finally(() => setCarregando(false));
+  }, []);
+
+  const filtrados = vagas.filter((v) => {
+    const q = busca.toLowerCase();
+    const matchBusca =
+      v.numero.toLowerCase().includes(q) ||
+      v.localizacao?.toLowerCase().includes(q);
+    const matchApt =
+      filtroAptId === "todos" ||
+      (filtroAptId === "sem-apt" ? !v.apartamentoId : v.apartamentoId === filtroAptId);
+    return matchBusca && matchApt;
+  });
+
+  async function handleCriar(dados, aptId) {
+    setErroCriar("");
+    try {
+      const res = await vagaApi.cadastrar(dados, aptId || undefined);
+      setVagas((prev) => [res.data, ...prev]);
+      setCriando(false);
+    } catch (err) {
+      const d = err.response?.data;
+      setErroCriar(d?.mensagem || d?.message || "Erro ao criar vaga.");
+    }
+  }
+
+  async function handleAtualizar(id, dados, aptId) {
+    setErroEditar("");
+    try {
+      const res = await vagaApi.atualizar(id, dados, aptId);
+      setVagas((prev) => prev.map((v) => (v.id === id ? res.data : v)));
+      setEditando(null);
+    } catch (err) {
+      const d = err.response?.data;
+      setErroEditar(d?.mensagem || d?.message || "Erro ao atualizar vaga.");
+    }
+  }
+
+  async function handleToggleAtivo(vaga) {
+    try {
+      if (vaga.ativa) {
+        await vagaApi.desativar(vaga.id);
+      } else {
+        await vagaApi.ativar(vaga.id);
+      }
+      setVagas((prev) =>
+        prev.map((v) => (v.id === vaga.id ? { ...v, ativa: !vaga.ativa } : v)),
+      );
+    } catch (err) {
+      console.error("Erro ao alterar status da vaga:", err);
+    }
+  }
+
+  return (
+    <>
+      {/* Stats + botão */}
+      <div className="flex items-center justify-between gap-4 flex-wrap">
+        <div className="flex gap-3 flex-wrap">
+          <div className="glass-panel rounded-2xl px-5 py-3 text-center">
+            <p className="text-2xl font-headline font-bold text-on-surface">{vagas.length}</p>
+            <p className="text-on-surface-variant text-xs uppercase tracking-wider">Total</p>
+          </div>
+          <div className="glass-panel rounded-2xl px-5 py-3 text-center">
+            <p className="text-2xl font-headline font-bold text-primary">{vagas.filter((v) => v.ativa).length}</p>
+            <p className="text-on-surface-variant text-xs uppercase tracking-wider">Ativas</p>
+          </div>
+          <div className="glass-panel rounded-2xl px-5 py-3 text-center">
+            <p className="text-2xl font-headline font-bold text-error">{vagas.filter((v) => !v.ativa).length}</p>
+            <p className="text-on-surface-variant text-xs uppercase tracking-wider">Inativas</p>
+          </div>
+        </div>
+        <button
+          onClick={() => { setCriando((c) => !c); setExpandido(null); setEditando(null); setErroCriar(""); setErroEditar(""); }}
+          className={`flex items-center gap-2 px-5 py-3 rounded-2xl font-semibold text-sm transition-all duration-200 cursor-pointer border ${
+            criando ? "border-error/30 text-error hover:bg-error/10" : "border-primary/30 text-primary hover:bg-primary/10"
+          }`}
+        >
+          <Icone name={criando ? "close" : "add"} className="text-xl" />
+          {criando ? "Cancelar" : "Nova Vaga"}
+        </button>
+      </div>
+
+      {/* Form nova vaga */}
+      {criando && (
+        <div className="glass-panel rounded-3xl p-6 lg:p-8 border border-primary/15">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+              <Icone name="local_parking" className="text-primary" />
+            </div>
+            <h2 className="font-headline text-xl font-bold text-on-surface">Nova Vaga</h2>
+          </div>
+          <FormVaga
+            apartamentos={apartamentos}
+            onSalvar={handleCriar}
+            onCancelar={() => { setCriando(false); setErroCriar(""); }}
+            erro={erroCriar}
+          />
+        </div>
+      )}
+
+      {/* Filtro por apartamento + busca */}
+      <div className="flex flex-col sm:flex-row gap-4 max-w-2xl">
+        <div className="flex-1">
+          <Campo
+            id="busca-vaga"
+            placeholder="Buscar por número ou localização..."
+            icon="search"
+            value={busca}
+            onChange={(e) => setBusca(e.target.value)}
+          />
+        </div>
+        <div className="shrink-0">
+          <select
+            value={filtroAptId}
+            onChange={(e) => setFiltroAptId(e.target.value)}
+            className="w-full bg-surface-container-highest/40 border-none rounded-xl py-4 px-4 text-on-surface focus:ring-2 focus:ring-primary/50 focus:outline-none backdrop-blur-sm transition-all"
+          >
+            <option value="todos">Todos</option>
+            <option value="sem-apt">Sem apartamento</option>
+            {apartamentos.map((a) => (
+              <option key={a.id} value={a.id}>Apt {a.numero} · {a.blocoNome}</option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      {/* Lista */}
+      {carregando ? (
+        <div className="glass-panel rounded-3xl p-10 text-center text-on-surface-variant">Carregando...</div>
+      ) : (
+        <div className="space-y-3">
+          {filtrados.length === 0 && (
+            <div className="glass-panel rounded-3xl p-10 text-center text-on-surface-variant">Nenhuma vaga encontrada.</div>
+          )}
+          {filtrados.map((vaga) => (
+            <div key={vaga.id} className="glass-panel rounded-3xl overflow-hidden">
+              <button
+                onClick={() => { setExpandido((p) => (p === vaga.id ? null : vaga.id)); setEditando(null); }}
+                className="w-full flex items-center gap-4 p-5 text-left hover:bg-white/5 transition-all cursor-pointer"
+              >
+                <div className="w-11 h-11 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                  <Icone name="local_parking" className="text-primary" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-on-surface font-semibold truncate">Vaga {vaga.numero}</p>
+                  <p className="text-on-surface-variant text-sm truncate">
+                    {vaga.apartamentoNumero ? `Apt ${vaga.apartamentoNumero}` : "Sem apartamento"}
+                    {vaga.localizacao ? ` · ${vaga.localizacao}` : ""}
+                  </p>
+                </div>
+                <div className="hidden sm:flex gap-6 text-sm shrink-0">
+                  {[
+                    { label: "Tipo", value: vaga.tipo || "—" },
+                    { label: "Apartamento", value: vaga.apartamentoNumero ? `Apt ${vaga.apartamentoNumero}` : "—" },
+                  ].map((col) => (
+                    <div key={col.label} className="text-center">
+                      <p className="text-on-surface-variant text-xs uppercase tracking-wider">{col.label}</p>
+                      <p className="text-on-surface font-semibold">{col.value}</p>
+                    </div>
+                  ))}
+                </div>
+                <span className={`shrink-0 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider ${statusStyle(vaga.ativa)}`}>
+                  {vaga.ativa ? "ativa" : "inativa"}
+                </span>
+                <Icone
+                  name="expand_more"
+                  className={`text-outline shrink-0 transition-transform duration-300 ${expandido === vaga.id ? "rotate-180" : ""}`}
+                />
+              </button>
+
+              {expandido === vaga.id && (
+                <div className="border-t border-outline-variant/15 px-5 pb-6 pt-5">
+                  {editando === vaga.id ? (
+                    <FormVaga
+                      inicial={vaga}
+                      apartamentos={apartamentos}
+                      onSalvar={(dados, aptId) => handleAtualizar(vaga.id, dados, aptId)}
+                      onCancelar={() => { setEditando(null); setErroEditar(""); }}
+                      erro={erroEditar}
+                    />
+                  ) : (
+                    <DetalhesVaga
+                      vaga={vaga}
+                      onEditar={() => setEditando(vaga.id)}
+                      onToggleAtivo={() => handleToggleAtivo(vaga)}
+                    />
+                  )}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </>
+  );
+}
+
+function FormVaga({ inicial, apartamentos, onSalvar, onCancelar, erro }) {
+  const [form, setForm] = useState({
+    numero: inicial?.numero || "",
+    localizacao: inicial?.localizacao || "",
+    tipo: inicial?.tipo || "",
+  });
+  const [aptId, setAptId] = useState(inicial?.apartamentoId?.toString() || "");
+
+  function set(field, value) { setForm((f) => ({ ...f, [field]: value })); }
+
+  function handleSubmit(e) {
+    e.preventDefault();
+    onSalvar(form, aptId);
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <Campo
+          id="vaga-numero"
+          label="Número"
+          placeholder="Ex: 12"
+          required
+          value={form.numero}
+          onChange={(e) => set("numero", e.target.value)}
+        />
+        <Campo
+          id="vaga-local"
+          label="Localização"
+          placeholder="Ex: Setor A - Térreo"
+          value={form.localizacao}
+          onChange={(e) => set("localizacao", e.target.value)}
+        />
+        <div className="space-y-2">
+          <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant ml-1">Tipo</label>
+          <select
+            value={form.tipo}
+            onChange={(e) => set("tipo", e.target.value)}
+            className="w-full bg-surface-container-highest/40 border-none rounded-xl py-4 px-4 text-on-surface focus:ring-2 focus:ring-primary/50 focus:outline-none backdrop-blur-sm transition-all"
+          >
+            <option value="">Selecione um tipo</option>
+            <option value="Coberta">Coberta</option>
+            <option value="Descoberta">Descoberta</option>
+          </select>
+        </div>
+        <div className="space-y-2">
+          <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant ml-1">Apartamento (opcional)</label>
+          <select
+            value={aptId}
+            onChange={(e) => setAptId(e.target.value)}
+            className="w-full bg-surface-container-highest/40 border-none rounded-xl py-4 px-4 text-on-surface focus:ring-2 focus:ring-primary/50 focus:outline-none backdrop-blur-sm transition-all"
+          >
+            <option value="">Sem apartamento</option>
+            {apartamentos.map((a) => (
+              <option key={a.id} value={a.id}>Apt {a.numero} · {a.blocoNome}</option>
+            ))}
+          </select>
+        </div>
+      </div>
+      {erro && <p className="text-error text-xs">{erro}</p>}
+      <div className="flex gap-3 pt-2">
+        <Botao type="submit">{inicial ? "Salvar alterações" : "Cadastrar vaga"}</Botao>
+        <button
+          type="button"
+          onClick={onCancelar}
+          className="flex-1 py-4 rounded-full border border-outline-variant/30 text-on-surface-variant hover:bg-white/5 font-semibold transition-all cursor-pointer"
+        >
+          Cancelar
+        </button>
+      </div>
+    </form>
+  );
+}
+
+function DetalhesVaga({ vaga, onEditar, onToggleAtivo }) {
+  return (
+    <div className="space-y-4">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        {[
+          { label: "Número", value: vaga.numero },
+          { label: "Tipo", value: vaga.tipo || "—" },
+          { label: "Localização", value: vaga.localizacao || "—" },
+          { label: "Apartamento", value: vaga.apartamentoNumero ? `Apt ${vaga.apartamentoNumero}` : "—" },
+        ].map((item) => (
+          <div key={item.label} className="bg-surface-container-highest/20 rounded-xl p-3">
+            <p className="text-on-surface-variant text-xs uppercase tracking-wider mb-1">{item.label}</p>
+            <p className="text-on-surface font-semibold">{item.value}</p>
+          </div>
+        ))}
+      </div>
+      <div className="flex gap-3 pt-1">
+        <button
+          onClick={onEditar}
+          className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-primary/30 text-primary hover:bg-primary/10 text-sm font-semibold transition-all cursor-pointer"
+        >
+          <Icone name="edit" className="text-lg" /> Editar
+        </button>
+        <button
+          onClick={onToggleAtivo}
+          className={`flex items-center gap-2 px-5 py-2.5 rounded-xl border text-sm font-semibold transition-all cursor-pointer ${
+            vaga.ativa ? "border-error/30 text-error hover:bg-error/10" : "border-primary/30 text-primary hover:bg-primary/10"
+          }`}
+        >
+          <Icone name={vaga.ativa ? "do_not_disturb_on" : "check_circle"} className="text-lg" />
+          {vaga.ativa ? "Desativar" : "Ativar"}
+        </button>
+      </div>
+    </div>
+  );
+}

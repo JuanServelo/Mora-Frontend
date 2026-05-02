@@ -1,7 +1,7 @@
 // src/pages/adm/GerenciarUsuarios.jsx
 import { useState, useEffect } from "react";
 import api from "../../services/api";
-import { blocoApi, apartamentoApi } from "../../services/estruturasApi";
+import { blocoApi, apartamentoApi, vagaApi } from "../../services/estruturasApi";
 import { Icone } from "../../components/icones/Icone";
 import { Campo } from "../../components/campos/Campo";
 import { Botao } from "../../components/botoes/Botao";
@@ -60,31 +60,45 @@ export function GerenciarUsuarios() {
     setEditando(null);
   }
 
-  async function salvarEdicao(id, dados) {
-    try {
-      const { status: _st, logins: _lg, ...payload } = dados;
-      const res = await api.put(`/api/users/${id}`, payload);
-      const u = res.data.usuario;
-      setUsuarios((us) =>
-        us.map((usr) =>
-          usr.id === id
-            ? {
-                ...usr,
-                nome: u.nome,
-                email: u.email,
-                role: u.role,
-                bloco: u.bloco ?? "",
-                apartamento: u.apartamento ?? "",
-                vaga: u.vaga ?? null,
-              }
-            : usr,
-        ),
-      );
-      setEditando(null);
-    } catch (err) {
-      console.error("Erro ao salvar:", err);
+ async function salvarEdicao(id, dados) {
+  const { status: _st, logins: _lg, ...payload } = dados;
+
+  try {
+    console.log("PAYLOAD ENVIADO:", payload);
+
+    const res = await api.put(`/api/users/${id}`, payload);
+
+    console.log("RESPOSTA API:", res.data);
+
+    const u = res.data.usuario;
+
+    if (!u) {
+      throw new Error("Resposta da API inválida");
     }
+
+    setUsuarios((us) =>
+      us.map((usr) =>
+        usr.id === id
+          ? {
+              ...usr,
+              nome: u.nome,
+              email: u.email,
+              role: u.role,
+              bloco: u.bloco ?? "",
+              apartamento: u.apartamento ?? "",
+              vaga: u.vaga ?? null,
+            }
+          : usr
+      )
+    );
+
+    setEditando(null);
+
+  } catch (err) {
+    console.error("Erro ao salvar edição:", err);
+    throw err;
   }
+}
 
   async function criarUsuario(dados) {
     try {
@@ -432,8 +446,11 @@ function FormEdicao({ usuario, blocos, apartamentos, onSalvar, onCancelar }) {
     if (!blocoInicial) return "";
     return apartamentos.find((a) => a.numero === usuario.apartamento && a.blocoId === blocoInicial.id)?.id ?? "";
   });
+  const [vagas, setVagas] = useState([]);
+  const [vagaId, setVagaId] = useState("");
+  const [erro, setErro] = useState(null);
+  const [salvando, setSalvando] = useState(false);
   const [form, setForm] = useState({
-    vaga: usuario.vaga ?? "",
     status: usuario.status,
     novoLogin: "",
     logins: [...usuario.logins],
@@ -453,6 +470,28 @@ function FormEdicao({ usuario, blocos, apartamentos, onSalvar, onCancelar }) {
       if (a) setAptId(a.id);
     }
   }, [blocoId, apartamentos]);
+
+  // Carrega vagas do apartamento selecionado
+  useEffect(() => {
+    if (!aptId) {
+      setVagas([]);
+      setVagaId("");
+      return;
+    }
+    let cancelado = false;
+    vagaApi.listarPorApartamento(aptId)
+      .then((res) => {
+        if (cancelado) return;
+        const lista = res.data || [];
+        setVagas(lista);
+        const match = lista.find((v) => v.numero === usuario.vaga);
+        setVagaId(match?.id ?? "");
+      })
+      .catch(() => {
+        if (!cancelado) { setVagas([]); setVagaId(""); }
+      });
+    return () => { cancelado = true; };
+  }, [aptId]);
 
   const aptsFiltrados = blocoId ? apartamentos.filter((a) => a.blocoId === blocoId) : apartamentos;
 
@@ -484,6 +523,66 @@ function FormEdicao({ usuario, blocos, apartamentos, onSalvar, onCancelar }) {
     if (form.logins.length === 1) return;
     setForm((f) => ({ ...f, logins: f.logins.filter((l) => l !== login) }));
   }
+
+  async function handleSalvar() {
+  setErro(null);
+  setSalvando(true);
+
+  try {
+    const blocoSel = blocos.find((b) => b.id === blocoId);
+    const aptSel = apartamentos.find((a) => a.id === aptId);
+    const vagaSel = vagas.find((v) => v.id === vagaId);
+
+    const novoBloco = blocoSel?.nome ?? "";
+    const novoApt = aptSel?.numero ?? "";
+    const novaVaga = vagaSel?.numero ?? null;
+
+    const houveMudanca =
+      usuario.bloco !== novoBloco ||
+      usuario.apartamento !== novoApt ||
+      usuario.vaga !== novaVaga;
+
+    if (!houveMudanca) {
+      setErro("Nenhuma alteração foi realizada.");
+      return;
+    }
+
+    console.log("ENVIANDO:", {
+      bloco: novoBloco,
+      apartamento: novoApt,
+      vaga: novaVaga,
+    });
+
+    await onSalvar({
+      bloco: novoBloco,
+      apartamento: novoApt,
+      vaga: novaVaga,
+      status: form.status,
+      logins: form.logins,
+    });
+
+  } catch (err) {
+    console.error("ERRO AO SALVAR:", err);
+
+    let mensagem = "Erro ao salvar.";
+
+    if (err.response) {
+      mensagem =
+        err.response.data?.mensagem ||
+        err.response.data?.message ||
+        `Erro ${err.response.status}`;
+    } else if (err.request) {
+      mensagem = "Servidor não respondeu.";
+    } else {
+      mensagem = err.message;
+    }
+
+    setErro(mensagem);
+
+  } finally {
+    setSalvando(false);
+  }
+}
 
   const selectCls = "w-full bg-surface-container-highest/40 border-none rounded-xl py-4 px-4 text-on-surface focus:ring-2 focus:ring-primary/50 focus:outline-none backdrop-blur-sm transition-all disabled:opacity-40";
   const labelCls = "text-xs font-semibold uppercase tracking-wider text-on-surface-variant ml-1";
@@ -517,14 +616,25 @@ function FormEdicao({ usuario, blocos, apartamentos, onSalvar, onCancelar }) {
             <p className="text-xs text-error ml-1">Nenhum apartamento neste bloco</p>
           )}
         </div>
-        <Campo
-          id="edit-vaga"
-          label="Vaga"
-          placeholder="A-12 (opcional)"
-          icon="local_parking"
-          value={form.vaga}
-          onChange={(e) => set("vaga", e.target.value)}
-        />
+        <div className="space-y-2">
+          <label className={labelCls}>Vaga</label>
+          <select
+            value={vagaId}
+            onChange={(e) => setVagaId(e.target.value)}
+            disabled={!aptId || vagas.length === 0}
+            className={selectCls}
+          >
+            <option value="">— Sem vaga —</option>
+            {vagas.filter((v) => v.ativa || v.id === vagaId).map((v) => (
+              <option key={v.id} value={v.id}>
+                Vaga {v.numero}{v.localizacao ? ` · ${v.localizacao}` : ""}
+              </option>
+            ))}
+          </select>
+          {aptId && vagas.length === 0 && (
+            <p className="text-xs text-on-surface-variant ml-1">Nenhuma vaga neste apartamento</p>
+          )}
+        </div>
       </div>
 
       <div className="space-y-2">
@@ -595,22 +705,17 @@ function FormEdicao({ usuario, blocos, apartamentos, onSalvar, onCancelar }) {
         </div>
       </div>
 
+      {erro && (
+        <p className="text-sm text-error bg-error/10 rounded-xl px-4 py-2">{erro}</p>
+      )}
+
       <div className="flex gap-3 pt-2">
         <Botao
           type="button"
-          onClick={() => {
-            const blocoSel = blocos.find((b) => b.id === blocoId);
-            const aptSel = apartamentos.find((a) => a.id === aptId);
-            onSalvar({
-              bloco: blocoSel?.nome ?? "",
-              apartamento: aptSel?.numero ?? "",
-              vaga: form.vaga || null,
-              status: form.status,
-              logins: form.logins,
-            });
-          }}
+          onClick={handleSalvar}
+          disabled={salvando}
         >
-          Salvar Alterações
+          {salvando ? "Salvando…" : "Salvar Alterações"}
           <Icone name="check" className="text-xl" />
         </Botao>
         <button
@@ -626,13 +731,25 @@ function FormEdicao({ usuario, blocos, apartamentos, onSalvar, onCancelar }) {
 
 // ─────────────────────────────────────────────
 function FormNovoUsuario({ blocos, apartamentos, onSalvar, onCancelar }) {
-  const [form, setForm] = useState({ nome: "", email: "", senha: "", vaga: "" });
+  const [form, setForm] = useState({ nome: "", email: "", senha: "" });
   const [blocoId, setBlocoId] = useState("");
   const [aptId, setAptId] = useState("");
+  const [vagas, setVagas] = useState([]);
+  const [vagaId, setVagaId] = useState("");
 
   useEffect(() => {
     if (!blocoId && blocos.length > 0) setBlocoId(blocos[0].id);
   }, [blocos]);
+
+  // Carrega vagas quando apartamento muda
+  useEffect(() => {
+    if (!aptId) { setVagas([]); setVagaId(""); return; }
+    let cancelado = false;
+    vagaApi.listarPorApartamento(aptId)
+      .then((res) => { if (!cancelado) { setVagas(res.data || []); setVagaId(""); } })
+      .catch(() => { if (!cancelado) { setVagas([]); setVagaId(""); } });
+    return () => { cancelado = true; };
+  }, [aptId]);
 
   const aptsFiltrados = blocoId ? apartamentos.filter((a) => a.blocoId === blocoId) : apartamentos;
 
@@ -659,13 +776,14 @@ function FormNovoUsuario({ blocos, apartamentos, onSalvar, onCancelar }) {
       return;
     const blocoSel = blocos.find((b) => b.id === blocoId);
     const aptSel = apartamentos.find((a) => a.id === aptId);
+    const vagaSel = vagas.find((v) => v.id === vagaId);
     onSalvar({
       nome: form.nome.trim(),
       email: form.email.trim(),
       senha: form.senha.trim(),
       bloco: blocoSel?.nome ?? "",
       apartamento: aptSel?.numero ?? "",
-      vaga: form.vaga.trim() || null,
+      vaga: vagaSel?.numero ?? null,
     });
   }
 
@@ -734,14 +852,25 @@ function FormNovoUsuario({ blocos, apartamentos, onSalvar, onCancelar }) {
             <p className="text-xs text-error ml-1">Nenhum apartamento neste bloco</p>
           )}
         </div>
-        <Campo
-          id="novo-vaga"
-          label="Vaga"
-          placeholder="A-12 (opcional)"
-          icon="local_parking"
-          value={form.vaga}
-          onChange={(e) => set("vaga", e.target.value)}
-        />
+        <div className="space-y-2">
+          <label className={labelCls}>Vaga</label>
+          <select
+            value={vagaId}
+            onChange={(e) => setVagaId(e.target.value)}
+            disabled={!aptId || vagas.length === 0}
+            className={selectCls}
+          >
+            <option value="">— Sem vaga —</option>
+            {vagas.filter((v) => v.ativa).map((v) => (
+              <option key={v.id} value={v.id}>
+                Vaga {v.numero}{v.localizacao ? ` · ${v.localizacao}` : ""}
+              </option>
+            ))}
+          </select>
+          {aptId && vagas.length === 0 && (
+            <p className="text-xs text-on-surface-variant ml-1">Nenhuma vaga neste apartamento</p>
+          )}
+        </div>
       </div>
 
       {/* Info */}
