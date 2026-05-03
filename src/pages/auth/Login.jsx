@@ -31,7 +31,7 @@ export function Login() {
 
     try {
       await login(email, senha);
-      navigate("/perfil");
+      navigate("/inicio");
     } catch (err) {
       setErro(err.response?.data?.mensagem || "Erro ao fazer login.");
     } finally {

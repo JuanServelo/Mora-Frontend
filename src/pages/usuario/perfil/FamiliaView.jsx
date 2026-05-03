@@ -4,14 +4,8 @@ import { Campo } from "../../../components/campos/Campo";
 import { Botao } from "../../../components/botoes/Botao";
 import { Icone } from "../../../components/icones/Icone";
 
-const MEMBROS_INICIAIS = [
-  { id: 1, nome: "Maria Silva", relacao: "Cônjuge", icon: "favorite" },
-  { id: 2, nome: "Pedro Silva", relacao: "Filho", icon: "child_care" },
-  { id: 3, nome: "Ana Lima", relacao: "Convidada", icon: "person_add" },
-];
-
 export function FamiliaView() {
-  const [membros, setMembros] = useState(MEMBROS_INICIAIS);
+  const [membros, setMembros] = useState([]);
   const [adicionando, setAdicionando] = useState(false);
 
   function remover(id) {
@@ -21,8 +15,14 @@ export function FamiliaView() {
   return (
     <div className="space-y-4">
       <p className="text-xs font-semibold uppercase tracking-widest text-on-surface-variant ml-1">
-        {membros.length} pessoas com acesso
+        {membros.length === 0 ? "Nenhuma pessoa cadastrada" : `${membros.length} pessoas com acesso`}
       </p>
+
+      {membros.length === 0 && (
+        <div className="rounded-2xl bg-surface-container-highest/30 py-10 px-4 text-center text-on-surface-variant text-sm">
+          Convites e dependentes aparecerão aqui após integração com o cadastro de unidade.
+        </div>
+      )}
 
       <div className="space-y-2">
         {membros.map((m) => (

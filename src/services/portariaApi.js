@@ -71,8 +71,16 @@ export const vagaApi = {
   buscar: (id) => portariaApi.get(`/vagas/${id}`),
   listarPorApartamento: (apartamentoId) =>
     portariaApi.get(`/vagas/apartamento/${apartamentoId}`),
-  cadastrar: (data) => portariaApi.post("/vagas/cadastrar", data),
-  atualizar: (id, data) => portariaApi.put(`/vagas/${id}`, data),
+  cadastrar: (data, apartamentoId) =>
+    portariaApi.post("/vagas/cadastrar", data, {
+      params: apartamentoId ? { apartamentoId } : {},
+    }),
+  atualizar: (id, data, apartamentoId) =>
+    portariaApi.put(`/vagas/${id}`, data, {
+      params: apartamentoId !== undefined
+        ? { apartamentoId: apartamentoId || "none" }
+        : {},
+    }),
   ativar: (id) => portariaApi.post(`/vagas/${id}/ativar`),
   desativar: (id) => portariaApi.delete(`/vagas/${id}`),
 };

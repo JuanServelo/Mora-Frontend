@@ -57,7 +57,9 @@ export const vagaApi = {
   buscar: (id) => estruturasApi.get(`/vagas/${id}`),
   listarPorApartamento: (apartamentoId) => estruturasApi.get(`/vagas/apartamento/${apartamentoId}`),
   cadastrar: (data, apartamentoId) =>
-    estruturasApi.post(`/vagas/cadastrar?apartamentoId=${apartamentoId}`, data),
+    estruturasApi.post('/vagas/cadastrar', data, {
+      params: apartamentoId ? { apartamentoId } : {},
+    }),
   atualizar: (id, data, apartamentoId) =>
     estruturasApi.put(`/vagas/${id}?apartamentoId=${apartamentoId}`, data),
   ativar: (id) => estruturasApi.put(`/vagas/${id}/ativar`),

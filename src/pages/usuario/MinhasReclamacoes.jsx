@@ -1,5 +1,6 @@
 // src/pages/usuario/MinhasReclamacoes.jsx
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { reclamacoesApi } from "../../services/reclamacoesApi";
 import { Icone } from "../../components/icones/Icone";
 import { Campo } from "../../components/campos/Campo";
 import { Botao } from "../../components/botoes/Botao";
@@ -55,36 +56,6 @@ const catLabel = (c) =>
     .toLowerCase()
     .replace(/\b\w/g, (l) => l.toUpperCase());
 
-// Mock: reclamações já abertas pelo usuário logado
-const MINHAS_RECLAMACOES_MOCK = [
-  {
-    id: 1,
-    protocolNumber: "REC-001",
-    category: "BARULHO",
-    description: "Barulho excessivo no apartamento 301 após as 22h todos os finais de semana.",
-    attachmentUrl: null,
-    status: "PENDENTE",
-    createdAt: "2026-04-20T14:30",
-    interactions: [],
-  },
-  {
-    id: 2,
-    protocolNumber: "REC-004",
-    category: "ELEVADORES",
-    description: "Elevador do bloco B está fazendo barulho estranho e travando no 3° andar.",
-    attachmentUrl: null,
-    status: "EM_ANALISE",
-    createdAt: "2026-04-22T10:00",
-    interactions: [
-      {
-        id: 1,
-        response: "Técnico agendado para visita na quinta-feira, entre 14h e 18h.",
-        status: "EM_ANALISE",
-      },
-    ],
-  },
-];
-
 // ─── Aba: Abrir Reclamação ───────────────────
 function AbaNovaReclamacao({ onCriada }) {
   const [form, setForm] = useState({
@@ -93,26 +64,31 @@ function AbaNovaReclamacao({ onCriada }) {
     attachmentUrl: "",
   });
   const [enviado, setEnviado] = useState(false);
+  const [erro, setErro] = useState("");
+  const [enviando, setEnviando] = useState(false);
 
   const handleForm = (e) => {
     const { name, value } = e.target;
     setForm((f) => ({ ...f, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const nova = {
-      id: Date.now(),
-      protocolNumber: `REC-${String(Math.floor(Math.random() * 900) + 100)}`,
-      category: form.category,
-      description: form.description,
-      attachmentUrl: form.attachmentUrl || null,
-      status: "PENDENTE",
-      createdAt: new Date().toISOString().slice(0, 16),
-      interactions: [],
-    };
-    onCriada(nova);
-    setEnviado(true);
+    setErro("");
+    setEnviando(true);
+    try {
+      const res = await reclamacoesApi.criar({
+        category: form.category,
+        description: form.description.trim(),
+        attachmentUrl: form.attachmentUrl?.trim() || undefined,
+      });
+      onCriada(res.data.reclamacao);
+      setEnviado(true);
+    } catch (err) {
+      setErro(err.response?.data?.mensagem || "Não foi possível enviar a reclamação.");
+    } finally {
+      setEnviando(false);
+    }
   };
 
   if (enviado) {
@@ -146,6 +122,11 @@ function AbaNovaReclamacao({ onCriada }) {
           Descreva o problema e nossa equipe responderá em breve.
         </p>
       </div>
+      {erro && (
+        <div className="rounded-xl bg-error/10 border border-error/25 px-4 py-3 text-sm text-error">
+          {erro}
+        </div>
+      )}
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-2">
           <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant ml-1">
@@ -181,9 +162,9 @@ function AbaNovaReclamacao({ onCriada }) {
           placeholder="https://..."
         />
         <div className="flex justify-end pt-2">
-          <Botao type="submit">
+          <Botao type="submit" disabled={enviando}>
             <span className="flex items-center gap-2">
-              <Icone name="send" className="text-lg" /> Enviar reclamação
+              <Icone name="send" className="text-lg" /> {enviando ? "Enviando…" : "Enviar reclamação"}
             </span>
           </Botao>
         </div>
@@ -281,13 +262,13 @@ function AbaMinhasReclamacoes({ reclamacoes }) {
               )}
 
               {/* Respostas do admin */}
-              {rec.interactions.length > 0 ? (
+              {(rec.interactions?.length ?? 0) > 0 ? (
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant mb-2">
                     Respostas da administração
                   </p>
                   <div className="space-y-2">
-                    {rec.interactions.map((i) => (
+                    {(rec.interactions || []).map((i) => (
                       <div
                         key={i.id}
                         className="bg-surface-container-highest/30 rounded-xl p-3 border-l-2 border-primary/40"
@@ -319,7 +300,25 @@ function AbaMinhasReclamacoes({ reclamacoes }) {
 // ═══════════════════════════════════════════════
 export function MinhasReclamacoes() {
   const [aba, setAba] = useState("nova");
-  const [reclamacoes, setReclamacoes] = useState(MINHAS_RECLAMACOES_MOCK);
+  const [reclamacoes, setReclamacoes] = useState([]);
+  const [carregando, setCarregando] = useState(true);
+
+  useEffect(() => {
+    let ok = true;
+    (async () => {
+      try {
+        const res = await reclamacoesApi.listarMinhas();
+        if (ok) setReclamacoes(res.data.reclamacoes || []);
+      } catch {
+        if (ok) setReclamacoes([]);
+      } finally {
+        if (ok) setCarregando(false);
+      }
+    })();
+    return () => {
+      ok = false;
+    };
+  }, []);
 
   const handleCriada = (nova) => {
     setReclamacoes((prev) => [nova, ...prev]);
@@ -373,6 +372,10 @@ export function MinhasReclamacoes() {
         {/* Conteúdo */}
         {aba === "nova" ? (
           <AbaNovaReclamacao onCriada={handleCriada} />
+        ) : carregando ? (
+          <div className="glass-panel rounded-2xl py-16 text-center text-on-surface-variant text-sm">
+            Carregando…
+          </div>
         ) : (
           <AbaMinhasReclamacoes reclamacoes={reclamacoes} />
         )}

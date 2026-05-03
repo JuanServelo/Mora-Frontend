@@ -1,25 +1,10 @@
 // src/pages/adm/GerenciarUsuarios.jsx
 import { useState, useEffect } from "react";
 import api from "../../services/api";
+import { blocoApi, apartamentoApi, vagaApi } from "../../services/estruturasApi";
 import { Icone } from "../../components/icones/Icone";
 import { Campo } from "../../components/campos/Campo";
 import { Botao } from "../../components/botoes/Botao";
-
-const MESES = [
-  "Janeiro",
-  "Fevereiro",
-  "Março",
-  "Abril",
-  "Maio",
-  "Junho",
-  "Julho",
-  "Agosto",
-  "Setembro",
-  "Outubro",
-  "Novembro",
-  "Dezembro",
-];
-const MES_ATUAL = MESES[new Date().getMonth()];
 
 const STATUS_STYLE = {
   ativo: "bg-primary/10 text-primary",
@@ -30,39 +15,38 @@ const STATUS_STYLE = {
 // ─────────────────────────────────────────────
 export function GerenciarUsuarios() {
   const [usuarios, setUsuarios] = useState([]);
+  const [blocos, setBlocos] = useState([]);
+  const [apartamentos, setApartamentos] = useState([]);
   const [carregando, setCarregando] = useState(true);
   const [busca, setBusca] = useState("");
 
   useEffect(() => {
-    api
-      .get("/api/users")
-      .then((res) => {
-        const lista = (res.data.usuarios || []).map((u) => ({
+    Promise.all([api.get("/api/users"), blocoApi.listar(), apartamentoApi.listar()])
+      .then(([usersRes, blocosRes, aptsRes]) => {
+        const lista = (usersRes.data.usuarios || []).map((u) => ({
           id: u.id,
           nome: u.nome,
           email: u.email,
           role: u.role,
           provider: u.provider,
-          bloco: u.bloco || "-",
-          apartamento: u.apartamento || "-",
-          vaga: u.vaga || null,
+          bloco: u.bloco ?? "",
+          apartamento: u.apartamento ?? "",
+          vaga: u.vaga ?? null,
           logins: [u.email],
           status: u.role === "admin" ? "ativo" : "ativo",
           createdAt: u.createdAt,
-          condominio: { valor: "R$ 1.240,00", pago: false, vencimento: "-" },
         }));
         setUsuarios(lista);
+        setBlocos(blocosRes.data);
+        setApartamentos(aptsRes.data);
       })
-      .catch((err) => console.error("Erro ao carregar usuarios:", err))
+      .catch((err) => console.error("Erro ao carregar dados:", err))
       .finally(() => setCarregando(false));
   }, []);
   const [editando, setEditando] = useState(null);
   const [expandido, setExpandido] = useState(null);
   const [criando, setCriando] = useState(false);
   const [aba, setAba] = useState("gerenciamento"); // gerenciamento | financeiro
-  const [ordenacaoCond, setOrdenacaoCond] = useState("todos");
-  const [sortCond, setSortCond] = useState("nome");
-
   const filtrados = usuarios.filter(
     (u) =>
       u.nome.toLowerCase().includes(busca.toLowerCase()) ||
@@ -76,30 +60,72 @@ export function GerenciarUsuarios() {
     setEditando(null);
   }
 
-  async function salvarEdicao(id, dados) {
-    try {
-      const res = await api.put(`/api/users/${id}`, dados);
-      const u = res.data.usuario;
-      setUsuarios((us) =>
-        us.map((usr) => (usr.id === id ? { ...usr, nome: u.nome, email: u.email, role: u.role, ...dados } : usr)),
-      );
-      setEditando(null);
-    } catch (err) {
-      console.error("Erro ao salvar:", err);
+ async function salvarEdicao(id, dados) {
+  const { status: _st, logins: _lg, ...payload } = dados;
+
+  try {
+    console.log("PAYLOAD ENVIADO:", payload);
+
+    const res = await api.put(`/api/users/${id}`, payload);
+
+    console.log("RESPOSTA API:", res.data);
+
+    const u = res.data.usuario;
+
+    if (!u) {
+      throw new Error("Resposta da API inválida");
     }
+
+    setUsuarios((us) =>
+      us.map((usr) =>
+        usr.id === id
+          ? {
+              ...usr,
+              nome: u.nome,
+              email: u.email,
+              role: u.role,
+              bloco: u.bloco ?? "",
+              apartamento: u.apartamento ?? "",
+              vaga: u.vaga ?? null,
+            }
+          : usr
+      )
+    );
+
+    setEditando(null);
+
+  } catch (err) {
+    console.error("Erro ao salvar edição:", err);
+    throw err;
   }
+}
 
   async function criarUsuario(dados) {
     try {
       const res = await api.post("/api/users", {
         nome: dados.nome,
         email: dados.email,
-        senha: dados.senha || "123456",
+        senha: dados.senha,
         role: "user",
+        bloco: dados.bloco || undefined,
+        apartamento: dados.apartamento || undefined,
+        vaga: dados.vaga || undefined,
       });
       const u = res.data.usuario;
       setUsuarios((us) => [
-        { id: u.id, nome: u.nome, email: u.email, role: u.role, provider: u.provider, bloco: dados.bloco || "-", apartamento: dados.apartamento || "-", vaga: dados.vaga || null, logins: [u.email], status: "ativo", createdAt: u.createdAt, condominio: { valor: "R$ 1.240,00", pago: false, vencimento: "-" } },
+        {
+          id: u.id,
+          nome: u.nome,
+          email: u.email,
+          role: u.role,
+          provider: u.provider,
+          bloco: u.bloco ?? "",
+          apartamento: u.apartamento ?? "",
+          vaga: u.vaga ?? null,
+          logins: [u.email],
+          status: "ativo",
+          createdAt: u.createdAt,
+        },
         ...us,
       ]);
       setCriando(false);
@@ -219,6 +245,8 @@ export function GerenciarUsuarios() {
                   </h2>
                 </div>
                 <FormNovoUsuario
+                  blocos={blocos}
+                  apartamentos={apartamentos}
                   onSalvar={criarUsuario}
                   onCancelar={() => setCriando(false)}
                 />
@@ -271,8 +299,8 @@ export function GerenciarUsuarios() {
 
                     <div className="hidden sm:flex gap-6 text-sm shrink-0">
                       {[
-                        { label: "Bloco", value: usuario.bloco },
-                        { label: "Apt", value: usuario.apartamento },
+                        { label: "Bloco", value: usuario.bloco || "—" },
+                        { label: "Apt", value: usuario.apartamento || "—" },
                         { label: "Vaga", value: usuario.vaga ?? "—" },
                       ].map((col) => (
                         <div key={col.label} className="text-center">
@@ -304,6 +332,8 @@ export function GerenciarUsuarios() {
                       {editando === usuario.id ? (
                         <FormEdicao
                           usuario={usuario}
+                          blocos={blocos}
+                          apartamentos={apartamentos}
                           onSalvar={(dados) => salvarEdicao(usuario.id, dados)}
                           onCancelar={() => setEditando(null)}
                         />
@@ -322,208 +352,23 @@ export function GerenciarUsuarios() {
         )}
 
         {/* ── Aba: Financeiro ── */}
-        {aba === "financeiro" && (
-          <SecaoCondominio
-            usuarios={usuarios}
-            filtro={ordenacaoCond}
-            setFiltro={setOrdenacaoCond}
-            sort={sortCond}
-            setSort={setSortCond}
-          />
-        )}
+        {aba === "financeiro" && <SecaoCondominio />}
       </div>
     </div>
   );
 }
 
 // ─────────────────────────────────────────────
-function SecaoCondominio({ usuarios, filtro, setFiltro, sort, setSort }) {
-  const [busca, setBusca] = useState("");
-  const pagos = usuarios.filter((u) => u.condominio?.pago).length;
-  const pendentes = usuarios.filter((u) => !u.condominio?.pago).length;
-
-  const lista = usuarios
-    .filter((u) => {
-      if (filtro === "pago") return u.condominio?.pago;
-      if (filtro === "pendente") return !u.condominio?.pago;
-      return true;
-    })
-    .filter((u) => {
-      if (!busca) return true;
-      const q = busca.toLowerCase();
-      return (
-        u.nome.toLowerCase().includes(q) ||
-        u.email.toLowerCase().includes(q) ||
-        u.bloco.toLowerCase().includes(q) ||
-        u.apartamento.includes(q)
-      );
-    })
-    .sort((a, b) => {
-      if (sort === "bloco")
-        return `${a.bloco}${a.apartamento}`.localeCompare(
-          `${b.bloco}${b.apartamento}`,
-        );
-      if (sort === "status")
-        return a.condominio?.pago === b.condominio?.pago
-          ? 0
-          : a.condominio?.pago
-            ? -1
-            : 1;
-      return a.nome.localeCompare(b.nome);
-    });
-
-  const FILTROS = [
-    { id: "todos", label: "Todos", count: usuarios.length },
-    { id: "pago", label: "Pagos", count: pagos },
-    { id: "pendente", label: "Pendentes", count: pendentes },
-  ];
-
-  const SORTS = [
-    { id: "nome", label: "Nome" },
-    { id: "bloco", label: "Bloco / Apt" },
-    { id: "status", label: "Status pag." },
-  ];
-
+function SecaoCondominio() {
   return (
-    <div className="glass-panel rounded-3xl p-6 lg:p-8 space-y-5">
-      {/* Header da seção */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-secondary/10 flex items-center justify-center shrink-0">
-            <Icone name="payments" className="text-secondary" />
-          </div>
-          <div>
-            <h2 className="font-headline text-xl font-bold text-on-surface">
-              Condomínio — {MES_ATUAL}
-            </h2>
-            <p className="text-on-surface-variant text-xs">
-              {pagos} pagos · {pendentes} pendentes
-            </p>
-          </div>
-        </div>
-
-        {/* Mini-progress bar */}
-        <div className="sm:w-48 shrink-0">
-          <div className="flex justify-between text-xs text-on-surface-variant mb-1">
-            <span>
-              {Math.round((pagos / (usuarios.length || 1)) * 100)}% pagos
-            </span>
-            <span>
-              {pagos}/{usuarios.length}
-            </span>
-          </div>
-          <div className="h-2 rounded-full bg-surface-container-highest overflow-hidden">
-            <div
-              className="h-full rounded-full bg-gradient-to-r from-primary to-tertiary transition-all duration-500"
-              style={{ width: `${(pagos / (usuarios.length || 1)) * 100}%` }}
-            />
-          </div>
-        </div>
+    <div className="glass-panel rounded-3xl p-8 lg:p-10 text-center max-w-2xl mx-auto">
+      <div className="w-14 h-14 rounded-2xl bg-secondary/10 flex items-center justify-center mx-auto mb-4">
+        <Icone name="payments" className="text-secondary text-3xl" />
       </div>
-
-      {/* Barra de busca */}
-      <div className="max-w-md">
-        <Campo
-          id="busca-cond"
-          placeholder="Buscar por nome, e-mail, bloco ou apt..."
-          icon="search"
-          value={busca}
-          onChange={(e) => setBusca(e.target.value)}
-        />
-      </div>
-
-      {/* Controles: filtro + ordenação */}
-      <div className="flex flex-wrap gap-3 items-center justify-between">
-        <div className="flex gap-2 flex-wrap">
-          {FILTROS.map((f) => (
-            <button
-              key={f.id}
-              onClick={() => setFiltro(f.id)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer border ${
-                filtro === f.id
-                  ? "border-primary bg-primary/10 text-primary"
-                  : "border-outline-variant/20 text-on-surface-variant hover:border-primary/30"
-              }`}
-            >
-              {f.label}
-              <span className="bg-surface-container-highest rounded-full px-1.5 py-0.5 text-[10px]">
-                {f.count}
-              </span>
-            </button>
-          ))}
-        </div>
-
-        <div className="flex items-center gap-2 text-xs text-on-surface-variant">
-          <Icone name="sort" className="text-base" />
-          <span className="shrink-0">Ordenar por:</span>
-          <div className="flex gap-1">
-            {SORTS.map((s) => (
-              <button
-                key={s.id}
-                onClick={() => setSort(s.id)}
-                className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all cursor-pointer ${
-                  sort === s.id
-                    ? "bg-primary/10 text-primary"
-                    : "text-on-surface-variant hover:text-on-surface"
-                }`}
-              >
-                {s.label}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Tabela */}
-      <div className="space-y-2">
-        {lista.map((u) => {
-          const pago = u.condominio?.pago;
-          return (
-            <div
-              key={u.id}
-              className="flex items-center gap-3 p-3 rounded-2xl hover:bg-white/5 transition-all"
-            >
-              <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                <Icone name="person" className="text-primary text-base" />
-              </div>
-
-              <div className="flex-1 min-w-0">
-                <p className="text-on-surface text-sm font-semibold truncate">
-                  {u.nome}
-                </p>
-                <p className="text-on-surface-variant text-xs">
-                  Bloco {u.bloco} · Apt {u.apartamento}
-                </p>
-              </div>
-
-              <div className="hidden sm:block text-right shrink-0">
-                <p className="text-on-surface text-sm font-bold">
-                  {u.condominio?.valor}
-                </p>
-                <p className="text-on-surface-variant text-xs">
-                  Venc. {u.condominio?.vencimento}
-                </p>
-              </div>
-
-              {/* Badge pago/pendente (somente leitura) */}
-              <div
-                className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider border ${
-                  pago
-                    ? "border-primary/30 bg-primary/10 text-primary"
-                    : "border-error/30 bg-error/10 text-error"
-                }`}
-              >
-                <Icone
-                  name={pago ? "check_circle" : "cancel"}
-                  className="text-base"
-                  style={pago ? { fontVariationSettings: "'FILL' 1" } : {}}
-                />
-                {pago ? "Pago" : "Pendente"}
-              </div>
-            </div>
-          );
-        })}
-      </div>
+      <h2 className="font-headline text-lg font-bold text-on-surface mb-2">Financeiro</h2>
+      <p className="text-on-surface-variant text-sm leading-relaxed">
+        Valores de condomínio e status de pagamento serão carregados aqui após integração com o módulo de cobranças. Esta sprint não utiliza valores financeiros fictícios no código do frontend.
+      </p>
     </div>
   );
 }
@@ -554,10 +399,10 @@ function DetalhesUsuario({ usuario, onEditar }) {
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
-          { label: "Bloco", value: usuario.bloco, icon: "domain" },
+          { label: "Bloco", value: usuario.bloco || "—", icon: "domain" },
           {
             label: "Apartamento",
-            value: usuario.apartamento,
+            value: usuario.apartamento || "—",
             icon: "meeting_room",
           },
           {
@@ -594,15 +439,74 @@ function DetalhesUsuario({ usuario, onEditar }) {
 }
 
 // ─────────────────────────────────────────────
-function FormEdicao({ usuario, onSalvar, onCancelar }) {
+function FormEdicao({ usuario, blocos, apartamentos, onSalvar, onCancelar }) {
+  const blocoInicial = blocos.find((b) => b.nome === usuario.bloco);
+  const [blocoId, setBlocoId] = useState(blocoInicial?.id ?? "");
+  const [aptId, setAptId] = useState(() => {
+    if (!blocoInicial) return "";
+    return apartamentos.find((a) => a.numero === usuario.apartamento && a.blocoId === blocoInicial.id)?.id ?? "";
+  });
+  const [vagas, setVagas] = useState([]);
+  const [vagaId, setVagaId] = useState("");
+  const [erro, setErro] = useState(null);
+  const [salvando, setSalvando] = useState(false);
   const [form, setForm] = useState({
-    bloco: usuario.bloco,
-    apartamento: usuario.apartamento,
-    vaga: usuario.vaga ?? "",
     status: usuario.status,
     novoLogin: "",
     logins: [...usuario.logins],
   });
+
+  // Resolve initial selections when data loads after mount
+  useEffect(() => {
+    if (!blocoId && blocos.length > 0) {
+      const b = blocos.find((b) => b.nome === usuario.bloco);
+      if (b) setBlocoId(b.id);
+    }
+  }, [blocos]);
+
+  useEffect(() => {
+    if (blocoId && !aptId && apartamentos.length > 0) {
+      const a = apartamentos.find((a) => a.numero === usuario.apartamento && a.blocoId === blocoId);
+      if (a) setAptId(a.id);
+    }
+  }, [blocoId, apartamentos]);
+
+  // Carrega vagas do apartamento selecionado
+  useEffect(() => {
+    if (!aptId) {
+      setVagas([]);
+      setVagaId("");
+      return;
+    }
+    let cancelado = false;
+    vagaApi.listarPorApartamento(aptId)
+      .then((res) => {
+        if (cancelado) return;
+        const lista = res.data || [];
+        setVagas(lista);
+        const match = lista.find((v) => v.numero === usuario.vaga);
+        setVagaId(match?.id ?? "");
+      })
+      .catch(() => {
+        if (!cancelado) { setVagas([]); setVagaId(""); }
+      });
+    return () => { cancelado = true; };
+  }, [aptId]);
+
+  const aptsFiltrados = blocoId ? apartamentos.filter((a) => a.blocoId === blocoId) : apartamentos;
+
+  function handleBlocoChange(newBlocoId) {
+    setBlocoId(newBlocoId);
+    setAptId("");
+  }
+
+  function handleAptChange(newAptId) {
+    setAptId(newAptId);
+    if (newAptId) {
+      const apt = apartamentos.find((a) => a.id === newAptId);
+      if (apt?.blocoId) setBlocoId(apt.blocoId);
+    }
+  }
 
   function set(field, value) {
     setForm((f) => ({ ...f, [field]: value }));
@@ -620,33 +524,117 @@ function FormEdicao({ usuario, onSalvar, onCancelar }) {
     setForm((f) => ({ ...f, logins: f.logins.filter((l) => l !== login) }));
   }
 
+  async function handleSalvar() {
+  setErro(null);
+  setSalvando(true);
+
+  try {
+    const blocoSel = blocos.find((b) => b.id === blocoId);
+    const aptSel = apartamentos.find((a) => a.id === aptId);
+    const vagaSel = vagas.find((v) => v.id === vagaId);
+
+    const novoBloco = blocoSel?.nome ?? "";
+    const novoApt = aptSel?.numero ?? "";
+    const novaVaga = vagaSel?.numero ?? null;
+
+    const houveMudanca =
+      usuario.bloco !== novoBloco ||
+      usuario.apartamento !== novoApt ||
+      usuario.vaga !== novaVaga;
+
+    if (!houveMudanca) {
+      setErro("Nenhuma alteração foi realizada.");
+      return;
+    }
+
+    console.log("ENVIANDO:", {
+      bloco: novoBloco,
+      apartamento: novoApt,
+      vaga: novaVaga,
+    });
+
+    await onSalvar({
+      bloco: novoBloco,
+      apartamento: novoApt,
+      vaga: novaVaga,
+      status: form.status,
+      logins: form.logins,
+    });
+
+  } catch (err) {
+    console.error("ERRO AO SALVAR:", err);
+
+    let mensagem = "Erro ao salvar.";
+
+    if (err.response) {
+      mensagem =
+        err.response.data?.mensagem ||
+        err.response.data?.message ||
+        `Erro ${err.response.status}`;
+    } else if (err.request) {
+      mensagem = "Servidor não respondeu.";
+    } else {
+      mensagem = err.message;
+    }
+
+    setErro(mensagem);
+
+  } finally {
+    setSalvando(false);
+  }
+}
+
+  const selectCls = "w-full bg-surface-container-highest/40 border-none rounded-xl py-4 px-4 text-on-surface focus:ring-2 focus:ring-primary/50 focus:outline-none backdrop-blur-sm transition-all disabled:opacity-40";
+  const labelCls = "text-xs font-semibold uppercase tracking-wider text-on-surface-variant ml-1";
+
   return (
     <div className="space-y-5">
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <Campo
-          id="edit-bloco"
-          label="Bloco"
-          placeholder="A"
-          icon="domain"
-          value={form.bloco}
-          onChange={(e) => set("bloco", e.target.value)}
-        />
-        <Campo
-          id="edit-apt"
-          label="Apartamento"
-          placeholder="102"
-          icon="meeting_room"
-          value={form.apartamento}
-          onChange={(e) => set("apartamento", e.target.value)}
-        />
-        <Campo
-          id="edit-vaga"
-          label="Vaga"
-          placeholder="A-12 (opcional)"
-          icon="local_parking"
-          value={form.vaga}
-          onChange={(e) => set("vaga", e.target.value)}
-        />
+        <div className="space-y-2">
+          <label className={labelCls}>Bloco</label>
+          <select value={blocoId} onChange={(e) => handleBlocoChange(e.target.value)} className={selectCls}>
+            <option value="">— Sem vínculo —</option>
+            {blocos.map((b) => (
+              <option key={b.id} value={b.id}>{b.nome}</option>
+            ))}
+          </select>
+        </div>
+        <div className="space-y-2">
+          <label className={labelCls}>Apartamento</label>
+          <select
+            value={aptId}
+            onChange={(e) => handleAptChange(e.target.value)}
+            disabled={aptsFiltrados.length === 0}
+            className={selectCls}
+          >
+            <option value="">— Selecione —</option>
+            {aptsFiltrados.map((a) => (
+              <option key={a.id} value={a.id}>Apto {a.numero}{a.andar != null ? ` · ${a.andar}º andar` : ""}</option>
+            ))}
+          </select>
+          {blocoId && aptsFiltrados.length === 0 && (
+            <p className="text-xs text-error ml-1">Nenhum apartamento neste bloco</p>
+          )}
+        </div>
+        <div className="space-y-2">
+          <label className={labelCls}>Vaga</label>
+          <select
+            value={vagaId}
+            onChange={(e) => setVagaId(e.target.value)}
+            disabled={!aptId || vagas.length === 0}
+            className={selectCls}
+          >
+            <option value="">— Sem vaga —</option>
+            {vagas.filter((v) => v.ativa || v.id === vagaId).map((v) => (
+              <option key={v.id} value={v.id}>
+                Vaga {v.numero}{v.localizacao ? ` · ${v.localizacao}` : ""}
+              </option>
+            ))}
+          </select>
+          {aptId && vagas.length === 0 && (
+            <p className="text-xs text-on-surface-variant ml-1">Nenhuma vaga neste apartamento</p>
+          )}
+        </div>
       </div>
 
       <div className="space-y-2">
@@ -717,20 +705,17 @@ function FormEdicao({ usuario, onSalvar, onCancelar }) {
         </div>
       </div>
 
+      {erro && (
+        <p className="text-sm text-error bg-error/10 rounded-xl px-4 py-2">{erro}</p>
+      )}
+
       <div className="flex gap-3 pt-2">
         <Botao
           type="button"
-          onClick={() =>
-            onSalvar({
-              bloco: form.bloco,
-              apartamento: form.apartamento,
-              vaga: form.vaga || null,
-              status: form.status,
-              logins: form.logins,
-            })
-          }
+          onClick={handleSalvar}
+          disabled={salvando}
         >
-          Salvar Alterações
+          {salvando ? "Salvando…" : "Salvar Alterações"}
           <Icone name="check" className="text-xl" />
         </Botao>
         <button
@@ -745,14 +730,41 @@ function FormEdicao({ usuario, onSalvar, onCancelar }) {
 }
 
 // ─────────────────────────────────────────────
-function FormNovoUsuario({ onSalvar, onCancelar }) {
-  const [form, setForm] = useState({
-    nome: "",
-    email: "",
-    bloco: "",
-    apartamento: "",
-    vaga: "",
-  });
+function FormNovoUsuario({ blocos, apartamentos, onSalvar, onCancelar }) {
+  const [form, setForm] = useState({ nome: "", email: "", senha: "" });
+  const [blocoId, setBlocoId] = useState("");
+  const [aptId, setAptId] = useState("");
+  const [vagas, setVagas] = useState([]);
+  const [vagaId, setVagaId] = useState("");
+
+  useEffect(() => {
+    if (!blocoId && blocos.length > 0) setBlocoId(blocos[0].id);
+  }, [blocos]);
+
+  // Carrega vagas quando apartamento muda
+  useEffect(() => {
+    if (!aptId) { setVagas([]); setVagaId(""); return; }
+    let cancelado = false;
+    vagaApi.listarPorApartamento(aptId)
+      .then((res) => { if (!cancelado) { setVagas(res.data || []); setVagaId(""); } })
+      .catch(() => { if (!cancelado) { setVagas([]); setVagaId(""); } });
+    return () => { cancelado = true; };
+  }, [aptId]);
+
+  const aptsFiltrados = blocoId ? apartamentos.filter((a) => a.blocoId === blocoId) : apartamentos;
+
+  function handleBlocoChange(newBlocoId) {
+    setBlocoId(newBlocoId);
+    setAptId("");
+  }
+
+  function handleAptChange(newAptId) {
+    setAptId(newAptId);
+    if (newAptId) {
+      const apt = apartamentos.find((a) => a.id === newAptId);
+      if (apt?.blocoId) setBlocoId(apt.blocoId);
+    }
+  }
 
   function set(field, value) {
     setForm((f) => ({ ...f, [field]: value }));
@@ -760,25 +772,27 @@ function FormNovoUsuario({ onSalvar, onCancelar }) {
 
   function handleSubmit(e) {
     e.preventDefault();
-    if (
-      !form.nome.trim() ||
-      !form.email.trim() ||
-      !form.bloco.trim() ||
-      !form.apartamento.trim()
-    )
+    if (!form.nome.trim() || !form.email.trim() || !form.senha.trim() || form.senha.trim().length < 6 || !blocoId || !aptId)
       return;
+    const blocoSel = blocos.find((b) => b.id === blocoId);
+    const aptSel = apartamentos.find((a) => a.id === aptId);
+    const vagaSel = vagas.find((v) => v.id === vagaId);
     onSalvar({
       nome: form.nome.trim(),
       email: form.email.trim(),
-      bloco: form.bloco.trim(),
-      apartamento: form.apartamento.trim(),
-      vaga: form.vaga.trim() || null,
+      senha: form.senha.trim(),
+      bloco: blocoSel?.nome ?? "",
+      apartamento: aptSel?.numero ?? "",
+      vaga: vagaSel?.numero ?? null,
     });
   }
 
+  const selectCls = "w-full bg-surface-container-highest/40 border-none rounded-xl py-4 px-4 text-on-surface focus:ring-2 focus:ring-primary/50 focus:outline-none backdrop-blur-sm transition-all disabled:opacity-40";
+  const labelCls = "text-xs font-semibold uppercase tracking-wider text-on-surface-variant ml-1";
+
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
-      {/* Nome + E-mail */}
+      {/* Nome + E-mail + Senha */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <Campo
           id="novo-nome"
@@ -797,34 +811,66 @@ function FormNovoUsuario({ onSalvar, onCancelar }) {
           value={form.email}
           onChange={(e) => set("email", e.target.value)}
         />
+        <Campo
+          id="novo-senha"
+          label="Senha inicial *"
+          type="password"
+          placeholder="Mínimo 6 caracteres"
+          icon="lock"
+          value={form.senha}
+          onChange={(e) => set("senha", e.target.value)}
+          autoComplete="new-password"
+        />
       </div>
 
       {/* Bloco + Apt + Vaga */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <Campo
-          id="novo-bloco"
-          label="Bloco *"
-          placeholder="A"
-          icon="domain"
-          value={form.bloco}
-          onChange={(e) => set("bloco", e.target.value)}
-        />
-        <Campo
-          id="novo-apt"
-          label="Apartamento *"
-          placeholder="102"
-          icon="meeting_room"
-          value={form.apartamento}
-          onChange={(e) => set("apartamento", e.target.value)}
-        />
-        <Campo
-          id="novo-vaga"
-          label="Vaga"
-          placeholder="A-12 (opcional)"
-          icon="local_parking"
-          value={form.vaga}
-          onChange={(e) => set("vaga", e.target.value)}
-        />
+        <div className="space-y-2">
+          <label className={labelCls}>Bloco *</label>
+          <select value={blocoId} onChange={(e) => handleBlocoChange(e.target.value)} required className={selectCls}>
+            <option value="">— Selecione o bloco —</option>
+            {blocos.map((b) => (
+              <option key={b.id} value={b.id}>{b.nome}</option>
+            ))}
+          </select>
+        </div>
+        <div className="space-y-2">
+          <label className={labelCls}>Apartamento *</label>
+          <select
+            value={aptId}
+            onChange={(e) => handleAptChange(e.target.value)}
+            required
+            disabled={aptsFiltrados.length === 0}
+            className={selectCls}
+          >
+            <option value="">— Selecione o apt —</option>
+            {aptsFiltrados.map((a) => (
+              <option key={a.id} value={a.id}>Apto {a.numero}{a.andar != null ? ` · ${a.andar}º andar` : ""}</option>
+            ))}
+          </select>
+          {blocoId && aptsFiltrados.length === 0 && (
+            <p className="text-xs text-error ml-1">Nenhum apartamento neste bloco</p>
+          )}
+        </div>
+        <div className="space-y-2">
+          <label className={labelCls}>Vaga</label>
+          <select
+            value={vagaId}
+            onChange={(e) => setVagaId(e.target.value)}
+            disabled={!aptId || vagas.length === 0}
+            className={selectCls}
+          >
+            <option value="">— Sem vaga —</option>
+            {vagas.filter((v) => v.ativa).map((v) => (
+              <option key={v.id} value={v.id}>
+                Vaga {v.numero}{v.localizacao ? ` · ${v.localizacao}` : ""}
+              </option>
+            ))}
+          </select>
+          {aptId && vagas.length === 0 && (
+            <p className="text-xs text-on-surface-variant ml-1">Nenhuma vaga neste apartamento</p>
+          )}
+        </div>
       </div>
 
       {/* Info */}

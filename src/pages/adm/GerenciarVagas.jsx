@@ -28,6 +28,8 @@ export function GerenciarVagas() {
   const [filtroStatus, setFiltroStatus] = useState("TODOS");
   const [busca, setBusca] = useState("");
   const [form, setForm] = useState({ numero: "", localizacao: "", tipo: "", apartamentoId: "" });
+  const [erro, setErro] = useState(null);
+  const [salvando, setSalvando] = useState(false);
 
   useEffect(() => {
     carregarDados();
@@ -55,13 +57,18 @@ export function GerenciarVagas() {
 
   const criarVaga = async (e) => {
     e.preventDefault();
+    setErro(null);
+    setSalvando(true);
     try {
-      const res = await vagaApi.cadastrar(form);
+      const { apartamentoId, ...vagaData } = form;
+      const res = await vagaApi.cadastrar(vagaData, apartamentoId || undefined);
       setVagas((prev) => [res.data, ...prev]);
       setCriando(false);
       setForm({ numero: "", localizacao: "", tipo: "", apartamentoId: "" });
     } catch (err) {
-      console.error("Erro ao criar vaga:", err);
+      setErro(err.response?.data?.mensagem ?? err.response?.data?.message ?? "Erro ao cadastrar vaga. Tente novamente.");
+    } finally {
+      setSalvando(false);
     }
   };
 
@@ -111,7 +118,7 @@ export function GerenciarVagas() {
             </h1>
           </div>
           {!criando && (
-            <Botao onClick={() => setCriando(true)}>
+            <Botao onClick={() => { setCriando(true); setErro(null); }}>
               <span className="flex items-center gap-2">
                 <Icone name="add" className="text-lg" /> Nova Vaga
               </span>
@@ -198,20 +205,25 @@ export function GerenciarVagas() {
                   >
                     <option value="">Nenhum apartamento</option>
                     {apartamentos.map((apt) => (
-                      <option key={apt.id} value={apt.id}>{apt.numero} - Bloco {apt.bloco?.nome}</option>
+                      <option key={apt.id} value={apt.id}>{apt.numero} - Bloco {apt.blocoNome}</option>
                     ))}
                   </select>
                 </div>
               </div>
+              {erro && (
+                <p className="text-sm text-error bg-error/10 rounded-xl px-4 py-2">{erro}</p>
+              )}
               <div className="flex gap-3 justify-end pt-2">
                 <button
                   type="button"
-                  onClick={() => setCriando(false)}
+                  onClick={() => { setCriando(false); setErro(null); }}
                   className="px-5 py-2.5 rounded-xl text-sm font-semibold text-on-surface-variant hover:bg-white/5 transition-all cursor-pointer"
                 >
                   Cancelar
                 </button>
-                <Botao type="submit">Cadastrar vaga</Botao>
+                <Botao type="submit" disabled={salvando}>
+                  {salvando ? "Cadastrando..." : "Cadastrar vaga"}
+                </Botao>
               </div>
             </form>
           </div>
