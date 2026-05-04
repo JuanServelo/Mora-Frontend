@@ -16,6 +16,7 @@ import { GerenciarConhecimento } from "../pages/adm/GerenciarConhecimento";
 import { FAQ } from "../pages/usuario/FAQ";
 import { MinhasReservas } from "../pages/usuario/MinhasReservas";
 import { MinhasReclamacoes } from "../pages/usuario/MinhasReclamacoes";
+import { MinhasEntregas } from "../pages/usuario/MinhasEntregas";
 import { Inicio } from "../pages/inicio/Inicio";
 import { Servicos } from "../pages/servicos/Servicos";
 import { Comodidades } from "../pages/comodidades/Comodidades";
@@ -56,6 +57,7 @@ export const router = createBrowserRouter([
       { path: "/acesso-pendente", element: <AcessoPendente /> },
       { path: "/espacos", element: <MinhasReservas /> },
       { path: "/reclamacoes", element: <MinhasReclamacoes /> },
+      { path: "/entregas", element: <MinhasEntregas /> },
       { path: "/adm/usuarios", element: <GerenciarUsuarios /> },
       { path: "/adm/estruturas", element: <GerenciarEstruturas /> },
       { path: "/adm/reunioes", element: <GerenciarReunioes /> },

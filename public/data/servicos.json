@@ -21,7 +21,8 @@
     "icon": "local_shipping",
     "titulo": "Encomendas e mudanças",
     "descricao": "Recebimento de volumes e agendamento de mudanças nas janelas permitidas pelo condomínio.",
-    "tags": ["Balcão", "Agendamento"]
+    "tags": ["Balcão", "Agendamento"],
+    "rota": "/entregas"
   },
   {
     "icon": "water_drop",
