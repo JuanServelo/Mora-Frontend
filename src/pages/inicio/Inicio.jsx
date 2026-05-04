@@ -151,6 +151,16 @@ export function Inicio() {
           </div>
         </div>
       </div>
+
+      <Link
+        to="/faq"
+        className="fixed bottom-6 right-6 z-40 inline-flex items-center justify-center gap-2 px-5 py-3 rounded-full glass-panel border border-outline-variant/15 text-on-surface hover:border-primary/35 hover:bg-white/[0.03] transition-all duration-300"
+        aria-label="Abrir FAQ"
+        title="FAQ"
+      >
+        <Icone name="help" className="text-primary text-xl" />
+        <span className="text-sm font-semibold">FAQ</span>
+      </Link>
     </div>
   );
 }
