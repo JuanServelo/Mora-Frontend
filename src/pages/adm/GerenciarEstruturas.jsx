@@ -1,7 +1,6 @@
 // src/pages/adm/GerenciarEstruturas.jsx
 import { useState, useEffect } from "react";
-import { blocoApi, apartamentoApi, areaComunApi } from "../../services/estruturasApi";
-import { vagaApi } from "../../services/portariaApi";
+import { blocoApi, apartamentoApi, areaComunApi, vagaApi } from "../../services/estruturasApi";
 import { Icone } from "../../components/icones/Icone";
 import { Campo } from "../../components/campos/Campo";
 import { Botao } from "../../components/botoes/Botao";
