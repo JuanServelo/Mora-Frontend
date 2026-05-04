@@ -74,3 +74,21 @@ export const carroApi = {
   registrarEntrada: (data) => portariaApi.post("/carros/entrada", data),
   registrarSaida: (id) => portariaApi.post(`/carros/${id}/saida`),
 };
+
+// ─────────────────────────────────────────────
+// BASE DE CONHECIMENTO / FAQ
+// ─────────────────────────────────────────────
+export const conhecimentoApi = {
+  listarTodos: () => portariaApi.get("/conhecimento"),
+  listarPublicados: () => portariaApi.get("/conhecimento/publicados"),
+  listarPorCategoria: (categoria) =>
+    portariaApi.get(`/conhecimento/categoria/${categoria}`),
+  listarPublicadosPorCategoria: (categoria) =>
+    portariaApi.get(`/conhecimento/categoria/${categoria}/publicados`),
+  buscarPorTitulo: (titulo) =>
+    portariaApi.get("/conhecimento/buscar", { params: { titulo } }),
+  buscar: (id) => portariaApi.get(`/conhecimento/${id}`),
+  criar: (data) => portariaApi.post("/conhecimento", data),
+  atualizar: (id, data) => portariaApi.put(`/conhecimento/${id}`, data),
+  excluir: (id) => portariaApi.delete(`/conhecimento/${id}`),
+};
