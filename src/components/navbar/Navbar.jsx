@@ -147,7 +147,7 @@ export function Navbar() {
               {l.label}
             </NavLink>
           ))}
-          {!isRestrictedUser && <AdminMenu />}
+          {isAdmin && <AdminMenu />}
         </div>
 
         {/* Centro — Logo */}
