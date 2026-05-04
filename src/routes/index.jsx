@@ -11,6 +11,9 @@ import { GerenciarReunioes } from "../pages/adm/GerenciarReunioes";
 import { GerenciarEspacos } from "../pages/adm/GerenciarEspacos";
 import { GerenciarReclamacoes } from "../pages/adm/GerenciarReclamacoes";
 import { GerenciarEntregas } from "../pages/adm/GerenciarEntregas";
+import { GerenciarVagas } from "../pages/adm/GerenciarVagas";
+import { GerenciarConhecimento } from "../pages/adm/GerenciarConhecimento";
+import { FAQ } from "../pages/usuario/FAQ";
 import { MinhasReservas } from "../pages/usuario/MinhasReservas";
 import { MinhasReclamacoes } from "../pages/usuario/MinhasReclamacoes";
 import { Inicio } from "../pages/inicio/Inicio";
@@ -48,6 +51,7 @@ export const router = createBrowserRouter([
       { path: "/inicio", element: <Inicio /> },
       { path: "/servicos", element: <Servicos /> },
       { path: "/comodidades", element: <Comodidades /> },
+      { path: "/faq", element: <FAQ /> },
       { path: "/perfil", element: <Perfil /> },
       { path: "/acesso-pendente", element: <AcessoPendente /> },
       { path: "/espacos", element: <MinhasReservas /> },
@@ -58,6 +62,8 @@ export const router = createBrowserRouter([
       { path: "/adm/espacos", element: <GerenciarEspacos /> },
       { path: "/adm/reclamacoes", element: <GerenciarReclamacoes /> },
       { path: "/adm/entregas", element: <GerenciarEntregas /> },
+      { path: "/adm/vagas", element: <GerenciarVagas /> },
+      { path: "/adm/conhecimento", element: <GerenciarConhecimento /> },
     ],
   },
 ]);

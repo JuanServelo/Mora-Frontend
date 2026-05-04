@@ -63,29 +63,6 @@ export const funcionarioApi = {
 };
 
 // ─────────────────────────────────────────────
-// VAGAS DE ESTACIONAMENTO
-// ─────────────────────────────────────────────
-export const vagaApi = {
-  listar: () => portariaApi.get("/vagas"),
-  listarTodas: () => portariaApi.get("/vagas/todas"),
-  buscar: (id) => portariaApi.get(`/vagas/${id}`),
-  listarPorApartamento: (apartamentoId) =>
-    portariaApi.get(`/vagas/apartamento/${apartamentoId}`),
-  cadastrar: (data, apartamentoId) =>
-    portariaApi.post("/vagas/cadastrar", data, {
-      params: apartamentoId ? { apartamentoId } : {},
-    }),
-  atualizar: (id, data, apartamentoId) =>
-    portariaApi.put(`/vagas/${id}`, data, {
-      params: apartamentoId !== undefined
-        ? { apartamentoId: apartamentoId || "none" }
-        : {},
-    }),
-  ativar: (id) => portariaApi.post(`/vagas/${id}/ativar`),
-  desativar: (id) => portariaApi.delete(`/vagas/${id}`),
-};
-
-// ─────────────────────────────────────────────
 // CARROS
 // ─────────────────────────────────────────────
 export const carroApi = {
@@ -96,4 +73,22 @@ export const carroApi = {
   atualizar: (id, data) => portariaApi.put(`/carros/${id}`, data),
   registrarEntrada: (data) => portariaApi.post("/carros/entrada", data),
   registrarSaida: (id) => portariaApi.post(`/carros/${id}/saida`),
+};
+
+// ─────────────────────────────────────────────
+// BASE DE CONHECIMENTO / FAQ
+// ─────────────────────────────────────────────
+export const conhecimentoApi = {
+  listarTodos: () => portariaApi.get("/conhecimento"),
+  listarPublicados: () => portariaApi.get("/conhecimento/publicados"),
+  listarPorCategoria: (categoria) =>
+    portariaApi.get(`/conhecimento/categoria/${categoria}`),
+  listarPublicadosPorCategoria: (categoria) =>
+    portariaApi.get(`/conhecimento/categoria/${categoria}/publicados`),
+  buscarPorTitulo: (titulo) =>
+    portariaApi.get("/conhecimento/buscar", { params: { titulo } }),
+  buscar: (id) => portariaApi.get(`/conhecimento/${id}`),
+  criar: (data) => portariaApi.post("/conhecimento", data),
+  atualizar: (id, data) => portariaApi.put(`/conhecimento/${id}`, data),
+  excluir: (id) => portariaApi.delete(`/conhecimento/${id}`),
 };
