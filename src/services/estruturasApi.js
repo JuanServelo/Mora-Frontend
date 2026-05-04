@@ -1,3 +1,4 @@
+// src/services/estruturasApi.js
 import axios from "axios";
 
 const estruturasApi = axios.create({
@@ -5,18 +6,6 @@ const estruturasApi = axios.create({
 });
 
 estruturasApi.interceptors.request.use((config) => {
-  const token = localStorage.getItem("token");
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
-
-const vagasApi = axios.create({
-  baseURL: import.meta.env.VITE_VAGAS_API_URL || "/vagas-api",
-});
-
-vagasApi.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
@@ -63,14 +52,17 @@ export const areaComunApi = {
 };
 
 export const vagaApi = {
-  listar: () => vagasApi.get("/vagas"),
-  listarTodas: () => vagasApi.get("/vagas/todas"),
-  buscar: (id) => vagasApi.get(`/vagas/${id}`),
-  listarPorApartamento: (apartamentoId) => vagasApi.get(`/vagas/apartamento/${apartamentoId}`),
+  listar: () => estruturasApi.get("/vagas"),
+  listarTodas: () => estruturasApi.get("/vagas/todas"),
+  buscar: (id) => estruturasApi.get(`/vagas/${id}`),
+  listarPorApartamento: (apartamentoId) => estruturasApi.get(`/vagas/apartamento/${apartamentoId}`),
   cadastrar: (data, apartamentoId) =>
-    vagasApi.post("/vagas/cadastrar", { ...data, apartamentoId }),
+    estruturasApi.post('/vagas/cadastrar', data, {
+      params: apartamentoId ? { apartamentoId } : {},
+    }),
   atualizar: (id, data, apartamentoId) =>
-    vagasApi.put(`/vagas/${id}`, { ...data, apartamentoId }),
-  ativar: (id) => vagasApi.post(`/vagas/${id}/ativar`),
-  desativar: (id) => vagasApi.delete(`/vagas/${id}`),
+    estruturasApi.put(`/vagas/${id}?apartamentoId=${apartamentoId}`, data),
+  ativar: (id) => estruturasApi.put(`/vagas/${id}/ativar`),
+  desativar: (id) => estruturasApi.put(`/vagas/${id}/desativar`),
+  deletar: (id) => estruturasApi.delete(`/vagas/${id}`),
 };
