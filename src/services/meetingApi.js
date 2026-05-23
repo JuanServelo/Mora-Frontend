@@ -16,6 +16,7 @@ meetingHttp.interceptors.request.use((config) => {
 export const meetingApi = {
   criar: (data) => meetingHttp.post("/api/meetings", data),
   buscar: (id) => meetingHttp.get(`/api/meetings/${id}`),
+  listar: (usuarioId) => meetingHttp.get("/api/meetings", { params: { usuarioId } }),
   atualizar: (id, data) => meetingHttp.put(`/api/meetings/${id}`, data),
   cancelar: (id) => meetingHttp.patch(`/api/meetings/${id}/cancel`),
   finalizar: (id) => meetingHttp.patch(`/api/meetings/${id}/finalizar`),
