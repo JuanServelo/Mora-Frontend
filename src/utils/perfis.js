@@ -26,6 +26,36 @@ export const PERFIS_CADASTRO_UNIDADE = [
   { value: PERFIS.GUEST, label: 'Convidado' },
 ];
 
+/** Matriz: perfil do ator → perfis que pode cadastrar */
+export const PERMISSOES_CADASTRO = {
+  [PERFIS.CONTRACTING_PROPERTY_MANAGER]: PERFIS_CADASTRO_CONDOMINIO.map((p) => p.value),
+  [PERFIS.CONTRACTING_SYNDIC]: PERFIS_CADASTRO_CONDOMINIO.map((p) => p.value),
+  [PERFIS.OPERATIONAL_SYNDIC]: PERFIS_CADASTRO_CONDOMINIO.map((p) => p.value),
+  [PERFIS.ADMINISTRATOR]: PERFIS_CADASTRO_CONDOMINIO.map((p) => p.value),
+  [PERFIS.RESIDENT_OWNER]: [PERFIS.LESSEE, PERFIS.OCCUPANT, PERFIS.GUEST],
+  [PERFIS.ABSENT_OWNER]: [PERFIS.LESSEE],
+  [PERFIS.LESSEE]: [PERFIS.OCCUPANT, PERFIS.GUEST],
+};
+
+export function podeCadastrarPerfil(perfilAtor, perfilAlvo) {
+  const permitidos = PERMISSOES_CADASTRO[perfilAtor];
+  return permitidos?.includes(perfilAlvo) ?? false;
+}
+
+export function podeGerenciarOcupantes(perfil) {
+  return [PERFIS.RESIDENT_OWNER, PERFIS.ABSENT_OWNER, PERFIS.LESSEE].includes(perfil);
+}
+
+export function perfisCadastroDisponiveis(perfilAtor) {
+  const condominio = PERFIS_CADASTRO_CONDOMINIO.filter((p) =>
+    podeCadastrarPerfil(perfilAtor, p.value),
+  );
+  const unidade = PERFIS_CADASTRO_UNIDADE.filter((p) =>
+    podeCadastrarPerfil(perfilAtor, p.value),
+  );
+  return [...condominio, ...unidade];
+}
+
 export function labelPerfil(perfil) {
   const all = [...PERFIS_CADASTRO_CONDOMINIO, ...PERFIS_CADASTRO_UNIDADE];
   return all.find((p) => p.value === perfil)?.label || perfil?.replace(/_/g, ' ') || '—';

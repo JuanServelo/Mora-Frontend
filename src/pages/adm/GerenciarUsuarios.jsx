@@ -6,12 +6,15 @@ import { Icone } from "../../components/icones/Icone";
 import { Campo } from "../../components/campos/Campo";
 import { Botao } from "../../components/botoes/Botao";
 import {
+  PERFIS,
   PERFIS_CADASTRO_CONDOMINIO,
   PERFIS_CADASTRO_UNIDADE,
   labelPerfil,
+  perfisCadastroDisponiveis,
 } from "../../utils/perfis";
 import { useToast } from "../../contexts/ToastContext";
 import { useConfirm } from "../../contexts/ConfirmContext";
+import { useAuth } from "../../contexts/AuthContext";
 
 const STATUS_STYLE = {
   ativo: "bg-primary/10 text-primary",
@@ -24,6 +27,7 @@ const STATUS_STYLE = {
 export function GerenciarUsuarios() {
   const toast = useToast();
   const confirm = useConfirm();
+  const { usuario: usuarioLogado } = useAuth();
   const [usuarios, setUsuarios] = useState([]);
   const [blocos, setBlocos] = useState([]);
   const [apartamentos, setApartamentos] = useState([]);
@@ -54,6 +58,7 @@ export function GerenciarUsuarios() {
           apartamento: u.apartamento ?? "",
           vaga: u.vaga ?? null,
           unidadeId: u.unidadeId,
+          responsavelFinanceiro: u.responsavelFinanceiro ?? false,
           logins: [u.email],
           status: mapStatus(u.status),
           createdAt: u.createdAt,
@@ -333,6 +338,7 @@ export function GerenciarUsuarios() {
                 <FormNovoUsuario
                   blocos={blocos}
                   apartamentos={apartamentos}
+                  perfilAtor={usuarioLogado?.perfil}
                   onSalvar={criarUsuario}
                   onCancelar={() => setCriando(false)}
                 />
@@ -406,6 +412,12 @@ export function GerenciarUsuarios() {
                       {usuario.status}
                     </span>
 
+                    {usuario.responsavelFinanceiro && usuario.tipo === "usuario" && (
+                      <span className="shrink-0 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider bg-secondary/10 text-secondary">
+                        Financeiro
+                      </span>
+                    )}
+
                     <Icone
                       name="expand_more"
                       className={`text-outline shrink-0 transition-transform duration-300 ${expandido === usuario.id ? "rotate-180" : ""}`}
@@ -476,6 +488,11 @@ function DetalhesUsuario({ usuario, onEditar, onReenviar, onDesativar }) {
       {usuario.perfil && (
         <p className="text-sm text-on-surface-variant">
           Perfil: <strong className="text-on-surface">{labelPerfil(usuario.perfil)}</strong>
+          {usuario.responsavelFinanceiro && (
+            <span className="ml-2 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-secondary/10 text-secondary">
+              Responsável financeiro
+            </span>
+          )}
         </p>
       )}
       <div>
@@ -856,10 +873,15 @@ function FormEdicao({ usuario, blocos, apartamentos, onSalvar, onCancelar }) {
 }
 
 // ─────────────────────────────────────────────
-function FormNovoUsuario({ blocos, apartamentos, onSalvar, onCancelar }) {
+function FormNovoUsuario({ blocos, apartamentos, perfilAtor, onSalvar, onCancelar }) {
+  const perfisDisponiveis = perfisCadastroDisponiveis(perfilAtor).filter(
+    (p) => p.value !== PERFIS.GUEST,
+  );
+  const perfilInicial = perfisDisponiveis[0]?.value ?? PERFIS_CADASTRO_CONDOMINIO[0].value;
+
   const [form, setForm] = useState({
     email: "",
-    perfil: PERFIS_CADASTRO_CONDOMINIO[0].value,
+    perfil: perfilInicial,
     nomePrecadastro: "",
     cpfPrecadastro: "",
   });
@@ -894,10 +916,15 @@ function FormNovoUsuario({ blocos, apartamentos, onSalvar, onCancelar }) {
 
   const selectCls = "w-full bg-surface-container-highest/40 border-none rounded-xl py-4 px-4 text-on-surface focus:ring-2 focus:ring-primary/50 focus:outline-none backdrop-blur-sm transition-all disabled:opacity-40";
   const labelCls = "text-xs font-semibold uppercase tracking-wider text-on-surface-variant ml-1";
-  const perfisOpcoes = [...PERFIS_CADASTRO_CONDOMINIO, ...PERFIS_CADASTRO_UNIDADE];
+  const perfisOpcoes = perfisDisponiveis.length > 0
+    ? perfisDisponiveis
+    : PERFIS_CADASTRO_CONDOMINIO;
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
+      <p className="text-xs text-on-surface-variant">
+        Convidados (Guest) devem ser cadastrados no perfil da unidade — sem convite por e-mail.
+      </p>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <Campo
           id="novo-email"
