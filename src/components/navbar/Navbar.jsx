@@ -26,6 +26,8 @@ const ADM_LINKS = [
   { label: "Espaços", to: "/adm/espacos", icon: "deck", description: "Gerenciar áreas comuns" },
   { label: "Reclamações", to: "/adm/reclamacoes", icon: "report", description: "Gestão de reclamações" },
   { label: "Entregas", to: "/adm/entregas", icon: "inventory_2", description: "Gestão de entregas" },
+  { label: "Vagas", to: "/adm/vagas", icon: "local_parking", description: "Vagas de garagem" },
+  { label: "Conhecimento", to: "/adm/conhecimento", icon: "library_books", description: "Base de conhecimento e FAQ" },
 ];
 
 function NavLink({ to, children }) {
