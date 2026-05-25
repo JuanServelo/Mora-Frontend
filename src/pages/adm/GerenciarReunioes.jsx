@@ -4,6 +4,8 @@ import { meetingApi, ataApi, pollApi } from "../../services/meetingApi";
 import { Icone } from "../../components/icones/Icone";
 import { Campo } from "../../components/campos/Campo";
 import { Botao } from "../../components/botoes/Botao";
+import { useToast } from "../../contexts/ToastContext";
+import { useConfirm } from "../../contexts/ConfirmContext";
 
 function TextArea({ label, ...props }) {
   return (
@@ -123,6 +125,8 @@ const EMPTY_MEETING = {
 };
 
 function AbaReunioes() {
+  const toast = useToast();
+  const confirm = useConfirm();
   const [reunioes, setReunioes] = useState([]);
   const [carregando, setCarregando] = useState(false);
   const [criando, setCriando] = useState(false);
@@ -188,22 +192,33 @@ function AbaReunioes() {
   }
 
   async function cancelar(id) {
-    if (!window.confirm("Cancelar esta reunião?")) return;
+    const ok = await confirm({
+      titulo: "Cancelar reunião",
+      mensagem: "Deseja cancelar esta reunião?",
+      confirmarTexto: "Cancelar reunião",
+      variante: "danger",
+    });
+    if (!ok) return;
     try {
       await meetingApi.cancelar(id);
       setDetalhe((p) => (p ? { ...p, status: "CANCELADA" } : p));
     } catch {
-      alert("Erro ao cancelar.");
+      toast.error("Erro ao cancelar reunião.");
     }
   }
 
   async function finalizar(id) {
-    if (!window.confirm("Finalizar esta reunião?")) return;
+    const ok = await confirm({
+      titulo: "Finalizar reunião",
+      mensagem: "Deseja finalizar esta reunião?",
+      confirmarTexto: "Finalizar",
+    });
+    if (!ok) return;
     try {
       await meetingApi.finalizar(id);
       setDetalhe((p) => (p ? { ...p, status: "FINALIZADA" } : p));
     } catch {
-      alert("Erro ao finalizar.");
+      toast.error("Erro ao finalizar reunião.");
     }
   }
 
@@ -218,9 +233,9 @@ function AbaReunioes() {
       });
       setAvalForm({ nota: "", comentario: "" });
       setAvalUsuarioId("");
-      alert("Avaliação registrada!");
+      toast.success("Avaliação registrada!");
     } catch (e) {
-      alert(e.response?.data?.message || "Erro ao avaliar.");
+      toast.error(e.response?.data?.message || "Erro ao avaliar.");
     } finally {
       setSalvandoAval(false);
     }
@@ -382,6 +397,8 @@ function AbaReunioes() {
 const EMPTY_POLL = { titulo: "", descricao: "", meetingId: "", opcoes: "" };
 
 function AbaVotacoes() {
+  const toast = useToast();
+  const confirm = useConfirm();
   const [criando, setCriando] = useState(false);
   const [form, setForm] = useState(EMPTY_POLL);
   const [salvando, setSalvando] = useState(false);
@@ -441,12 +458,18 @@ function AbaVotacoes() {
 
   async function encerrarPoll() {
     if (!detalhe) return;
-    if (!window.confirm("Encerrar esta votação?")) return;
+    const ok = await confirm({
+      titulo: "Encerrar votação",
+      mensagem: "Deseja encerrar esta votação?",
+      confirmarTexto: "Encerrar",
+      variante: "danger",
+    });
+    if (!ok) return;
     try {
       await pollApi.encerrar(detalhe.id);
       setDetalhe((p) => (p ? { ...p, status: "ENCERRADA" } : p));
     } catch {
-      alert("Erro ao encerrar votação.");
+      toast.error("Erro ao encerrar votação.");
     }
   }
 
@@ -460,11 +483,10 @@ function AbaVotacoes() {
         usuarioId: Number(voteForm.usuarioId),
       });
       setVoteForm({ pollOptionId: "", usuarioId: "" });
-      // reload poll to see updated state
       const res = await pollApi.buscar(detalhe.id);
       setDetalhe(res.data);
     } catch (e) {
-      alert(e.response?.data?.message || "Erro ao registrar voto.");
+      toast.error(e.response?.data?.message || "Erro ao registrar voto.");
     } finally {
       setVotando(false);
     }

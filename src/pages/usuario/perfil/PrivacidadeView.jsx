@@ -1,21 +1,66 @@
 // src/pages/perfil/PrivacidadeView.jsx
 import { useState } from "react";
+import { useAuth } from "../../../contexts/AuthContext";
 import { Campo } from "../../../components/campos/Campo";
 import { Botao } from "../../../components/botoes/Botao";
 import { Icone } from "../../../components/icones/Icone";
+import { validarSenha } from "../../../utils/passwordValidation";
 
 export function PrivacidadeView() {
-  const [biometria, setBiometria] = useState(true);
+  const { atualizarPerfil } = useAuth();
+  const [salvando, setSalvando] = useState(false);
+  const [msg, setMsg] = useState("");
+  const [erro, setErro] = useState("");
+  const [errosSenha, setErrosSenha] = useState([]);
+
+  async function handleAtualizarSenha(e) {
+    e.preventDefault();
+    setMsg("");
+    setErro("");
+    setErrosSenha([]);
+
+    const form = new FormData(e.target);
+    const senhaAtual = form.get("senhaAtual");
+    const novaSenha = form.get("novaSenha");
+    const confirmarSenha = form.get("confirmarSenha");
+
+    if (!senhaAtual || !novaSenha || !confirmarSenha) {
+      setErro("Preencha todos os campos.");
+      return;
+    }
+
+    if (novaSenha !== confirmarSenha) {
+      setErro("As senhas não coincidem.");
+      return;
+    }
+
+    const reqs = validarSenha(novaSenha);
+    if (reqs.length > 0) {
+      setErrosSenha(reqs);
+      return;
+    }
+
+    setSalvando(true);
+    try {
+      await atualizarPerfil({ senha: novaSenha, senhaAtual });
+      setMsg("Senha atualizada com sucesso.");
+      e.target.reset();
+    } catch (err) {
+      setErro(err.response?.data?.mensagem || "Erro ao atualizar senha.");
+    } finally {
+      setSalvando(false);
+    }
+  }
 
   return (
-    <div className="space-y-7">
-      {/* Alterar Senha */}
+    <form onSubmit={handleAtualizarSenha} className="space-y-7">
       <div className="space-y-4">
         <p className="text-xs font-semibold uppercase tracking-widest text-on-surface-variant ml-1">
           Alterar Senha
         </p>
         <Campo
           id="senha-atual"
+          name="senhaAtual"
           label="Senha Atual"
           type="password"
           placeholder="••••••••"
@@ -23,13 +68,18 @@ export function PrivacidadeView() {
         />
         <Campo
           id="nova-senha"
+          name="novaSenha"
           label="Nova Senha"
           type="password"
-          placeholder="••••••••"
+          placeholder="Mín. 8 caracteres, 1 número, 1 maiúscula"
           icon="lock_reset"
         />
+        {errosSenha.map((m) => (
+          <p key={m} className="text-error text-sm">{m}</p>
+        ))}
         <Campo
           id="confirmar-senha"
+          name="confirmarSenha"
           label="Confirmar Nova Senha"
           type="password"
           placeholder="••••••••"
@@ -37,45 +87,15 @@ export function PrivacidadeView() {
         />
       </div>
 
-      {/* Autenticação */}
-      <div>
-        <p className="text-xs font-semibold uppercase tracking-widest text-on-surface-variant ml-1 mb-3">
-          Autenticação
-        </p>
-        <div className="flex items-center justify-between p-4 bg-surface-container-highest/40 rounded-2xl backdrop-blur-sm">
-          <div className="flex items-center gap-3">
-            <Icone name="fingerprint" className="text-primary text-2xl" />
-            <div>
-              <p className="text-on-surface text-sm font-semibold">
-                Acesso por Biometria
-              </p>
-              <p className="text-on-surface-variant text-xs">
-                Face ID ou impressão digital
-              </p>
-            </div>
-          </div>
-          <button
-            type="button"
-            onClick={() => setBiometria((b) => !b)}
-            className={`relative w-12 h-6 rounded-full transition-colors duration-300 cursor-pointer ${
-              biometria ? "bg-primary" : "bg-surface-container-highest"
-            }`}
-          >
-            <span
-              className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full shadow transition-transform duration-300 ${
-                biometria ? "translate-x-6" : "translate-x-0"
-              }`}
-            />
-          </button>
-        </div>
-      </div>
+      {erro && <p className="text-error text-sm font-medium">{erro}</p>}
+      {msg && <p className="text-primary text-sm font-medium">{msg}</p>}
 
       <div className="pt-1">
-        <Botao type="button">
-          Atualizar Senha
-          <Icone name="check" className="text-xl" />
+        <Botao type="submit" disabled={salvando}>
+          {salvando ? "Atualizando..." : "Atualizar Senha"}
+          {!salvando && <Icone name="check" className="text-xl" />}
         </Botao>
       </div>
-    </div>
+    </form>
   );
 }

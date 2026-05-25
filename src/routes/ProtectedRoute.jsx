@@ -1,16 +1,12 @@
 import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
+import { isUsuarioRestrito } from "../utils/perfis";
 
 export function ProtectedRoute({ children }) {
   const { usuario, loading } = useAuth();
   const location = useLocation();
 
-  const role = String(usuario?.role || "").toLowerCase();
-  const isAdmin = role === "admin";
-  const hasBuilding = Boolean(usuario?.bloco);
-  const hasApartment = Boolean(usuario?.apartamento);
-  const hasUnitAssociation = hasBuilding && hasApartment;
-  const isRestrictedUser = Boolean(usuario) && !isAdmin && !hasUnitAssociation;
+  const isRestrictedUser = isUsuarioRestrito(usuario);
   const allowedRestrictedPaths = new Set(["/perfil", "/acesso-pendente"]);
 
   if (loading) {

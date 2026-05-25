@@ -1,8 +1,11 @@
 // src/routes/index.jsx
 import { createBrowserRouter, Navigate } from "react-router-dom";
-import { SolicitarAcesso } from "../pages/auth/SolicitarAcesso";
+import { AtivarConta } from "../pages/auth/AtivarConta";
+import { SemConvite } from "../pages/auth/SemConvite";
 import { Login } from "../pages/auth/Login";
 import { EsqueceuSenha } from "../pages/auth/EsqueceuSenha";
+import { ResetPassword } from "../pages/auth/ResetPassword";
+import { AuthCallback } from "../pages/auth/AuthCallback";
 import { AcessoPendente } from "../pages/auth/AcessoPendente";
 import { Perfil } from "../pages/usuario/perfil/Perfil";
 import { GerenciarUsuarios } from "../pages/adm/GerenciarUsuarios";
@@ -30,7 +33,15 @@ export const router = createBrowserRouter([
   // Páginas de autenticação — sem navbar
   {
     path: "/solicitar-acesso",
-    element: <SolicitarAcesso />,
+    element: <Navigate to="/sem-convite" replace />,
+  },
+  {
+    path: "/sem-convite",
+    element: <SemConvite />,
+  },
+  {
+    path: "/ativar",
+    element: <AtivarConta />,
   },
   {
     path: "/login",
@@ -39,6 +50,14 @@ export const router = createBrowserRouter([
   {
     path: "/esqueceu-senha",
     element: <EsqueceuSenha />,
+  },
+  {
+    path: "/reset-password",
+    element: <ResetPassword />,
+  },
+  {
+    path: "/auth/callback",
+    element: <AuthCallback />,
   },
   // Páginas do app — com navbar, protegidas
   {

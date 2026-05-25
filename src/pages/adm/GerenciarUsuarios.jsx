@@ -5,15 +5,25 @@ import { blocoApi, apartamentoApi, vagaApi } from "../../services/estruturasApi"
 import { Icone } from "../../components/icones/Icone";
 import { Campo } from "../../components/campos/Campo";
 import { Botao } from "../../components/botoes/Botao";
+import {
+  PERFIS_CADASTRO_CONDOMINIO,
+  PERFIS_CADASTRO_UNIDADE,
+  labelPerfil,
+} from "../../utils/perfis";
+import { useToast } from "../../contexts/ToastContext";
+import { useConfirm } from "../../contexts/ConfirmContext";
 
 const STATUS_STYLE = {
   ativo: "bg-primary/10 text-primary",
   pendente: "bg-secondary/10 text-secondary",
   inativo: "bg-error/10 text-error",
+  expirado: "bg-error/10 text-error",
 };
 
 // ─────────────────────────────────────────────
 export function GerenciarUsuarios() {
+  const toast = useToast();
+  const confirm = useConfirm();
   const [usuarios, setUsuarios] = useState([]);
   const [blocos, setBlocos] = useState([]);
   const [apartamentos, setApartamentos] = useState([]);
@@ -21,22 +31,50 @@ export function GerenciarUsuarios() {
   const [busca, setBusca] = useState("");
 
   useEffect(() => {
-    Promise.all([api.get("/api/users"), blocoApi.listar(), apartamentoApi.listar()])
+    Promise.all([
+      api.get("/api/user-management/users").catch(() => api.get("/api/users")),
+      blocoApi.listar(),
+      apartamentoApi.listar(),
+    ])
       .then(([usersRes, blocosRes, aptsRes]) => {
-        const lista = (usersRes.data.usuarios || []).map((u) => ({
+        const mapStatus = (s) => {
+          if (s === "active") return "ativo";
+          if (s === "inactive") return "inativo";
+          if (s === "pending_activation") return "pendente";
+          return s || "ativo";
+        };
+
+        const listaUsuarios = (usersRes.data.usuarios || []).map((u) => ({
           id: u.id,
           nome: u.nome,
           email: u.email,
-          role: u.role,
+          perfil: u.perfil,
           provider: u.provider,
           bloco: u.bloco ?? "",
           apartamento: u.apartamento ?? "",
           vaga: u.vaga ?? null,
+          unidadeId: u.unidadeId,
           logins: [u.email],
-          status: u.role === "admin" ? "ativo" : "ativo",
+          status: mapStatus(u.status),
           createdAt: u.createdAt,
+          tipo: "usuario",
         }));
-        setUsuarios(lista);
+
+        const convites = (usersRes.data.convitesPendentes || []).map((c) => ({
+          id: `convite-${c.id}`,
+          conviteId: c.id,
+          nome: c.email,
+          email: c.email,
+          perfil: c.perfil,
+          unidadeId: c.unidadeId,
+          logins: [c.email],
+          status: c.expirado ? "expirado" : "pendente",
+          expiresAt: c.expiresAt,
+          createdAt: c.createdAt,
+          tipo: "convite",
+        }));
+
+        setUsuarios([...convites, ...listaUsuarios]);
         setBlocos(blocosRes.data);
         setApartamentos(aptsRes.data);
       })
@@ -83,7 +121,7 @@ export function GerenciarUsuarios() {
               ...usr,
               nome: u.nome,
               email: u.email,
-              role: u.role,
+              perfil: u.perfil,
               bloco: u.bloco ?? "",
               apartamento: u.apartamento ?? "",
               vaga: u.vaga ?? null,
@@ -102,35 +140,83 @@ export function GerenciarUsuarios() {
 
   async function criarUsuario(dados) {
     try {
-      const res = await api.post("/api/users", {
-        nome: dados.nome,
+      const res = await api.post("/api/user-management/invites", {
         email: dados.email,
-        senha: dados.senha,
-        role: "user",
-        bloco: dados.bloco || undefined,
-        apartamento: dados.apartamento || undefined,
-        vaga: dados.vaga || undefined,
+        perfil: dados.perfil,
+        unidadeId: dados.unidadeId || undefined,
+        nomePrecadastro: dados.nomePrecadastro || undefined,
+        cpfPrecadastro: dados.cpfPrecadastro || undefined,
       });
-      const u = res.data.usuario;
+      const c = res.data.convite;
       setUsuarios((us) => [
         {
-          id: u.id,
-          nome: u.nome,
-          email: u.email,
-          role: u.role,
-          provider: u.provider,
-          bloco: u.bloco ?? "",
-          apartamento: u.apartamento ?? "",
-          vaga: u.vaga ?? null,
-          logins: [u.email],
-          status: "ativo",
-          createdAt: u.createdAt,
+          id: `convite-${c.id}`,
+          conviteId: c.id,
+          nome: c.email,
+          email: c.email,
+          perfil: c.perfil,
+          unidadeId: dados.unidadeId,
+          logins: [c.email],
+          status: "pendente",
+          expiresAt: c.expiresAt,
+          createdAt: new Date().toISOString(),
+          tipo: "convite",
         },
         ...us,
       ]);
       setCriando(false);
+      if (res.data.emailEnviado === false) {
+        toast.warning(
+          res.data.avisoEmail || res.data.mensagem || "Convite criado, mas o e-mail não pôde ser enviado.",
+          { detalhe: `Código do convite: ${c.codigo}` },
+        );
+      } else {
+        toast.success(res.data.mensagem || "Convite enviado com sucesso.");
+      }
     } catch (err) {
-      console.error("Erro ao criar:", err);
+      toast.error(err.response?.data?.mensagem || "Erro ao enviar convite.");
+    }
+  }
+
+  async function reenviarConvite(conviteId) {
+    try {
+      const res = await api.post(`/api/user-management/invites/${conviteId}/resend`);
+      setUsuarios((us) =>
+        us.map((u) =>
+          u.conviteId === conviteId
+            ? { ...u, status: "pendente", expiresAt: res.data.convite?.expiresAt }
+            : u,
+        ),
+      );
+      if (res.data.emailEnviado === false) {
+        toast.warning(
+          res.data.avisoEmail || res.data.mensagem || "Convite reenviado, mas o e-mail não pôde ser enviado.",
+          { detalhe: `Código do convite: ${res.data.convite?.codigo || "—"}` },
+        );
+      } else {
+        toast.success(res.data.mensagem || "Convite reenviado com sucesso.");
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.mensagem || "Erro ao reenviar convite.");
+    }
+  }
+
+  async function desativarUsuario(userId) {
+    const ok = await confirm({
+      titulo: "Desativar usuário",
+      mensagem: "Esta ação revoga o acesso imediatamente. Deseja continuar?",
+      confirmarTexto: "Desativar",
+      variante: "danger",
+    });
+    if (!ok) return;
+    try {
+      const res = await api.patch(`/api/user-management/users/${userId}/deactivate`);
+      setUsuarios((us) =>
+        us.map((u) => (u.id === userId ? { ...u, status: "inativo" } : u)),
+      );
+      toast.success(res.data.mensagem || "Usuário desativado.");
+    } catch (err) {
+      toast.error(err.response?.data?.mensagem || "Erro ao desativar usuário.");
     }
   }
 
@@ -341,6 +427,16 @@ export function GerenciarUsuarios() {
                         <DetalhesUsuario
                           usuario={usuario}
                           onEditar={() => setEditando(usuario.id)}
+                          onReenviar={
+                            usuario.tipo === "convite"
+                              ? () => reenviarConvite(usuario.conviteId)
+                              : null
+                          }
+                          onDesativar={
+                            usuario.tipo === "usuario" && usuario.status === "ativo"
+                              ? () => desativarUsuario(usuario.id)
+                              : null
+                          }
                         />
                       )}
                     </div>
@@ -374,9 +470,14 @@ function SecaoCondominio() {
 }
 
 // ─────────────────────────────────────────────
-function DetalhesUsuario({ usuario, onEditar }) {
+function DetalhesUsuario({ usuario, onEditar, onReenviar, onDesativar }) {
   return (
     <div className="space-y-5">
+      {usuario.perfil && (
+        <p className="text-sm text-on-surface-variant">
+          Perfil: <strong className="text-on-surface">{labelPerfil(usuario.perfil)}</strong>
+        </p>
+      )}
       <div>
         <p className="text-xs font-semibold uppercase tracking-widest text-on-surface-variant mb-3">
           Logins vinculados ao apartamento
@@ -427,13 +528,38 @@ function DetalhesUsuario({ usuario, onEditar }) {
         ))}
       </div>
 
-      <button
-        onClick={onEditar}
-        className="flex items-center gap-2 text-sm font-semibold text-primary hover:underline cursor-pointer transition-colors"
-      >
-        <Icone name="edit" className="text-base" />
-        Editar vinculações
-      </button>
+      <div className="flex flex-wrap gap-3">
+        {onReenviar && (
+          <button
+            type="button"
+            onClick={onReenviar}
+            className="flex items-center gap-2 text-sm font-semibold text-secondary hover:underline cursor-pointer"
+          >
+            <Icone name="send" className="text-base" />
+            Reenviar convite
+          </button>
+        )}
+        {onDesativar && (
+          <button
+            type="button"
+            onClick={onDesativar}
+            className="flex items-center gap-2 text-sm font-semibold text-error hover:underline cursor-pointer"
+          >
+            <Icone name="person_off" className="text-base" />
+            Desativar
+          </button>
+        )}
+        {usuario.tipo !== "convite" && (
+          <button
+            type="button"
+            onClick={onEditar}
+            className="flex items-center gap-2 text-sm font-semibold text-primary hover:underline cursor-pointer transition-colors"
+          >
+            <Icone name="edit" className="text-base" />
+            Editar vinculações
+          </button>
+        )}
+      </div>
     </div>
   );
 }
@@ -731,40 +857,22 @@ function FormEdicao({ usuario, blocos, apartamentos, onSalvar, onCancelar }) {
 
 // ─────────────────────────────────────────────
 function FormNovoUsuario({ blocos, apartamentos, onSalvar, onCancelar }) {
-  const [form, setForm] = useState({ nome: "", email: "", senha: "" });
+  const [form, setForm] = useState({
+    email: "",
+    perfil: PERFIS_CADASTRO_CONDOMINIO[0].value,
+    nomePrecadastro: "",
+    cpfPrecadastro: "",
+  });
   const [blocoId, setBlocoId] = useState("");
   const [aptId, setAptId] = useState("");
-  const [vagas, setVagas] = useState([]);
-  const [vagaId, setVagaId] = useState("");
 
   useEffect(() => {
     if (!blocoId && blocos.length > 0) setBlocoId(blocos[0].id);
   }, [blocos]);
 
-  // Carrega vagas quando apartamento muda
-  useEffect(() => {
-    if (!aptId) { setVagas([]); setVagaId(""); return; }
-    let cancelado = false;
-    vagaApi.listarPorApartamento(aptId)
-      .then((res) => { if (!cancelado) { setVagas(res.data || []); setVagaId(""); } })
-      .catch(() => { if (!cancelado) { setVagas([]); setVagaId(""); } });
-    return () => { cancelado = true; };
-  }, [aptId]);
-
   const aptsFiltrados = blocoId ? apartamentos.filter((a) => a.blocoId === blocoId) : apartamentos;
-
-  function handleBlocoChange(newBlocoId) {
-    setBlocoId(newBlocoId);
-    setAptId("");
-  }
-
-  function handleAptChange(newAptId) {
-    setAptId(newAptId);
-    if (newAptId) {
-      const apt = apartamentos.find((a) => a.id === newAptId);
-      if (apt?.blocoId) setBlocoId(apt.blocoId);
-    }
-  }
+  const perfilUnidade = PERFIS_CADASTRO_UNIDADE.some((p) => p.value === form.perfil);
+  const exigeUnidade = form.perfil === "RESIDENT_OWNER" || perfilUnidade;
 
   function set(field, value) {
     setForm((f) => ({ ...f, [field]: value }));
@@ -772,123 +880,104 @@ function FormNovoUsuario({ blocos, apartamentos, onSalvar, onCancelar }) {
 
   function handleSubmit(e) {
     e.preventDefault();
-    if (!form.nome.trim() || !form.email.trim() || !form.senha.trim() || form.senha.trim().length < 6 || !blocoId || !aptId)
-      return;
-    const blocoSel = blocos.find((b) => b.id === blocoId);
-    const aptSel = apartamentos.find((a) => a.id === aptId);
-    const vagaSel = vagas.find((v) => v.id === vagaId);
+    if (!form.email.trim() || !form.perfil) return;
+    if (exigeUnidade && !aptId) return;
+
     onSalvar({
-      nome: form.nome.trim(),
       email: form.email.trim(),
-      senha: form.senha.trim(),
-      bloco: blocoSel?.nome ?? "",
-      apartamento: aptSel?.numero ?? "",
-      vaga: vagaSel?.numero ?? null,
+      perfil: form.perfil,
+      unidadeId: aptId || undefined,
+      nomePrecadastro: perfilUnidade ? form.nomePrecadastro.trim() : undefined,
+      cpfPrecadastro: perfilUnidade ? form.cpfPrecadastro.trim() : undefined,
     });
   }
 
   const selectCls = "w-full bg-surface-container-highest/40 border-none rounded-xl py-4 px-4 text-on-surface focus:ring-2 focus:ring-primary/50 focus:outline-none backdrop-blur-sm transition-all disabled:opacity-40";
   const labelCls = "text-xs font-semibold uppercase tracking-wider text-on-surface-variant ml-1";
+  const perfisOpcoes = [...PERFIS_CADASTRO_CONDOMINIO, ...PERFIS_CADASTRO_UNIDADE];
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
-      {/* Nome + E-mail + Senha */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <Campo
-          id="novo-nome"
-          label="Nome Completo *"
-          placeholder="Ex: João Silva"
-          icon="person"
-          value={form.nome}
-          onChange={(e) => set("nome", e.target.value)}
-        />
         <Campo
           id="novo-email"
           label="E-mail *"
           type="email"
-          placeholder="joao@mora.com"
+          placeholder="usuario@mora.com"
           icon="mail"
           value={form.email}
           onChange={(e) => set("email", e.target.value)}
         />
-        <Campo
-          id="novo-senha"
-          label="Senha inicial *"
-          type="password"
-          placeholder="Mínimo 6 caracteres"
-          icon="lock"
-          value={form.senha}
-          onChange={(e) => set("senha", e.target.value)}
-          autoComplete="new-password"
-        />
-      </div>
-
-      {/* Bloco + Apt + Vaga */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="space-y-2">
-          <label className={labelCls}>Bloco *</label>
-          <select value={blocoId} onChange={(e) => handleBlocoChange(e.target.value)} required className={selectCls}>
-            <option value="">— Selecione o bloco —</option>
-            {blocos.map((b) => (
-              <option key={b.id} value={b.id}>{b.nome}</option>
-            ))}
-          </select>
-        </div>
-        <div className="space-y-2">
-          <label className={labelCls}>Apartamento *</label>
+          <label className={labelCls}>Perfil *</label>
           <select
-            value={aptId}
-            onChange={(e) => handleAptChange(e.target.value)}
+            value={form.perfil}
+            onChange={(e) => set("perfil", e.target.value)}
             required
-            disabled={aptsFiltrados.length === 0}
             className={selectCls}
           >
-            <option value="">— Selecione o apt —</option>
-            {aptsFiltrados.map((a) => (
-              <option key={a.id} value={a.id}>Apto {a.numero}{a.andar != null ? ` · ${a.andar}º andar` : ""}</option>
+            {perfisOpcoes.map((p) => (
+              <option key={p.value} value={p.value}>{p.label}</option>
             ))}
           </select>
-          {blocoId && aptsFiltrados.length === 0 && (
-            <p className="text-xs text-error ml-1">Nenhum apartamento neste bloco</p>
-          )}
-        </div>
-        <div className="space-y-2">
-          <label className={labelCls}>Vaga</label>
-          <select
-            value={vagaId}
-            onChange={(e) => setVagaId(e.target.value)}
-            disabled={!aptId || vagas.length === 0}
-            className={selectCls}
-          >
-            <option value="">— Sem vaga —</option>
-            {vagas.filter((v) => v.ativa).map((v) => (
-              <option key={v.id} value={v.id}>
-                Vaga {v.numero}{v.localizacao ? ` · ${v.localizacao}` : ""}
-              </option>
-            ))}
-          </select>
-          {aptId && vagas.length === 0 && (
-            <p className="text-xs text-on-surface-variant ml-1">Nenhuma vaga neste apartamento</p>
-          )}
         </div>
       </div>
 
-      {/* Info */}
+      {perfilUnidade && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <Campo
+            id="novo-nome-precad"
+            label="Nome completo *"
+            placeholder="Nome do convidado"
+            icon="person"
+            value={form.nomePrecadastro}
+            onChange={(e) => set("nomePrecadastro", e.target.value)}
+          />
+          <Campo
+            id="novo-cpf-precad"
+            label="CPF *"
+            placeholder="000.000.000-00"
+            icon="badge"
+            value={form.cpfPrecadastro}
+            onChange={(e) => set("cpfPrecadastro", e.target.value)}
+          />
+        </div>
+      )}
+
+      {exigeUnidade && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <label className={labelCls}>Bloco *</label>
+            <select value={blocoId} onChange={(e) => { setBlocoId(e.target.value); setAptId(""); }} required className={selectCls}>
+              <option value="">— Selecione —</option>
+              {blocos.map((b) => (
+                <option key={b.id} value={b.id}>{b.nome}</option>
+              ))}
+            </select>
+          </div>
+          <div className="space-y-2">
+            <label className={labelCls}>Apartamento *</label>
+            <select value={aptId} onChange={(e) => setAptId(e.target.value)} required disabled={aptsFiltrados.length === 0} className={selectCls}>
+              <option value="">— Selecione —</option>
+              {aptsFiltrados.map((a) => (
+                <option key={a.id} value={a.id}>Apto {a.numero}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+      )}
+
       <div className="flex items-start gap-2 px-4 py-3 rounded-xl bg-surface-container-highest/30 text-on-surface-variant text-xs">
         <Icone name="info" className="text-primary text-base shrink-0 mt-0.5" />
         <span>
-          O usuário será criado com status{" "}
-          <strong className="text-secondary">pendente</strong>. O e-mail
-          informado será o login inicial e poderá ter outros logins adicionados
-          depois.
+          Um código de convite será enviado por e-mail (validade 48h). O usuário ativa a conta informando o código.
         </span>
       </div>
 
-      {/* Ações */}
       <div className="flex gap-3 pt-1">
         <Botao type="submit">
-          Criar Usuário
-          <Icone name="person_add" className="text-xl" />
+          Enviar convite
+          <Icone name="send" className="text-xl" />
         </Botao>
         <button
           type="button"
