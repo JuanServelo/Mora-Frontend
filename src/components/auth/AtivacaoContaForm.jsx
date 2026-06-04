@@ -39,6 +39,7 @@ export function AtivacaoContaForm({ tituloPasso1, subtituloPasso1, subtituloPass
     try {
       const res = await validarConvite(codigo.trim());
       setConvite(res.convite);
+      setCodigo(codigo.trim()); // garante que o código não vaze para outros campos
       setPasso(2);
     } catch (err) {
       setErro(err.response?.data?.mensagem || "Erro ao validar código.");

@@ -30,4 +30,16 @@ export const userManagementApi = {
   removerOcupante(unidadeId, userId) {
     return api.delete(`${base(unidadeId)}/occupants/${userId}`);
   },
+
+  listarMoradores(unidadeId) {
+    return api.get(`${base(unidadeId)}/residents`);
+  },
+
+  vincularUnidade(userId, unidadeId) {
+    return api.patch(`/api/user-management/users/${userId}/unit`, { unidadeId });
+  },
+
+  desvincularUnidade(userId) {
+    return api.delete(`/api/user-management/users/${userId}/unit`);
+  },
 };

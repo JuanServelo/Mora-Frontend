@@ -2,16 +2,30 @@
 import { useState, useEffect } from "react";
 import api from "../../services/api";
 import { blocoApi, apartamentoApi, vagaApi } from "../../services/estruturasApi";
+import { userManagementApi } from "../../services/userManagementApi";
 import { Icone } from "../../components/icones/Icone";
 import { Campo } from "../../components/campos/Campo";
 import { Botao } from "../../components/botoes/Botao";
 import {
   PERFIS,
-  PERFIS_CADASTRO_CONDOMINIO,
-  PERFIS_CADASTRO_UNIDADE,
+  TODOS_PERFIS,
   labelPerfil,
   perfisCadastroDisponiveis,
 } from "../../utils/perfis";
+
+const PERFIS_EXIGEM_UNIDADE_FORM = new Set([
+  PERFIS.RESIDENT_OWNER,
+  PERFIS.ABSENT_OWNER,
+  PERFIS.LESSEE,
+  PERFIS.OCCUPANT,
+  PERFIS.GUEST,
+]);
+
+const PERFIS_EXIGEM_PRECADASTRO = new Set([
+  PERFIS.LESSEE,
+  PERFIS.OCCUPANT,
+  PERFIS.GUEST,
+]);
 import { useToast } from "../../contexts/ToastContext";
 import { useConfirm } from "../../contexts/ConfirmContext";
 import { useAuth } from "../../contexts/AuthContext";
@@ -104,19 +118,19 @@ export function GerenciarUsuarios() {
   }
 
  async function salvarEdicao(id, dados) {
-  const { status: _st, logins: _lg, ...payload } = dados;
+  const { status: _st, logins: _lg, unidadeId, ...payload } = dados;
 
   try {
-    console.log("PAYLOAD ENVIADO:", payload);
-
     const res = await api.put(`/api/users/${id}`, payload);
-
-    console.log("RESPOSTA API:", res.data);
-
     const u = res.data.usuario;
+    if (!u) throw new Error("Resposta da API inválida");
 
-    if (!u) {
-      throw new Error("Resposta da API inválida");
+    // Sincroniza unidadeId com o novo endpoint
+    const usuarioAtual = usuarios.find((usr) => usr.id === id);
+    if (unidadeId && unidadeId !== usuarioAtual?.unidadeId) {
+      await userManagementApi.vincularUnidade(id, unidadeId);
+    } else if (!unidadeId && usuarioAtual?.unidadeId) {
+      await userManagementApi.desvincularUnidade(id).catch(() => {});
     }
 
     setUsuarios((us) =>
@@ -130,13 +144,14 @@ export function GerenciarUsuarios() {
               bloco: u.bloco ?? "",
               apartamento: u.apartamento ?? "",
               vaga: u.vaga ?? null,
+              unidadeId: unidadeId ?? null,
             }
-          : usr
-      )
+          : usr,
+      ),
     );
 
     setEditando(null);
-
+    toast.success("Usuário atualizado.");
   } catch (err) {
     console.error("Erro ao salvar edição:", err);
     throw err;
@@ -529,10 +544,19 @@ function DetalhesUsuario({ usuario, onEditar, onReenviar, onDesativar }) {
             icon: "local_parking",
           },
           { label: "Status", value: usuario.status, icon: "verified_user" },
+          ...(usuario.unidadeId
+            ? [{
+                label: "Unidade ID",
+                value: `${usuario.unidadeId.slice(0, 8)}…`,
+                icon: "fingerprint",
+                title: usuario.unidadeId,
+              }]
+            : []),
         ].map((item) => (
           <div
             key={item.label}
             className="bg-surface-container-highest/30 rounded-2xl p-4"
+            title={item.title}
           >
             <Icone name={item.icon} className="text-primary text-xl mb-2" />
             <p className="text-on-surface-variant text-xs uppercase tracking-wider">
@@ -679,6 +703,7 @@ function FormEdicao({ usuario, blocos, apartamentos, onSalvar, onCancelar }) {
     const novoBloco = blocoSel?.nome ?? "";
     const novoApt = aptSel?.numero ?? "";
     const novaVaga = vagaSel?.numero ?? null;
+    const novaUnidadeId = aptSel?.id ?? null;
 
     const houveMudanca =
       usuario.bloco !== novoBloco ||
@@ -690,16 +715,11 @@ function FormEdicao({ usuario, blocos, apartamentos, onSalvar, onCancelar }) {
       return;
     }
 
-    console.log("ENVIANDO:", {
-      bloco: novoBloco,
-      apartamento: novoApt,
-      vaga: novaVaga,
-    });
-
     await onSalvar({
       bloco: novoBloco,
       apartamento: novoApt,
       vaga: novaVaga,
+      unidadeId: novaUnidadeId,
       status: form.status,
       logins: form.logins,
     });
@@ -874,27 +894,33 @@ function FormEdicao({ usuario, blocos, apartamentos, onSalvar, onCancelar }) {
 
 // ─────────────────────────────────────────────
 function FormNovoUsuario({ blocos, apartamentos, perfilAtor, onSalvar, onCancelar }) {
-  const perfisDisponiveis = perfisCadastroDisponiveis(perfilAtor).filter(
+  const perfisOpcoes = perfisCadastroDisponiveis(perfilAtor).filter(
     (p) => p.value !== PERFIS.GUEST,
   );
-  const perfilInicial = perfisDisponiveis[0]?.value ?? PERFIS_CADASTRO_CONDOMINIO[0].value;
 
   const [form, setForm] = useState({
     email: "",
-    perfil: perfilInicial,
+    perfil: perfisOpcoes[0]?.value ?? PERFIS.OPERATIONAL_SYNDIC,
     nomePrecadastro: "",
     cpfPrecadastro: "",
   });
   const [blocoId, setBlocoId] = useState("");
   const [aptId, setAptId] = useState("");
 
+  // Sincroniza o perfil inicial quando perfisOpcoes mudar (ex: perfilAtor carregou depois)
+  useEffect(() => {
+    if (perfisOpcoes.length > 0 && !perfisOpcoes.some((p) => p.value === form.perfil)) {
+      setForm((f) => ({ ...f, perfil: perfisOpcoes[0].value }));
+    }
+  }, [perfilAtor]); // eslint-disable-line react-hooks/exhaustive-deps
+
   useEffect(() => {
     if (!blocoId && blocos.length > 0) setBlocoId(blocos[0].id);
   }, [blocos]);
 
   const aptsFiltrados = blocoId ? apartamentos.filter((a) => a.blocoId === blocoId) : apartamentos;
-  const perfilUnidade = PERFIS_CADASTRO_UNIDADE.some((p) => p.value === form.perfil);
-  const exigeUnidade = form.perfil === "RESIDENT_OWNER" || perfilUnidade;
+  const perfilUnidade = PERFIS_EXIGEM_PRECADASTRO.has(form.perfil);
+  const exigeUnidade = PERFIS_EXIGEM_UNIDADE_FORM.has(form.perfil);
 
   function set(field, value) {
     setForm((f) => ({ ...f, [field]: value }));
@@ -916,9 +942,6 @@ function FormNovoUsuario({ blocos, apartamentos, perfilAtor, onSalvar, onCancela
 
   const selectCls = "w-full bg-surface-container-highest/40 border-none rounded-xl py-4 px-4 text-on-surface focus:ring-2 focus:ring-primary/50 focus:outline-none backdrop-blur-sm transition-all disabled:opacity-40";
   const labelCls = "text-xs font-semibold uppercase tracking-wider text-on-surface-variant ml-1";
-  const perfisOpcoes = perfisDisponiveis.length > 0
-    ? perfisDisponiveis
-    : PERFIS_CADASTRO_CONDOMINIO;
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">

@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 import { useAuth } from "../../../contexts/AuthContext";
 import { useToast } from "../../../contexts/ToastContext";
 import { useConfirm } from "../../../contexts/ConfirmContext";
@@ -307,9 +306,9 @@ export function FamiliaView() {
         <p className="text-on-surface-variant text-sm">
           Sua conta ainda não está vinculada a uma unidade.
         </p>
-        <Link to="/acesso-pendente" className="text-primary text-sm font-semibold hover:underline">
-          Verificar status de acesso
-        </Link>
+        <p className="text-on-surface-variant text-xs">
+          Aguarde um administrador vincular seu usuário a um apartamento.
+        </p>
       </div>
     );
   }
@@ -367,7 +366,12 @@ export function FamiliaView() {
             key={item.tipo === "convite" ? `convite-${item.id}` : item.id}
             item={item}
             responsavelFinanceiroId={responsavelFinanceiroId}
-            podeRemover
+            podeRemover={
+              item.tipo !== "convite" &&
+              (podeGerenciarOcupantes(perfil)
+                ? item.cadastradoPorId === usuario?.id
+                : true)
+            }
             onRemover={handleRemover}
           />
         ))}

@@ -29,6 +29,8 @@ const ADM_LINKS = [
   { label: "Entregas", to: "/adm/entregas", icon: "inventory_2", description: "Gestão de entregas" },
   { label: "Vagas", to: "/adm/vagas", icon: "local_parking", description: "Vagas de garagem" },
   { label: "Conhecimento", to: "/adm/conhecimento", icon: "library_books", description: "Base de conhecimento e FAQ" },
+  { label: "Perfis", to: "/adm/perfis", icon: "verified_user", description: "Permissões por perfil" },
+  { label: "Clientes", to: "/adm/condominios", icon: "domain", description: "Gestão de clientes" },
 ];
 
 function NavLink({ to, children }) {
