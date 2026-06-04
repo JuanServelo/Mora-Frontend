@@ -1,6 +1,8 @@
 // src/pages/inicio/Inicio.jsx
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
+import { condominiosApi } from "../../services/condominiosApi";
 import { Icone } from "../../components/icones/Icone";
 
 const ACESSO_RAPIDO = [
@@ -33,13 +35,21 @@ const ACESSO_RAPIDO = [
 export function Inicio() {
   const { usuario } = useAuth();
   const primeiroNome = usuario?.nome?.split(" ")[0] || "Morador";
+  const [nomeCondominio, setNomeCondominio] = useState(null);
+
+  useEffect(() => {
+    if (!usuario?.condominioId) return;
+    condominiosApi.buscar(usuario.condominioId)
+      .then((res) => setNomeCondominio(res.data.condominio?.nome ?? null))
+      .catch(() => {});
+  }, [usuario?.condominioId]);
 
   return (
     <div className="min-h-screen w-full pt-4 pb-20 px-6">
       <div className="max-w-6xl mx-auto space-y-10">
         <header className="text-center max-w-3xl mx-auto">
           <p className="text-on-surface-variant text-xs font-semibold uppercase tracking-widest mb-2">
-            Condomínio
+            {nomeCondominio ?? "Condomínio"}
           </p>
           <h1 className="font-headline text-4xl md:text-5xl font-extrabold tracking-tight text-on-surface mb-4">
             Olá,{" "}

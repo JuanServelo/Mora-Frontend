@@ -3,6 +3,7 @@ import { useState, useRef, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Icone } from "../icones/Icone";
 import { useAuth } from "../../contexts/AuthContext";
+import { isUsuarioRestrito, podeAcessarAdmin } from "../../utils/perfis";
 // import moraLogo from "../../assets/Mora.png";
 // import moraLogo2 from "../../assets/Mora2.png";
 import moraLogo3 from "../../assets/Mora3.png";
@@ -28,6 +29,8 @@ const ADM_LINKS = [
   { label: "Entregas", to: "/adm/entregas", icon: "inventory_2", description: "Gestão de entregas" },
   { label: "Vagas", to: "/adm/vagas", icon: "local_parking", description: "Vagas de garagem" },
   { label: "Conhecimento", to: "/adm/conhecimento", icon: "library_books", description: "Base de conhecimento e FAQ" },
+  { label: "Perfis", to: "/adm/perfis", icon: "verified_user", description: "Permissões por perfil" },
+  { label: "Clientes", to: "/adm/condominios", icon: "domain", description: "Gestão de clientes" },
 ];
 
 function NavLink({ to, children }) {
@@ -129,13 +132,9 @@ function AdminMenu() {
 export function Navbar() {
   const [darkMode, setDarkMode] = useState(true);
   const { usuario } = useAuth();
-  const role = String(usuario?.role || "").toLowerCase();
-  const isAdmin = role === "admin";
-  const hasUnitAssociation = Boolean(usuario?.bloco) && Boolean(usuario?.apartamento);
-  const isRestrictedUser = Boolean(usuario) && !isAdmin && !hasUnitAssociation;
-  const visibleLeftLinks = isRestrictedUser
-    ? []
-    : NAV_LINKS_LEFT;
+  const isRestrictedUser = isUsuarioRestrito(usuario);
+  const showAdminMenu = podeAcessarAdmin(usuario?.perfil);
+  const visibleLeftLinks = isRestrictedUser ? [] : NAV_LINKS_LEFT;
 
   return (
     <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-[94%] max-w-4xl px-1">
@@ -147,7 +146,7 @@ export function Navbar() {
               {l.label}
             </NavLink>
           ))}
-          {isAdmin && <AdminMenu />}
+          {!isRestrictedUser && showAdminMenu && <AdminMenu />}
         </div>
 
         {/* Centro — Logo */}

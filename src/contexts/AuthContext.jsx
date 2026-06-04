@@ -1,5 +1,6 @@
-import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useState, useEffect, useCallback } from "react";
 import api from "../services/api";
+import { redirectPorPerfil } from "../utils/perfis";
 
 const AuthContext = createContext(null);
 
@@ -20,18 +21,25 @@ export function AuthProvider({ children }) {
     }
   }, []);
 
-  async function login(email, senha) {
-    const res = await api.post("/api/auth/login", { email, senha });
+  function persistSession(res) {
     localStorage.setItem("token", res.data.token);
     setUsuario(res.data.usuario);
     return res.data;
   }
 
-  async function registrar(nome, email, senha) {
-    const res = await api.post("/api/auth/register", { nome, email, senha });
-    localStorage.setItem("token", res.data.token);
-    setUsuario(res.data.usuario);
+  async function login(email, senha) {
+    const res = await api.post("/api/auth/login", { email, senha });
+    return persistSession(res);
+  }
+
+  async function validarConvite(codigo) {
+    const res = await api.post("/api/invites/validate", { codigo });
     return res.data;
+  }
+
+  async function ativarConta(dados) {
+    const res = await api.post("/api/invites/activate", dados);
+    return persistSession(res);
   }
 
   async function esqueciSenha(email) {
@@ -39,8 +47,35 @@ export function AuthProvider({ children }) {
     return res.data;
   }
 
+  async function redefinirSenha(token, senha) {
+    const res = await api.post(`/api/auth/reset-password/${token}`, { senha });
+    return res.data;
+  }
+
+  const completarOAuth = useCallback(async (token) => {
+    localStorage.setItem("token", token);
+    const res = await api.get("/api/auth/me");
+    setUsuario(res.data.usuario);
+    return res.data.usuario;
+  }, []);
+
+  function loginComGoogle() {
+    const base = import.meta.env.VITE_API_URL || "http://localhost:3001";
+    window.location.href = `${base}/api/auth/google`;
+  }
+
   async function atualizarPerfil(dados) {
     const res = await api.put("/api/auth/me", dados);
+    setUsuario(res.data.usuario);
+    return res.data;
+  }
+
+  async function atualizarFoto(file) {
+    const formData = new FormData();
+    formData.append("foto", file);
+    const res = await api.post("/api/auth/me/foto", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
     setUsuario(res.data.usuario);
     return res.data;
   }
@@ -50,9 +85,27 @@ export function AuthProvider({ children }) {
     setUsuario(null);
   }
 
+  function getRedirectPath(perfil) {
+    return redirectPorPerfil(perfil);
+  }
+
   return (
     <AuthContext.Provider
-      value={{ usuario, loading, login, registrar, esqueciSenha, atualizarPerfil, logout }}
+      value={{
+        usuario,
+        loading,
+        login,
+        validarConvite,
+        ativarConta,
+        esqueciSenha,
+        redefinirSenha,
+        completarOAuth,
+        loginComGoogle,
+        atualizarPerfil,
+        atualizarFoto,
+        logout,
+        getRedirectPath,
+      }}
     >
       {children}
     </AuthContext.Provider>

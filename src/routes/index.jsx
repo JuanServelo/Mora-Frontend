@@ -1,8 +1,11 @@
 // src/routes/index.jsx
 import { createBrowserRouter, Navigate } from "react-router-dom";
-import { SolicitarAcesso } from "../pages/auth/SolicitarAcesso";
+import { AtivarConta } from "../pages/auth/AtivarConta";
+import { SemConvite } from "../pages/auth/SemConvite";
 import { Login } from "../pages/auth/Login";
 import { EsqueceuSenha } from "../pages/auth/EsqueceuSenha";
+import { ResetPassword } from "../pages/auth/ResetPassword";
+import { AuthCallback } from "../pages/auth/AuthCallback";
 import { AcessoPendente } from "../pages/auth/AcessoPendente";
 import { Perfil } from "../pages/usuario/perfil/Perfil";
 import { GerenciarUsuarios } from "../pages/adm/GerenciarUsuarios";
@@ -13,6 +16,8 @@ import { GerenciarReclamacoes } from "../pages/adm/GerenciarReclamacoes";
 import { GerenciarEntregas } from "../pages/adm/GerenciarEntregas";
 import { GerenciarVagas } from "../pages/adm/GerenciarVagas";
 import { GerenciarConhecimento } from "../pages/adm/GerenciarConhecimento";
+import { GerenciarPerfis } from "../pages/adm/GerenciarPerfis";
+import { GerenciarCondominios } from "../pages/adm/GerenciarCondominios";
 import { FAQ } from "../pages/usuario/FAQ";
 import { MinhasReservas } from "../pages/usuario/MinhasReservas";
 import { MinhasReclamacoes } from "../pages/usuario/MinhasReclamacoes";
@@ -31,7 +36,15 @@ export const router = createBrowserRouter([
   // Páginas de autenticação — sem navbar
   {
     path: "/solicitar-acesso",
-    element: <SolicitarAcesso />,
+    element: <Navigate to="/sem-convite" replace />,
+  },
+  {
+    path: "/sem-convite",
+    element: <SemConvite />,
+  },
+  {
+    path: "/ativar",
+    element: <AtivarConta />,
   },
   {
     path: "/login",
@@ -40,6 +53,14 @@ export const router = createBrowserRouter([
   {
     path: "/esqueceu-senha",
     element: <EsqueceuSenha />,
+  },
+  {
+    path: "/reset-password",
+    element: <ResetPassword />,
+  },
+  {
+    path: "/auth/callback",
+    element: <AuthCallback />,
   },
   // Páginas do app — com navbar, protegidas
   {
@@ -66,6 +87,8 @@ export const router = createBrowserRouter([
       { path: "/adm/entregas", element: <GerenciarEntregas /> },
       { path: "/adm/vagas", element: <GerenciarVagas /> },
       { path: "/adm/conhecimento", element: <GerenciarConhecimento /> },
+      { path: "/adm/perfis", element: <GerenciarPerfis /> },
+      { path: "/adm/condominios", element: <GerenciarCondominios /> },
     ],
   },
 ]);

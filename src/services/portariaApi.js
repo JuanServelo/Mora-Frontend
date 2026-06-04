@@ -63,6 +63,29 @@ export const funcionarioApi = {
 };
 
 // ─────────────────────────────────────────────
+// VAGAS DE ESTACIONAMENTO
+// ─────────────────────────────────────────────
+export const vagaApi = {
+  listar: () => portariaApi.get("/vagas"),
+  listarTodas: () => portariaApi.get("/vagas/todas"),
+  buscar: (id) => portariaApi.get(`/vagas/${id}`),
+  listarPorApartamento: (apartamentoId) =>
+    portariaApi.get(`/vagas/apartamento/${apartamentoId}`),
+  cadastrar: (data, apartamentoId) =>
+    portariaApi.post("/vagas/cadastrar", data, {
+      params: apartamentoId ? { apartamentoId } : {},
+    }),
+  atualizar: (id, data, apartamentoId) =>
+    portariaApi.put(`/vagas/${id}`, data, {
+      params: apartamentoId !== undefined
+        ? { apartamentoId: apartamentoId || "none" }
+        : {},
+    }),
+  ativar: (id) => portariaApi.post(`/vagas/${id}/ativar`),
+  desativar: (id) => portariaApi.delete(`/vagas/${id}`),
+};
+
+// ─────────────────────────────────────────────
 // CARROS
 // ─────────────────────────────────────────────
 export const carroApi = {

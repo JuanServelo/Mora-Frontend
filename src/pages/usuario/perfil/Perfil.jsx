@@ -33,9 +33,9 @@ const ITENS_CONTA = [
     icon: "groups",
     color: "text-primary",
     titleId: "perfil.familia.titulo",
-    titleDefault: "Família e Convidados",
+    titleDefault: "Ocupantes da unidade",
     descId: "perfil.familia.desc",
-    descDefault: "Gerencie quem pode acessar sua unidade",
+    descDefault: "Gerencie Lessee, Occupant e Guest vinculados à sua unidade",
   },
   {
     id: "cobranca",
@@ -51,7 +51,7 @@ const ITENS_CONTA = [
 const TITULOS_VIEW = {
   detalhes: "Detalhes da Conta",
   privacidade: "Privacidade e Segurança",
-  familia: "Família e Convidados",
+  familia: "Ocupantes da unidade",
   cobranca: "Histórico de Cobrança",
 };
 

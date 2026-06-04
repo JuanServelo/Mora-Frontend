@@ -5,6 +5,7 @@ import { areaComunApi } from "../../services/estruturasApi";
 import { Icone } from "../../components/icones/Icone";
 import { Campo } from "../../components/campos/Campo";
 import { Botao } from "../../components/botoes/Botao";
+import { useConfirm } from "../../contexts/ConfirmContext";
 
 function TextArea({ label, ...props }) {
   return (
@@ -44,6 +45,7 @@ const FORM_INICIAL = {
 const TIPOS_AREA = ["PISCINA", "SALAO_FESTAS", "ACADEMIA", "CHURRASQUEIRA", "QUADRA", "PLAYGROUND", "GYM", "OUTRO"];
 
 export function GerenciarEspacos() {
+  const confirm = useConfirm();
   const [areas, setAreas] = useState([]);
   const [carregando, setCarregando] = useState(true);
   const [criando, setCriando] = useState(false);
@@ -92,7 +94,13 @@ export function GerenciarEspacos() {
   };
 
   const excluir = async (id) => {
-    if (!confirm("Tem certeza que deseja excluir?")) return;
+    const ok = await confirm({
+      titulo: "Excluir espaço",
+      mensagem: "Tem certeza que deseja excluir esta área comum?",
+      confirmarTexto: "Excluir",
+      variante: "danger",
+    });
+    if (!ok) return;
     try {
       await areaComunApi.desativar(id);
       setAreas((prev) => prev.filter((a) => a.id !== id));

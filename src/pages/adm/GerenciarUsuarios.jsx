@@ -2,18 +2,46 @@
 import { useState, useEffect } from "react";
 import api from "../../services/api";
 import { blocoApi, apartamentoApi, vagaApi } from "../../services/estruturasApi";
+import { userManagementApi } from "../../services/userManagementApi";
 import { Icone } from "../../components/icones/Icone";
 import { Campo } from "../../components/campos/Campo";
 import { Botao } from "../../components/botoes/Botao";
+import {
+  PERFIS,
+  TODOS_PERFIS,
+  labelPerfil,
+  perfisCadastroDisponiveis,
+} from "../../utils/perfis";
+
+const PERFIS_EXIGEM_UNIDADE_FORM = new Set([
+  PERFIS.RESIDENT_OWNER,
+  PERFIS.ABSENT_OWNER,
+  PERFIS.LESSEE,
+  PERFIS.OCCUPANT,
+  PERFIS.GUEST,
+]);
+
+const PERFIS_EXIGEM_PRECADASTRO = new Set([
+  PERFIS.LESSEE,
+  PERFIS.OCCUPANT,
+  PERFIS.GUEST,
+]);
+import { useToast } from "../../contexts/ToastContext";
+import { useConfirm } from "../../contexts/ConfirmContext";
+import { useAuth } from "../../contexts/AuthContext";
 
 const STATUS_STYLE = {
   ativo: "bg-primary/10 text-primary",
   pendente: "bg-secondary/10 text-secondary",
   inativo: "bg-error/10 text-error",
+  expirado: "bg-error/10 text-error",
 };
 
 // ─────────────────────────────────────────────
 export function GerenciarUsuarios() {
+  const toast = useToast();
+  const confirm = useConfirm();
+  const { usuario: usuarioLogado } = useAuth();
   const [usuarios, setUsuarios] = useState([]);
   const [blocos, setBlocos] = useState([]);
   const [apartamentos, setApartamentos] = useState([]);
@@ -21,22 +49,51 @@ export function GerenciarUsuarios() {
   const [busca, setBusca] = useState("");
 
   useEffect(() => {
-    Promise.all([api.get("/api/users"), blocoApi.listar(), apartamentoApi.listar()])
+    Promise.all([
+      api.get("/api/user-management/users").catch(() => api.get("/api/users")),
+      blocoApi.listar(),
+      apartamentoApi.listar(),
+    ])
       .then(([usersRes, blocosRes, aptsRes]) => {
-        const lista = (usersRes.data.usuarios || []).map((u) => ({
+        const mapStatus = (s) => {
+          if (s === "active") return "ativo";
+          if (s === "inactive") return "inativo";
+          if (s === "pending_activation") return "pendente";
+          return s || "ativo";
+        };
+
+        const listaUsuarios = (usersRes.data.usuarios || []).map((u) => ({
           id: u.id,
           nome: u.nome,
           email: u.email,
-          role: u.role,
+          perfil: u.perfil,
           provider: u.provider,
           bloco: u.bloco ?? "",
           apartamento: u.apartamento ?? "",
           vaga: u.vaga ?? null,
+          unidadeId: u.unidadeId,
+          responsavelFinanceiro: u.responsavelFinanceiro ?? false,
           logins: [u.email],
-          status: u.role === "admin" ? "ativo" : "ativo",
+          status: mapStatus(u.status),
           createdAt: u.createdAt,
+          tipo: "usuario",
         }));
-        setUsuarios(lista);
+
+        const convites = (usersRes.data.convitesPendentes || []).map((c) => ({
+          id: `convite-${c.id}`,
+          conviteId: c.id,
+          nome: c.email,
+          email: c.email,
+          perfil: c.perfil,
+          unidadeId: c.unidadeId,
+          logins: [c.email],
+          status: c.expirado ? "expirado" : "pendente",
+          expiresAt: c.expiresAt,
+          createdAt: c.createdAt,
+          tipo: "convite",
+        }));
+
+        setUsuarios([...convites, ...listaUsuarios]);
         setBlocos(blocosRes.data);
         setApartamentos(aptsRes.data);
       })
@@ -61,19 +118,19 @@ export function GerenciarUsuarios() {
   }
 
  async function salvarEdicao(id, dados) {
-  const { status: _st, logins: _lg, ...payload } = dados;
+  const { status: _st, logins: _lg, unidadeId, ...payload } = dados;
 
   try {
-    console.log("PAYLOAD ENVIADO:", payload);
-
     const res = await api.put(`/api/users/${id}`, payload);
-
-    console.log("RESPOSTA API:", res.data);
-
     const u = res.data.usuario;
+    if (!u) throw new Error("Resposta da API inválida");
 
-    if (!u) {
-      throw new Error("Resposta da API inválida");
+    // Sincroniza unidadeId com o novo endpoint
+    const usuarioAtual = usuarios.find((usr) => usr.id === id);
+    if (unidadeId && unidadeId !== usuarioAtual?.unidadeId) {
+      await userManagementApi.vincularUnidade(id, unidadeId);
+    } else if (!unidadeId && usuarioAtual?.unidadeId) {
+      await userManagementApi.desvincularUnidade(id).catch(() => {});
     }
 
     setUsuarios((us) =>
@@ -83,17 +140,18 @@ export function GerenciarUsuarios() {
               ...usr,
               nome: u.nome,
               email: u.email,
-              role: u.role,
+              perfil: u.perfil,
               bloco: u.bloco ?? "",
               apartamento: u.apartamento ?? "",
               vaga: u.vaga ?? null,
+              unidadeId: unidadeId ?? null,
             }
-          : usr
-      )
+          : usr,
+      ),
     );
 
     setEditando(null);
-
+    toast.success("Usuário atualizado.");
   } catch (err) {
     console.error("Erro ao salvar edição:", err);
     throw err;
@@ -102,35 +160,83 @@ export function GerenciarUsuarios() {
 
   async function criarUsuario(dados) {
     try {
-      const res = await api.post("/api/users", {
-        nome: dados.nome,
+      const res = await api.post("/api/user-management/invites", {
         email: dados.email,
-        senha: dados.senha,
-        role: "user",
-        bloco: dados.bloco || undefined,
-        apartamento: dados.apartamento || undefined,
-        vaga: dados.vaga || undefined,
+        perfil: dados.perfil,
+        unidadeId: dados.unidadeId || undefined,
+        nomePrecadastro: dados.nomePrecadastro || undefined,
+        cpfPrecadastro: dados.cpfPrecadastro || undefined,
       });
-      const u = res.data.usuario;
+      const c = res.data.convite;
       setUsuarios((us) => [
         {
-          id: u.id,
-          nome: u.nome,
-          email: u.email,
-          role: u.role,
-          provider: u.provider,
-          bloco: u.bloco ?? "",
-          apartamento: u.apartamento ?? "",
-          vaga: u.vaga ?? null,
-          logins: [u.email],
-          status: "ativo",
-          createdAt: u.createdAt,
+          id: `convite-${c.id}`,
+          conviteId: c.id,
+          nome: c.email,
+          email: c.email,
+          perfil: c.perfil,
+          unidadeId: dados.unidadeId,
+          logins: [c.email],
+          status: "pendente",
+          expiresAt: c.expiresAt,
+          createdAt: new Date().toISOString(),
+          tipo: "convite",
         },
         ...us,
       ]);
       setCriando(false);
+      if (res.data.emailEnviado === false) {
+        toast.warning(
+          res.data.avisoEmail || res.data.mensagem || "Convite criado, mas o e-mail não pôde ser enviado.",
+          { detalhe: `Código do convite: ${c.codigo}` },
+        );
+      } else {
+        toast.success(res.data.mensagem || "Convite enviado com sucesso.");
+      }
     } catch (err) {
-      console.error("Erro ao criar:", err);
+      toast.error(err.response?.data?.mensagem || "Erro ao enviar convite.");
+    }
+  }
+
+  async function reenviarConvite(conviteId) {
+    try {
+      const res = await api.post(`/api/user-management/invites/${conviteId}/resend`);
+      setUsuarios((us) =>
+        us.map((u) =>
+          u.conviteId === conviteId
+            ? { ...u, status: "pendente", expiresAt: res.data.convite?.expiresAt }
+            : u,
+        ),
+      );
+      if (res.data.emailEnviado === false) {
+        toast.warning(
+          res.data.avisoEmail || res.data.mensagem || "Convite reenviado, mas o e-mail não pôde ser enviado.",
+          { detalhe: `Código do convite: ${res.data.convite?.codigo || "—"}` },
+        );
+      } else {
+        toast.success(res.data.mensagem || "Convite reenviado com sucesso.");
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.mensagem || "Erro ao reenviar convite.");
+    }
+  }
+
+  async function desativarUsuario(userId) {
+    const ok = await confirm({
+      titulo: "Desativar usuário",
+      mensagem: "Esta ação revoga o acesso imediatamente. Deseja continuar?",
+      confirmarTexto: "Desativar",
+      variante: "danger",
+    });
+    if (!ok) return;
+    try {
+      const res = await api.patch(`/api/user-management/users/${userId}/deactivate`);
+      setUsuarios((us) =>
+        us.map((u) => (u.id === userId ? { ...u, status: "inativo" } : u)),
+      );
+      toast.success(res.data.mensagem || "Usuário desativado.");
+    } catch (err) {
+      toast.error(err.response?.data?.mensagem || "Erro ao desativar usuário.");
     }
   }
 
@@ -247,6 +353,7 @@ export function GerenciarUsuarios() {
                 <FormNovoUsuario
                   blocos={blocos}
                   apartamentos={apartamentos}
+                  perfilAtor={usuarioLogado?.perfil}
                   onSalvar={criarUsuario}
                   onCancelar={() => setCriando(false)}
                 />
@@ -320,6 +427,12 @@ export function GerenciarUsuarios() {
                       {usuario.status}
                     </span>
 
+                    {usuario.responsavelFinanceiro && usuario.tipo === "usuario" && (
+                      <span className="shrink-0 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider bg-secondary/10 text-secondary">
+                        Financeiro
+                      </span>
+                    )}
+
                     <Icone
                       name="expand_more"
                       className={`text-outline shrink-0 transition-transform duration-300 ${expandido === usuario.id ? "rotate-180" : ""}`}
@@ -341,6 +454,16 @@ export function GerenciarUsuarios() {
                         <DetalhesUsuario
                           usuario={usuario}
                           onEditar={() => setEditando(usuario.id)}
+                          onReenviar={
+                            usuario.tipo === "convite"
+                              ? () => reenviarConvite(usuario.conviteId)
+                              : null
+                          }
+                          onDesativar={
+                            usuario.tipo === "usuario" && usuario.status === "ativo"
+                              ? () => desativarUsuario(usuario.id)
+                              : null
+                          }
                         />
                       )}
                     </div>
@@ -374,9 +497,19 @@ function SecaoCondominio() {
 }
 
 // ─────────────────────────────────────────────
-function DetalhesUsuario({ usuario, onEditar }) {
+function DetalhesUsuario({ usuario, onEditar, onReenviar, onDesativar }) {
   return (
     <div className="space-y-5">
+      {usuario.perfil && (
+        <p className="text-sm text-on-surface-variant">
+          Perfil: <strong className="text-on-surface">{labelPerfil(usuario.perfil)}</strong>
+          {usuario.responsavelFinanceiro && (
+            <span className="ml-2 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-secondary/10 text-secondary">
+              Responsável financeiro
+            </span>
+          )}
+        </p>
+      )}
       <div>
         <p className="text-xs font-semibold uppercase tracking-widest text-on-surface-variant mb-3">
           Logins vinculados ao apartamento
@@ -411,10 +544,19 @@ function DetalhesUsuario({ usuario, onEditar }) {
             icon: "local_parking",
           },
           { label: "Status", value: usuario.status, icon: "verified_user" },
+          ...(usuario.unidadeId
+            ? [{
+                label: "Unidade ID",
+                value: `${usuario.unidadeId.slice(0, 8)}…`,
+                icon: "fingerprint",
+                title: usuario.unidadeId,
+              }]
+            : []),
         ].map((item) => (
           <div
             key={item.label}
             className="bg-surface-container-highest/30 rounded-2xl p-4"
+            title={item.title}
           >
             <Icone name={item.icon} className="text-primary text-xl mb-2" />
             <p className="text-on-surface-variant text-xs uppercase tracking-wider">
@@ -427,13 +569,38 @@ function DetalhesUsuario({ usuario, onEditar }) {
         ))}
       </div>
 
-      <button
-        onClick={onEditar}
-        className="flex items-center gap-2 text-sm font-semibold text-primary hover:underline cursor-pointer transition-colors"
-      >
-        <Icone name="edit" className="text-base" />
-        Editar vinculações
-      </button>
+      <div className="flex flex-wrap gap-3">
+        {onReenviar && (
+          <button
+            type="button"
+            onClick={onReenviar}
+            className="flex items-center gap-2 text-sm font-semibold text-secondary hover:underline cursor-pointer"
+          >
+            <Icone name="send" className="text-base" />
+            Reenviar convite
+          </button>
+        )}
+        {onDesativar && (
+          <button
+            type="button"
+            onClick={onDesativar}
+            className="flex items-center gap-2 text-sm font-semibold text-error hover:underline cursor-pointer"
+          >
+            <Icone name="person_off" className="text-base" />
+            Desativar
+          </button>
+        )}
+        {usuario.tipo !== "convite" && (
+          <button
+            type="button"
+            onClick={onEditar}
+            className="flex items-center gap-2 text-sm font-semibold text-primary hover:underline cursor-pointer transition-colors"
+          >
+            <Icone name="edit" className="text-base" />
+            Editar vinculações
+          </button>
+        )}
+      </div>
     </div>
   );
 }
@@ -536,6 +703,7 @@ function FormEdicao({ usuario, blocos, apartamentos, onSalvar, onCancelar }) {
     const novoBloco = blocoSel?.nome ?? "";
     const novoApt = aptSel?.numero ?? "";
     const novaVaga = vagaSel?.numero ?? null;
+    const novaUnidadeId = aptSel?.id ?? null;
 
     const houveMudanca =
       usuario.bloco !== novoBloco ||
@@ -547,16 +715,11 @@ function FormEdicao({ usuario, blocos, apartamentos, onSalvar, onCancelar }) {
       return;
     }
 
-    console.log("ENVIANDO:", {
-      bloco: novoBloco,
-      apartamento: novoApt,
-      vaga: novaVaga,
-    });
-
     await onSalvar({
       bloco: novoBloco,
       apartamento: novoApt,
       vaga: novaVaga,
+      unidadeId: novaUnidadeId,
       status: form.status,
       logins: form.logins,
     });
@@ -730,41 +893,34 @@ function FormEdicao({ usuario, blocos, apartamentos, onSalvar, onCancelar }) {
 }
 
 // ─────────────────────────────────────────────
-function FormNovoUsuario({ blocos, apartamentos, onSalvar, onCancelar }) {
-  const [form, setForm] = useState({ nome: "", email: "", senha: "" });
+function FormNovoUsuario({ blocos, apartamentos, perfilAtor, onSalvar, onCancelar }) {
+  const perfisOpcoes = perfisCadastroDisponiveis(perfilAtor).filter(
+    (p) => p.value !== PERFIS.GUEST,
+  );
+
+  const [form, setForm] = useState({
+    email: "",
+    perfil: perfisOpcoes[0]?.value ?? PERFIS.OPERATIONAL_SYNDIC,
+    nomePrecadastro: "",
+    cpfPrecadastro: "",
+  });
   const [blocoId, setBlocoId] = useState("");
   const [aptId, setAptId] = useState("");
-  const [vagas, setVagas] = useState([]);
-  const [vagaId, setVagaId] = useState("");
+
+  // Sincroniza o perfil inicial quando perfisOpcoes mudar (ex: perfilAtor carregou depois)
+  useEffect(() => {
+    if (perfisOpcoes.length > 0 && !perfisOpcoes.some((p) => p.value === form.perfil)) {
+      setForm((f) => ({ ...f, perfil: perfisOpcoes[0].value }));
+    }
+  }, [perfilAtor]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (!blocoId && blocos.length > 0) setBlocoId(blocos[0].id);
   }, [blocos]);
 
-  // Carrega vagas quando apartamento muda
-  useEffect(() => {
-    if (!aptId) { setVagas([]); setVagaId(""); return; }
-    let cancelado = false;
-    vagaApi.listarPorApartamento(aptId)
-      .then((res) => { if (!cancelado) { setVagas(res.data || []); setVagaId(""); } })
-      .catch(() => { if (!cancelado) { setVagas([]); setVagaId(""); } });
-    return () => { cancelado = true; };
-  }, [aptId]);
-
   const aptsFiltrados = blocoId ? apartamentos.filter((a) => a.blocoId === blocoId) : apartamentos;
-
-  function handleBlocoChange(newBlocoId) {
-    setBlocoId(newBlocoId);
-    setAptId("");
-  }
-
-  function handleAptChange(newAptId) {
-    setAptId(newAptId);
-    if (newAptId) {
-      const apt = apartamentos.find((a) => a.id === newAptId);
-      if (apt?.blocoId) setBlocoId(apt.blocoId);
-    }
-  }
+  const perfilUnidade = PERFIS_EXIGEM_PRECADASTRO.has(form.perfil);
+  const exigeUnidade = PERFIS_EXIGEM_UNIDADE_FORM.has(form.perfil);
 
   function set(field, value) {
     setForm((f) => ({ ...f, [field]: value }));
@@ -772,18 +928,15 @@ function FormNovoUsuario({ blocos, apartamentos, onSalvar, onCancelar }) {
 
   function handleSubmit(e) {
     e.preventDefault();
-    if (!form.nome.trim() || !form.email.trim() || !form.senha.trim() || form.senha.trim().length < 6 || !blocoId || !aptId)
-      return;
-    const blocoSel = blocos.find((b) => b.id === blocoId);
-    const aptSel = apartamentos.find((a) => a.id === aptId);
-    const vagaSel = vagas.find((v) => v.id === vagaId);
+    if (!form.email.trim() || !form.perfil) return;
+    if (exigeUnidade && !aptId) return;
+
     onSalvar({
-      nome: form.nome.trim(),
       email: form.email.trim(),
-      senha: form.senha.trim(),
-      bloco: blocoSel?.nome ?? "",
-      apartamento: aptSel?.numero ?? "",
-      vaga: vagaSel?.numero ?? null,
+      perfil: form.perfil,
+      unidadeId: aptId || undefined,
+      nomePrecadastro: perfilUnidade ? form.nomePrecadastro.trim() : undefined,
+      cpfPrecadastro: perfilUnidade ? form.cpfPrecadastro.trim() : undefined,
     });
   }
 
@@ -792,103 +945,89 @@ function FormNovoUsuario({ blocos, apartamentos, onSalvar, onCancelar }) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
-      {/* Nome + E-mail + Senha */}
+      <p className="text-xs text-on-surface-variant">
+        Convidados (Guest) devem ser cadastrados no perfil da unidade — sem convite por e-mail.
+      </p>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <Campo
-          id="novo-nome"
-          label="Nome Completo *"
-          placeholder="Ex: João Silva"
-          icon="person"
-          value={form.nome}
-          onChange={(e) => set("nome", e.target.value)}
-        />
         <Campo
           id="novo-email"
           label="E-mail *"
           type="email"
-          placeholder="joao@mora.com"
+          placeholder="usuario@mora.com"
           icon="mail"
           value={form.email}
           onChange={(e) => set("email", e.target.value)}
         />
-        <Campo
-          id="novo-senha"
-          label="Senha inicial *"
-          type="password"
-          placeholder="Mínimo 6 caracteres"
-          icon="lock"
-          value={form.senha}
-          onChange={(e) => set("senha", e.target.value)}
-          autoComplete="new-password"
-        />
-      </div>
-
-      {/* Bloco + Apt + Vaga */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="space-y-2">
-          <label className={labelCls}>Bloco *</label>
-          <select value={blocoId} onChange={(e) => handleBlocoChange(e.target.value)} required className={selectCls}>
-            <option value="">— Selecione o bloco —</option>
-            {blocos.map((b) => (
-              <option key={b.id} value={b.id}>{b.nome}</option>
-            ))}
-          </select>
-        </div>
-        <div className="space-y-2">
-          <label className={labelCls}>Apartamento *</label>
+          <label className={labelCls}>Perfil *</label>
           <select
-            value={aptId}
-            onChange={(e) => handleAptChange(e.target.value)}
+            value={form.perfil}
+            onChange={(e) => set("perfil", e.target.value)}
             required
-            disabled={aptsFiltrados.length === 0}
             className={selectCls}
           >
-            <option value="">— Selecione o apt —</option>
-            {aptsFiltrados.map((a) => (
-              <option key={a.id} value={a.id}>Apto {a.numero}{a.andar != null ? ` · ${a.andar}º andar` : ""}</option>
+            {perfisOpcoes.map((p) => (
+              <option key={p.value} value={p.value}>{p.label}</option>
             ))}
           </select>
-          {blocoId && aptsFiltrados.length === 0 && (
-            <p className="text-xs text-error ml-1">Nenhum apartamento neste bloco</p>
-          )}
-        </div>
-        <div className="space-y-2">
-          <label className={labelCls}>Vaga</label>
-          <select
-            value={vagaId}
-            onChange={(e) => setVagaId(e.target.value)}
-            disabled={!aptId || vagas.length === 0}
-            className={selectCls}
-          >
-            <option value="">— Sem vaga —</option>
-            {vagas.filter((v) => v.ativa).map((v) => (
-              <option key={v.id} value={v.id}>
-                Vaga {v.numero}{v.localizacao ? ` · ${v.localizacao}` : ""}
-              </option>
-            ))}
-          </select>
-          {aptId && vagas.length === 0 && (
-            <p className="text-xs text-on-surface-variant ml-1">Nenhuma vaga neste apartamento</p>
-          )}
         </div>
       </div>
 
-      {/* Info */}
+      {perfilUnidade && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <Campo
+            id="novo-nome-precad"
+            label="Nome completo *"
+            placeholder="Nome do convidado"
+            icon="person"
+            value={form.nomePrecadastro}
+            onChange={(e) => set("nomePrecadastro", e.target.value)}
+          />
+          <Campo
+            id="novo-cpf-precad"
+            label="CPF *"
+            placeholder="000.000.000-00"
+            icon="badge"
+            value={form.cpfPrecadastro}
+            onChange={(e) => set("cpfPrecadastro", e.target.value)}
+          />
+        </div>
+      )}
+
+      {exigeUnidade && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <label className={labelCls}>Bloco *</label>
+            <select value={blocoId} onChange={(e) => { setBlocoId(e.target.value); setAptId(""); }} required className={selectCls}>
+              <option value="">— Selecione —</option>
+              {blocos.map((b) => (
+                <option key={b.id} value={b.id}>{b.nome}</option>
+              ))}
+            </select>
+          </div>
+          <div className="space-y-2">
+            <label className={labelCls}>Apartamento *</label>
+            <select value={aptId} onChange={(e) => setAptId(e.target.value)} required disabled={aptsFiltrados.length === 0} className={selectCls}>
+              <option value="">— Selecione —</option>
+              {aptsFiltrados.map((a) => (
+                <option key={a.id} value={a.id}>Apto {a.numero}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+      )}
+
       <div className="flex items-start gap-2 px-4 py-3 rounded-xl bg-surface-container-highest/30 text-on-surface-variant text-xs">
         <Icone name="info" className="text-primary text-base shrink-0 mt-0.5" />
         <span>
-          O usuário será criado com status{" "}
-          <strong className="text-secondary">pendente</strong>. O e-mail
-          informado será o login inicial e poderá ter outros logins adicionados
-          depois.
+          Um código de convite será enviado por e-mail (validade 48h). O usuário ativa a conta informando o código.
         </span>
       </div>
 
-      {/* Ações */}
       <div className="flex gap-3 pt-1">
         <Botao type="submit">
-          Criar Usuário
-          <Icone name="person_add" className="text-xl" />
+          Enviar convite
+          <Icone name="send" className="text-xl" />
         </Botao>
         <button
           type="button"

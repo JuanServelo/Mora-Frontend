@@ -4,8 +4,8 @@ import { meetingApi, ataApi, pollApi } from "../../services/meetingApi";
 import { Icone } from "../../components/icones/Icone";
 import { Campo } from "../../components/campos/Campo";
 import { Botao } from "../../components/botoes/Botao";
-import { useAuth } from "../../contexts/AuthContext";
-import api from "../../services/api";
+import { useToast } from "../../contexts/ToastContext";
+import { useConfirm } from "../../contexts/ConfirmContext";
 
 function TextArea({ label, ...props }) {
   return (
@@ -150,7 +150,8 @@ const EMPTY_MEETING = {
 };
 
 function AbaReunioes() {
-  const { usuario } = useAuth();
+  const toast = useToast();
+  const confirm = useConfirm();
   const [reunioes, setReunioes] = useState([]);
   const [carregando, setCarregando] = useState(false);
   const [criando, setCriando] = useState(false);
@@ -389,70 +390,33 @@ function AbaReunioes() {
   }
 
   async function cancelar(id) {
-    abrirConfirmacao(
-      "Cancelar Reunião",
-      "Tem certeza que deseja cancelar esta reunião? Esta ação não poderá ser desfeita.",
-      async () => {
-        try {
-          await meetingApi.cancelar(id);
-          setDetalhe((p) => (p ? { ...p, status: "CANCELADA" } : p));
-          carregarReunioesSemana();
-          if (resultadosBusca) {
-            setResultadosBusca((p) => p.map((r) => r.id === id ? { ...r, status: "CANCELADA" } : r));
-          }
-          mostrarNotificacao("Reunião cancelada com sucesso.", "sucesso");
-        } catch {
-          mostrarNotificacao("Erro ao cancelar reunião.", "erro");
-        } finally {
-          fecharConfirmacao();
-        }
-      }
-    );
+    const ok = await confirm({
+      titulo: "Cancelar reunião",
+      mensagem: "Deseja cancelar esta reunião?",
+      confirmarTexto: "Cancelar reunião",
+      variante: "danger",
+    });
+    if (!ok) return;
+    try {
+      await meetingApi.cancelar(id);
+      setDetalhe((p) => (p ? { ...p, status: "CANCELADA" } : p));
+    } catch {
+      toast.error("Erro ao cancelar reunião.");
+    }
   }
 
   async function finalizar(id) {
-    abrirConfirmacao(
-      "Finalizar Reunião",
-      "Tem certeza que deseja finalizar esta reunião?",
-      async () => {
-        try {
-          await meetingApi.finalizar(id);
-          setDetalhe((p) => (p ? { ...p, status: "FINALIZADA" } : p));
-          carregarReunioesSemana();
-          if (resultadosBusca) {
-            setResultadosBusca((p) => p.map((r) => r.id === id ? { ...r, status: "FINALIZADA" } : r));
-          }
-          mostrarNotificacao("Reunião finalizada com sucesso.", "sucesso");
-        } catch {
-          mostrarNotificacao("Erro ao finalizar reunião.", "erro");
-        } finally {
-          fecharConfirmacao();
-        }
-      }
-    );
-  }
-
-  async function responderPresenca(id, status) {
-    if (!usuario?.id) return;
+    const ok = await confirm({
+      titulo: "Finalizar reunião",
+      mensagem: "Deseja finalizar esta reunião?",
+      confirmarTexto: "Finalizar",
+    });
+    if (!ok) return;
     try {
-      await meetingApi.atualizarPresenca(id, usuario.id, status);
-      mostrarNotificacao("Presença registrada!", "sucesso");
-      carregarReunioesSemana();
-      if (detalhe && detalhe.id === id) {
-        const res = await meetingApi.buscar(id);
-        setDetalhe(res.data);
-        carregarAtaReuniao(id);
-      }
-      if (resultadosBusca) {
-        const res = await meetingApi.listar(usuario.id);
-        const filtradas = (res.data || []).filter((r) => {
-          const dataInicioStr = r.dataHoraInicio.split("T")[0];
-          return dataInicioStr === buscaDia;
-        });
-        setResultadosBusca(filtradas);
-      }
-    } catch (e) {
-      mostrarNotificacao("Erro ao atualizar presença: " + (e.response?.data?.message || e.message), "erro");
+      await meetingApi.finalizar(id);
+      setDetalhe((p) => (p ? { ...p, status: "FINALIZADA" } : p));
+    } catch {
+      toast.error("Erro ao finalizar reunião.");
     }
   }
 
@@ -467,22 +431,9 @@ function AbaReunioes() {
       });
       setAvalForm({ nota: "", comentario: "" });
       setAvalUsuarioId("");
-      mostrarNotificacao("Avaliação registrada!", "sucesso");
-      
-      const res = await meetingApi.buscar(detalhe.id);
-      setDetalhe(res.data);
-      carregarAtaReuniao(detalhe.id);
-
-      if (resultadosBusca) {
-        const listRes = await meetingApi.listar(usuario.id);
-        const filtradas = (listRes.data || []).filter((r) => {
-          const dataInicioStr = r.dataHoraInicio.split("T")[0];
-          return dataInicioStr === buscaDia;
-        });
-        setResultadosBusca(filtradas);
-      }
+      toast.success("Avaliação registrada!");
     } catch (e) {
-      mostrarNotificacao(e.response?.data?.message || "Erro ao avaliar.", "erro");
+      toast.error(e.response?.data?.message || "Erro ao avaliar.");
     } finally {
       setSalvandoAval(false);
     }
@@ -1415,6 +1366,8 @@ function AbaReunioes() {
 const EMPTY_POLL = { titulo: "", descricao: "", meetingId: "", opcoes: "" };
 
 function AbaVotacoes() {
+  const toast = useToast();
+  const confirm = useConfirm();
   const [criando, setCriando] = useState(false);
   const [form, setForm] = useState(EMPTY_POLL);
   const [salvando, setSalvando] = useState(false);
@@ -1474,12 +1427,18 @@ function AbaVotacoes() {
 
   async function encerrarPoll() {
     if (!detalhe) return;
-    if (!window.confirm("Encerrar esta votação?")) return;
+    const ok = await confirm({
+      titulo: "Encerrar votação",
+      mensagem: "Deseja encerrar esta votação?",
+      confirmarTexto: "Encerrar",
+      variante: "danger",
+    });
+    if (!ok) return;
     try {
       await pollApi.encerrar(detalhe.id);
       setDetalhe((p) => (p ? { ...p, status: "ENCERRADA" } : p));
     } catch {
-      alert("Erro ao encerrar votação.");
+      toast.error("Erro ao encerrar votação.");
     }
   }
 
@@ -1493,11 +1452,10 @@ function AbaVotacoes() {
         usuarioId: Number(voteForm.usuarioId),
       });
       setVoteForm({ pollOptionId: "", usuarioId: "" });
-      // reload poll to see updated state
       const res = await pollApi.buscar(detalhe.id);
       setDetalhe(res.data);
     } catch (e) {
-      alert(e.response?.data?.message || "Erro ao registrar voto.");
+      toast.error(e.response?.data?.message || "Erro ao registrar voto.");
     } finally {
       setVotando(false);
     }

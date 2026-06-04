@@ -1,19 +1,56 @@
 // src/pages/adm/GerenciarEstruturas.jsx
 import { useState, useEffect } from "react";
-import { blocoApi, apartamentoApi, areaComunApi, vagaApi } from "../../services/estruturasApi";
+import { blocoApi, apartamentoApi, areaComunApi } from "../../services/estruturasApi";
+import { vagaApi } from "../../services/portariaApi";
+import { condominiosApi } from "../../services/condominiosApi";
 import { Icone } from "../../components/icones/Icone";
 import { Campo } from "../../components/campos/Campo";
 import { Botao } from "../../components/botoes/Botao";
+import { useAuth } from "../../contexts/AuthContext";
+import { PERFIS } from "../../utils/perfis";
 
 const TIPOS_AREA = ["PISCINA", "SALAO_FESTAS", "ACADEMIA", "CHURRASQUEIRA", "QUADRA", "PLAYGROUND", "OUTRO"];
 
-// ─── helpers ────────────────────────────────
 const statusStyle = (ativo) =>
   ativo ? "bg-primary/10 text-primary" : "bg-error/10 text-error";
 
+const selectCls = "w-full bg-surface-container-highest/40 border-none rounded-xl py-4 px-4 text-on-surface focus:ring-2 focus:ring-primary/50 focus:outline-none backdrop-blur-sm transition-all disabled:opacity-40";
+
 // ════════════════════════════════════════════
 export function GerenciarEstruturas() {
-  const [aba, setAba] = useState("blocos"); // blocos | apartamentos | areas-comuns | vagas
+  const { usuario } = useAuth();
+  const isGerente = [PERFIS.CONTRACTING_PROPERTY_MANAGER, PERFIS.CONTRACTING_SYNDIC].includes(usuario?.perfil);
+
+  const [condominios, setCondominios] = useState([]);
+  const [condominioId, setCondominioId] = useState(null);
+  const [aba, setAba] = useState("blocos");
+
+  useEffect(() => {
+    if (isGerente) {
+      condominiosApi.listar().then((res) => {
+        const lista = (res.data.condominios || []).filter((c) => c.status === "active");
+        setCondominios(lista);
+        if (lista.length > 0) setCondominioId(lista[0].id);
+      }).catch(() => {});
+    } else {
+      // Não-gerentes ficam escopados ao próprio condomínio
+      setCondominioId(usuario?.condominioId ?? null);
+    }
+  }, [isGerente, usuario]);
+
+  const condominioAtual = condominios.find((c) => c.id === condominioId);
+
+  if (!condominioId) {
+    return (
+      <div className="min-h-screen w-full pt-4 pb-20 px-6 flex items-center justify-center">
+        <div className="glass-panel rounded-3xl p-10 text-center max-w-md">
+          <Icone name="domain" className="text-primary text-4xl mb-4" />
+          <h2 className="font-headline text-xl font-bold text-on-surface mb-2">Nenhum cliente encontrado</h2>
+          <p className="text-on-surface-variant text-sm">Crie um cliente em <strong>Clientes</strong> antes de gerenciar estruturas.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen w-full pt-4 pb-20 px-6">
@@ -32,6 +69,38 @@ export function GerenciarEstruturas() {
             </h1>
           </div>
         </header>
+
+        {/* Seletor de cliente */}
+        <div className="glass-panel rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center gap-4">
+          <div className="flex items-center gap-3 shrink-0">
+            <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center">
+              <Icone name="domain" className="text-primary text-lg" />
+            </div>
+            <p className="text-xs font-semibold uppercase tracking-widest text-on-surface-variant">
+              Cliente
+            </p>
+          </div>
+
+          {isGerente ? (
+            <select
+              value={condominioId}
+              onChange={(e) => { setCondominioId(e.target.value); setAba("blocos"); }}
+              className="flex-1 bg-surface-container-highest/40 border-none rounded-xl py-3 px-4 text-on-surface font-semibold focus:ring-2 focus:ring-primary/50 focus:outline-none"
+            >
+              {condominios.map((c) => (
+                <option key={c.id} value={c.id}>{c.nome}</option>
+              ))}
+            </select>
+          ) : (
+            <p className="text-on-surface font-semibold">
+              {condominioAtual?.nome ?? condominioId}
+            </p>
+          )}
+
+          <div className="flex gap-2 shrink-0 text-xs text-on-surface-variant font-mono">
+            <span className="px-2 py-1 rounded-lg bg-surface-container-highest/30">{condominioId}</span>
+          </div>
+        </div>
 
         {/* Sub-navbar de abas */}
         <div className="glass-panel rounded-2xl p-1.5 flex gap-1 w-fit flex-wrap">
@@ -56,11 +125,11 @@ export function GerenciarEstruturas() {
           ))}
         </div>
 
-        {/* Conteúdo por aba */}
-        {aba === "blocos" && <AbaBlocos />}
-        {aba === "apartamentos" && <AbaApartamentos />}
-        {aba === "areas-comuns" && <AbaAreasComuns />}
-        {aba === "vagas" && <AbaVagas />}
+        {/* Conteúdo por aba — passa condominioId para cada aba */}
+        {aba === "blocos" && <AbaBlocos condominioId={condominioId} />}
+        {aba === "apartamentos" && <AbaApartamentos condominioId={condominioId} />}
+        {aba === "areas-comuns" && <AbaAreasComuns condominioId={condominioId} />}
+        {aba === "vagas" && <AbaVagas condominioId={condominioId} />}
       </div>
     </div>
   );
@@ -69,7 +138,7 @@ export function GerenciarEstruturas() {
 // ════════════════════════════════════════════
 // ABA: BLOCOS
 // ════════════════════════════════════════════
-function AbaBlocos() {
+function AbaBlocos({ condominioId }) {
   const [blocos, setBlocos] = useState([]);
   const [carregando, setCarregando] = useState(true);
   const [busca, setBusca] = useState("");
@@ -78,12 +147,14 @@ function AbaBlocos() {
   const [editando, setEditando] = useState(null);
 
   useEffect(() => {
+    setCarregando(true);
+    setBlocos([]);
     blocoApi
-      .listarTodos()
+      .listarTodos(condominioId)
       .then((res) => setBlocos(res.data))
       .catch((err) => console.error("Erro ao carregar blocos:", err))
       .finally(() => setCarregando(false));
-  }, []);
+  }, [condominioId]);
 
   const filtrados = blocos.filter((b) =>
     b.nome.toLowerCase().includes(busca.toLowerCase()) ||
@@ -92,7 +163,7 @@ function AbaBlocos() {
 
   async function handleCriar(dados) {
     try {
-      const res = await blocoApi.cadastrar(dados);
+      const res = await blocoApi.cadastrar({ ...dados, condominioId });
       setBlocos((prev) => [res.data, ...prev]);
       setCriando(false);
     } catch (err) {
@@ -314,7 +385,7 @@ function DetalhesBloco({ bloco, onEditar, onToggleAtivo }) {
 // ════════════════════════════════════════════
 // ABA: APARTAMENTOS
 // ════════════════════════════════════════════
-function AbaApartamentos() {
+function AbaApartamentos({ condominioId }) {
   const [apartamentos, setApartamentos] = useState([]);
   const [blocos, setBlocos] = useState([]);
   const [carregando, setCarregando] = useState(true);
@@ -327,14 +398,18 @@ function AbaApartamentos() {
   const [erroEditar, setErroEditar] = useState("");
 
   useEffect(() => {
-    Promise.all([apartamentoApi.listarTodos(), blocoApi.listar()])
+    setCarregando(true);
+    setApartamentos([]);
+    setBlocos([]);
+    setFiltroBlocoId("todos");
+    Promise.all([apartamentoApi.listarTodos(condominioId), blocoApi.listar(condominioId)])
       .then(([resApts, resBlocos]) => {
         setApartamentos(resApts.data);
         setBlocos(resBlocos.data);
       })
       .catch((err) => console.error("Erro ao carregar apartamentos:", err))
       .finally(() => setCarregando(false));
-  }, []);
+  }, [condominioId]);
 
   const filtrados = apartamentos.filter((a) => {
     const q = busca.toLowerCase();
@@ -618,7 +693,7 @@ function DetalhesApartamento({ apt, onEditar, onToggleAtivo }) {
 // ════════════════════════════════════════════
 // ABA: ÁREAS COMUNS
 // ════════════════════════════════════════════
-function AbaAreasComuns() {
+function AbaAreasComuns({ condominioId }) {
   const [areas, setAreas] = useState([]);
   const [carregando, setCarregando] = useState(true);
   const [busca, setBusca] = useState("");
@@ -628,12 +703,14 @@ function AbaAreasComuns() {
   const [editando, setEditando] = useState(null);
 
   useEffect(() => {
+    setCarregando(true);
+    setAreas([]);
     areaComunApi
-      .listarTodas()
+      .listarTodas(condominioId)
       .then((res) => setAreas(res.data))
       .catch((err) => console.error("Erro ao carregar áreas comuns:", err))
       .finally(() => setCarregando(false));
-  }, []);
+  }, [condominioId]);
 
   const filtrados = areas.filter((a) => {
     const q = busca.toLowerCase();
@@ -644,7 +721,7 @@ function AbaAreasComuns() {
 
   async function handleCriar(dados) {
     try {
-      const res = await areaComunApi.cadastrar(dados);
+      const res = await areaComunApi.cadastrar({ ...dados, condominioId });
       setAreas((prev) => [res.data, ...prev]);
       setCriando(false);
     } catch (err) {
@@ -915,7 +992,7 @@ function DetalhesAreaComum({ area, onEditar, onToggleAtivo }) {
 // ════════════════════════════════════════════
 // ABA: VAGAS
 // ════════════════════════════════════════════
-function AbaVagas() {
+function AbaVagas({ condominioId }) {
   const [vagas, setVagas] = useState([]);
   const [apartamentos, setApartamentos] = useState([]);
   const [carregando, setCarregando] = useState(true);
@@ -928,14 +1005,23 @@ function AbaVagas() {
   const [erroEditar, setErroEditar] = useState("");
 
   useEffect(() => {
-    Promise.all([vagaApi.listarTodas(), apartamentoApi.listarTodos()])
+    setCarregando(true);
+    setVagas([]);
+    setApartamentos([]);
+    // Vagas não têm condominioId direto: filtramos pelos apartamentos do cliente
+    Promise.all([vagaApi.listarTodas(), apartamentoApi.listarTodos(condominioId)])
       .then(([resVagas, resApts]) => {
-        setVagas(resVagas.data);
-        setApartamentos(resApts.data);
+        const aptIds = new Set((resApts.data || []).map((a) => a.id));
+        // Filtra vagas que pertencem a apartamentos do condomínio selecionado
+        const vagasFiltradas = (resVagas.data || []).filter(
+          (v) => !v.apartamentoId || aptIds.has(v.apartamentoId),
+        );
+        setVagas(vagasFiltradas);
+        setApartamentos(resApts.data || []);
       })
       .catch((err) => console.error("Erro ao carregar vagas:", err))
       .finally(() => setCarregando(false));
-  }, []);
+  }, [condominioId]);
 
   const filtrados = vagas.filter((v) => {
     const q = busca.toLowerCase();

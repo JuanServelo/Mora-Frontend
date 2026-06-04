@@ -187,10 +187,9 @@ export function GerenciarVagas() {
                     onChange={handleForm}
                     className="appearance-none bg-surface-container-highest/50 border border-white/10 rounded-xl py-3 pl-4 pr-10 text-on-surface focus:ring-2 focus:ring-primary/50 focus:outline-none transition-all cursor-pointer"
                   >
-                    <option value="COBERTA">Coberta</option>
-                    <option value="DESCOBERTA">Descoberta</option>
-                    <option value="MOTO">Moto</option>
-                    <option value="DEFICIENTE">PCD / Deficiente</option>
+                    <option value="">Selecione um tipo</option>
+                    <option value="Coberta">Coberta</option>
+                    <option value="Descoberta">Descoberta</option>
                   </select>
                   <Icone name="expand_more" className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-lg" />
                 </div>

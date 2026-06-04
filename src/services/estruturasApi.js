@@ -1,3 +1,4 @@
+// src/services/estruturasApi.js
 import axios from "axios";
 
 const estruturasApi = axios.create({
@@ -12,21 +13,11 @@ estruturasApi.interceptors.request.use((config) => {
   return config;
 });
 
-const vagasApi = axios.create({
-  baseURL: import.meta.env.VITE_VAGAS_API_URL || "/vagas-api",
-});
-
-vagasApi.interceptors.request.use((config) => {
-  const token = localStorage.getItem("token");
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
-
 export const blocoApi = {
-  listar: () => estruturasApi.get("/blocos"),
-  listarTodos: () => estruturasApi.get("/blocos/todos"),
+  listar: (condominioId) =>
+    estruturasApi.get("/blocos", { params: condominioId ? { condominioId } : {} }),
+  listarTodos: (condominioId) =>
+    estruturasApi.get("/blocos/todos", { params: condominioId ? { condominioId } : {} }),
   buscar: (id) => estruturasApi.get(`/blocos/${id}`),
   cadastrar: (data) => estruturasApi.post("/blocos/cadastrar", data),
   atualizar: (id, data) => estruturasApi.put(`/blocos/${id}`, data),
@@ -36,8 +27,10 @@ export const blocoApi = {
 };
 
 export const apartamentoApi = {
-  listar: () => estruturasApi.get("/apartamentos"),
-  listarTodos: () => estruturasApi.get("/apartamentos/todos"),
+  listar: (condominioId) =>
+    estruturasApi.get("/apartamentos", { params: condominioId ? { condominioId } : {} }),
+  listarTodos: (condominioId) =>
+    estruturasApi.get("/apartamentos/todos", { params: condominioId ? { condominioId } : {} }),
   buscar: (id) => estruturasApi.get(`/apartamentos/${id}`),
   listarPorBloco: (blocoId) => estruturasApi.get(`/apartamentos/bloco/${blocoId}`),
   listarPorBlocoAtivos: (blocoId) => estruturasApi.get(`/apartamentos/bloco/${blocoId}/ativos`),
@@ -51,8 +44,10 @@ export const apartamentoApi = {
 };
 
 export const areaComunApi = {
-  listar: () => estruturasApi.get("/areas-comuns"),
-  listarTodas: () => estruturasApi.get("/areas-comuns/todas"),
+  listar: (condominioId) =>
+    estruturasApi.get("/areas-comuns", { params: condominioId ? { condominioId } : {} }),
+  listarTodas: (condominioId) =>
+    estruturasApi.get("/areas-comuns/todas", { params: condominioId ? { condominioId } : {} }),
   buscar: (id) => estruturasApi.get(`/areas-comuns/${id}`),
   listarPorTipo: (tipo) => estruturasApi.get(`/areas-comuns/tipo/${tipo}`),
   cadastrar: (data) => estruturasApi.post("/areas-comuns/cadastrar", data),
@@ -63,14 +58,17 @@ export const areaComunApi = {
 };
 
 export const vagaApi = {
-  listar: () => vagasApi.get("/vagas"),
-  listarTodas: () => vagasApi.get("/vagas/todas"),
-  buscar: (id) => vagasApi.get(`/vagas/${id}`),
-  listarPorApartamento: (apartamentoId) => vagasApi.get(`/vagas/apartamento/${apartamentoId}`),
+  listar: () => estruturasApi.get("/vagas"),
+  listarTodas: () => estruturasApi.get("/vagas/todas"),
+  buscar: (id) => estruturasApi.get(`/vagas/${id}`),
+  listarPorApartamento: (apartamentoId) => estruturasApi.get(`/vagas/apartamento/${apartamentoId}`),
   cadastrar: (data, apartamentoId) =>
-    vagasApi.post("/vagas/cadastrar", { ...data, apartamentoId }),
+    estruturasApi.post('/vagas/cadastrar', data, {
+      params: apartamentoId ? { apartamentoId } : {},
+    }),
   atualizar: (id, data, apartamentoId) =>
-    vagasApi.put(`/vagas/${id}`, { ...data, apartamentoId }),
-  ativar: (id) => vagasApi.post(`/vagas/${id}/ativar`),
-  desativar: (id) => vagasApi.delete(`/vagas/${id}`),
+    estruturasApi.put(`/vagas/${id}?apartamentoId=${apartamentoId}`, data),
+  ativar: (id) => estruturasApi.put(`/vagas/${id}/ativar`),
+  desativar: (id) => estruturasApi.put(`/vagas/${id}/desativar`),
+  deletar: (id) => estruturasApi.delete(`/vagas/${id}`),
 };
