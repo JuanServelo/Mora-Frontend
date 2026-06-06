@@ -7,6 +7,7 @@ import { Icone } from "../../components/icones/Icone";
 import { Campo } from "../../components/campos/Campo";
 import { Botao } from "../../components/botoes/Botao";
 import { useAuth } from "../../contexts/AuthContext";
+import { useToast } from "../../contexts/ToastContext";
 import { PERFIS } from "../../utils/perfis";
 
 const TIPOS_AREA = ["PISCINA", "SALAO_FESTAS", "ACADEMIA", "CHURRASQUEIRA", "QUADRA", "PLAYGROUND", "OUTRO"];
@@ -139,6 +140,7 @@ export function GerenciarEstruturas() {
 // ABA: BLOCOS
 // ════════════════════════════════════════════
 function AbaBlocos({ condominioId }) {
+  const toast = useToast();
   const [blocos, setBlocos] = useState([]);
   const [carregando, setCarregando] = useState(true);
   const [busca, setBusca] = useState("");
@@ -166,8 +168,9 @@ function AbaBlocos({ condominioId }) {
       const res = await blocoApi.cadastrar({ ...dados, condominioId });
       setBlocos((prev) => [res.data, ...prev]);
       setCriando(false);
+      toast.success("Bloco criado com sucesso.");
     } catch (err) {
-      console.error("Erro ao criar bloco:", err);
+      toast.error(err.response?.data?.erro || "Erro ao criar bloco.");
     }
   }
 
@@ -176,8 +179,9 @@ function AbaBlocos({ condominioId }) {
       const res = await blocoApi.atualizar(id, dados);
       setBlocos((prev) => prev.map((b) => (b.id === id ? res.data : b)));
       setEditando(null);
+      toast.success("Bloco atualizado.");
     } catch (err) {
-      console.error("Erro ao atualizar bloco:", err);
+      toast.error(err.response?.data?.erro || "Erro ao atualizar bloco.");
     }
   }
 
@@ -191,8 +195,9 @@ function AbaBlocos({ condominioId }) {
       setBlocos((prev) =>
         prev.map((b) => (b.id === bloco.id ? { ...b, ativo: !b.ativo } : b)),
       );
+      toast.success(bloco.ativo ? "Bloco desativado." : "Bloco reativado.");
     } catch (err) {
-      console.error("Erro ao alterar status do bloco:", err);
+      toast.error(err.response?.data?.erro || "Erro ao alterar status do bloco.");
     }
   }
 
@@ -694,6 +699,7 @@ function DetalhesApartamento({ apt, onEditar, onToggleAtivo }) {
 // ABA: ÁREAS COMUNS
 // ════════════════════════════════════════════
 function AbaAreasComuns({ condominioId }) {
+  const toast = useToast();
   const [areas, setAreas] = useState([]);
   const [carregando, setCarregando] = useState(true);
   const [busca, setBusca] = useState("");
@@ -724,8 +730,9 @@ function AbaAreasComuns({ condominioId }) {
       const res = await areaComunApi.cadastrar({ ...dados, condominioId });
       setAreas((prev) => [res.data, ...prev]);
       setCriando(false);
+      toast.success("Área comum criada com sucesso.");
     } catch (err) {
-      console.error("Erro ao criar área comum:", err);
+      toast.error(err.response?.data?.erro || "Erro ao criar área comum.");
     }
   }
 
@@ -734,8 +741,9 @@ function AbaAreasComuns({ condominioId }) {
       const res = await areaComunApi.atualizar(id, dados);
       setAreas((prev) => prev.map((a) => (a.id === id ? res.data : a)));
       setEditando(null);
+      toast.success("Área comum atualizada.");
     } catch (err) {
-      console.error("Erro ao atualizar área comum:", err);
+      toast.error(err.response?.data?.erro || "Erro ao atualizar área comum.");
     }
   }
 
@@ -749,8 +757,9 @@ function AbaAreasComuns({ condominioId }) {
       setAreas((prev) =>
         prev.map((a) => (a.id === area.id ? { ...a, ativo: !a.ativo } : a)),
       );
+      toast.success(area.ativo ? "Área desativada." : "Área reativada.");
     } catch (err) {
-      console.error("Erro ao alterar status da área comum:", err);
+      toast.error(err.response?.data?.erro || "Erro ao alterar status da área comum.");
     }
   }
 

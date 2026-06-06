@@ -7,6 +7,7 @@ export function Campo({
   type = "text",
   placeholder,
   icon,
+  error,
   className = "",
   ...rest
 }) {
@@ -31,10 +32,13 @@ export function Campo({
           id={id}
           type={type}
           placeholder={placeholder}
-          className={`w-full bg-surface-container-highest/40 border-none rounded-xl py-4 ${icon ? "pl-12" : "pl-4"} pr-4 text-on-surface placeholder:text-outline-variant focus:ring-2 focus:ring-primary/50 focus:outline-none backdrop-blur-sm transition-all ${className}`}
+          className={`w-full bg-surface-container-highest/40 border-none rounded-xl py-4 ${icon ? "pl-12" : "pl-4"} pr-4 text-on-surface placeholder:text-outline-variant focus:outline-none backdrop-blur-sm transition-all ${error ? "ring-2 ring-error/60" : "focus:ring-2 focus:ring-primary/50"} ${className}`}
           {...rest}
         />
       </div>
+      {error && (
+        <p className="text-xs text-error ml-1">{error}</p>
+      )}
     </div>
   );
 }

@@ -139,7 +139,7 @@ export function isUsuarioRestrito(usuario) {
 
 export function redirectPorPerfil(perfil) {
   const map = {
-    [PERFIS.DOORMAN]:                          '/portaria',
+    [PERFIS.DOORMAN]:                          '/inicio',
     [PERFIS.CONTRACTING_PROPERTY_MANAGER]:     '/inicio',
     [PERFIS.CONTRACTING_SYNDIC]:               '/inicio',
     [PERFIS.OPERATIONAL_SYNDIC]:               '/inicio',

@@ -31,9 +31,10 @@
     "tags": ["Conformidade", "Laudos"]
   },
   {
-    "icon": "electrical_services",
-    "titulo": "Energia e iluminação",
-    "descricao": "Iluminação de garagem e áreas externas conforme projeto elétrico do condomínio.",
-    "tags": ["LED", "Economia"]
+    "icon": "directions_car",
+    "titulo": "Cadastro de veículos",
+    "descricao": "Cadastre e gerencie veículos vinculados às unidades do condomínio, incluindo veículos de serviço.",
+    "tags": ["Garagem", "Controle"],
+    "rota": "/veiculos"
   }
 ]

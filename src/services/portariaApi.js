@@ -86,17 +86,23 @@ export const vagaApi = {
 };
 
 // ─────────────────────────────────────────────
-// CARROS
+// VEÍCULOS (substitui Carros)
 // ─────────────────────────────────────────────
-export const carroApi = {
-  listar: () => portariaApi.get("/carros"),
-  listarDentro: () => portariaApi.get("/carros/dentro"),
-  buscar: (id) => portariaApi.get(`/carros/${id}`),
-  cadastrar: (data) => portariaApi.post("/carros/cadastrar", data),
-  atualizar: (id, data) => portariaApi.put(`/carros/${id}`, data),
-  registrarEntrada: (data) => portariaApi.post("/carros/entrada", data),
-  registrarSaida: (id) => portariaApi.post(`/carros/${id}/saida`),
+export const veiculoApi = {
+  listar: () => portariaApi.get("/veiculos"),
+  listarDentro: () => portariaApi.get("/veiculos/dentro"),
+  listarPorProprietario: (proprietarioId) => portariaApi.get(`/veiculos/proprietario/${proprietarioId}`),
+  buscar: (id) => portariaApi.get(`/veiculos/${id}`),
+  cadastrar: (data) => portariaApi.post("/veiculos/cadastrar", data),
+  atualizar: (id, data) => portariaApi.put(`/veiculos/${id}`, data),
+  alterarVaga: (id, vagaId) => portariaApi.patch(`/veiculos/${id}/vaga`, { vagaId }),
+  registrarEntrada: (id) => portariaApi.post(`/veiculos/${id}/entrada`),
+  registrarEntradaPorPlaca: (placa) => portariaApi.post(`/veiculos/entrada/placa/${placa}`),
+  registrarSaida: (id) => portariaApi.post(`/veiculos/${id}/saida`),
 };
+
+/** @deprecated Use veiculoApi */
+export const carroApi = veiculoApi;
 
 // ─────────────────────────────────────────────
 // BASE DE CONHECIMENTO / FAQ

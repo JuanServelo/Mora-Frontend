@@ -3,7 +3,7 @@ import { useState, useRef, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Icone } from "../icones/Icone";
 import { useAuth } from "../../contexts/AuthContext";
-import { isUsuarioRestrito, podeAcessarAdmin } from "../../utils/perfis";
+import { PERFIS, isUsuarioRestrito, podeAcessarAdmin } from "../../utils/perfis";
 // import moraLogo from "../../assets/Mora.png";
 // import moraLogo2 from "../../assets/Mora2.png";
 import moraLogo3 from "../../assets/Mora3.png";
@@ -14,6 +14,13 @@ const NAV_LINKS_LEFT = [
   { label: "Comodidades", to: "/comodidades" },
   { label: "Espaços", to: "/espacos" },
   { label: "Reclamações", to: "/reclamacoes" },
+];
+
+const NAV_LINKS_DOORMAN = [
+  { label: "Início", to: "/inicio" },
+  { label: "Entradas e Saídas", to: "/entradas-e-saidas" },
+  { label: "Entregas", to: "/entregas" },
+  { label: "Chaves", to: "/chaves" },
 ];
 
 const NAV_LINKS_RIGHT = [
@@ -134,7 +141,16 @@ export function Navbar() {
   const { usuario } = useAuth();
   const isRestrictedUser = isUsuarioRestrito(usuario);
   const showAdminMenu = podeAcessarAdmin(usuario?.perfil);
-  const visibleLeftLinks = isRestrictedUser ? [] : NAV_LINKS_LEFT;
+  const isDoorman = usuario?.perfil === PERFIS.DOORMAN;
+
+  let visibleLeftLinks;
+  if (isRestrictedUser) {
+    visibleLeftLinks = [];
+  } else if (isDoorman) {
+    visibleLeftLinks = NAV_LINKS_DOORMAN;
+  } else {
+    visibleLeftLinks = NAV_LINKS_LEFT;
+  }
 
   return (
     <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-[94%] max-w-4xl px-1">
@@ -146,7 +162,7 @@ export function Navbar() {
               {l.label}
             </NavLink>
           ))}
-          {!isRestrictedUser && showAdminMenu && <AdminMenu />}
+          {!isRestrictedUser && !isDoorman && showAdminMenu && <AdminMenu />}
         </div>
 
         {/* Centro — Logo */}

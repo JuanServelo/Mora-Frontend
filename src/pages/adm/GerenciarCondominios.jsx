@@ -7,6 +7,7 @@ import { useToast } from "../../contexts/ToastContext";
 import { useConfirm } from "../../contexts/ConfirmContext";
 import { useAuth } from "../../contexts/AuthContext";
 import { PERFIS } from "../../utils/perfis";
+import { mascararCnpj, mascararTelefone, validarCnpj, validarTelefone } from "../../utils/masks";
 
 const STATUS_STYLE = {
   active:   "bg-primary/10 text-primary",
@@ -393,25 +394,42 @@ function FormCondominio({ inicial, onSalvar, onCancelar, isNovo }) {
   const [form, setForm] = useState({
     id: inicial?.id ?? "",
     nome: inicial?.nome ?? "",
-    cnpj: inicial?.cnpj ?? "",
+    cnpj: inicial?.cnpj ? mascararCnpj(inicial.cnpj) : "",
     endereco: inicial?.endereco ?? "",
-    telefone: inicial?.telefone ?? "",
+    telefone: inicial?.telefone ? mascararTelefone(inicial.telefone) : "",
     email: inicial?.email ?? "",
   });
   const [salvando, setSalvando] = useState(false);
-  const [erro, setErro] = useState(null);
+  const [erros, setErros] = useState({});
 
   function set(field, value) {
     setForm((f) => ({ ...f, [field]: value }));
+    setErros((e) => ({ ...e, [field]: undefined }));
+  }
+
+  function validar() {
+    const novosErros = {};
+    if (isNovo && !form.id.trim()) novosErros.id = "ID é obrigatório.";
+    if (!form.nome.trim()) novosErros.nome = "Nome é obrigatório.";
+    if (form.cnpj.trim()) {
+      const digits = form.cnpj.replace(/\D/g, "");
+      if (digits.length !== 14) novosErros.cnpj = "CNPJ incompleto (14 dígitos).";
+      else if (!validarCnpj(form.cnpj)) novosErros.cnpj = "CNPJ inválido.";
+    }
+    if (form.telefone.trim() && !validarTelefone(form.telefone)) {
+      novosErros.telefone = "Telefone inválido (10 ou 11 dígitos).";
+    }
+    return novosErros;
   }
 
   async function handleSubmit(e) {
     e.preventDefault();
-    if (!form.nome.trim() || (isNovo && !form.id.trim())) {
-      setErro("ID e nome são obrigatórios.");
+    const novosErros = validar();
+    if (Object.keys(novosErros).length > 0) {
+      setErros(novosErros);
       return;
     }
-    setErro(null);
+    setErros({});
     setSalvando(true);
     try {
       await onSalvar({
@@ -439,6 +457,7 @@ function FormCondominio({ inicial, onSalvar, onCancelar, isNovo }) {
             placeholder="ex: cond-jardim-europa"
             icon="tag"
             value={form.id}
+            error={erros.id}
             onChange={(e) => set("id", e.target.value.toLowerCase().replace(/\s/g, "-"))}
           />
         )}
@@ -448,6 +467,7 @@ function FormCondominio({ inicial, onSalvar, onCancelar, isNovo }) {
           placeholder="Condomínio Jardim Europa"
           icon="domain"
           value={form.nome}
+          error={erros.nome}
           onChange={(e) => set("nome", e.target.value)}
         />
         <Campo
@@ -456,7 +476,9 @@ function FormCondominio({ inicial, onSalvar, onCancelar, isNovo }) {
           placeholder="00.000.000/0000-00"
           icon="badge"
           value={form.cnpj}
-          onChange={(e) => set("cnpj", e.target.value)}
+          error={erros.cnpj}
+          inputMode="numeric"
+          onChange={(e) => set("cnpj", mascararCnpj(e.target.value))}
         />
         <Campo
           id="cond-email"
@@ -473,7 +495,9 @@ function FormCondominio({ inicial, onSalvar, onCancelar, isNovo }) {
           placeholder="(11) 99999-9999"
           icon="call"
           value={form.telefone}
-          onChange={(e) => set("telefone", e.target.value)}
+          error={erros.telefone}
+          inputMode="numeric"
+          onChange={(e) => set("telefone", mascararTelefone(e.target.value))}
         />
       </div>
       <Campo
@@ -484,10 +508,6 @@ function FormCondominio({ inicial, onSalvar, onCancelar, isNovo }) {
         value={form.endereco}
         onChange={(e) => set("endereco", e.target.value)}
       />
-
-      {erro && (
-        <p className="text-sm text-error bg-error/10 rounded-xl px-4 py-2">{erro}</p>
-      )}
 
       <div className="flex gap-3 pt-1">
         <Botao type="submit" disabled={salvando}>

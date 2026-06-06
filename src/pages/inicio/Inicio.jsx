@@ -4,6 +4,8 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import { condominiosApi } from "../../services/condominiosApi";
 import { Icone } from "../../components/icones/Icone";
+import { PERFIS } from "../../utils/perfis";
+import { InicioDoorman } from "../porteiro/InicioDoorman";
 
 const ACESSO_RAPIDO = [
   {
@@ -34,6 +36,11 @@ const ACESSO_RAPIDO = [
 
 export function Inicio() {
   const { usuario } = useAuth();
+
+  if (usuario?.perfil === PERFIS.DOORMAN) {
+    return <InicioDoorman />;
+  }
+
   const primeiroNome = usuario?.nome?.split(" ")[0] || "Morador";
   const [nomeCondominio, setNomeCondominio] = useState(null);
 

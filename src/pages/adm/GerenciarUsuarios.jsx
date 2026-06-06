@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import api from "../../services/api";
 import { blocoApi, apartamentoApi, vagaApi } from "../../services/estruturasApi";
 import { userManagementApi } from "../../services/userManagementApi";
+import { condominiosApi } from "../../services/condominiosApi";
 import { Icone } from "../../components/icones/Icone";
 import { Campo } from "../../components/campos/Campo";
 import { Botao } from "../../components/botoes/Botao";
@@ -12,6 +13,7 @@ import {
   labelPerfil,
   perfisCadastroDisponiveis,
 } from "../../utils/perfis";
+import { mascararCpf, validarCpf } from "../../utils/masks";
 
 const PERFIS_EXIGEM_UNIDADE_FORM = new Set([
   PERFIS.RESIDENT_OWNER,
@@ -45,6 +47,7 @@ export function GerenciarUsuarios() {
   const [usuarios, setUsuarios] = useState([]);
   const [blocos, setBlocos] = useState([]);
   const [apartamentos, setApartamentos] = useState([]);
+  const [condominios, setCondominios] = useState([]);
   const [carregando, setCarregando] = useState(true);
   const [busca, setBusca] = useState("");
 
@@ -53,8 +56,10 @@ export function GerenciarUsuarios() {
       api.get("/api/user-management/users").catch(() => api.get("/api/users")),
       blocoApi.listar(),
       apartamentoApi.listar(),
+      condominiosApi.listar().catch(() => ({ data: { condominios: [] } })),
     ])
-      .then(([usersRes, blocosRes, aptsRes]) => {
+      .then(([usersRes, blocosRes, aptsRes, condsRes]) => {
+        setCondominios((condsRes.data.condominios || []).filter((c) => c.status === "active"));
         const mapStatus = (s) => {
           if (s === "active") return "ativo";
           if (s === "inactive") return "inativo";
@@ -163,6 +168,7 @@ export function GerenciarUsuarios() {
       const res = await api.post("/api/user-management/invites", {
         email: dados.email,
         perfil: dados.perfil,
+        condominioId: dados.condominioId || undefined,
         unidadeId: dados.unidadeId || undefined,
         nomePrecadastro: dados.nomePrecadastro || undefined,
         cpfPrecadastro: dados.cpfPrecadastro || undefined,
@@ -353,7 +359,10 @@ export function GerenciarUsuarios() {
                 <FormNovoUsuario
                   blocos={blocos}
                   apartamentos={apartamentos}
+                  condominios={condominios}
                   perfilAtor={usuarioLogado?.perfil}
+                  condominioIdAtor={usuarioLogado?.condominioId}
+                  roleAtor={usuarioLogado?.role}
                   onSalvar={criarUsuario}
                   onCancelar={() => setCriando(false)}
                 />
@@ -893,10 +902,13 @@ function FormEdicao({ usuario, blocos, apartamentos, onSalvar, onCancelar }) {
 }
 
 // ─────────────────────────────────────────────
-function FormNovoUsuario({ blocos, apartamentos, perfilAtor, onSalvar, onCancelar }) {
+function FormNovoUsuario({ blocos, apartamentos, condominios, perfilAtor, condominioIdAtor, roleAtor, onSalvar, onCancelar }) {
   const perfisOpcoes = perfisCadastroDisponiveis(perfilAtor).filter(
     (p) => p.value !== PERFIS.GUEST,
   );
+
+  // Admin (role: 'admin') sempre pode selecionar/alterar o condomínio
+  const precisaSelecionarCondominio = !condominioIdAtor || roleAtor === 'admin';
 
   const [form, setForm] = useState({
     email: "",
@@ -904,6 +916,8 @@ function FormNovoUsuario({ blocos, apartamentos, perfilAtor, onSalvar, onCancela
     nomePrecadastro: "",
     cpfPrecadastro: "",
   });
+  const [erroCpf, setErroCpf] = useState("");
+  const [condominioId, setCondominioId] = useState(() => condominioIdAtor || "");
   const [blocoId, setBlocoId] = useState("");
   const [aptId, setAptId] = useState("");
 
@@ -914,11 +928,22 @@ function FormNovoUsuario({ blocos, apartamentos, perfilAtor, onSalvar, onCancela
     }
   }, [perfilAtor]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Pré-seleciona primeiro condomínio disponível para admins sem condomínio próprio
   useEffect(() => {
-    if (!blocoId && blocos.length > 0) setBlocoId(blocos[0].id);
-  }, [blocos]);
+    if (precisaSelecionarCondominio && !condominioId && condominios.length > 0) {
+      setCondominioId(condominios[0].id);
+    }
+  }, [condominios]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Blocos filtrados pelo condomínio selecionado
+  const blocosFiltrados = condominioId
+    ? blocos.filter((b) => b.condominioId === condominioId)
+    : blocos;
 
   const aptsFiltrados = blocoId ? apartamentos.filter((a) => a.blocoId === blocoId) : apartamentos;
+
+  // Condomínio do ator para exibição readonly
+  const condominioDoAtor = condominios.find((c) => c.id === condominioIdAtor);
   const perfilUnidade = PERFIS_EXIGEM_PRECADASTRO.has(form.perfil);
   const exigeUnidade = PERFIS_EXIGEM_UNIDADE_FORM.has(form.perfil);
 
@@ -926,14 +951,27 @@ function FormNovoUsuario({ blocos, apartamentos, perfilAtor, onSalvar, onCancela
     setForm((f) => ({ ...f, [field]: value }));
   }
 
+  function handleCpfChange(e) {
+    const masked = mascararCpf(e.target.value);
+    setForm((f) => ({ ...f, cpfPrecadastro: masked }));
+    setErroCpf("");
+  }
+
   function handleSubmit(e) {
     e.preventDefault();
     if (!form.email.trim() || !form.perfil) return;
+    if (precisaSelecionarCondominio && !condominioId) return;
     if (exigeUnidade && !aptId) return;
+
+    if (perfilUnidade && !validarCpf(form.cpfPrecadastro)) {
+      setErroCpf("CPF inválido. Verifique o número informado.");
+      return;
+    }
 
     onSalvar({
       email: form.email.trim(),
       perfil: form.perfil,
+      condominioId: condominioId || undefined,
       unidadeId: aptId || undefined,
       nomePrecadastro: perfilUnidade ? form.nomePrecadastro.trim() : undefined,
       cpfPrecadastro: perfilUnidade ? form.cpfPrecadastro.trim() : undefined,
@@ -948,6 +986,34 @@ function FormNovoUsuario({ blocos, apartamentos, perfilAtor, onSalvar, onCancela
       <p className="text-xs text-on-surface-variant">
         Convidados (Guest) devem ser cadastrados no perfil da unidade — sem convite por e-mail.
       </p>
+
+      {precisaSelecionarCondominio ? (
+        <div className="space-y-2">
+          <label className={labelCls}>Condomínio *</label>
+          <select
+            value={condominioId}
+            onChange={(e) => { setCondominioId(e.target.value); setBlocoId(""); setAptId(""); }}
+            required
+            className={selectCls}
+          >
+            <option value="">— Selecione o condomínio —</option>
+            {condominios.map((c) => (
+              <option key={c.id} value={c.id}>{c.nome}</option>
+            ))}
+          </select>
+        </div>
+      ) : (
+        <div className="flex items-center gap-2 px-4 py-3 rounded-xl bg-surface-container-highest/30">
+          <Icone name="domain" className="text-primary text-base shrink-0" />
+          <span className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant mr-1">
+            Condomínio:
+          </span>
+          <span className="text-sm font-semibold text-on-surface">
+            {condominioDoAtor?.nome ?? condominioIdAtor}
+          </span>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <Campo
           id="novo-email"
@@ -988,9 +1054,11 @@ function FormNovoUsuario({ blocos, apartamentos, perfilAtor, onSalvar, onCancela
             label="CPF *"
             placeholder="000.000.000-00"
             icon="badge"
+            inputMode="numeric"
             value={form.cpfPrecadastro}
-            onChange={(e) => set("cpfPrecadastro", e.target.value)}
+            onChange={handleCpfChange}
           />
+          {erroCpf && <p className="text-error text-sm ml-1">{erroCpf}</p>}
         </div>
       )}
 
@@ -1000,10 +1068,13 @@ function FormNovoUsuario({ blocos, apartamentos, perfilAtor, onSalvar, onCancela
             <label className={labelCls}>Bloco *</label>
             <select value={blocoId} onChange={(e) => { setBlocoId(e.target.value); setAptId(""); }} required className={selectCls}>
               <option value="">— Selecione —</option>
-              {blocos.map((b) => (
+              {blocosFiltrados.map((b) => (
                 <option key={b.id} value={b.id}>{b.nome}</option>
               ))}
             </select>
+            {condominioId && blocosFiltrados.length === 0 && (
+              <p className="text-xs text-on-surface-variant ml-1">Nenhum bloco cadastrado para este condomínio</p>
+            )}
           </div>
           <div className="space-y-2">
             <label className={labelCls}>Apartamento *</label>

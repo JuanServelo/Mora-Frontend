@@ -18,6 +18,7 @@ import { GerenciarVagas } from "../pages/adm/GerenciarVagas";
 import { GerenciarConhecimento } from "../pages/adm/GerenciarConhecimento";
 import { GerenciarPerfis } from "../pages/adm/GerenciarPerfis";
 import { GerenciarCondominios } from "../pages/adm/GerenciarCondominios";
+import { GerenciarVeiculos } from "../pages/adm/GerenciarVeiculos";
 import { FAQ } from "../pages/usuario/FAQ";
 import { MinhasReservas } from "../pages/usuario/MinhasReservas";
 import { MinhasReclamacoes } from "../pages/usuario/MinhasReclamacoes";
@@ -25,8 +26,13 @@ import { MinhasEntregas } from "../pages/usuario/MinhasEntregas";
 import { Inicio } from "../pages/inicio/Inicio";
 import { Servicos } from "../pages/servicos/Servicos";
 import { Comodidades } from "../pages/comodidades/Comodidades";
+import { Portaria } from "../pages/portaria/Portaria";
+import { Chaves } from "../pages/porteiro/Chaves";
+import { UsuariosCondominio } from "../pages/porteiro/UsuariosCondominio";
+import { MeusConvidados } from "../pages/usuario/MeusConvidados";
 import { AppLayout } from "../layouts/AppLayout";
 import { ProtectedRoute } from "./ProtectedRoute";
+import { DoormanRoute } from "./DoormanRoute";
 
 export const router = createBrowserRouter([
   {
@@ -79,6 +85,19 @@ export const router = createBrowserRouter([
       { path: "/espacos", element: <MinhasReservas /> },
       { path: "/reclamacoes", element: <MinhasReclamacoes /> },
       { path: "/entregas", element: <MinhasEntregas /> },
+      { path: "/portaria", element: <Portaria /> },
+      { path: "/entradas-e-saidas", element: <Portaria /> },
+      { path: "/chaves", element: <Chaves /> },
+      { path: "/veiculos", element: <GerenciarVeiculos /> },
+      {
+        path: "/usuarios",
+        element: (
+          <DoormanRoute>
+            <UsuariosCondominio />
+          </DoormanRoute>
+        ),
+      },
+      { path: "/meus-convidados", element: <MeusConvidados /> },
       { path: "/adm/usuarios", element: <GerenciarUsuarios /> },
       { path: "/adm/estruturas", element: <GerenciarEstruturas /> },
       { path: "/adm/reunioes", element: <GerenciarReunioes /> },
@@ -89,6 +108,7 @@ export const router = createBrowserRouter([
       { path: "/adm/conhecimento", element: <GerenciarConhecimento /> },
       { path: "/adm/perfis", element: <GerenciarPerfis /> },
       { path: "/adm/condominios", element: <GerenciarCondominios /> },
+      { path: "/adm/veiculos", element: <GerenciarVeiculos /> },
     ],
   },
 ]);
