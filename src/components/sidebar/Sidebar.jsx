@@ -32,11 +32,10 @@ export function Sidebar() {
 
   const isPlataforma = PERFIS_PLATAFORMA.includes(usuario?.perfil);
   const isSuperAdmin = usuario?.role === "admin";
-  const links = ADM_LINKS.filter((l) => {
-    if (l.superAdmin) return isSuperAdmin;
-    if (l.plataforma) return isPlataforma;
-    return true;
-  });
+  // Super Admin vê SOMENTE Planos; os demais admins veem suas abas (sem Planos).
+  const links = isSuperAdmin
+    ? ADM_LINKS.filter((l) => l.superAdmin)
+    : ADM_LINKS.filter((l) => !l.superAdmin && (!l.plataforma || isPlataforma));
 
   async function handleLogout() {
     await logout();

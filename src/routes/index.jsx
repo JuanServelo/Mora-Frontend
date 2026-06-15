@@ -33,6 +33,7 @@ import { MeusConvidados } from "../pages/usuario/MeusConvidados";
 import { AppLayout } from "../layouts/AppLayout";
 import { ProtectedRoute } from "./ProtectedRoute";
 import { DoormanRoute } from "./DoormanRoute";
+import { SuperAdminRoute } from "./SuperAdminRoute";
 
 export const router = createBrowserRouter([
   {
@@ -108,7 +109,14 @@ export const router = createBrowserRouter([
       { path: "/adm/perfis", element: <GerenciarPerfis /> },
       { path: "/adm/condominios", element: <GerenciarCondominios /> },
       { path: "/adm/veiculos", element: <GerenciarVeiculos /> },
-      { path: "/adm/planos", element: <GerenciarPlanos /> },
+      {
+        path: "/adm/planos",
+        element: (
+          <SuperAdminRoute>
+            <GerenciarPlanos />
+          </SuperAdminRoute>
+        ),
+      },
     ],
   },
 ]);
