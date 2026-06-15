@@ -121,3 +121,18 @@ export const conhecimentoApi = {
   atualizar: (id, data) => portariaApi.put(`/conhecimento/${id}`, data),
   excluir: (id) => portariaApi.delete(`/conhecimento/${id}`),
 };
+
+// ─────────────────────────────────────────────
+// AVISOS E COMUNICADOS (por condomínio)
+// ─────────────────────────────────────────────
+export const avisoApi = {
+  listar: (condominioId) =>
+    portariaApi.get("/avisos", { params: condominioId ? { condominioId } : {} }),
+  listarAtivos: (condominioId) =>
+    portariaApi.get("/avisos/ativos", { params: { condominioId } }),
+  buscar: (id) => portariaApi.get(`/avisos/${id}`),
+  criar: (data) => portariaApi.post("/avisos", data),
+  atualizar: (id, data) => portariaApi.put(`/avisos/${id}`, data),
+  encerrar: (id) => portariaApi.patch(`/avisos/${id}/encerrar`),
+  excluir: (id) => portariaApi.delete(`/avisos/${id}`),
+};

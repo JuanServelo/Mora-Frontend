@@ -3,12 +3,13 @@ import { useState, useEffect } from "react";
 import { blocoApi, apartamentoApi, areaComunApi } from "../../services/estruturasApi";
 import { vagaApi } from "../../services/portariaApi";
 import { condominiosApi } from "../../services/condominiosApi";
+import api from "../../services/api";
 import { Icone } from "../../components/icones/Icone";
 import { Campo } from "../../components/campos/Campo";
 import { Botao } from "../../components/botoes/Botao";
 import { useAuth } from "../../contexts/AuthContext";
 import { useToast } from "../../contexts/ToastContext";
-import { PERFIS } from "../../utils/perfis";
+import { PERFIS, perfisCadastroDisponiveis } from "../../utils/perfis";
 
 const TIPOS_AREA = ["PISCINA", "SALAO_FESTAS", "ACADEMIA", "CHURRASQUEIRA", "QUADRA", "PLAYGROUND", "OUTRO"];
 
@@ -106,8 +107,7 @@ export function GerenciarEstruturas() {
         {/* Sub-navbar de abas */}
         <div className="glass-panel rounded-2xl p-1.5 flex gap-1 w-fit flex-wrap">
           {[
-            { id: "blocos", label: "Blocos", icon: "apartment" },
-            { id: "apartamentos", label: "Apartamentos", icon: "door_front" },
+            { id: "blocos", label: "Blocos & Apartamentos", icon: "apartment" },
             { id: "areas-comuns", label: "Áreas Comuns", icon: "pool" },
             { id: "vagas", label: "Vagas", icon: "local_parking" },
           ].map((tab) => (
@@ -128,7 +128,6 @@ export function GerenciarEstruturas() {
 
         {/* Conteúdo por aba — passa condominioId para cada aba */}
         {aba === "blocos" && <AbaBlocos condominioId={condominioId} />}
-        {aba === "apartamentos" && <AbaApartamentos condominioId={condominioId} />}
         {aba === "areas-comuns" && <AbaAreasComuns condominioId={condominioId} />}
         {aba === "vagas" && <AbaVagas condominioId={condominioId} />}
       </div>
@@ -145,8 +144,7 @@ function AbaBlocos({ condominioId }) {
   const [carregando, setCarregando] = useState(true);
   const [busca, setBusca] = useState("");
   const [criando, setCriando] = useState(false);
-  const [expandido, setExpandido] = useState(null);
-  const [editando, setEditando] = useState(null);
+  const [blocoSelecionado, setBlocoSelecionado] = useState(null);
 
   useEffect(() => {
     setCarregando(true);
@@ -178,10 +176,11 @@ function AbaBlocos({ condominioId }) {
     try {
       const res = await blocoApi.atualizar(id, dados);
       setBlocos((prev) => prev.map((b) => (b.id === id ? res.data : b)));
-      setEditando(null);
       toast.success("Bloco atualizado.");
+      return res.data;
     } catch (err) {
       toast.error(err.response?.data?.erro || "Erro ao atualizar bloco.");
+      return null;
     }
   }
 
@@ -199,6 +198,24 @@ function AbaBlocos({ condominioId }) {
     } catch (err) {
       toast.error(err.response?.data?.erro || "Erro ao alterar status do bloco.");
     }
+  }
+
+  if (blocoSelecionado) {
+    return (
+      <VistaApartamentos
+        bloco={blocoSelecionado}
+        condominioId={condominioId}
+        onVoltar={() => setBlocoSelecionado(null)}
+        onEditarBloco={async (dados) => {
+          const atualizado = await handleAtualizar(blocoSelecionado.id, dados);
+          if (atualizado) setBlocoSelecionado(atualizado);
+        }}
+        onToggleAtivoBloco={async () => {
+          await handleToggleAtivo(blocoSelecionado);
+          setBlocoSelecionado((b) => ({ ...b, ativo: !b.ativo }));
+        }}
+      />
+    );
   }
 
   return (
@@ -220,7 +237,7 @@ function AbaBlocos({ condominioId }) {
           </div>
         </div>
         <button
-          onClick={() => { setCriando((c) => !c); setExpandido(null); setEditando(null); }}
+          onClick={() => setCriando((c) => !c)}
           className={`flex items-center gap-2 px-5 py-3 rounded-2xl font-semibold text-sm transition-all duration-200 cursor-pointer border ${
             criando ? "border-error/30 text-error hover:bg-error/10" : "border-primary/30 text-primary hover:bg-primary/10"
           }`}
@@ -265,7 +282,7 @@ function AbaBlocos({ condominioId }) {
           {filtrados.map((bloco) => (
             <div key={bloco.id} className="glass-panel rounded-3xl overflow-hidden">
               <button
-                onClick={() => { setExpandido((p) => (p === bloco.id ? null : bloco.id)); setEditando(null); }}
+                onClick={() => setBlocoSelecionado(bloco)}
                 className="w-full flex items-center gap-4 p-5 text-left hover:bg-white/5 transition-all cursor-pointer"
               >
                 <div className="w-11 h-11 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
@@ -289,25 +306,12 @@ function AbaBlocos({ condominioId }) {
                 <span className={`shrink-0 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider ${statusStyle(bloco.ativo)}`}>
                   {bloco.ativo ? "ativo" : "inativo"}
                 </span>
-                <Icone
-                  name="expand_more"
-                  className={`text-outline shrink-0 transition-transform duration-300 ${expandido === bloco.id ? "rotate-180" : ""}`}
-                />
+                <span className="hidden md:flex items-center gap-1 text-primary text-sm font-semibold shrink-0">
+                  Ver apartamentos
+                  <Icone name="chevron_right" className="text-lg" />
+                </span>
+                <Icone name="chevron_right" className="text-outline shrink-0 md:hidden" />
               </button>
-
-              {expandido === bloco.id && (
-                <div className="border-t border-outline-variant/15 px-5 pb-6 pt-5">
-                  {editando === bloco.id ? (
-                    <FormBloco
-                      inicial={bloco}
-                      onSalvar={(dados) => handleAtualizar(bloco.id, dados)}
-                      onCancelar={() => setEditando(null)}
-                    />
-                  ) : (
-                    <DetalhesBloco bloco={bloco} onEditar={() => setEditando(bloco.id)} onToggleAtivo={() => handleToggleAtivo(bloco)} />
-                  )}
-                </div>
-              )}
             </div>
           ))}
         </div>
@@ -388,7 +392,365 @@ function DetalhesBloco({ bloco, onEditar, onToggleAtivo }) {
 }
 
 // ════════════════════════════════════════════
-// ABA: APARTAMENTOS
+// DRILL-DOWN: APARTAMENTOS DE UM BLOCO (+ convite)
+// ════════════════════════════════════════════
+function VistaApartamentos({ bloco, condominioId, onVoltar, onEditarBloco, onToggleAtivoBloco }) {
+  const toast = useToast();
+  const [apartamentos, setApartamentos] = useState([]);
+  const [carregando, setCarregando] = useState(true);
+  const [criando, setCriando] = useState(false);
+  const [expandido, setExpandido] = useState(null);
+  const [editando, setEditando] = useState(null);
+  const [editandoBloco, setEditandoBloco] = useState(false);
+  const [erroCriar, setErroCriar] = useState("");
+  const [erroEditar, setErroEditar] = useState("");
+
+  useEffect(() => {
+    apartamentoApi
+      .listarPorBloco(bloco.id)
+      .then((res) =>
+        setApartamentos(res.data.map((a) => ({ ...a, blocoNome: a.blocoNome ?? bloco.nome }))),
+      )
+      .catch((err) => console.error("Erro ao carregar apartamentos do bloco:", err))
+      .finally(() => setCarregando(false));
+  }, [bloco.id, bloco.nome]);
+
+  async function handleCriar(dados) {
+    setErroCriar("");
+    try {
+      const res = await apartamentoApi.cadastrar(dados, bloco.id);
+      setApartamentos((prev) => [{ ...res.data, blocoNome: res.data.blocoNome ?? bloco.nome }, ...prev]);
+      setCriando(false);
+      toast.success("Apartamento cadastrado.");
+    } catch (err) {
+      const d = err.response?.data;
+      setErroCriar(d?.erro || (d?.erros ? Object.values(d.erros).join("; ") : null) || "Erro ao criar apartamento.");
+    }
+  }
+
+  async function handleAtualizar(id, dados) {
+    setErroEditar("");
+    try {
+      const res = await apartamentoApi.atualizar(id, dados, bloco.id);
+      setApartamentos((prev) =>
+        prev.map((a) => (a.id === id ? { ...res.data, blocoNome: res.data.blocoNome ?? bloco.nome } : a)),
+      );
+      setEditando(null);
+      toast.success("Apartamento atualizado.");
+    } catch (err) {
+      const d = err.response?.data;
+      setErroEditar(d?.erro || (d?.erros ? Object.values(d.erros).join("; ") : null) || "Erro ao atualizar apartamento.");
+    }
+  }
+
+  async function handleToggleAtivo(apt) {
+    try {
+      if (apt.ativo) await apartamentoApi.desativar(apt.id);
+      else await apartamentoApi.ativar(apt.id);
+      setApartamentos((prev) => prev.map((a) => (a.id === apt.id ? { ...a, ativo: !a.ativo } : a)));
+    } catch (err) {
+      console.error("Erro ao alterar status do apartamento:", err);
+    }
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Voltar */}
+      <button
+        onClick={onVoltar}
+        className="flex items-center gap-1.5 text-on-surface-variant hover:text-on-surface text-sm font-semibold w-fit transition-colors cursor-pointer"
+      >
+        <Icone name="arrow_back" className="text-lg" /> Voltar para blocos
+      </button>
+
+      {/* Cabeçalho do bloco */}
+      <div className="glass-panel rounded-3xl p-5 flex items-center gap-4 flex-wrap">
+        <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0">
+          <Icone name="apartment" className="text-primary text-2xl" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <h2 className="font-headline text-2xl font-bold text-on-surface truncate">{bloco.nome}</h2>
+          <p className="text-on-surface-variant text-sm truncate">{bloco.descricao}</p>
+        </div>
+        <span className={`shrink-0 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider ${statusStyle(bloco.ativo)}`}>
+          {bloco.ativo ? "ativo" : "inativo"}
+        </span>
+        <div className="flex gap-2 shrink-0">
+          <button
+            onClick={() => setEditandoBloco((v) => !v)}
+            className="flex items-center gap-1.5 px-4 py-2 rounded-xl border border-primary/30 text-primary hover:bg-primary/10 text-sm font-semibold transition-all cursor-pointer"
+          >
+            <Icone name="edit" className="text-base" /> Editar bloco
+          </button>
+          <button
+            onClick={onToggleAtivoBloco}
+            className={`flex items-center gap-1.5 px-4 py-2 rounded-xl border text-sm font-semibold transition-all cursor-pointer ${
+              bloco.ativo ? "border-error/30 text-error hover:bg-error/10" : "border-primary/30 text-primary hover:bg-primary/10"
+            }`}
+          >
+            <Icone name={bloco.ativo ? "do_not_disturb_on" : "check_circle"} className="text-base" />
+            {bloco.ativo ? "Desativar" : "Ativar"}
+          </button>
+        </div>
+      </div>
+
+      {editandoBloco && (
+        <div className="glass-panel rounded-3xl p-6 border border-primary/15">
+          <FormBloco
+            inicial={bloco}
+            onSalvar={async (dados) => { await onEditarBloco(dados); setEditandoBloco(false); }}
+            onCancelar={() => setEditandoBloco(false)}
+          />
+        </div>
+      )}
+
+      {/* Stats + novo apartamento */}
+      <div className="flex items-center justify-between gap-4 flex-wrap">
+        <div className="flex gap-3 flex-wrap">
+          <div className="glass-panel rounded-2xl px-5 py-3 text-center">
+            <p className="text-2xl font-headline font-bold text-on-surface">{apartamentos.length}</p>
+            <p className="text-on-surface-variant text-xs uppercase tracking-wider">Apartamentos</p>
+          </div>
+          <div className="glass-panel rounded-2xl px-5 py-3 text-center">
+            <p className="text-2xl font-headline font-bold text-primary">{apartamentos.filter((a) => a.ativo).length}</p>
+            <p className="text-on-surface-variant text-xs uppercase tracking-wider">Ativos</p>
+          </div>
+        </div>
+        <button
+          onClick={() => { setCriando((c) => !c); setExpandido(null); setEditando(null); setErroCriar(""); }}
+          className={`flex items-center gap-2 px-5 py-3 rounded-2xl font-semibold text-sm transition-all duration-200 cursor-pointer border ${
+            criando ? "border-error/30 text-error hover:bg-error/10" : "border-primary/30 text-primary hover:bg-primary/10"
+          }`}
+        >
+          <Icone name={criando ? "close" : "add"} className="text-xl" />
+          {criando ? "Cancelar" : "Novo Apartamento"}
+        </button>
+      </div>
+
+      {criando && (
+        <div className="glass-panel rounded-3xl p-6 lg:p-8 border border-primary/15">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+              <Icone name="door_front" className="text-primary" />
+            </div>
+            <h2 className="font-headline text-xl font-bold text-on-surface">Novo Apartamento em {bloco.nome}</h2>
+          </div>
+          <FormApartamento
+            blocos={[bloco]}
+            onSalvar={(dados) => handleCriar(dados)}
+            onCancelar={() => { setCriando(false); setErroCriar(""); }}
+            erro={erroCriar}
+          />
+        </div>
+      )}
+
+      {/* Lista de apartamentos */}
+      {carregando ? (
+        <div className="glass-panel rounded-3xl p-10 text-center text-on-surface-variant">Carregando...</div>
+      ) : (
+        <div className="space-y-3">
+          {apartamentos.length === 0 && (
+            <div className="glass-panel rounded-3xl p-10 text-center text-on-surface-variant">Nenhum apartamento neste bloco ainda.</div>
+          )}
+          {apartamentos.map((apt) => (
+            <div key={apt.id} className="glass-panel rounded-3xl overflow-hidden">
+              <button
+                onClick={() => { setExpandido((p) => (p === apt.id ? null : apt.id)); setEditando(null); }}
+                className="w-full flex items-center gap-4 p-5 text-left hover:bg-white/5 transition-all cursor-pointer"
+              >
+                <div className="w-11 h-11 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                  <Icone name="door_front" className="text-primary" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-on-surface font-semibold truncate">Apt {apt.numero}</p>
+                  <p className="text-on-surface-variant text-sm truncate">
+                    {apt.andar != null ? `${apt.andar}º andar` : "—"}{apt.quartos ? ` · ${apt.quartos} quartos` : ""}
+                  </p>
+                </div>
+                <span className={`shrink-0 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider ${statusStyle(apt.ativo)}`}>
+                  {apt.ativo ? "ativo" : "inativo"}
+                </span>
+                <Icone
+                  name="expand_more"
+                  className={`text-outline shrink-0 transition-transform duration-300 ${expandido === apt.id ? "rotate-180" : ""}`}
+                />
+              </button>
+
+              {expandido === apt.id && (
+                <div className="border-t border-outline-variant/15 px-5 pb-6 pt-5 space-y-6">
+                  {editando === apt.id ? (
+                    <FormApartamento
+                      inicial={apt}
+                      blocos={[bloco]}
+                      onSalvar={(dados) => handleAtualizar(apt.id, dados)}
+                      onCancelar={() => { setEditando(null); setErroEditar(""); }}
+                      erro={erroEditar}
+                    />
+                  ) : (
+                    <>
+                      <DetalhesApartamento apt={apt} onEditar={() => setEditando(apt.id)} onToggleAtivo={() => handleToggleAtivo(apt)} />
+                      <div className="border-t border-outline-variant/15 pt-5">
+                        <ConviteEstrutura apartamento={apt} bloco={bloco} condominioId={condominioId} />
+                      </div>
+                    </>
+                  )}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Convite de morador atrelado a um apartamento ───
+const PERFIS_UNIDADE_CONVITE = [
+  PERFIS.RESIDENT_OWNER,
+  PERFIS.ABSENT_OWNER,
+  PERFIS.LESSEE,
+  PERFIS.OCCUPANT,
+];
+
+function ConviteEstrutura({ apartamento, bloco, condominioId }) {
+  const { usuario } = useAuth();
+  const toast = useToast();
+  const opcoes = perfisCadastroDisponiveis(usuario?.perfil).filter((p) =>
+    PERFIS_UNIDADE_CONVITE.includes(p.value),
+  );
+  const [perfil, setPerfil] = useState(opcoes[0]?.value || "");
+  const [email, setEmail] = useState("");
+  const [enviando, setEnviando] = useState(false);
+  const [resultado, setResultado] = useState(null);
+  const [copiado, setCopiado] = useState(false);
+
+  if (opcoes.length === 0) {
+    return (
+      <p className="text-sm text-on-surface-variant">
+        Seu perfil não pode emitir convites de morador para esta unidade.
+      </p>
+    );
+  }
+
+  const link = resultado ? `${window.location.origin}/ativar?codigo=${resultado.convite.codigo}` : "";
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    if (!email.trim() || !perfil) return;
+    setEnviando(true);
+    setResultado(null);
+    try {
+      const res = await api.post("/api/user-management/invites", {
+        email: email.trim(),
+        perfil,
+        condominioId,
+        unidadeId: apartamento.id,
+      });
+      setResultado(res.data);
+      if (res.data.emailEnviado === false) {
+        toast.warning(res.data.avisoEmail || "Convite criado — envie o link manualmente.", {
+          detalhe: `Código: ${res.data.convite.codigo}`,
+        });
+      } else {
+        toast.success("Convite enviado.");
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.mensagem || "Erro ao gerar convite.");
+    } finally {
+      setEnviando(false);
+    }
+  }
+
+  function copiar() {
+    navigator.clipboard?.writeText(link);
+    setCopiado(true);
+    setTimeout(() => setCopiado(false), 2000);
+  }
+
+  if (resultado) {
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center gap-2 text-primary">
+          <Icone name="check_circle" className="text-xl" />
+          <p className="font-semibold">Convite gerado para Apt {apartamento.numero} · {bloco.nome}</p>
+        </div>
+        {!resultado.emailEnviado && (
+          <p className="text-xs text-secondary bg-secondary/10 rounded-xl px-3 py-2">
+            O e-mail automático não está configurado — copie e envie o link abaixo manualmente.
+          </p>
+        )}
+        <div className="space-y-2">
+          <p className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant">Código</p>
+          <p className="font-mono text-lg font-bold text-on-surface bg-surface-container-highest/40 rounded-xl px-4 py-3 w-fit tracking-widest">
+            {resultado.convite.codigo}
+          </p>
+        </div>
+        <div className="space-y-2">
+          <p className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant">Link de ativação</p>
+          <div className="flex gap-2">
+            <input
+              readOnly
+              value={link}
+              className="flex-1 bg-surface-container-highest/40 border-none rounded-xl py-3 px-4 text-on-surface text-sm focus:outline-none"
+            />
+            <button
+              onClick={copiar}
+              className="shrink-0 px-4 rounded-xl border border-primary/30 text-primary hover:bg-primary/10 text-sm font-semibold cursor-pointer flex items-center gap-1.5"
+            >
+              <Icone name={copiado ? "check" : "content_copy"} className="text-base" />
+              {copiado ? "Copiado" : "Copiar"}
+            </button>
+          </div>
+        </div>
+        <button
+          onClick={() => { setResultado(null); setEmail(""); }}
+          className="text-sm font-semibold text-primary hover:underline cursor-pointer"
+        >
+          Gerar outro convite
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="flex items-center gap-2 mb-1">
+        <Icone name="person_add" className="text-primary text-lg" />
+        <p className="font-headline font-bold text-on-surface">Convidar morador para esta unidade</p>
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant ml-1">Tipo de morador</label>
+          <select
+            value={perfil}
+            onChange={(e) => setPerfil(e.target.value)}
+            className="w-full bg-surface-container-highest/40 border-none rounded-xl py-4 px-4 text-on-surface focus:ring-2 focus:ring-primary/50 focus:outline-none backdrop-blur-sm transition-all"
+          >
+            {opcoes.map((p) => (
+              <option key={p.value} value={p.value}>{p.label}</option>
+            ))}
+          </select>
+        </div>
+        <Campo
+          id={`convite-email-${apartamento.id}`}
+          label="E-mail do convidado"
+          type="email"
+          placeholder="pessoa@email.com"
+          icon="mail"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+      </div>
+      <Botao type="submit" disabled={enviando}>
+        {enviando ? "Gerando…" : "Gerar convite"}
+        <Icone name="link" className="text-xl" />
+      </Botao>
+    </form>
+  );
+}
+
+// ════════════════════════════════════════════
+// ABA: APARTAMENTOS (avulsa — mantida como referência/reuso)
 // ════════════════════════════════════════════
 function AbaApartamentos({ condominioId }) {
   const [apartamentos, setApartamentos] = useState([]);
