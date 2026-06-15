@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import { condominiosApi } from "../../services/condominiosApi";
+import { avisoApi } from "../../services/portariaApi";
 import { Icone } from "../../components/icones/Icone";
 import { PERFIS } from "../../utils/perfis";
 import { InicioDoorman } from "../porteiro/InicioDoorman";
@@ -37,19 +38,23 @@ const ACESSO_RAPIDO = [
 export function Inicio() {
   const { usuario } = useAuth();
 
-  if (usuario?.perfil === PERFIS.DOORMAN) {
-    return <InicioDoorman />;
-  }
-
   const primeiroNome = usuario?.nome?.split(" ")[0] || "Morador";
   const [nomeCondominio, setNomeCondominio] = useState(null);
+  const [avisos, setAvisos] = useState([]);
 
   useEffect(() => {
     if (!usuario?.condominioId) return;
     condominiosApi.buscar(usuario.condominioId)
       .then((res) => setNomeCondominio(res.data.condominio?.nome ?? null))
       .catch(() => {});
+    avisoApi.listarAtivos(usuario.condominioId)
+      .then((res) => setAvisos(res.data || []))
+      .catch(() => {});
   }, [usuario?.condominioId]);
+
+  if (usuario?.perfil === PERFIS.DOORMAN) {
+    return <InicioDoorman />;
+  }
 
   return (
     <div className="min-h-screen w-full pt-4 pb-20 px-6">
@@ -68,6 +73,35 @@ export function Inicio() {
             Central do seu condomínio: reservas, comunicação e tudo o que você precisa em um só lugar.
           </p>
         </header>
+
+        {/* Avisos vigentes do condomínio */}
+        {avisos.length > 0 && (
+          <section className="space-y-4">
+            <div className="flex items-center gap-2">
+              <Icone name="campaign" className="text-primary text-xl" />
+              <h2 className="font-headline text-2xl font-bold text-on-surface">Avisos</h2>
+            </div>
+            <div className="space-y-3">
+              {avisos.map((a) => (
+                <div key={a.id} className="glass-panel rounded-2xl p-5 border border-primary/15">
+                  <div className="flex items-start gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                      <Icone name="campaign" className="text-primary" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-on-surface">{a.titulo}</p>
+                      <p className="text-sm text-on-surface-variant whitespace-pre-wrap mt-1">{a.mensagem}</p>
+                      <p className="text-xs text-on-surface-variant/70 mt-2">
+                        Até {new Date(a.dataFim).toLocaleDateString("pt-BR")}
+                        {a.autor ? ` · ${a.autor}` : ""}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {[
@@ -154,7 +188,7 @@ export function Inicio() {
                   Precisa de ajuda da administração?
                 </h3>
                 <p className="text-on-surface-variant text-sm max-w-xl">
-                  Use reclamações para chamados ou consulte serviços do condomínio. Em breve, avisos oficiais aparecerão aqui também.
+                  Use reclamações para chamados ou consulte serviços do condomínio. Os avisos oficiais aparecem no topo desta página.
                 </p>
               </div>
             </div>

@@ -28,7 +28,6 @@ const ADMIN_ABAS = [
   { label: "Usuários", to: "/adm/usuarios", icon: "manage_accounts" },
   { label: "Estruturas", to: "/adm/estruturas", icon: "apartment" },
   { label: "Reuniões", to: "/adm/reunioes", icon: "groups" },
-  { label: "Espaços", to: "/adm/espacos", icon: "deck" },
   { label: "Reclamações", to: "/adm/reclamacoes", icon: "report" },
   { label: "Entregas", to: "/adm/entregas", icon: "inventory_2" },
   { label: "Vagas", to: "/adm/vagas", icon: "local_parking" },
