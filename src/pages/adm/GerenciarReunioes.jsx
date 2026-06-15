@@ -6,6 +6,8 @@ import { Campo } from "../../components/campos/Campo";
 import { Botao } from "../../components/botoes/Botao";
 import { useToast } from "../../contexts/ToastContext";
 import { useConfirm } from "../../contexts/ConfirmContext";
+import { useAuth } from "../../contexts/AuthContext";
+import api from "../../services/api";
 
 function TextArea({ label, ...props }) {
   return (
@@ -88,6 +90,12 @@ function filtrarReunioesDaSemana(lista) {
 // ════════════════════════════════════════════
 export function GerenciarReunioes() {
   const [aba, setAba] = useState("reunioes");
+  const [reuniaoParaVotar, setReuniaoParaVotar] = useState(null);
+
+  const irParaVotacao = (meetingId) => {
+    setReuniaoParaVotar(meetingId);
+    setAba("votacoes");
+  };
 
   return (
     <div className="min-h-screen w-full pt-4 pb-20 px-6">
@@ -129,8 +137,8 @@ export function GerenciarReunioes() {
           ))}
         </div>
 
-        {aba === "reunioes" && <AbaReunioes />}
-        {aba === "votacoes" && <AbaVotacoes />}
+        {aba === "reunioes" && <AbaReunioes irParaVotacao={irParaVotacao} />}
+        {aba === "votacoes" && <AbaVotacoes reuniaoPreenchida={reuniaoParaVotar} />}
         {aba === "atas" && <AbaAtas />}
       </div>
     </div>
@@ -149,9 +157,10 @@ const EMPTY_MEETING = {
   idConvidados: "",
 };
 
-function AbaReunioes() {
+function AbaReunioes({ irParaVotacao }) {
   const toast = useToast();
   const confirm = useConfirm();
+  const { usuario } = useAuth();
   const [reunioes, setReunioes] = useState([]);
   const [carregando, setCarregando] = useState(false);
   const [criando, setCriando] = useState(false);
@@ -173,14 +182,6 @@ function AbaReunioes() {
   // Modal de confirmação premium
   const [confirmModal, setConfirmModal] = useState({ aberto: false, titulo: "", mensagem: "", onConfirmar: null });
 
-  const abrirConfirmacao = (titulo, mensagem, onConfirmar) => {
-    setConfirmModal({ aberto: true, titulo, mensagem, onConfirmar });
-  };
-
-  const fecharConfirmacao = () => {
-    setConfirmModal({ aberto: false, titulo: "", mensagem: "", onConfirmar: null });
-  };
-
   // avaliação
   const [avalForm, setAvalForm] = useState({ nota: "", comentario: "" });
   const [avalUsuarioId, setAvalUsuarioId] = useState("");
@@ -198,6 +199,18 @@ function AbaReunioes() {
   const [buscaUsuario, setBuscaUsuario] = useState("");
   const [reunioesSemana, setReunioesSemana] = useState([]);
   const [carregandoSemana, setCarregandoSemana] = useState(false);
+
+  const [votacoesReuniao, setVotacoesReuniao] = useState([]);
+
+  useEffect(() => {
+    if (detalhe?.id) {
+      pollApi.listar({ meetingId: detalhe.id })
+        .then((res) => setVotacoesReuniao(res.data || []))
+        .catch(() => setVotacoesReuniao([]));
+    } else {
+      setVotacoesReuniao([]);
+    }
+  }, [detalhe?.id]);
 
   // Sistema de alertas/notificações flutuantes personalizadas
   const [notificacao, setNotificacao] = useState(null); // { mensagem: "", tipo: "sucesso" | "erro" }
@@ -439,7 +452,19 @@ function AbaReunioes() {
     }
   }
 
-  const stats = { total: reunioes.length };
+  async function responderPresenca(meetingId, status) {
+    try {
+        await meetingApi.responderPresenca(meetingId, { status });
+        toast.success("Resposta registrada!");
+        carregarReunioesSemana();
+        if (detalhe?.id === meetingId) {
+            const res = await meetingApi.buscar(meetingId);
+            setDetalhe(res.data);
+        }
+    } catch (err) {
+        toast.error("Erro ao responder presença.");
+    }
+  }
 
   return (
     <div className="space-y-6 relative">
@@ -1123,7 +1148,7 @@ function AbaReunioes() {
                       className="w-full bg-surface-container-highest/40 border border-white/5 rounded-xl py-3 px-4 text-on-surface focus:ring-2 focus:ring-primary/50 focus:outline-none backdrop-blur-sm transition-all"
                     >
                       <option value="" className="bg-surface-container-highest text-on-surface">Selecione um convidado...</option>
-                      {detalhe.convidados?.map((c) => {
+                      {detalhe.convidados?.filter(c => c.status === "CONFIRMADO").map((c) => {
                         const usr = todosUsuarios.find((u) => u.id === c.usuarioId);
                         if (!usr) return null;
                         return (
@@ -1142,6 +1167,40 @@ function AbaReunioes() {
                 </form>
               </div>
             )}
+
+            {/* Seção de Votações da Reunião */}
+            <div className="p-5 space-y-4 border-t border-white/5">
+              <div className="flex items-center justify-between">
+                <h4 className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider flex items-center gap-2">
+                  <Icone name="how_to_vote" className="text-base text-primary" />
+                  Votações da Reunião
+                </h4>
+                {detalhe.idOrganizador === usuario?.id && (
+                  <button
+                    onClick={() => irParaVotacao(detalhe.id)}
+                    className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-primary text-on-primary hover:bg-primary-hover shadow-lg shadow-primary/20 hover:shadow-primary/30 transition text-xs font-semibold cursor-pointer"
+                  >
+                    <Icone name="add" className="text-sm font-bold" /> Criar Votação
+                  </button>
+                )}
+              </div>
+              
+              {votacoesReuniao.length > 0 ? (
+                <div className="grid gap-2 mt-2">
+                  {votacoesReuniao.map((poll) => (
+                    <div key={poll.id} className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition cursor-pointer" onClick={() => irParaVotacao(detalhe.id)}>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-medium text-on-surface">{poll.titulo}</span>
+                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${poll.status === 'ABERTA' ? 'bg-primary/20 text-primary' : 'bg-surface-container text-on-surface-variant'}`}>{poll.status}</span>
+                      </div>
+                      <Icone name="chevron_right" className="text-sm text-on-surface-variant" />
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-xs text-on-surface-variant italic">Nenhuma votação registrada para esta reunião.</p>
+              )}
+            </div>
 
             {/* Seção da Ata da Reunião integrada */}
             {carregandoAta ? (
@@ -1321,7 +1380,7 @@ function AbaReunioes() {
         <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4">
           <div 
             className="absolute inset-0 bg-black/60 backdrop-blur-md transition-all duration-300 animate-fade-in"
-            onClick={fecharConfirmacao}
+            onClick={() => setConfirmModal({ aberto: false })}
           />
           <div className="relative w-full max-w-md glass-panel rounded-3xl p-6 border border-white/10 shadow-2xl bg-surface-container-highest/95 backdrop-blur-xl animate-scale-up space-y-6">
             <div className="flex items-center gap-4">
@@ -1340,7 +1399,7 @@ function AbaReunioes() {
             <div className="flex items-center justify-end gap-3 pt-2">
               <button
                 type="button"
-                onClick={fecharConfirmacao}
+                onClick={() => setConfirmModal({ aberto: false })}
                 className="px-4 py-2.5 rounded-xl text-xs font-semibold text-on-surface-variant hover:text-on-surface hover:bg-white/5 transition cursor-pointer"
               >
                 Cancelar
@@ -1363,20 +1422,28 @@ function AbaReunioes() {
 // ════════════════════════════════════════════
 // ABA: VOTAÇÕES
 // ════════════════════════════════════════════
-const EMPTY_POLL = { titulo: "", descricao: "", meetingId: "", opcoes: "" };
-
-function AbaVotacoes() {
+function AbaVotacoes({ reuniaoPreenchida }) {
   const toast = useToast();
   const confirm = useConfirm();
-  const [criando, setCriando] = useState(false);
-  const [form, setForm] = useState(EMPTY_POLL);
+  const [buscaId, setBuscaId] = useState("");
+  const [buscaData, setBuscaData] = useState("");
+  const [detalhe, setDetalhe] = useState(null);
+  const [resultadosBusca, setResultadosBusca] = useState([]);
+  const [buscando, setBuscando] = useState(false);
+  const [erroDetalhe, setErroDetalhe] = useState("");
+
+  const [form, setForm] = useState({ titulo: "", descricao: "", meetingId: reuniaoPreenchida || "", opcoes: "" });
+  const [criando, setCriando] = useState(!!reuniaoPreenchida);
   const [salvando, setSalvando] = useState(false);
   const [erro, setErro] = useState("");
 
-  const [buscaId, setBuscaId] = useState("");
-  const [detalhe, setDetalhe] = useState(null);
-  const [buscando, setBuscando] = useState(false);
-  const [erroDetalhe, setErroDetalhe] = useState("");
+  useEffect(() => {
+    if (reuniaoPreenchida) {
+      setForm(p => ({ ...p, meetingId: reuniaoPreenchida }));
+      setCriando(true);
+      setDetalhe(null);
+    }
+  }, [reuniaoPreenchida]);
 
   // voto
   const [voteForm, setVoteForm] = useState({ pollOptionId: "", usuarioId: "" });
@@ -1401,8 +1468,9 @@ function AbaVotacoes() {
           .filter(Boolean),
       };
       await pollApi.criar(payload);
-      setForm(EMPTY_POLL);
+      setForm({ ...form, titulo: "", descricao: "", opcoes: "" });
       setCriando(false);
+      toast.success("Votação criada!");
     } catch (e) {
       setErro(e.response?.data?.message || "Erro ao criar votação.");
     } finally {
@@ -1415,11 +1483,29 @@ function AbaVotacoes() {
     setBuscando(true);
     setErroDetalhe("");
     setDetalhe(null);
+    setResultadosBusca([]);
     try {
       const res = await pollApi.buscar(buscaId);
       setDetalhe(res.data);
     } catch {
       setErroDetalhe("Votação não encontrada.");
+    } finally {
+      setBuscando(false);
+    }
+  }
+
+  async function buscarPollsPorData() {
+    if (!buscaData) return;
+    setBuscando(true);
+    setErroDetalhe("");
+    setDetalhe(null);
+    try {
+      const res = await pollApi.listar({ date: buscaData });
+      setResultadosBusca(res.data || []);
+      if (res.data.length === 0) setErroDetalhe("Nenhuma votação encontrada para esta data.");
+    } catch (e) {
+      setErroDetalhe("Erro ao buscar votações.");
+      setResultadosBusca([]);
     } finally {
       setBuscando(false);
     }
@@ -1437,6 +1523,7 @@ function AbaVotacoes() {
     try {
       await pollApi.encerrar(detalhe.id);
       setDetalhe((p) => (p ? { ...p, status: "ENCERRADA" } : p));
+      toast.success("Votação encerrada!");
     } catch {
       toast.error("Erro ao encerrar votação.");
     }
@@ -1454,6 +1541,7 @@ function AbaVotacoes() {
       setVoteForm({ pollOptionId: "", usuarioId: "" });
       const res = await pollApi.buscar(detalhe.id);
       setDetalhe(res.data);
+      toast.success("Voto registrado!");
     } catch (e) {
       toast.error(e.response?.data?.message || "Erro ao registrar voto.");
     } finally {
@@ -1489,23 +1577,51 @@ function AbaVotacoes() {
           </form>
         )}
 
-        {/* Busca por ID */}
-        <div className="space-y-3">
-          <div className="flex gap-2">
-            <div className="flex-1">
+        {/* Busca por ID ou Data */}
+        <div className="space-y-4">
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="flex-1 space-y-1">
               <Campo label="Buscar votação por ID" type="number" value={buscaId} onChange={(e) => setBuscaId(e.target.value)} placeholder="Digite o ID da votação" />
+              <button
+                onClick={buscarPoll}
+                disabled={buscando || !buscaId}
+                className="w-full flex justify-center items-center gap-1 px-4 py-2 rounded-xl bg-primary/10 text-primary hover:bg-primary/20 transition text-sm font-semibold cursor-pointer"
+              >
+                <Icone name="search" className="text-base" /> Buscar por ID
+              </button>
             </div>
-            <button
-              onClick={buscarPoll}
-              disabled={buscando}
-              className="self-end mb-0.5 flex items-center gap-1 px-4 py-2 rounded-xl bg-primary/10 text-primary hover:bg-primary/20 transition text-sm font-semibold cursor-pointer"
-            >
-              <Icone name="search" className="text-base" />
-              {buscando ? "..." : "Buscar"}
-            </button>
+            <div className="flex-1 space-y-1">
+              <Campo label="Buscar votações por Data" type="date" value={buscaData} onChange={(e) => setBuscaData(e.target.value)} />
+              <button
+                onClick={buscarPollsPorData}
+                disabled={buscando || !buscaData}
+                className="w-full flex justify-center items-center gap-1 px-4 py-2 rounded-xl bg-primary/10 text-primary hover:bg-primary/20 transition text-sm font-semibold cursor-pointer"
+              >
+                <Icone name="event" className="text-base" /> Buscar por Data
+              </button>
+            </div>
           </div>
           {erroDetalhe && <p className="text-error text-xs">{erroDetalhe}</p>}
         </div>
+
+        {/* Lista de Resultados da Busca por Data */}
+        {resultadosBusca.length > 0 && !detalhe && (
+          <div className="space-y-2">
+            <h3 className="font-semibold text-sm text-on-surface">Votações de {buscaData}</h3>
+            {resultadosBusca.map(poll => (
+              <div key={poll.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition cursor-pointer" onClick={() => setDetalhe(poll)}>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-bold text-on-surface">{poll.titulo}</span>
+                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${STATUS_POLL[poll.status]?.cls ?? ""}`}>{poll.status}</span>
+                  </div>
+                  <p className="text-xs text-on-surface-variant">Reunião ID: {poll.meetingId}</p>
+                </div>
+                <Icone name="chevron_right" className="text-on-surface-variant hidden sm:block" />
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* Detalhe da votação */}
         {detalhe && (

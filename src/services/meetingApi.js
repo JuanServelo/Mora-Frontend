@@ -35,6 +35,7 @@ export const ataApi = {
 export const pollApi = {
   criar: (data) => meetingHttp.post("/api/polls", data),
   buscar: (id) => meetingHttp.get(`/api/polls/${id}`),
+  listar: (params) => meetingHttp.get("/api/polls", { params }),
   atualizar: (id, data) => meetingHttp.put(`/api/polls/${id}`, data),
   encerrar: (id) => meetingHttp.patch(`/api/polls/${id}/close`),
   votar: (id, data) => meetingHttp.post(`/api/polls/${id}/votes`, data),
