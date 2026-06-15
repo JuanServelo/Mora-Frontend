@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../../contexts/AuthContext";
 import { useToast } from "../../../contexts/ToastContext";
 import { useConfirm } from "../../../contexts/ConfirmContext";
@@ -187,6 +188,7 @@ export function FamiliaView() {
   const { usuario } = useAuth();
   const toast = useToast();
   const confirm = useConfirm();
+  const navigate = useNavigate();
 
   const [ocupantes, setOcupantes] = useState([]);
   const [convitesPendentes, setConvitesPendentes] = useState([]);
@@ -408,14 +410,24 @@ export function FamiliaView() {
             </button>
           )}
           {podeGuest && (
-            <button
-              type="button"
-              onClick={() => setFormAtivo("guest")}
-              className="flex items-center gap-2 px-4 py-3 rounded-xl border border-dashed border-outline-variant/30 text-on-surface-variant hover:text-primary hover:border-primary/30 transition-all text-sm font-semibold cursor-pointer"
-            >
-              <Icone name="group_add" className="text-lg" />
-              Cadastrar Guest
-            </button>
+            <>
+              <button
+                type="button"
+                onClick={() => setFormAtivo("guest")}
+                className="flex items-center gap-2 px-4 py-3 rounded-xl border border-dashed border-outline-variant/30 text-on-surface-variant hover:text-primary hover:border-primary/30 transition-all text-sm font-semibold cursor-pointer"
+              >
+                <Icone name="group_add" className="text-lg" />
+                Cadastrar Guest
+              </button>
+              <button
+                type="button"
+                onClick={() => navigate("/meus-convidados")}
+                className="flex items-center gap-2 px-4 py-3 rounded-xl border border-solid border-secondary/30 text-secondary hover:bg-secondary/10 transition-all text-sm font-semibold cursor-pointer"
+              >
+                <Icone name="manage_accounts" className="text-lg" />
+                Gerenciar Acessos
+              </button>
+            </>
           )}
         </div>
       )}
