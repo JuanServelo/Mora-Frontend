@@ -3,14 +3,15 @@ import { Outlet } from "react-router-dom";
 import { Navbar } from "../components/navbar/Navbar";
 import { Sidebar } from "../components/sidebar/Sidebar";
 import { useAuth } from "../contexts/AuthContext";
-import { podeAcessarAdmin } from "../utils/perfis";
+import { podeAcessarAdmin, PERFIS } from "../utils/perfis";
 
 export function AppLayout() {
   const { usuario } = useAuth();
   const isAdmin = podeAcessarAdmin(usuario?.perfil) || usuario?.role === "admin";
+  const isDoorman = usuario?.perfil === PERFIS.DOORMAN;
 
-  // Perfis admin usam layout de barra lateral; os demais, a navbar.
-  if (isAdmin) {
+  // Admins e porteiro usam layout de barra lateral; os demais, a navbar.
+  if (isAdmin || isDoorman) {
     return (
       <div className="flex min-h-screen">
         <Sidebar />

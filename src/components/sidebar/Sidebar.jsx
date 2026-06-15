@@ -25,17 +25,33 @@ const PERFIS_PLATAFORMA = [
   PERFIS.CONTRACTING_SYNDIC,
 ];
 
+// Telas do porteiro (mesmo layout de Sidebar dos admins).
+const PORTEIRO_LINKS = [
+  { to: "/inicio", label: "Início", icon: "home" },
+  { to: "/entradas-e-saidas", label: "Entradas e Saídas", icon: "swap_horiz" },
+  { to: "/entregas", label: "Entregas", icon: "inventory_2" },
+  { to: "/chaves", label: "Chaves", icon: "vpn_key" },
+  { to: "/usuarios", label: "Usuários do Condomínio", icon: "groups" },
+];
+
 export function Sidebar() {
   const { pathname } = useLocation();
   const { usuario, logout } = useAuth();
   const navigate = useNavigate();
 
+  const isDoorman = usuario?.perfil === PERFIS.DOORMAN;
   const isPlataforma = PERFIS_PLATAFORMA.includes(usuario?.perfil);
   const isSuperAdmin = usuario?.role === "admin";
-  // Super Admin vê SOMENTE Planos; os demais admins veem suas abas (sem Planos).
-  const links = isSuperAdmin
-    ? ADM_LINKS.filter((l) => l.superAdmin)
-    : ADM_LINKS.filter((l) => !l.superAdmin && (!l.plataforma || isPlataforma));
+
+  // Porteiro tem o conjunto dele; os demais (admins) veem as abas administrativas.
+  // Super Admin vê SOMENTE Planos; os outros admins veem suas abas (sem Planos).
+  const links = isDoorman
+    ? PORTEIRO_LINKS
+    : isSuperAdmin
+      ? ADM_LINKS.filter((l) => l.superAdmin)
+      : ADM_LINKS.filter((l) => !l.superAdmin && (!l.plataforma || isPlataforma));
+
+  const subtitulo = isDoorman ? "Portaria" : "Administrativo";
 
   async function handleLogout() {
     await logout();
@@ -52,7 +68,7 @@ export function Sidebar() {
         <img src={moraLogo3} alt="Mora" className="h-7 w-auto" />
         <div>
           <p className="text-[10px] font-semibold uppercase tracking-widest text-on-surface-variant">Painel</p>
-          <p className="text-sm font-bold text-on-surface leading-tight">Administrativo</p>
+          <p className="text-sm font-bold text-on-surface leading-tight">{subtitulo}</p>
         </div>
       </div>
 
@@ -88,7 +104,7 @@ export function Sidebar() {
           className="flex items-center gap-3 px-3 py-2 rounded-xl bg-surface-container-highest/20 hover:bg-white/5 transition-all"
         >
           <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center shrink-0">
-            <Icone name="admin_panel_settings" className="text-base text-primary" />
+            <Icone name={isDoorman ? "badge" : "admin_panel_settings"} className="text-base text-primary" />
           </div>
           <div className="min-w-0">
             <p className="text-sm font-semibold text-on-surface truncate leading-tight">{usuario?.nome || "Admin"}</p>
