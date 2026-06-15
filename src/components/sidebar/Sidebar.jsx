@@ -5,9 +5,10 @@ import { useAuth } from "../../contexts/AuthContext";
 import { PERFIS } from "../../utils/perfis";
 import moraLogo3 from "../../assets/Mora3.png";
 
-// `plataforma: true` → aba visível apenas para nível Plataforma
-// (Administradora / Síndico Contratante).
+// `superAdmin: true` → só para o Super Admin da plataforma (role === "admin").
+// `plataforma: true` → só para nível Plataforma (Administradora / Síndico Contratante).
 const ADM_LINKS = [
+  { to: "/adm/planos", label: "Planos", icon: "workspace_premium", superAdmin: true },
   { to: "/adm/usuarios", label: "Usuários", icon: "manage_accounts" },
   { to: "/adm/estruturas", label: "Estruturas", icon: "apartment" },
   { to: "/adm/reunioes", label: "Reuniões", icon: "groups" },
@@ -31,7 +32,12 @@ export function Sidebar() {
   const navigate = useNavigate();
 
   const isPlataforma = PERFIS_PLATAFORMA.includes(usuario?.perfil);
-  const links = ADM_LINKS.filter((l) => !l.plataforma || isPlataforma);
+  const isSuperAdmin = usuario?.role === "admin";
+  const links = ADM_LINKS.filter((l) => {
+    if (l.superAdmin) return isSuperAdmin;
+    if (l.plataforma) return isPlataforma;
+    return true;
+  });
 
   async function handleLogout() {
     await logout();
