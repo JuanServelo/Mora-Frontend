@@ -59,11 +59,20 @@ function NavLink({ to, children }) {
   );
 }
 
-function AdminMenu() {
+function AdminMenu({ usuario }) {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
   const { pathname } = useLocation();
-  const admActive = ADM_LINKS.some((l) => pathname === l.to);
+
+  const isSuperAdmin = usuario?.role === "admin";
+  const admLinks = isSuperAdmin
+    ? [
+        { label: "Planos", to: "/adm/planos", icon: "workspace_premium", description: "Gerenciar planos SaaS" },
+        ...ADM_LINKS,
+      ]
+    : ADM_LINKS;
+
+  const admActive = admLinks.some((l) => pathname === l.to);
 
   useEffect(() => {
     function handleClick(e) {
@@ -102,7 +111,7 @@ function AdminMenu() {
 
           {/* Links */}
           <div className="p-2 space-y-0.5">
-            {ADM_LINKS.map((link) => {
+            {admLinks.map((link) => {
               const active = pathname === link.to;
               return (
                 <Link
@@ -162,7 +171,7 @@ export function Navbar() {
               {l.label}
             </NavLink>
           ))}
-          {!isRestrictedUser && !isDoorman && showAdminMenu && <AdminMenu />}
+          {!isRestrictedUser && !isDoorman && showAdminMenu && <AdminMenu usuario={usuario} />}
         </div>
 
         {/* Centro — Logo */}
