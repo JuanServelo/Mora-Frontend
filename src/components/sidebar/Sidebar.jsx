@@ -12,7 +12,6 @@ const ADM_LINKS = [
   { to: "/adm/usuarios", label: "Usuários", icon: "manage_accounts" },
   { to: "/adm/estruturas", label: "Estruturas", icon: "apartment" },
   { to: "/adm/reunioes", label: "Reuniões", icon: "groups" },
-  { to: "/adm/espacos", label: "Espaços", icon: "deck" },
   { to: "/adm/reclamacoes", label: "Reclamações", icon: "report" },
   { to: "/adm/entregas", label: "Entregas", icon: "inventory_2" },
   { to: "/adm/vagas", label: "Vagas", icon: "local_parking" },

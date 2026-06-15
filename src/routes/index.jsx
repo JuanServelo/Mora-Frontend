@@ -11,7 +11,6 @@ import { Perfil } from "../pages/usuario/perfil/Perfil";
 import { GerenciarUsuarios } from "../pages/adm/GerenciarUsuarios";
 import { GerenciarEstruturas } from "../pages/adm/GerenciarEstruturas";
 import { GerenciarReunioes } from "../pages/adm/GerenciarReunioes";
-import { GerenciarEspacos } from "../pages/adm/GerenciarEspacos";
 import { GerenciarReclamacoes } from "../pages/adm/GerenciarReclamacoes";
 import { GerenciarEntregas } from "../pages/adm/GerenciarEntregas";
 import { GerenciarVagas } from "../pages/adm/GerenciarVagas";
@@ -102,7 +101,6 @@ export const router = createBrowserRouter([
       { path: "/adm/usuarios", element: <GerenciarUsuarios /> },
       { path: "/adm/estruturas", element: <GerenciarEstruturas /> },
       { path: "/adm/reunioes", element: <GerenciarReunioes /> },
-      { path: "/adm/espacos", element: <GerenciarEspacos /> },
       { path: "/adm/reclamacoes", element: <GerenciarReclamacoes /> },
       { path: "/adm/entregas", element: <GerenciarEntregas /> },
       { path: "/adm/vagas", element: <GerenciarVagas /> },
