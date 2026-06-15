@@ -1,7 +1,7 @@
 import { Navigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
+import { isSuperAdmin } from "../utils/perfis";
 
-// Apenas o Super Admin da plataforma (role === "admin") pode acessar.
 export function SuperAdminRoute({ children }) {
   const { usuario, loading } = useAuth();
 
@@ -13,7 +13,7 @@ export function SuperAdminRoute({ children }) {
     );
   }
 
-  if (!usuario || usuario.role !== "admin") {
+  if (!usuario || !isSuperAdmin(usuario.perfil)) {
     return <Navigate to="/inicio" replace />;
   }
 

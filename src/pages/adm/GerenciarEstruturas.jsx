@@ -151,10 +151,13 @@ function AbaBlocos({ condominioId }) {
     setBlocos([]);
     blocoApi
       .listarTodos(condominioId)
-      .then((res) => setBlocos(res.data))
-      .catch((err) => console.error("Erro ao carregar blocos:", err))
+      .then((res) => setBlocos(Array.isArray(res.data) ? res.data : []))
+      .catch((err) => {
+        console.error("Erro ao carregar blocos:", err);
+        toast.error(err.response?.data?.erro || "Erro ao carregar blocos.");
+      })
       .finally(() => setCarregando(false));
-  }, [condominioId]);
+  }, [condominioId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const filtrados = blocos.filter((b) =>
     b.nome.toLowerCase().includes(busca.toLowerCase()) ||
@@ -1365,6 +1368,7 @@ function DetalhesAreaComum({ area, onEditar, onToggleAtivo }) {
 // ════════════════════════════════════════════
 function AbaVagas({ condominioId }) {
   const [vagas, setVagas] = useState([]);
+  const [blocos, setBlocos] = useState([]);
   const [apartamentos, setApartamentos] = useState([]);
   const [carregando, setCarregando] = useState(true);
   const [busca, setBusca] = useState("");
@@ -1378,17 +1382,21 @@ function AbaVagas({ condominioId }) {
   useEffect(() => {
     setCarregando(true);
     setVagas([]);
+    setBlocos([]);
     setApartamentos([]);
-    // Vagas não têm condominioId direto: filtramos pelos apartamentos do cliente
-    Promise.all([vagaApi.listarTodas(), apartamentoApi.listarTodos(condominioId)])
-      .then(([resVagas, resApts]) => {
+    Promise.all([
+      vagaApi.listarTodas(),
+      apartamentoApi.listarTodos(condominioId),
+      blocoApi.listarTodos(condominioId),
+    ])
+      .then(([resVagas, resApts, resBlocos]) => {
         const aptIds = new Set((resApts.data || []).map((a) => a.id));
-        // Filtra vagas que pertencem a apartamentos do condomínio selecionado
         const vagasFiltradas = (resVagas.data || []).filter(
           (v) => !v.apartamentoId || aptIds.has(v.apartamentoId),
         );
         setVagas(vagasFiltradas);
         setApartamentos(resApts.data || []);
+        setBlocos(resBlocos.data || []);
       })
       .catch((err) => console.error("Erro ao carregar vagas:", err))
       .finally(() => setCarregando(false));
@@ -1483,6 +1491,7 @@ function AbaVagas({ condominioId }) {
             <h2 className="font-headline text-xl font-bold text-on-surface">Nova Vaga</h2>
           </div>
           <FormVaga
+            blocos={blocos}
             apartamentos={apartamentos}
             onSalvar={handleCriar}
             onCancelar={() => { setCriando(false); setErroCriar(""); }}
@@ -1566,6 +1575,7 @@ function AbaVagas({ condominioId }) {
                   {editando === vaga.id ? (
                     <FormVaga
                       inicial={vaga}
+                      blocos={blocos}
                       apartamentos={apartamentos}
                       onSalvar={(dados, aptId) => handleAtualizar(vaga.id, dados, aptId)}
                       onCancelar={() => { setEditando(null); setErroEditar(""); }}
@@ -1588,15 +1598,29 @@ function AbaVagas({ condominioId }) {
   );
 }
 
-function FormVaga({ inicial, apartamentos, onSalvar, onCancelar, erro }) {
+function FormVaga({ inicial, blocos = [], apartamentos = [], onSalvar, onCancelar, erro }) {
+  const aptInicial = inicial?.apartamentoId
+    ? apartamentos.find((a) => String(a.id) === String(inicial.apartamentoId))
+    : null;
+
   const [form, setForm] = useState({
     numero: inicial?.numero || "",
     localizacao: inicial?.localizacao || "",
     tipo: inicial?.tipo || "",
   });
+  const [blocoId, setBlocoId] = useState(aptInicial?.blocoId?.toString() || "");
   const [aptId, setAptId] = useState(inicial?.apartamentoId?.toString() || "");
 
+  const aptsDoBloco = blocoId
+    ? apartamentos.filter((a) => String(a.blocoId) === String(blocoId))
+    : [];
+
   function set(field, value) { setForm((f) => ({ ...f, [field]: value })); }
+
+  function handleBlocoChange(value) {
+    setBlocoId(value);
+    setAptId("");
+  }
 
   function handleSubmit(e) {
     e.preventDefault();
@@ -1634,15 +1658,29 @@ function FormVaga({ inicial, apartamentos, onSalvar, onCancelar, erro }) {
           </select>
         </div>
         <div className="space-y-2">
-          <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant ml-1">Apartamento (opcional)</label>
+          <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant ml-1">Bloco</label>
+          <select
+            value={blocoId}
+            onChange={(e) => handleBlocoChange(e.target.value)}
+            className="w-full bg-surface-container-highest/40 border-none rounded-xl py-4 px-4 text-on-surface focus:ring-2 focus:ring-primary/50 focus:outline-none backdrop-blur-sm transition-all"
+          >
+            <option value="">Selecione o bloco</option>
+            {blocos.map((b) => (
+              <option key={b.id} value={b.id}>{b.nome}</option>
+            ))}
+          </select>
+        </div>
+        <div className="space-y-2 sm:col-span-2">
+          <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant ml-1">Apartamento</label>
           <select
             value={aptId}
             onChange={(e) => setAptId(e.target.value)}
-            className="w-full bg-surface-container-highest/40 border-none rounded-xl py-4 px-4 text-on-surface focus:ring-2 focus:ring-primary/50 focus:outline-none backdrop-blur-sm transition-all"
+            disabled={!blocoId}
+            className="w-full bg-surface-container-highest/40 border-none rounded-xl py-4 px-4 text-on-surface focus:ring-2 focus:ring-primary/50 focus:outline-none backdrop-blur-sm transition-all disabled:opacity-40"
           >
-            <option value="">Sem apartamento</option>
-            {apartamentos.map((a) => (
-              <option key={a.id} value={a.id}>Apt {a.numero} · {a.blocoNome}</option>
+            <option value="">{blocoId ? "Selecione o apartamento" : "Escolha um bloco primeiro"}</option>
+            {aptsDoBloco.map((a) => (
+              <option key={a.id} value={a.id}>Apt {a.numero}{a.andar != null ? ` · ${a.andar}º andar` : ""}</option>
             ))}
           </select>
         </div>

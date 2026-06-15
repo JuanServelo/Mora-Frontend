@@ -52,14 +52,24 @@ export function GerenciarUsuarios() {
   const [busca, setBusca] = useState("");
 
   useEffect(() => {
-    Promise.all([
-      api.get("/api/user-management/users").catch(() => api.get("/api/users")),
-      blocoApi.listar(),
-      apartamentoApi.listar(),
-      condominiosApi.listar().catch(() => ({ data: { condominios: [] } })),
-    ])
-      .then(([usersRes, blocosRes, aptsRes, condsRes]) => {
-        setCondominios((condsRes.data.condominios || []).filter((c) => c.status === "active"));
+    async function carregar() {
+      setCarregando(true);
+      try {
+        const condsRes = await condominiosApi.listar().catch(() => ({ data: { condominios: [] } }));
+        const conds = (condsRes.data.condominios || []).filter((c) => c.status === "active");
+        setCondominios(conds);
+
+        const usersRes = await api
+          .get("/api/user-management/users")
+          .catch(() => api.get("/api/users"));
+
+        const blocosRes = await Promise.all(
+          conds.map((c) => blocoApi.listarTodos(c.id).catch(() => ({ data: [] }))),
+        );
+        const aptsRes = await Promise.all(
+          conds.map((c) => apartamentoApi.listarTodos(c.id).catch(() => ({ data: [] }))),
+        );
+
         const mapStatus = (s) => {
           if (s === "active") return "ativo";
           if (s === "inactive") return "inativo";
@@ -99,11 +109,16 @@ export function GerenciarUsuarios() {
         }));
 
         setUsuarios([...convites, ...listaUsuarios]);
-        setBlocos(blocosRes.data);
-        setApartamentos(aptsRes.data);
-      })
-      .catch((err) => console.error("Erro ao carregar dados:", err))
-      .finally(() => setCarregando(false));
+        setBlocos(blocosRes.flatMap((r) => r.data || []));
+        setApartamentos(aptsRes.flatMap((r) => r.data || []));
+      } catch (err) {
+        console.error("Erro ao carregar dados:", err);
+      } finally {
+        setCarregando(false);
+      }
+    }
+
+    carregar();
   }, []);
   const [editando, setEditando] = useState(null);
   const [expandido, setExpandido] = useState(null);
@@ -907,8 +922,9 @@ function FormNovoUsuario({ blocos, apartamentos, condominios, perfilAtor, condom
     (p) => p.value !== PERFIS.GUEST,
   );
 
-  // Admin (role: 'admin') sempre pode selecionar/alterar o condomínio
-  const precisaSelecionarCondominio = !condominioIdAtor || roleAtor === 'admin';
+  // Admin legado ou gerente de tenant (CPM) seleciona o condomínio
+  const isGerenteTenant = [PERFIS.CONTRACTING_PROPERTY_MANAGER, PERFIS.CONTRACTING_SYNDIC].includes(perfilAtor);
+  const precisaSelecionarCondominio = !condominioIdAtor || roleAtor === "admin" || isGerenteTenant;
 
   const [form, setForm] = useState({
     email: "",
@@ -935,12 +951,14 @@ function FormNovoUsuario({ blocos, apartamentos, condominios, perfilAtor, condom
     }
   }, [condominios]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Blocos filtrados pelo condomínio selecionado
+  // Blocos/apartamentos do condomínio selecionado (legado sem condominioId = default)
   const blocosFiltrados = condominioId
-    ? blocos.filter((b) => b.condominioId === condominioId)
+    ? blocos.filter((b) => !b.condominioId || b.condominioId === condominioId)
     : blocos;
 
-  const aptsFiltrados = blocoId ? apartamentos.filter((a) => a.blocoId === blocoId) : apartamentos;
+  const aptsFiltrados = blocoId
+    ? apartamentos.filter((a) => a.blocoId === blocoId)
+    : apartamentos.filter((a) => !condominioId || !a.condominioId || a.condominioId === condominioId);
 
   // Condomínio do ator para exibição readonly
   const condominioDoAtor = condominios.find((c) => c.id === condominioIdAtor);

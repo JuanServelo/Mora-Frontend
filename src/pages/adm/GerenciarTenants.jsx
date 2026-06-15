@@ -343,6 +343,20 @@ function DetalhesTenant({
           { label: "Provisionado", value: tenant.provisioned ? "Sim" : "Não", icon: "cloud_done" },
           { label: "Condomínios", value: tenant.condominiumCount ?? 0, icon: "apartment" },
           { label: "Criado em", value: formatarData(tenant.createdAt), icon: "event" },
+          ...(tenant.usuarioContratante
+            ? [
+                {
+                  label: "Usuário contratante",
+                  value: tenant.usuarioContratante.nome || "—",
+                  icon: "person",
+                },
+                {
+                  label: "E-mail de acesso",
+                  value: tenant.usuarioContratante.email || "—",
+                  icon: "mail",
+                },
+              ]
+            : []),
         ].map((item) => (
           <div key={item.label} className="bg-surface-container-highest/30 rounded-2xl p-4">
             <Icone name={item.icon} className="text-primary text-xl mb-2" />
@@ -428,9 +442,15 @@ function FormNovoTenant({ tipos, planosAtivos, onSalvar, onCancelar }) {
     cnpj: "",
     schemaName: "",
     planId: planosAtivos[0]?.id ?? "",
+    cpmNome: "",
+    cpmEmail: "",
+    cpmSenha: "",
   });
   const [erro, setErro] = useState(null);
   const [salvando, setSalvando] = useState(false);
+
+  const perfilContratanteLabel =
+    form.type === "SYNDIC" ? "Síndico Contratante" : "Administradora Contratante (CPM)";
 
   function set(field, value) {
     setForm((f) => ({ ...f, [field]: value }));
@@ -439,7 +459,15 @@ function FormNovoTenant({ tipos, planosAtivos, onSalvar, onCancelar }) {
   async function handleSubmit(e) {
     e.preventDefault();
     setErro(null);
-    if (!form.name.trim() || !form.type || !form.cnpj.trim() || !form.schemaName.trim()) {
+    if (
+      !form.name.trim() ||
+      !form.type ||
+      !form.cnpj.trim() ||
+      !form.schemaName.trim() ||
+      !form.cpmNome.trim() ||
+      !form.cpmEmail.trim() ||
+      !form.cpmSenha.trim()
+    ) {
       setErro("Este campo é obrigatório.");
       return;
     }
@@ -455,6 +483,9 @@ function FormNovoTenant({ tipos, planosAtivos, onSalvar, onCancelar }) {
         cnpj: form.cnpj.trim(),
         schemaName: form.schemaName.trim(),
         planId: Number(form.planId),
+        cpmNome: form.cpmNome.trim(),
+        cpmEmail: form.cpmEmail.trim(),
+        cpmSenha: form.cpmSenha,
       });
     } catch (err) {
       setErro(err.response?.data?.mensagem || "Erro ao cadastrar tenant.");
@@ -523,11 +554,47 @@ function FormNovoTenant({ tipos, planosAtivos, onSalvar, onCancelar }) {
         </div>
       </div>
 
+      <div className="space-y-3 pt-2 border-t border-white/5">
+        <p className="text-sm font-semibold text-on-surface">
+          Usuário contratante — {perfilContratanteLabel}
+        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <Campo
+            id="tenant-cpm-nome"
+            label="Nome *"
+            placeholder="Ex: Maria Silva"
+            icon="person"
+            value={form.cpmNome}
+            onChange={(e) => set("cpmNome", e.target.value)}
+          />
+          <Campo
+            id="tenant-cpm-email"
+            label="E-mail *"
+            placeholder="contato@administradora.com"
+            icon="mail"
+            type="email"
+            value={form.cpmEmail}
+            onChange={(e) => set("cpmEmail", e.target.value)}
+          />
+          <div className="sm:col-span-2">
+            <Campo
+              id="tenant-cpm-senha"
+              label="Senha inicial *"
+              placeholder="Mín. 8 caracteres, 1 maiúscula e 1 número"
+              icon="lock"
+              type="password"
+              value={form.cpmSenha}
+              onChange={(e) => set("cpmSenha", e.target.value)}
+            />
+          </div>
+        </div>
+      </div>
+
       <div className="flex items-start gap-2 px-4 py-3 rounded-xl bg-surface-container-highest/30 text-on-surface-variant text-xs">
         <Icone name="info" className="text-primary text-base shrink-0 mt-0.5" />
         <span>
-          Após cadastrar, provisione o tenant para preparar a estrutura operacional (evento
-          tenant.provisioned).
+          O usuário contratante é criado junto com o tenant e já pode fazer login. Depois,
+          provisione o tenant para preparar a estrutura operacional (evento tenant.provisioned).
         </span>
       </div>
 

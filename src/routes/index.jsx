@@ -20,7 +20,6 @@ import { GerenciarVagas } from "../pages/adm/GerenciarVagas";
 import { GerenciarConhecimento } from "../pages/adm/GerenciarConhecimento";
 import { GerenciarPerfis } from "../pages/adm/GerenciarPerfis";
 import { GerenciarCondominios } from "../pages/adm/GerenciarCondominios";
-import { GerenciarPlanos } from "../pages/adm/GerenciarPlanos";
 import { GerenciarVeiculos } from "../pages/adm/GerenciarVeiculos";
 import { FAQ } from "../pages/usuario/FAQ";
 import { MinhasReservas } from "../pages/usuario/MinhasReservas";
@@ -104,7 +103,6 @@ export const router = createBrowserRouter([
       { path: "/meus-convidados", element: <MeusConvidados /> },
       { path: "/adm/usuarios", element: <GerenciarUsuarios /> },
       { path: "/adm/dashboard", element: <DashboardSuperAdmin /> },
-      { path: "/adm/planos", element: <GerenciarPlanos /> },
       { path: "/adm/tenants", element: <GerenciarTenants /> },
       { path: "/adm/estruturas", element: <GerenciarEstruturas /> },
       { path: "/adm/reunioes", element: <GerenciarReunioes /> },

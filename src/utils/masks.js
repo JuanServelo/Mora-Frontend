@@ -38,8 +38,15 @@ export function validarTelefone(tel) {
   return digits.length === 10 || digits.length === 11;
 }
 
+export function somenteDigitosCnpj(value) {
+  return String(value ?? '')
+    .normalize('NFKC')
+    .replace(/\D/g, '')
+    .slice(0, 14);
+}
+
 export function mascararCnpj(value) {
-  const d = String(value ?? '').replace(/\D/g, '').slice(0, 14);
+  const d = somenteDigitosCnpj(value);
   if (d.length <= 2) return d;
   if (d.length <= 5) return `${d.slice(0, 2)}.${d.slice(2)}`;
   if (d.length <= 8) return `${d.slice(0, 2)}.${d.slice(2, 5)}.${d.slice(5)}`;
@@ -48,17 +55,24 @@ export function mascararCnpj(value) {
 }
 
 export function validarCnpj(cnpj) {
-  const d = String(cnpj ?? '').replace(/\D/g, '');
+  const d = somenteDigitosCnpj(cnpj);
   if (d.length !== 14) return false;
   if (/^(\d)\1{13}$/.test(d)) return false;
-  const calc = (len) => {
-    let sum = 0, pos = len - 7;
-    for (let i = len; i >= 1; i--) {
-      sum += parseInt(d[len - i], 10) * pos--;
-      if (pos < 2) pos = 9;
-    }
-    const r = sum % 11;
-    return r < 2 ? 0 : 11 - r;
+
+  const calcDigito = (base) => {
+    const pesos = base.length === 12
+      ? [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]
+      : [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
+    const soma = base
+      .split('')
+      .reduce((acc, digito, i) => acc + Number(digito) * pesos[i], 0);
+    const resto = soma % 11;
+    return resto < 2 ? 0 : 11 - resto;
   };
-  return calc(12) === parseInt(d[12], 10) && calc(13) === parseInt(d[13], 10);
+
+  const dv1 = calcDigito(d.slice(0, 12));
+  if (dv1 !== Number(d[12])) return false;
+
+  const dv2 = calcDigito(d.slice(0, 13));
+  return dv2 === Number(d[13]);
 }

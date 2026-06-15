@@ -7,7 +7,7 @@ import { useToast } from "../../contexts/ToastContext";
 import { useConfirm } from "../../contexts/ConfirmContext";
 import { useAuth } from "../../contexts/AuthContext";
 import { PERFIS } from "../../utils/perfis";
-import { mascararCnpj, mascararTelefone, validarCnpj, validarTelefone } from "../../utils/masks";
+import { mascararCnpj, mascararTelefone, somenteDigitosCnpj, validarTelefone } from "../../utils/masks";
 
 const STATUS_STYLE = {
   active:   "bg-primary/10 text-primary",
@@ -412,9 +412,12 @@ function FormCondominio({ inicial, onSalvar, onCancelar, isNovo }) {
     if (isNovo && !form.id.trim()) novosErros.id = "ID é obrigatório.";
     if (!form.nome.trim()) novosErros.nome = "Nome é obrigatório.";
     if (form.cnpj.trim()) {
-      const digits = form.cnpj.replace(/\D/g, "");
-      if (digits.length !== 14) novosErros.cnpj = "CNPJ incompleto (14 dígitos).";
-      else if (!validarCnpj(form.cnpj)) novosErros.cnpj = "CNPJ inválido.";
+      const digits = somenteDigitosCnpj(form.cnpj);
+      if (digits.length !== 14) {
+        novosErros.cnpj = "CNPJ incompleto (14 dígitos).";
+      } else if (/^(\d)\1{13}$/.test(digits)) {
+        novosErros.cnpj = "CNPJ inválido.";
+      }
     }
     if (form.telefone.trim() && !validarTelefone(form.telefone)) {
       novosErros.telefone = "Telefone inválido (10 ou 11 dígitos).";
@@ -435,7 +438,7 @@ function FormCondominio({ inicial, onSalvar, onCancelar, isNovo }) {
       await onSalvar({
         id: form.id.trim().toLowerCase(),
         nome: form.nome.trim(),
-        cnpj: form.cnpj.trim() || undefined,
+        cnpj: form.cnpj.trim() ? mascararCnpj(form.cnpj) : undefined,
         endereco: form.endereco.trim() || undefined,
         telefone: form.telefone.trim() || undefined,
         email: form.email.trim() || undefined,
