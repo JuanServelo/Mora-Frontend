@@ -3,7 +3,8 @@ import { useState, useRef, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Icone } from "../icones/Icone";
 import { useAuth } from "../../contexts/AuthContext";
-import { PERFIS, isUsuarioRestrito, podeAcessarAdmin } from "../../utils/perfis";
+import { useTheme } from "../../contexts/ThemeContext";
+import { isUsuarioRestrito, podeAcessarAdmin, podeAcessarPlataforma } from "../../utils/perfis";
 // import moraLogo from "../../assets/Mora.png";
 // import moraLogo2 from "../../assets/Mora2.png";
 import moraLogo3 from "../../assets/Mora3.png";
@@ -16,27 +17,25 @@ const NAV_LINKS_LEFT = [
   { label: "Reclamações", to: "/reclamacoes" },
 ];
 
-const NAV_LINKS_DOORMAN = [
-  { label: "Início", to: "/inicio" },
-  { label: "Entradas e Saídas", to: "/entradas-e-saidas" },
-  { label: "Entregas", to: "/entregas" },
-  { label: "Chaves", to: "/chaves" },
-];
-
 const NAV_LINKS_RIGHT = [
   { label: "Perfil", to: "/perfil" },
+];
+
+const PLATAFORMA_LINKS = [
+  { label: "Dashboard", to: "/adm/dashboard", icon: "dashboard", description: "Visão geral da plataforma" },
+  { label: "Planos", to: "/adm/planos", icon: "workspace_premium", description: "Catálogo de planos SaaS" },
+  { label: "Tenants", to: "/adm/tenants", icon: "domain", description: "Clientes da plataforma" },
 ];
 
 const ADM_LINKS = [
   { label: "Usuários", to: "/adm/usuarios", icon: "manage_accounts", description: "Gerenciar moradores" },
   { label: "Estruturas", to: "/adm/estruturas", icon: "apartment", description: "Blocos e apartamentos" },
   { label: "Reuniões", to: "/adm/reunioes", icon: "groups", description: "Reuniões e votações" },
+  { label: "Espaços", to: "/adm/espacos", icon: "deck", description: "Gerenciar áreas comuns" },
   { label: "Reclamações", to: "/adm/reclamacoes", icon: "report", description: "Gestão de reclamações" },
   { label: "Entregas", to: "/adm/entregas", icon: "inventory_2", description: "Gestão de entregas" },
   { label: "Vagas", to: "/adm/vagas", icon: "local_parking", description: "Vagas de garagem" },
   { label: "Conhecimento", to: "/adm/conhecimento", icon: "library_books", description: "Base de conhecimento e FAQ" },
-  { label: "Perfis", to: "/adm/perfis", icon: "verified_user", description: "Permissões por perfil" },
-  { label: "Clientes", to: "/adm/condominios", icon: "domain", description: "Gestão de clientes" },
 ];
 
 function NavLink({ to, children }) {
@@ -50,7 +49,7 @@ function NavLink({ to, children }) {
         ${
           active
             ? "text-primary bg-primary/10"
-            : "text-on-surface-variant hover:text-on-surface hover:bg-white/5"
+            : "text-on-surface-variant hover:text-on-surface hover:bg-on-surface/8"
         }`}
     >
       {children}
@@ -58,20 +57,11 @@ function NavLink({ to, children }) {
   );
 }
 
-function AdminMenu({ usuario }) {
+function AdminMenu() {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
   const { pathname } = useLocation();
-
-  const isSuperAdmin = usuario?.role === "admin";
-  const admLinks = isSuperAdmin
-    ? [
-        { label: "Planos", to: "/adm/planos", icon: "workspace_premium", description: "Gerenciar planos SaaS" },
-        ...ADM_LINKS,
-      ]
-    : ADM_LINKS;
-
-  const admActive = admLinks.some((l) => pathname === l.to);
+  const admActive = ADM_LINKS.some((l) => pathname === l.to);
 
   useEffect(() => {
     function handleClick(e) {
@@ -88,7 +78,7 @@ function AdminMenu({ usuario }) {
         className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-200 cursor-pointer
           ${admActive || open
             ? "text-primary bg-primary/10"
-            : "text-on-surface-variant hover:text-on-surface hover:bg-white/5"
+            : "text-on-surface-variant hover:text-on-surface hover:bg-on-surface/8"
           }`}
       >
         <Icone name="admin_panel_settings" className="text-base" />
@@ -100,9 +90,9 @@ function AdminMenu({ usuario }) {
       </button>
 
       {open && (
-        <div className="absolute top-[calc(100%+10px)] left-1/2 -translate-x-1/2 w-72 rounded-2xl overflow-hidden z-50 shadow-[0_16px_48px_rgba(0,0,0,0.6)]" style={{ background: "rgba(18,18,24,0.97)", backdropFilter: "blur(24px)", border: "1px solid rgba(255,255,255,0.08)" }}>
+        <div className="dropdown-panel absolute top-[calc(100%+10px)] left-1/2 -translate-x-1/2 w-72 rounded-2xl overflow-hidden z-50">
           {/* Header do painel */}
-          <div className="px-4 py-3 border-b border-white/5">
+          <div className="px-4 py-3 border-b border-on-surface/10">
             <p className="text-xs font-semibold uppercase tracking-widest text-on-surface-variant">
               Painel Administrativo
             </p>
@@ -110,7 +100,7 @@ function AdminMenu({ usuario }) {
 
           {/* Links */}
           <div className="p-2 space-y-0.5">
-            {admLinks.map((link) => {
+            {ADM_LINKS.map((link) => {
               const active = pathname === link.to;
               return (
                 <Link
@@ -120,7 +110,81 @@ function AdminMenu({ usuario }) {
                   className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group
                     ${active
                       ? "bg-primary/10 text-primary"
-                      : "text-on-surface-variant hover:bg-white/5 hover:text-on-surface"
+                      : "text-on-surface-variant hover:bg-on-surface/8 hover:text-on-surface"
+                    }`}
+                >
+                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all
+                    ${active ? "bg-primary/15" : "bg-surface-container-highest/50 group-hover:bg-primary/10"}`}>
+                    <Icone name={link.icon} className={`text-lg ${active ? "text-primary" : "group-hover:text-primary"}`} />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold leading-tight">{link.label}</p>
+                    <p className="text-xs opacity-60 leading-tight">{link.description}</p>
+                  </div>
+                  {active && (
+                    <Icone name="arrow_forward_ios" className="text-xs text-primary ml-auto" />
+                  )}
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function PlataformaMenu() {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+  const { pathname } = useLocation();
+  const plataformaActive = PLATAFORMA_LINKS.some((l) => pathname === l.to);
+
+  useEffect(() => {
+    function handleClick(e) {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        onClick={() => setOpen((o) => !o)}
+        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-200 cursor-pointer
+          ${plataformaActive || open
+            ? "text-primary bg-primary/10"
+            : "text-on-surface-variant hover:text-on-surface hover:bg-on-surface/8"
+          }`}
+      >
+        <Icone name="rocket_launch" className="text-base" />
+        <span>Plataforma</span>
+        <Icone
+          name="expand_more"
+          className={`text-base transition-transform duration-200 ${open ? "rotate-180" : ""}`}
+        />
+      </button>
+
+      {open && (
+        <div className="dropdown-panel absolute top-[calc(100%+10px)] left-1/2 -translate-x-1/2 w-72 rounded-2xl overflow-hidden z-50">
+          <div className="px-4 py-3 border-b border-on-surface/10">
+            <p className="text-xs font-semibold uppercase tracking-widest text-on-surface-variant">
+              Plataforma (Super Admin)
+            </p>
+          </div>
+          <div className="p-2 space-y-0.5">
+            {PLATAFORMA_LINKS.map((link) => {
+              const active = pathname === link.to;
+              return (
+                <Link
+                  key={link.to}
+                  to={link.to}
+                  onClick={() => setOpen(false)}
+                  className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group
+                    ${active
+                      ? "bg-primary/10 text-primary"
+                      : "text-on-surface-variant hover:bg-on-surface/8 hover:text-on-surface"
                     }`}
                 >
                   <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all
@@ -145,20 +209,17 @@ function AdminMenu({ usuario }) {
 }
 
 export function Navbar() {
-  const [darkMode, setDarkMode] = useState(true);
+  const { isDark, toggleTheme } = useTheme();
   const { usuario } = useAuth();
   const isRestrictedUser = isUsuarioRestrito(usuario);
   const showAdminMenu = podeAcessarAdmin(usuario?.perfil);
-  const isDoorman = usuario?.perfil === PERFIS.DOORMAN;
-
-  let visibleLeftLinks;
-  if (isRestrictedUser) {
-    visibleLeftLinks = [];
-  } else if (isDoorman) {
-    visibleLeftLinks = NAV_LINKS_DOORMAN;
-  } else {
-    visibleLeftLinks = NAV_LINKS_LEFT;
-  }
+  const showPlataformaMenu = podeAcessarPlataforma(usuario?.perfil);
+  const visibleLeftLinks = isRestrictedUser || showPlataformaMenu ? [] : NAV_LINKS_LEFT;
+  const logoTarget = isRestrictedUser
+    ? "/perfil"
+    : showPlataformaMenu
+      ? "/adm/dashboard"
+      : "/inicio";
 
   return (
     <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-[94%] max-w-4xl px-1">
@@ -170,12 +231,13 @@ export function Navbar() {
               {l.label}
             </NavLink>
           ))}
-          {!isRestrictedUser && !isDoorman && showAdminMenu && <AdminMenu usuario={usuario} />}
+          {!isRestrictedUser && showAdminMenu && <AdminMenu />}
+          {showPlataformaMenu && <PlataformaMenu />}
         </div>
 
         {/* Centro — Logo */}
         <Link
-          to={isRestrictedUser ? "/perfil" : "/inicio"}
+          to={logoTarget}
           className="shrink-0 mx-4 hover:opacity-80 transition-opacity"
         >
           <img src={moraLogo3} alt="Mora" className="h-8 w-auto" />
@@ -191,12 +253,12 @@ export function Navbar() {
 
           {/* Toggle Dark/Light */}
           <button
-            onClick={() => setDarkMode((d) => !d)}
+            onClick={toggleTheme}
             className="ml-1 w-9 h-9 rounded-full flex items-center justify-center text-on-surface-variant hover:text-primary hover:bg-primary/10 transition-all duration-200 cursor-pointer"
-            title={darkMode ? "Modo Claro" : "Modo Escuro"}
+            title={isDark ? "Modo Claro" : "Modo Escuro"}
           >
             <Icone
-              name={darkMode ? "dark_mode" : "light_mode"}
+              name={isDark ? "dark_mode" : "light_mode"}
               className="text-xl"
             />
           </button>

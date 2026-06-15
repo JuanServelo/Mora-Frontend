@@ -3,6 +3,7 @@ import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../../../contexts/AuthContext";
+import { isSuperAdmin } from "../../../utils/perfis";
 import { Icone } from "../../../components/icones/Icone";
 import { DetalhesContaView } from "./DetalhesContaView";
 import { PrivacidadeView } from "./PrivacidadeView";
@@ -63,6 +64,11 @@ export function Perfil() {
   const lastViewRef = useRef(null);
   if (activeView !== null) lastViewRef.current = activeView;
 
+  const superAdmin = isSuperAdmin(usuario?.perfil);
+  const itensConta = superAdmin
+    ? ITENS_CONTA.filter((item) => item.id === "privacidade")
+    : ITENS_CONTA;
+
   return (
     <div className="min-h-screen w-full pt-4 pb-20 px-6">
       <div className="max-w-6xl mx-auto">
@@ -97,42 +103,46 @@ export function Perfil() {
               <h2 className="font-headline text-2xl font-bold text-on-surface">
                 {usuario?.nome || t("perfil.nome")}
               </h2>
-              <p className="text-primary-container font-medium mb-4 text-sm">
+              <p className="font-medium mb-4 text-sm bg-gradient-to-r from-primary to-tertiary bg-clip-text text-transparent">
                 {usuario?.email || t("perfil.unidade")}
               </p>
 
-              <div className="flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full border border-primary/20">
-                <Icone
-                  name="verified"
-                  className="text-primary text-sm"
-                  style={{ fontVariationSettings: "'FILL' 1" }}
-                />
-                <span className="text-primary text-xs font-semibold tracking-wider uppercase">
-                  {t("perfil.verificado")}
-                </span>
-              </div>
+              {!superAdmin && (
+                <div className="flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full border border-primary/20">
+                  <Icone
+                    name="verified"
+                    className="text-primary text-sm"
+                    style={{ fontVariationSettings: "'FILL' 1" }}
+                  />
+                  <span className="text-primary text-xs font-semibold tracking-wider uppercase">
+                    {t("perfil.verificado")}
+                  </span>
+                </div>
+              )}
             </div>
 
             {/* Taxa de Condomínio */}
-            <div className="glass-panel rounded-3xl p-6 relative overflow-hidden">
-              <div className="absolute top-0 left-0 w-full h-1 bg-primary/30 rounded-t-3xl" />
-              <div className="flex justify-between items-start mb-2">
-                <span className="text-on-surface-variant text-xs font-medium uppercase tracking-widest">
-                  {t("perfil.taxa.label")}
-                </span>
-                <Icone
-                  name="check_circle"
-                  className="text-primary"
-                  style={{ fontVariationSettings: "'FILL' 1" }}
-                />
+            {!superAdmin && (
+              <div className="glass-panel rounded-3xl p-6 relative overflow-hidden">
+                <div className="absolute top-0 left-0 w-full h-1 bg-primary/30 rounded-t-3xl" />
+                <div className="flex justify-between items-start mb-2">
+                  <span className="text-on-surface-variant text-xs font-medium uppercase tracking-widest">
+                    {t("perfil.taxa.label")}
+                  </span>
+                  <Icone
+                    name="check_circle"
+                    className="text-primary"
+                    style={{ fontVariationSettings: "'FILL' 1" }}
+                  />
+                </div>
+                <div className="text-2xl font-headline font-bold text-on-surface mb-1">
+                  —
+                </div>
+                <div className="text-xs text-primary font-medium">
+                  {t("perfil.taxa.status")}
+                </div>
               </div>
-              <div className="text-2xl font-headline font-bold text-on-surface mb-1">
-                —
-              </div>
-              <div className="text-xs text-primary font-medium">
-                {t("perfil.taxa.status")}
-              </div>
-            </div>
+            )}
           </div>
 
           {/* Coluna direita — Navegação com sliding panel */}
@@ -170,7 +180,7 @@ export function Perfil() {
                   {/* Panel 1 — Lista de itens */}
                   <div className="w-full shrink-0 min-w-0">
                     <div className="space-y-2">
-                      {ITENS_CONTA.map((item) => (
+                      {itensConta.map((item) => (
                         <button
                           key={item.id}
                           onClick={() => setActiveView(item.id)}

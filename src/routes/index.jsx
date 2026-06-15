@@ -9,6 +9,9 @@ import { AuthCallback } from "../pages/auth/AuthCallback";
 import { AcessoPendente } from "../pages/auth/AcessoPendente";
 import { Perfil } from "../pages/usuario/perfil/Perfil";
 import { GerenciarUsuarios } from "../pages/adm/GerenciarUsuarios";
+import { DashboardSuperAdmin } from "../pages/adm/DashboardSuperAdmin";
+import { GerenciarPlanos } from "../pages/adm/GerenciarPlanos";
+import { GerenciarTenants } from "../pages/adm/GerenciarTenants";
 import { GerenciarEstruturas } from "../pages/adm/GerenciarEstruturas";
 import { GerenciarReunioes } from "../pages/adm/GerenciarReunioes";
 import { GerenciarReclamacoes } from "../pages/adm/GerenciarReclamacoes";
@@ -100,6 +103,9 @@ export const router = createBrowserRouter([
       },
       { path: "/meus-convidados", element: <MeusConvidados /> },
       { path: "/adm/usuarios", element: <GerenciarUsuarios /> },
+      { path: "/adm/dashboard", element: <DashboardSuperAdmin /> },
+      { path: "/adm/planos", element: <GerenciarPlanos /> },
+      { path: "/adm/tenants", element: <GerenciarTenants /> },
       { path: "/adm/estruturas", element: <GerenciarEstruturas /> },
       { path: "/adm/reunioes", element: <GerenciarReunioes /> },
       { path: "/adm/reclamacoes", element: <GerenciarReclamacoes /> },

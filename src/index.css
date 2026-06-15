@@ -67,6 +67,80 @@
 }
 
 /* ================================================================
+   THEME — Material Design 3 LIGHT palette (override via html.light)
+   As variáveis do @theme acima ficam no :root (dark, padrão).
+   Quando o <html> tem a classe .light, sobrescrevemos os tokens.
+   ================================================================ */
+html.light {
+  --color-surface-dim:                  #d6dbdb;
+  --color-on-secondary-fixed:           #251a00;
+  --color-on-background:                #191c1d;
+  --color-tertiary-container:           #9cf0f1;
+  --color-surface-container-lowest:     #ffffff;
+  --color-surface-bright:               #f6fafa;
+  --color-secondary-container:          #ffdf9b;
+  --color-on-tertiary-fixed:            #002020;
+  --color-outline:                      #6f797a;
+  --color-inverse-primary:              #4cd8e0;
+  --color-surface-container:            #eaeeee;
+  --color-surface-container-high:       #e4e9e9;
+  --color-on-tertiary-fixed-variant:    #004f50;
+  --color-surface-container-highest:    #dee3e3;
+  --color-on-primary-fixed-variant:     #004f52;
+  --color-surface:                      #f6fafa;
+  --color-error-container:              #ffdad6;
+  --color-error:                        #ba1a1a;
+  --color-on-secondary-fixed-variant:   #5a4302;
+  --color-primary:                      #00696e;
+  --color-tertiary-fixed:               #9cf0f1;
+  --color-inverse-on-surface:           #eff1f1;
+  --color-primary-container:            #6ff6fd;
+  --color-outline-variant:              #bec8c9;
+  --color-on-primary-fixed:             #002022;
+  --color-on-primary:                   #ffffff;
+  --color-tertiary-fixed-dim:           #80d4d5;
+  --color-surface-tint:                 #00696e;
+  --color-on-tertiary:                  #ffffff;
+  --color-on-primary-container:         #002022;
+  --color-background:                   #f6fafa;
+  --color-secondary:                    #7c5800;
+  --color-on-surface:                   #191c1d;
+  --color-on-secondary:                 #ffffff;
+  --color-on-surface-variant:           #3f4849;
+  --color-surface-container-low:        #f0f4f4;
+  --color-secondary-fixed-dim:          #e5c277;
+  --color-secondary-fixed:              #ffdf9b;
+  --color-on-error-container:           #410002;
+  --color-on-secondary-container:       #271900;
+  --color-primary-fixed-dim:            #4cd8e0;
+  --color-on-error:                     #ffffff;
+  --color-tertiary:                     #006a6b;
+  --color-surface-variant:              #dae4e5;
+  --color-primary-fixed:                #6ff6fd;
+  --color-inverse-surface:              #2d3131;
+  --color-on-tertiary-container:        #002020;
+}
+
+/* Glass + mesh adaptados ao tema claro (os @utility usam rgba fixos) */
+html.light .glass-panel,
+html.light .glass-card {
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+html.light .bg-mesh {
+  background-image:
+    radial-gradient(at 0% 0%,     rgba(0, 105, 110, 0.10) 0px, transparent 50%),
+    radial-gradient(at 100% 0%,   rgba(124, 88, 0, 0.08)  0px, transparent 50%),
+    radial-gradient(at 100% 100%, rgba(0, 105, 110, 0.08) 0px, transparent 50%),
+    radial-gradient(at 0% 100%,   rgba(246, 250, 250, 1)  0px, transparent 50%);
+}
+
+/* Informa aos controles nativos (scrollbar, inputs) o esquema atual */
+html.dark { color-scheme: dark; }
+html.light { color-scheme: light; }
+
+/* ================================================================
    GLOBAL BASE
    ================================================================ */
 *, *::before, *::after {
@@ -97,6 +171,21 @@ body {
   background: rgba(54, 52, 58, 0.4);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
+}
+
+/* Painel de dropdown (menus da navbar) adaptado ao tema */
+.dropdown-panel {
+  background: rgba(18, 18, 24, 0.97);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.6);
+}
+
+html.light .dropdown-panel {
+  background: rgba(255, 255, 255, 0.97);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.18);
 }
 
 @utility bg-mesh {
