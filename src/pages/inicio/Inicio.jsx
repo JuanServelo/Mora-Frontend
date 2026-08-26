@@ -28,8 +28,8 @@ const ACESSO_RAPIDO = [
     icon: "room_service",
   },
   {
-    to: "/comodidades",
-    label: "Comodidades",
+    to: "/espacos",
+    label: "Espaços",
     desc: "Estrutura de lazer e bem-estar",
     icon: "pool",
   },
@@ -52,7 +52,7 @@ export function Inicio() {
       .catch(() => {});
   }, [usuario?.condominioId]);
 
-  if (usuario?.perfil === PERFIS.DOORMAN) {
+  if (usuario?.perfil === PERFIS.PORTEIRO) {
     return <InicioDoorman />;
   }
 

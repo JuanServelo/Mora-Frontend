@@ -68,7 +68,6 @@ export const vagaApi = {
     }),
   atualizar: (id, data, apartamentoId) =>
     estruturasApi.put(`/vagas/${id}?apartamentoId=${apartamentoId}`, data),
-  ativar: (id) => estruturasApi.put(`/vagas/${id}/ativar`),
-  desativar: (id) => estruturasApi.put(`/vagas/${id}/desativar`),
-  deletar: (id) => estruturasApi.delete(`/vagas/${id}`),
+  ativar: (id) => estruturasApi.post(`/vagas/${id}/ativar`),
+  desativar: (id) => estruturasApi.delete(`/vagas/${id}`),
 };

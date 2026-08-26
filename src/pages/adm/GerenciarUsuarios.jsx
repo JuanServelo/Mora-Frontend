@@ -16,17 +16,14 @@ import {
 import { mascararCpf, validarCpf } from "../../utils/masks";
 
 const PERFIS_EXIGEM_UNIDADE_FORM = new Set([
-  PERFIS.RESIDENT_OWNER,
-  PERFIS.ABSENT_OWNER,
-  PERFIS.LESSEE,
-  PERFIS.OCCUPANT,
-  PERFIS.GUEST,
+  PERFIS.MORADOR,
+  PERFIS.DONO_ALUGUEL,
+  PERFIS.CONVIDADO,
 ]);
 
 const PERFIS_EXIGEM_PRECADASTRO = new Set([
-  PERFIS.LESSEE,
-  PERFIS.OCCUPANT,
-  PERFIS.GUEST,
+  PERFIS.MORADOR,
+  PERFIS.CONVIDADO,
 ]);
 import { useToast } from "../../contexts/ToastContext";
 import { useConfirm } from "../../contexts/ConfirmContext";
@@ -54,8 +51,8 @@ export function GerenciarUsuarios() {
   useEffect(() => {
     Promise.all([
       api.get("/api/user-management/users").catch(() => api.get("/api/users")),
-      blocoApi.listar(),
-      apartamentoApi.listar(),
+      blocoApi.listar().catch(() => ({ data: [] })),
+      apartamentoApi.listar().catch(() => ({ data: [] })),
       condominiosApi.listar().catch(() => ({ data: { condominios: [] } })),
     ])
       .then(([usersRes, blocosRes, aptsRes, condsRes]) => {
@@ -362,7 +359,6 @@ export function GerenciarUsuarios() {
                   condominios={condominios}
                   perfilAtor={usuarioLogado?.perfil}
                   condominioIdAtor={usuarioLogado?.condominioId}
-                  roleAtor={usuarioLogado?.role}
                   onSalvar={criarUsuario}
                   onCancelar={() => setCriando(false)}
                 />
@@ -902,17 +898,17 @@ function FormEdicao({ usuario, blocos, apartamentos, onSalvar, onCancelar }) {
 }
 
 // ─────────────────────────────────────────────
-function FormNovoUsuario({ blocos, apartamentos, condominios, perfilAtor, condominioIdAtor, roleAtor, onSalvar, onCancelar }) {
+function FormNovoUsuario({ blocos, apartamentos, condominios, perfilAtor, condominioIdAtor, onSalvar, onCancelar }) {
   const perfisOpcoes = perfisCadastroDisponiveis(perfilAtor).filter(
-    (p) => p.value !== PERFIS.GUEST,
+    (p) => p.value !== PERFIS.CONVIDADO,
   );
 
-  // Admin (role: 'admin') sempre pode selecionar/alterar o condomínio
-  const precisaSelecionarCondominio = !condominioIdAtor || roleAtor === 'admin';
+  // O Admin Geral não tem condomínio próprio: sempre escolhe o de destino.
+  const precisaSelecionarCondominio = !condominioIdAtor || perfilAtor === PERFIS.ADMIN_GERAL;
 
   const [form, setForm] = useState({
     email: "",
-    perfil: perfisOpcoes[0]?.value ?? PERFIS.OPERATIONAL_SYNDIC,
+    perfil: perfisOpcoes[0]?.value ?? PERFIS.ADMIN_SINDICO,
     nomePrecadastro: "",
     cpfPrecadastro: "",
   });

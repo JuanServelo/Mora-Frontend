@@ -15,9 +15,9 @@ import { Botao } from "../../../components/botoes/Botao";
 import { Icone } from "../../../components/icones/Icone";
 
 const PERFIL_ICONE = {
-  [PERFIS.LESSEE]: "key",
-  [PERFIS.OCCUPANT]: "person",
-  [PERFIS.GUEST]: "person_outline",
+  [PERFIS.MORADOR]: "person",
+  [PERFIS.DONO_ALUGUEL]: "key",
+  [PERFIS.CONVIDADO]: "person_outline",
 };
 
 function campoErroClass(erros, campo) {
@@ -324,9 +324,9 @@ export function FamiliaView() {
   }
 
   const itens = [...convitesPendentes, ...ocupantes];
-  const podeLessee = podeCadastrarPerfil(perfil, PERFIS.LESSEE);
-  const podeOccupant = podeCadastrarPerfil(perfil, PERFIS.OCCUPANT);
-  const podeGuest = podeCadastrarPerfil(perfil, PERFIS.GUEST);
+  const podeLessee = podeCadastrarPerfil(perfil, PERFIS.MORADOR);
+  const podeOccupant = podeCadastrarPerfil(perfil, PERFIS.MORADOR);
+  const podeGuest = podeCadastrarPerfil(perfil, PERFIS.CONVIDADO);
   const podeTransferir = elegibilidade?.podeTransferir === true;
 
   return (
@@ -346,7 +346,7 @@ export function FamiliaView() {
         </div>
       )}
 
-      {elegibilidade?.elegivel === false && elegibilidade?.mensagem && perfil === PERFIS.RESIDENT_OWNER && usuario?.responsavelFinanceiro && (
+      {elegibilidade?.elegivel === false && elegibilidade?.mensagem && perfil === PERFIS.MORADOR && usuario?.responsavelFinanceiro && (
         <p className="text-xs text-on-surface-variant ml-1">{elegibilidade.mensagem}</p>
       )}
 

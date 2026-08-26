@@ -37,7 +37,7 @@ function BadgePermissao({ permitida }) {
 
 function CartaoUsuario({ usuario, onEntrada, onSaida, showPermissao = false, carregando }) {
   const dentro = usuario.statusAcesso === "DENTRO";
-  const isGuest = usuario.perfil === "GUEST";
+  const isGuest = usuario.perfil === "CONVIDADO";
   const bloqueado = isGuest && !usuario.entradaPermitida;
 
   return (

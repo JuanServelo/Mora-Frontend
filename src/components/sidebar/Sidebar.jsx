@@ -4,27 +4,9 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Icone } from "../icones/Icone";
 import { useAuth } from "../../contexts/AuthContext";
 import { PERFIS } from "../../utils/perfis";
+import { linksDoPerfil } from "../../utils/menuAdmin";
 import moraLogo3 from "../../assets/Mora3.png";
 
-// `superAdmin: true` → só para o Super Admin da plataforma (role === "admin").
-// `plataforma: true` → só para nível Plataforma (Administradora / Síndico Contratante).
-const ADM_LINKS = [
-  { to: "/adm/planos", label: "Planos", icon: "workspace_premium", superAdmin: true },
-  { to: "/adm/usuarios", label: "Usuários", icon: "manage_accounts" },
-  { to: "/adm/estruturas", label: "Estruturas", icon: "apartment" },
-  { to: "/adm/reunioes", label: "Reuniões", icon: "groups" },
-  { to: "/adm/reclamacoes", label: "Reclamações", icon: "report" },
-  { to: "/adm/entregas", label: "Entregas", icon: "inventory_2" },
-  { to: "/adm/vagas", label: "Vagas", icon: "local_parking" },
-  { to: "/adm/conhecimento", label: "Conhecimento", icon: "library_books" },
-  { to: "/adm/perfis", label: "Perfis", icon: "verified_user", plataforma: true },
-  { to: "/adm/condominios", label: "Clientes", icon: "domain", plataforma: true },
-];
-
-const PERFIS_PLATAFORMA = [
-  PERFIS.CONTRACTING_PROPERTY_MANAGER,
-  PERFIS.CONTRACTING_SYNDIC,
-];
 
 // Telas do porteiro (mesmo layout de Sidebar dos admins).
 const PORTEIRO_LINKS = [
@@ -68,19 +50,17 @@ export function Sidebar() {
     return () => document.removeEventListener("keydown", handleKey);
   }, [aberta]);
 
-  const isDoorman = usuario?.perfil === PERFIS.DOORMAN;
-  const isPlataforma = PERFIS_PLATAFORMA.includes(usuario?.perfil);
-  const isSuperAdmin = usuario?.role === "admin";
+  const perfil = usuario?.perfil;
+  const isDoorman = perfil === PERFIS.PORTEIRO;
 
-  // Porteiro tem o conjunto dele; os demais (admins) veem as abas administrativas.
-  // Super Admin vê SOMENTE Planos; os outros admins veem suas abas (sem Planos).
-  const links = isDoorman
-    ? PORTEIRO_LINKS
-    : isSuperAdmin
-      ? ADM_LINKS.filter((l) => l.superAdmin)
-      : ADM_LINKS.filter((l) => !l.superAdmin && (!l.plataforma || isPlataforma));
+  // Porteiro tem o conjunto dele; os admins veem o que o próprio perfil permite.
+  const links = isDoorman ? PORTEIRO_LINKS : linksDoPerfil(perfil);
 
-  const subtitulo = isDoorman ? "Portaria" : "Administrativo";
+  const subtitulo = isDoorman
+    ? "Portaria"
+    : perfil === PERFIS.ADMIN_GERAL
+      ? "Plataforma"
+      : "Administrativo";
 
   async function handleLogout() {
     await logout();

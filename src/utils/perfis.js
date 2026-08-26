@@ -1,88 +1,60 @@
+/**
+ * Perfis de acesso — espelho de services/auth-api/constants/perfis.js.
+ * Modelo simplificado: 6 perfis em 3 camadas.
+ */
 export const PERFIS = {
-  CONTRACTING_PROPERTY_MANAGER: 'CONTRACTING_PROPERTY_MANAGER',
-  CONTRACTING_SYNDIC: 'CONTRACTING_SYNDIC',
-  OPERATIONAL_SYNDIC: 'OPERATIONAL_SYNDIC',
-  ADMINISTRATOR: 'ADMINISTRATOR',
-  DOORMAN: 'DOORMAN',
-  REAL_ESTATE_AGENCY: 'REAL_ESTATE_AGENCY',
-  RESIDENT_OWNER: 'RESIDENT_OWNER',
-  ABSENT_OWNER: 'ABSENT_OWNER',
-  LESSEE: 'LESSEE',
-  OCCUPANT: 'OCCUPANT',
-  GUEST: 'GUEST',
+  ADMIN_GERAL: 'ADMIN_GERAL',
+  ADMIN_SINDICO: 'ADMIN_SINDICO',
+  PORTEIRO: 'PORTEIRO',
+  MORADOR: 'MORADOR',
+  DONO_ALUGUEL: 'DONO_ALUGUEL',
+  CONVIDADO: 'CONVIDADO',
 };
 
-// Perfis que podem ser cadastrados via convite pelo painel admin
+export const TODOS_PERFIS = [
+  { value: PERFIS.ADMIN_GERAL, label: 'Admin Geral' },
+  { value: PERFIS.ADMIN_SINDICO, label: 'Admin Síndico' },
+  { value: PERFIS.PORTEIRO, label: 'Porteiro' },
+  { value: PERFIS.MORADOR, label: 'Morador' },
+  { value: PERFIS.DONO_ALUGUEL, label: 'Dono Aluguel' },
+  { value: PERFIS.CONVIDADO, label: 'Convidado' },
+];
+
+/** Perfis oferecidos ao Admin Geral ao montar a gestão de um condomínio. */
 export const PERFIS_CADASTRO_PLATAFORMA = [
-  { value: PERFIS.CONTRACTING_SYNDIC, label: 'Síndico Contratante' },
+  { value: PERFIS.ADMIN_SINDICO, label: 'Admin Síndico' },
 ];
 
 export const PERFIS_CADASTRO_CONDOMINIO = [
-  { value: PERFIS.OPERATIONAL_SYNDIC, label: 'Síndico Operacional' },
-  { value: PERFIS.ADMINISTRATOR, label: 'Administrador' },
-  { value: PERFIS.DOORMAN, label: 'Porteiro' },
-  { value: PERFIS.REAL_ESTATE_AGENCY, label: 'Imobiliária' },
-  { value: PERFIS.RESIDENT_OWNER, label: 'Proprietário Residente' },
+  { value: PERFIS.ADMIN_SINDICO, label: 'Admin Síndico' },
+  { value: PERFIS.PORTEIRO, label: 'Porteiro' },
+  { value: PERFIS.MORADOR, label: 'Morador' },
+  { value: PERFIS.DONO_ALUGUEL, label: 'Dono Aluguel' },
 ];
 
 export const PERFIS_CADASTRO_UNIDADE = [
-  { value: PERFIS.LESSEE, label: 'Locatário' },
-  { value: PERFIS.OCCUPANT, label: 'Ocupante' },
-  { value: PERFIS.GUEST, label: 'Convidado' },
+  { value: PERFIS.MORADOR, label: 'Morador' },
+  { value: PERFIS.CONVIDADO, label: 'Convidado' },
 ];
 
-// Todos os perfis com label (usado para exibição e lookup)
-export const TODOS_PERFIS = [
-  { value: PERFIS.CONTRACTING_PROPERTY_MANAGER, label: 'Administradora Contratante' },
-  { value: PERFIS.CONTRACTING_SYNDIC,           label: 'Síndico Contratante' },
-  { value: PERFIS.OPERATIONAL_SYNDIC,           label: 'Síndico Operacional' },
-  { value: PERFIS.ADMINISTRATOR,                label: 'Administrador' },
-  { value: PERFIS.DOORMAN,                      label: 'Porteiro' },
-  { value: PERFIS.REAL_ESTATE_AGENCY,           label: 'Imobiliária' },
-  { value: PERFIS.RESIDENT_OWNER,               label: 'Proprietário Residente' },
-  { value: PERFIS.ABSENT_OWNER,                 label: 'Proprietário Ausente' },
-  { value: PERFIS.LESSEE,                       label: 'Locatário' },
-  { value: PERFIS.OCCUPANT,                     label: 'Ocupante' },
-  { value: PERFIS.GUEST,                        label: 'Convidado' },
-];
-
-/** Matriz: perfil do ator → perfis que pode cadastrar via convite */
+/** Matriz: perfil do ator → perfis que pode cadastrar via convite. */
 export const PERMISSOES_CADASTRO = {
-  [PERFIS.CONTRACTING_PROPERTY_MANAGER]: [
-    PERFIS.CONTRACTING_SYNDIC,
-    PERFIS.OPERATIONAL_SYNDIC,
-    PERFIS.ADMINISTRATOR,
-    PERFIS.DOORMAN,
-    PERFIS.REAL_ESTATE_AGENCY,
-    PERFIS.RESIDENT_OWNER,
-    PERFIS.ABSENT_OWNER,
-    PERFIS.LESSEE,
-    PERFIS.OCCUPANT,
+  [PERFIS.ADMIN_GERAL]: [
+    PERFIS.ADMIN_GERAL,
+    PERFIS.ADMIN_SINDICO,
+    PERFIS.PORTEIRO,
+    PERFIS.MORADOR,
+    PERFIS.DONO_ALUGUEL,
+    PERFIS.CONVIDADO,
   ],
-  [PERFIS.CONTRACTING_SYNDIC]: [
-    PERFIS.OPERATIONAL_SYNDIC,
-    PERFIS.ADMINISTRATOR,
-    PERFIS.DOORMAN,
-    PERFIS.REAL_ESTATE_AGENCY,
-    PERFIS.RESIDENT_OWNER,
-    PERFIS.ABSENT_OWNER,
-    PERFIS.LESSEE,
-    PERFIS.OCCUPANT,
+  [PERFIS.ADMIN_SINDICO]: [
+    PERFIS.PORTEIRO,
+    PERFIS.MORADOR,
+    PERFIS.DONO_ALUGUEL,
+    PERFIS.CONVIDADO,
   ],
-  [PERFIS.OPERATIONAL_SYNDIC]: [
-    PERFIS.ADMINISTRATOR,
-    PERFIS.DOORMAN,
-    PERFIS.REAL_ESTATE_AGENCY,
-    PERFIS.RESIDENT_OWNER,
-  ],
-  [PERFIS.ADMINISTRATOR]: [
-    PERFIS.DOORMAN,
-    PERFIS.REAL_ESTATE_AGENCY,
-    PERFIS.RESIDENT_OWNER,
-  ],
-  [PERFIS.RESIDENT_OWNER]:  [PERFIS.LESSEE, PERFIS.OCCUPANT, PERFIS.GUEST],
-  [PERFIS.ABSENT_OWNER]:    [PERFIS.LESSEE],
-  [PERFIS.LESSEE]:          [PERFIS.OCCUPANT, PERFIS.GUEST],
+  [PERFIS.MORADOR]: [PERFIS.CONVIDADO],
+  [PERFIS.DONO_ALUGUEL]: [PERFIS.MORADOR, PERFIS.CONVIDADO],
 };
 
 export function podeCadastrarPerfil(perfilAtor, perfilAlvo) {
@@ -90,10 +62,10 @@ export function podeCadastrarPerfil(perfilAtor, perfilAlvo) {
 }
 
 export function podeGerenciarOcupantes(perfil) {
-  return [PERFIS.RESIDENT_OWNER, PERFIS.ABSENT_OWNER, PERFIS.LESSEE].includes(perfil);
+  return [PERFIS.MORADOR, PERFIS.DONO_ALUGUEL].includes(perfil);
 }
 
-/** Retorna os perfis que o ator pode cadastrar via convite, com label e agrupamento */
+/** Perfis que o ator pode cadastrar via convite, com label. */
 export function perfisCadastroDisponiveis(perfilAtor) {
   const permitidos = PERMISSOES_CADASTRO[perfilAtor] ?? [];
   return TODOS_PERFIS.filter((p) => permitidos.includes(p.value));
@@ -105,20 +77,23 @@ export function labelPerfil(perfil) {
     ?? '—';
 }
 
+/** Perfis que atuam no condomínio, não numa unidade específica. */
 export const PERFIS_CONDOMINIO = [
-  PERFIS.CONTRACTING_PROPERTY_MANAGER,
-  PERFIS.CONTRACTING_SYNDIC,
-  PERFIS.OPERATIONAL_SYNDIC,
-  PERFIS.ADMINISTRATOR,
-  PERFIS.DOORMAN,
-  PERFIS.REAL_ESTATE_AGENCY,
+  PERFIS.ADMIN_GERAL,
+  PERFIS.ADMIN_SINDICO,
+  PERFIS.PORTEIRO,
 ];
 
 export const PERFIS_ACESSO_ADMIN = [
-  PERFIS.CONTRACTING_PROPERTY_MANAGER,
-  PERFIS.CONTRACTING_SYNDIC,
-  PERFIS.OPERATIONAL_SYNDIC,
-  PERFIS.ADMINISTRATOR,
+  PERFIS.ADMIN_GERAL,
+  PERFIS.ADMIN_SINDICO,
+];
+
+/** Operam as telas de portaria. */
+export const PERFIS_PORTARIA = [
+  PERFIS.ADMIN_GERAL,
+  PERFIS.ADMIN_SINDICO,
+  PERFIS.PORTEIRO,
 ];
 
 export function isPerfilCondominio(perfil) {
@@ -129,27 +104,24 @@ export function podeAcessarAdmin(perfil) {
   return PERFIS_ACESSO_ADMIN.includes(perfil);
 }
 
+export function podeAcessarPortaria(perfil) {
+  return PERFIS_PORTARIA.includes(perfil);
+}
+
 export function isUsuarioRestrito(usuario) {
   if (!usuario) return false;
-  const hasUnitAssociation =
-    Boolean(usuario.unidadeId) ||
-    (Boolean(usuario.bloco) && Boolean(usuario.apartamento));
+  const hasUnitAssociation = Boolean(usuario.unidadeId)
+    || (Boolean(usuario.bloco) && Boolean(usuario.apartamento));
   return !isPerfilCondominio(usuario.perfil) && !hasUnitAssociation;
 }
 
+/** Espelha services/auth-api/utils/redirectPorPerfil.js. */
+const ROTA_POR_PERFIL = {
+  [PERFIS.PORTEIRO]: "/portaria",
+  // Admin Geral opera a plataforma, não um condomínio: painel próprio.
+  [PERFIS.ADMIN_GERAL]: "/adm/geral",
+};
+
 export function redirectPorPerfil(perfil) {
-  const map = {
-    [PERFIS.DOORMAN]:                          '/inicio',
-    [PERFIS.CONTRACTING_PROPERTY_MANAGER]:     '/inicio',
-    [PERFIS.CONTRACTING_SYNDIC]:               '/inicio',
-    [PERFIS.OPERATIONAL_SYNDIC]:               '/inicio',
-    [PERFIS.ADMINISTRATOR]:                    '/inicio',
-    [PERFIS.REAL_ESTATE_AGENCY]:               '/inicio',
-    [PERFIS.RESIDENT_OWNER]:                   '/inicio',
-    [PERFIS.ABSENT_OWNER]:                     '/inicio',
-    [PERFIS.LESSEE]:                           '/inicio',
-    [PERFIS.OCCUPANT]:                         '/inicio',
-    [PERFIS.GUEST]:                            '/inicio',
-  };
-  return map[perfil] || '/inicio';
+  return ROTA_POR_PERFIL[perfil] ?? "/inicio";
 }

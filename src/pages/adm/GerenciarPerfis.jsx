@@ -1,20 +1,16 @@
 import { useState, useEffect } from "react";
 import api from "../../services/api";
 import { Icone } from "../../components/icones/Icone";
+import { ADM_LINKS, linksDoPerfil } from "../../utils/menuAdmin";
 
 // Mapa local para ícones e cores por perfil (fallback offline)
 const PERFIL_META = {
-  CONTRACTING_PROPERTY_MANAGER: { icon: "corporate_fare", cor: "primary" },
-  CONTRACTING_SYNDIC:           { icon: "real_estate_agent", cor: "primary" },
-  OPERATIONAL_SYNDIC:           { icon: "supervisor_account", cor: "tertiary" },
-  ADMINISTRATOR:                { icon: "manage_accounts", cor: "tertiary" },
-  DOORMAN:                      { icon: "door_front", cor: "secondary" },
-  REAL_ESTATE_AGENCY:           { icon: "business", cor: "secondary" },
-  RESIDENT_OWNER:               { icon: "home", cor: "primary" },
-  ABSENT_OWNER:                 { icon: "home_work", cor: "tertiary" },
-  LESSEE:                       { icon: "key", cor: "secondary" },
-  OCCUPANT:                     { icon: "person", cor: "outline" },
-  GUEST:                        { icon: "badge", cor: "outline" },
+  ADMIN_GERAL:   { icon: "corporate_fare", cor: "primary" },
+  ADMIN_SINDICO: { icon: "supervisor_account", cor: "tertiary" },
+  PORTEIRO:      { icon: "door_front", cor: "secondary" },
+  MORADOR:       { icon: "home", cor: "primary" },
+  DONO_ALUGUEL:  { icon: "home_work", cor: "tertiary" },
+  CONVIDADO:     { icon: "badge", cor: "outline" },
 };
 
 const COR_CLASSE = {
@@ -24,25 +20,12 @@ const COR_CLASSE = {
   outline:  "bg-surface-container-highest/40 text-on-surface-variant border-outline-variant/30",
 };
 
-const ADMIN_ABAS = [
-  { label: "Usuários", to: "/adm/usuarios", icon: "manage_accounts" },
-  { label: "Estruturas", to: "/adm/estruturas", icon: "apartment" },
-  { label: "Reuniões", to: "/adm/reunioes", icon: "groups" },
-  { label: "Reclamações", to: "/adm/reclamacoes", icon: "report" },
-  { label: "Entregas", to: "/adm/entregas", icon: "inventory_2" },
-  { label: "Vagas", to: "/adm/vagas", icon: "local_parking" },
-  { label: "Conhecimento", to: "/adm/conhecimento", icon: "library_books" },
-  { label: "Perfis", to: "/adm/perfis", icon: "verified_user" },
-  { label: "Clientes", to: "/adm/condominios", icon: "domain" },
-];
+// Abas por perfil: lidas do mapa compartilhado, para não divergir do menu.
+const ADMIN_ABAS = ADM_LINKS;
+const ACESSO_ADMIN = Object.fromEntries(
+  ["ADMIN_GERAL", "ADMIN_SINDICO"].map((p) => [p, linksDoPerfil(p).map((l) => l.label)]),
+);
 
-// Quais perfis podem acessar o painel admin (e quais abas)
-const ACESSO_ADMIN = {
-  CONTRACTING_PROPERTY_MANAGER: ADMIN_ABAS.map((a) => a.label),
-  CONTRACTING_SYNDIC:           ADMIN_ABAS.map((a) => a.label),
-  OPERATIONAL_SYNDIC:           ["Usuários","Estruturas","Reuniões","Espaços","Reclamações","Entregas","Vagas","Conhecimento","Perfis"],
-  ADMINISTRATOR:                ["Usuários","Estruturas","Espaços","Reclamações","Entregas","Vagas","Conhecimento","Perfis"],
-};
 
 const CATEGORIAS = ["plataforma", "condominio", "unidade"];
 const CATEGORIA_LABEL = {
@@ -273,18 +256,11 @@ function CardPerfil({ perfil }) {
 }
 
 function MatrizAcesso() {
-  const perfisAdmin = [
-    "CONTRACTING_PROPERTY_MANAGER",
-    "CONTRACTING_SYNDIC",
-    "OPERATIONAL_SYNDIC",
-    "ADMINISTRATOR",
-  ];
+  const perfisAdmin = ["ADMIN_GERAL", "ADMIN_SINDICO"];
 
   const labelCurto = {
-    CONTRACTING_PROPERTY_MANAGER: "Adm. Contratante",
-    CONTRACTING_SYNDIC:           "Síndico Contrat.",
-    OPERATIONAL_SYNDIC:           "Síndico Oper.",
-    ADMINISTRATOR:                "Administrador",
+    ADMIN_GERAL:   "Admin Geral",
+    ADMIN_SINDICO: "Admin Síndico",
   };
 
   return (
@@ -350,7 +326,7 @@ function MatrizAcesso() {
           Perfis de nível Unidade (sem acesso ao painel admin)
         </p>
         <div className="flex flex-wrap gap-2">
-          {["RESIDENT_OWNER","ABSENT_OWNER","LESSEE","OCCUPANT","GUEST"].map((p) => {
+          {["MORADOR","DONO_ALUGUEL","CONVIDADO"].map((p) => {
             const meta = PERFIL_META[p];
             return (
               <span key={p} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs bg-surface-container-highest/30 text-on-surface-variant border border-outline-variant/20">
