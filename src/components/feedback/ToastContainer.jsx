@@ -34,7 +34,7 @@ function ToastItem({ toast, onDismiss }) {
     <div
       role="alert"
       className={`
-        glass-panel rounded-2xl p-4 shadow-2xl border min-w-[280px] max-w-sm
+        glass-panel rounded-2xl p-4 shadow-2xl border w-full sm:w-auto sm:min-w-[280px] max-w-full sm:max-w-sm
         animate-[slideIn_0.3s_ease-out]
         ${estilo.border} ${estilo.bg}
       `}
@@ -69,7 +69,7 @@ export function ToastContainer({ toasts, onDismiss }) {
   if (toasts.length === 0) return null;
 
   return (
-    <div className="fixed top-4 right-4 z-[9999] flex flex-col gap-3 pointer-events-none">
+    <div className="fixed top-20 right-4 left-4 sm:top-4 sm:left-auto z-[9999] flex flex-col items-stretch sm:items-end gap-3 pointer-events-none">
       {toasts.map((t) => (
         <div key={t.id} className="pointer-events-auto">
           <ToastItem toast={t} onDismiss={onDismiss} />

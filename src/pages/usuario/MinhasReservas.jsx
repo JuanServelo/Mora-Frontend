@@ -53,13 +53,13 @@ export function MinhasReservas() {
   const [aba, setAba] = useState("areas");
 
   return (
-    <div className="min-h-screen w-full pt-4 pb-20 px-6">
+    <div className="min-h-screen w-full pt-4 pb-20 px-4 sm:px-6">
       <div className="max-w-5xl mx-auto space-y-8">
         <header>
           <p className="text-on-surface-variant text-xs font-semibold uppercase tracking-widest mb-1">
             Reservas
           </p>
-          <h1 className="font-headline text-4xl font-extrabold tracking-tight text-on-surface">
+          <h1 className="font-headline text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-on-surface">
             Áreas{" "}
             <span className="bg-gradient-to-r from-primary to-tertiary bg-clip-text text-transparent">
               & Reservas
@@ -70,7 +70,7 @@ export function MinhasReservas() {
           </p>
         </header>
 
-        <div className="glass-panel rounded-2xl p-1.5 flex gap-1 w-fit">
+        <div className="glass-panel rounded-2xl p-1.5 flex flex-wrap gap-1 w-full sm:w-fit">
           {[
             { id: "areas", label: "Áreas Disponíveis", icon: "meeting_room" },
             { id: "minhas", label: "Minhas Reservas", icon: "event_available" },
@@ -79,7 +79,7 @@ export function MinhasReservas() {
               key={tab.id}
               type="button"
               onClick={() => setAba(tab.id)}
-              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 cursor-pointer ${
+              className={`flex items-center gap-2 px-3 sm:px-5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 cursor-pointer ${
                 aba === tab.id
                   ? "bg-primary/15 text-primary"
                   : "text-on-surface-variant hover:text-on-surface hover:bg-white/5"
@@ -168,7 +168,7 @@ function AbaAreas() {
 
   if (erro) {
     return (
-      <div className="glass-panel rounded-2xl p-8 border border-error/20 text-on-surface-variant text-sm">
+      <div className="glass-panel rounded-2xl p-5 sm:p-8 border border-error/20 text-on-surface-variant text-sm">
         {erro}
       </div>
     );
@@ -176,20 +176,20 @@ function AbaAreas() {
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {areas.map((a) => (
           <button
             key={a.id}
             type="button"
             onClick={() => a.disponivel && setSelecionada(a.id === selecionada ? null : a.id)}
             disabled={!a.disponivel}
-            className={`glass-panel rounded-2xl p-5 text-left transition-all duration-200 space-y-3
+            className={`glass-panel rounded-2xl p-4 sm:p-5 text-left transition-all duration-200 space-y-3
               ${a.disponivel ? "cursor-pointer hover:ring-2 hover:ring-primary/40" : "opacity-50 cursor-not-allowed"}
               ${selecionada === a.id ? "ring-2 ring-primary" : ""}
             `}
           >
             <div className="flex items-start justify-between">
-              <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+              <div className="w-12 h-12 shrink-0 rounded-xl bg-primary/10 flex items-center justify-center">
                 <Icone name={a.icon} className="text-primary text-2xl" />
               </div>
               <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${areaStatusColor(a.status)}`}>
@@ -215,7 +215,7 @@ function AbaAreas() {
       </div>
 
       {areas.length === 0 && (
-        <div className="glass-panel rounded-2xl py-16 flex flex-col items-center gap-3 text-on-surface-variant">
+        <div className="glass-panel rounded-2xl py-12 sm:py-16 px-4 text-center flex flex-col items-center gap-3 text-on-surface-variant">
           <Icone name="meeting_room" className="text-5xl opacity-30" />
           <p className="text-sm text-center max-w-md">
             Nenhuma área comum cadastrada ou disponível. Quando a administração cadastrar áreas no painel, elas aparecerão aqui.
@@ -224,13 +224,13 @@ function AbaAreas() {
       )}
 
       {selecionada && area && (
-        <div className="glass-panel rounded-2xl p-6 space-y-5">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+        <div className="glass-panel rounded-2xl p-4 sm:p-6 space-y-5">
+          <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+            <div className="w-12 h-12 shrink-0 rounded-xl bg-primary/10 flex items-center justify-center">
               <Icone name={area.icon} className="text-primary text-2xl" />
             </div>
-            <div>
-              <h2 className="font-headline text-xl font-bold text-on-surface">Reservar — {area.nome}</h2>
+            <div className="min-w-0">
+              <h2 className="font-headline text-lg sm:text-xl font-bold text-on-surface">Reservar — {area.nome}</h2>
               <p className="text-xs text-on-surface-variant">{area.descricao}</p>
             </div>
           </div>
@@ -253,7 +253,7 @@ function AbaAreas() {
           )}
 
           <form onSubmit={confirmarReserva} className="space-y-5">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Campo
                 label="Data/hora de início"
                 name="dataInicio"
@@ -282,9 +282,9 @@ function AbaAreas() {
                     {convidados.map((c) => (
                       <div
                         key={c.id}
-                        className="flex items-center justify-between bg-surface-container-highest/30 rounded-xl px-4 py-2.5"
+                        className="flex items-center justify-between gap-3 bg-surface-container-highest/30 rounded-xl px-4 py-2.5"
                       >
-                        <div>
+                        <div className="min-w-0">
                           <span className="text-sm font-medium text-on-surface">{c.nome}</span>
                           {c.cpf && <span className="text-xs text-on-surface-variant ml-2">{c.cpf}</span>}
                         </div>
@@ -299,8 +299,8 @@ function AbaAreas() {
                     ))}
                   </div>
                 )}
-                <div className="flex gap-2 items-end">
-                  <div className="flex-1">
+                <div className="flex flex-col sm:flex-row gap-2 sm:items-end">
+                  <div className="flex-1 min-w-0">
                     <Campo
                       label="Nome do convidado"
                       value={convidadoForm.nome}
@@ -308,7 +308,7 @@ function AbaAreas() {
                       placeholder="Nome completo"
                     />
                   </div>
-                  <div className="flex-1">
+                  <div className="flex-1 min-w-0">
                     <Campo
                       label="CPF"
                       value={convidadoForm.cpf}
@@ -319,7 +319,7 @@ function AbaAreas() {
                   <button
                     type="button"
                     onClick={adicionarConvidado}
-                    className="shrink-0 px-4 py-3 bg-primary/10 text-primary rounded-xl hover:bg-primary/20 transition-all cursor-pointer"
+                    className="shrink-0 flex items-center justify-center gap-2 px-4 py-3 bg-primary/10 text-primary rounded-xl hover:bg-primary/20 transition-all cursor-pointer"
                   >
                     <Icone name="person_add" className="text-xl" />
                   </button>
@@ -345,7 +345,7 @@ function AbaAreas() {
               </div>
             )}
 
-            <div className="flex gap-3 justify-end pt-2">
+            <div className="flex flex-col-reverse sm:flex-row gap-3 sm:justify-end pt-2">
               <button
                 type="button"
                 onClick={() => {
@@ -371,7 +371,7 @@ function AbaAreas() {
 
 function AbaMinhasReservas() {
   return (
-    <div className="glass-panel rounded-2xl py-20 flex flex-col items-center gap-4 text-on-surface-variant px-6 text-center">
+    <div className="glass-panel rounded-2xl py-14 sm:py-20 flex flex-col items-center gap-4 text-on-surface-variant px-4 sm:px-6 text-center">
       <Icone name="event_busy" className="text-5xl opacity-30" />
       <p className="text-sm max-w-md">
         Não há reservas listadas. O histórico será carregado automaticamente quando o microsserviço de agendamento estiver

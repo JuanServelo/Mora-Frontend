@@ -79,7 +79,7 @@ export function Login() {
             <span className="text-secondary font-headline tracking-[0.2em] text-xs uppercase font-bold">
               {t("login.welcome")}
             </span>
-            <h1 className="text-5xl font-headline font-extrabold tracking-tight text-on-surface leading-tight">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-headline font-extrabold tracking-tight text-on-surface leading-tight">
               {t("login.tagline")}
               <br />
               <span className="bg-gradient-to-r from-primary to-tertiary bg-clip-text text-transparent italic">
@@ -87,7 +87,7 @@ export function Login() {
               </span>
             </h1>
           </div>
-          <p className="text-on-surface-variant text-lg max-w-md leading-relaxed">
+          <p className="text-on-surface-variant text-base lg:text-lg max-w-md leading-relaxed">
             {t("login.description")}
           </p>
           <div className="flex items-center gap-5 pt-2">
@@ -110,7 +110,7 @@ export function Login() {
 
         {/* Coluna direita — Card de login */}
         <div className="lg:col-span-5 flex justify-center lg:justify-end w-full">
-          <div className="glass-panel w-full max-w-sm rounded-[2rem] p-8 shadow-2xl relative overflow-hidden group">
+          <div className="glass-panel w-full max-w-sm rounded-[2rem] p-6 sm:p-8 shadow-2xl relative overflow-hidden group">
             <div className="absolute -top-24 -left-24 w-48 h-48 bg-primary/20 blur-[60px] pointer-events-none transition-all duration-700 group-hover:bg-primary/30" />
 
             <div className="relative z-10">
@@ -235,7 +235,7 @@ export function Login() {
       </main>
 
       {/* Rodapé */}
-      <footer className="fixed bottom-6 w-full px-8 flex justify-between items-center text-[10px] text-on-surface-variant/40 font-medium tracking-widest uppercase pointer-events-none">
+      <footer className="hidden sm:flex fixed bottom-6 w-full px-8 justify-between items-center text-[10px] text-on-surface-variant/40 font-medium tracking-widest uppercase pointer-events-none">
         <div className="flex items-center gap-4">
           <span>{t("footer.privacy")}</span>
           <span>{t("footer.terms")}</span>

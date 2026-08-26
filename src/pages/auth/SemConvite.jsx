@@ -9,13 +9,13 @@ export function SemConvite() {
   return (
     <div className="min-h-screen w-full flex items-center justify-center px-4 py-8">
       <div className="w-full max-w-lg space-y-6">
-        <div className="glass-panel rounded-[2rem] p-8 shadow-2xl">
-          <div className="flex items-start gap-4 mb-6">
-            <div className="w-12 h-12 rounded-xl bg-secondary/15 flex items-center justify-center shrink-0">
+        <div className="glass-panel rounded-[2rem] p-5 sm:p-8 shadow-2xl">
+          <div className="flex items-start gap-3 sm:gap-4 mb-6">
+            <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-secondary/15 flex items-center justify-center shrink-0">
               <Icone name="mail" className="text-secondary text-2xl" />
             </div>
-            <div>
-              <h1 className="text-2xl font-headline font-bold text-on-surface">
+            <div className="min-w-0">
+              <h1 className="text-xl sm:text-2xl font-headline font-bold text-on-surface">
                 Acesso somente por convite
               </h1>
               <p className="text-on-surface-variant text-sm mt-2 leading-relaxed">

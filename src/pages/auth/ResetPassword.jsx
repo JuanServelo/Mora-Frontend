@@ -62,7 +62,7 @@ export function ResetPassword() {
   if (!token) {
     return (
       <div className="min-h-screen flex items-center justify-center px-4">
-        <div className="glass-panel max-w-sm w-full rounded-[2rem] p-8 text-center">
+        <div className="glass-panel max-w-sm w-full rounded-[2rem] p-6 sm:p-8 text-center">
           <Icone name="error" className="text-error text-4xl mb-4" />
           <p className="text-on-surface font-semibold mb-2">Link inválido</p>
           <p className="text-on-surface-variant text-sm mb-6">
@@ -78,7 +78,7 @@ export function ResetPassword() {
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 py-8">
-      <div className="glass-panel w-full max-w-sm rounded-[2rem] p-8 shadow-2xl">
+      <div className="glass-panel w-full max-w-sm rounded-[2rem] p-6 sm:p-8 shadow-2xl">
         <div className="mb-6">
           <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
             <Icone name="lock_reset" className="text-primary text-2xl" />

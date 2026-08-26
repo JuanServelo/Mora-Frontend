@@ -110,14 +110,14 @@ export function GerenciarReclamacoes() {
 
   if (carregando) {
     return (
-      <div className="min-h-screen w-full pt-4 pb-20 px-6">
+      <div className="min-h-screen w-full pt-4 pb-20 px-4 sm:px-6">
         <div className="max-w-6xl mx-auto py-20 text-center text-on-surface-variant text-sm">Carregando…</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen w-full pt-4 pb-20 px-6">
+    <div className="min-h-screen w-full pt-4 pb-20 px-4 sm:px-6">
       <div className="max-w-6xl mx-auto space-y-8">
         {/* Header */}
         <header className="flex flex-col md:flex-row md:items-end justify-between gap-4">
@@ -125,7 +125,7 @@ export function GerenciarReclamacoes() {
             <p className="text-on-surface-variant text-xs font-semibold uppercase tracking-widest mb-1">
               Painel Administrativo
             </p>
-            <h1 className="font-headline text-4xl font-extrabold tracking-tight text-on-surface">
+            <h1 className="font-headline text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-on-surface">
               Gestão de{" "}
               <span className="bg-gradient-to-r from-primary to-tertiary bg-clip-text text-transparent">
                 Reclamações
@@ -135,7 +135,7 @@ export function GerenciarReclamacoes() {
         </header>
 
         {/* Cards resumo */}
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
           {[
             { s: "PENDENTE", label: "Pendentes", icon: "schedule", cor: "text-tertiary bg-tertiary/10" },
             { s: "EM_ANALISE", label: "Em Análise", icon: "manage_search", cor: "text-primary bg-primary/10" },
@@ -148,7 +148,7 @@ export function GerenciarReclamacoes() {
                 filtroStatus === s ? "ring-2 ring-primary/40" : ""
               }`}
             >
-              <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${cor}`}>
+              <div className={`w-10 h-10 shrink-0 rounded-xl flex items-center justify-center ${cor}`}>
                 <Icone name={icon} className="text-xl" />
               </div>
               <div className="text-left">
@@ -181,25 +181,26 @@ export function GerenciarReclamacoes() {
             <div key={rec.id} className="glass-panel rounded-2xl overflow-hidden">
               {/* Cabeçalho */}
               <button
-                className="w-full flex items-center justify-between px-6 py-4 text-left cursor-pointer hover:bg-white/5 transition-all"
+                className="w-full flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 sm:px-6 py-4 text-left cursor-pointer hover:bg-white/5 transition-all"
                 onClick={() =>
                   setExpandido(expandido === rec.id ? null : rec.id)
                 }
               >
-                <div className="flex items-center gap-4">
-                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${statusColor(rec.status)}`}>
+                <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+                  <div className={`w-10 h-10 shrink-0 rounded-xl flex items-center justify-center ${statusColor(rec.status)}`}>
                     <Icone name={statusIcon(rec.status)} className="text-xl" />
                   </div>
-                  <div>
-                    <div className="flex items-center gap-2">
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-x-2">
                       <p className="font-semibold text-on-surface">{catLabel(rec.category)}</p>
                       <span className="text-xs text-on-surface-variant font-mono">{rec.protocolNumber}</span>
                     </div>
-                    <p className="text-xs text-on-surface-variant line-clamp-1 max-w-md">{rec.description}</p>
+                    <p className="text-xs text-on-surface-variant line-clamp-1 max-w-full sm:max-w-md">{rec.description}</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-3">
-                  <span className={`text-xs font-semibold px-3 py-1 rounded-full ${statusColor(rec.status)}`}>
+                <div className="flex items-center justify-between sm:justify-end gap-3 shrink-0">
+                  <span
+                    className={`text-xs font-semibold px-3 py-1 rounded-full ${statusColor(rec.status)}`}>
                     {rec.status.replace("_", " ")}
                   </span>
                   <Icone
@@ -211,9 +212,9 @@ export function GerenciarReclamacoes() {
 
               {/* Detalhes expandidos */}
               {expandido === rec.id && (
-                <div className="px-6 pb-5 border-t border-white/5 pt-4 space-y-5">
+                <div className="px-4 sm:px-6 pb-5 border-t border-white/5 pt-4 space-y-5">
                   {/* Info */}
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
                     <div className="bg-surface-container-highest/30 rounded-xl p-3">
                       <p className="text-xs text-on-surface-variant mb-1">Morador</p>
                       <p className="text-sm font-semibold text-on-surface">
@@ -317,7 +318,7 @@ export function GerenciarReclamacoes() {
           ))}
 
           {recFiltradas.length === 0 && (
-            <div className="glass-panel rounded-2xl py-16 flex flex-col items-center gap-3 text-on-surface-variant">
+            <div className="glass-panel rounded-2xl py-12 sm:py-16 px-4 text-center flex flex-col items-center gap-3 text-on-surface-variant">
               <Icone name="inbox" className="text-5xl opacity-30" />
               <p className="text-sm">Nenhuma reclamação encontrada.</p>
             </div>

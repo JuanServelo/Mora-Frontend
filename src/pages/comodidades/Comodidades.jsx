@@ -29,14 +29,14 @@ export function Comodidades() {
   }, []);
 
   return (
-    <div className="min-h-screen w-full pt-4 pb-20 px-6">
-      <div className="max-w-6xl mx-auto space-y-10">
+    <div className="min-h-screen w-full pt-4 pb-20 px-4 sm:px-6">
+      <div className="max-w-6xl mx-auto space-y-8 sm:space-y-10">
         <header className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
           <div>
             <p className="text-on-surface-variant text-xs font-semibold uppercase tracking-widest mb-1">
               Lazer e bem-estar
             </p>
-            <h1 className="font-headline text-4xl font-extrabold tracking-tight text-on-surface">
+            <h1 className="font-headline text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-on-surface">
               Comodidades{" "}
               <span className="bg-gradient-to-r from-primary to-tertiary bg-clip-text text-transparent">
                 do condomínio
@@ -63,7 +63,7 @@ export function Comodidades() {
           {itens.map((c) => (
             <article
               key={c.titulo}
-              className="group glass-panel rounded-3xl p-5 border border-outline-variant/10 hover:border-tertiary/30 transition-all duration-300 flex flex-col"
+              className="group glass-panel rounded-3xl p-4 sm:p-5 border border-outline-variant/10 hover:border-tertiary/30 transition-all duration-300 flex flex-col"
             >
               <div className="flex items-center justify-between mb-4">
                 <div className="w-11 h-11 rounded-xl bg-tertiary/10 flex items-center justify-center group-hover:bg-tertiary/20 transition-colors">
@@ -85,7 +85,7 @@ export function Comodidades() {
           </div>
         )}
 
-        <section className="glass-panel rounded-[2rem] p-8 md:p-10 border border-white/5">
+        <section className="glass-panel rounded-[2rem] p-5 sm:p-8 md:p-10 border border-white/5">
           <div className="flex flex-col md:flex-row gap-8 md:items-center">
             <div className="flex-1 space-y-3">
               <h3 className="font-headline text-xl font-bold text-on-surface">
@@ -95,7 +95,7 @@ export function Comodidades() {
                 Horários e normas de uso seguem o regimento interno e deliberações da assembleia.
               </p>
             </div>
-            <div className="flex gap-3 flex-wrap md:justify-end">
+            <div className="flex flex-wrap gap-3 md:justify-end">
               <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-surface-container-highest/50 text-sm text-on-surface-variant">
                 <Icone name="schedule" className="text-primary" />
                 Portaria / regulamento
