@@ -57,7 +57,7 @@ export function Inicio() {
   }
 
   return (
-    <div className="min-h-screen w-full pt-4 pb-20 px-6">
+    <div className="min-h-screen w-full pt-4 pb-20 px-4 sm:px-6">
       <div className="max-w-6xl mx-auto space-y-10">
         <header className="text-center max-w-3xl mx-auto">
           <p className="text-on-surface-variant text-xs font-semibold uppercase tracking-widest mb-2">
@@ -85,7 +85,7 @@ export function Inicio() {
               {avisos.map((a) => (
                 <div key={a.id} className="glass-panel rounded-2xl p-5 border border-primary/15">
                   <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                    <div className="w-10 h-10 shrink-0 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
                       <Icone name="campaign" className="text-primary" />
                     </div>
                     <div className="flex-1 min-w-0">
@@ -126,7 +126,7 @@ export function Inicio() {
               className="glass-panel rounded-3xl p-6 border border-white/5 hover:border-primary/20 transition-colors"
             >
               <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                <div className="w-10 h-10 shrink-0 rounded-xl bg-primary/10 flex items-center justify-center">
                   <Icone name={c.icon} className="text-primary text-xl" />
                 </div>
                 <span className="text-on-surface-variant text-xs font-semibold uppercase tracking-wider">

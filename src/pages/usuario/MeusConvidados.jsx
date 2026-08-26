@@ -57,8 +57,8 @@ function CartaoConvidado({ guest, onToggle, alterando }) {
       </div>
 
       {/* Controle de permissão */}
-      <div className="flex items-center justify-between pt-1 border-t border-outline-variant/10">
-        <div>
+      <div className="flex items-center justify-between gap-3 pt-1 border-t border-outline-variant/10">
+        <div className="min-w-0">
           <p className="text-sm font-semibold text-on-surface">
             Permissão de entrada
           </p>
@@ -132,7 +132,7 @@ export function MeusConvidados() {
   const podeGerenciar = usuario?.responsavelFinanceiro || usuario?.perfil === "MORADOR";
 
   return (
-    <div className="min-h-screen w-full pt-4 pb-20 px-6">
+    <div className="min-h-screen w-full pt-4 pb-20 px-4 sm:px-6">
       <div className="max-w-3xl mx-auto space-y-8">
 
         {/* Header */}
@@ -140,7 +140,7 @@ export function MeusConvidados() {
           <p className="text-on-surface-variant text-xs font-semibold uppercase tracking-widest mb-1">
             Minha Unidade
           </p>
-          <h1 className="font-headline text-4xl font-extrabold tracking-tight text-on-surface">
+          <h1 className="font-headline text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-on-surface">
             Meus{" "}
             <span className="bg-gradient-to-r from-primary to-tertiary bg-clip-text text-transparent">
               Convidados
@@ -166,11 +166,11 @@ export function MeusConvidados() {
 
         {/* Lista */}
         {carregando ? (
-          <div className="glass-panel rounded-3xl p-10 text-center text-on-surface-variant">
+          <div className="glass-panel rounded-3xl p-6 sm:p-10 text-center text-on-surface-variant">
             Carregando convidados...
           </div>
         ) : guests.length === 0 ? (
-          <div className="glass-panel rounded-3xl p-10 text-center space-y-3">
+          <div className="glass-panel rounded-3xl p-6 sm:p-10 text-center space-y-3">
             <Icone name="person_outline" className="text-4xl text-on-surface-variant mx-auto block" />
             <p className="text-on-surface-variant">Você não possui convidados cadastrados.</p>
             <p className="text-xs text-on-surface-variant">

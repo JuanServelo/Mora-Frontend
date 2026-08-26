@@ -219,7 +219,7 @@ export function GerenciarPlanos() {
 
   // ─── render ───────────────────────────────
   return (
-    <div className="min-h-screen w-full pt-4 pb-20 px-6">
+    <div className="min-h-screen w-full pt-4 pb-20 px-4 sm:px-6">
       <div className="max-w-6xl mx-auto space-y-8">
         {/* Header */}
         <header className="flex flex-col md:flex-row md:items-end justify-between gap-4">
@@ -227,7 +227,7 @@ export function GerenciarPlanos() {
             <p className="text-on-surface-variant text-xs font-semibold uppercase tracking-widest mb-1">
               Super Admin
             </p>
-            <h1 className="font-headline text-4xl font-extrabold tracking-tight text-on-surface">
+            <h1 className="font-headline text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-on-surface">
               Gestão de{" "}
               <span className="bg-gradient-to-r from-primary to-tertiary bg-clip-text text-transparent">
                 Planos SaaS
@@ -237,7 +237,7 @@ export function GerenciarPlanos() {
         </header>
 
         {/* Toolbar */}
-        <div className="glass-panel rounded-3xl p-6 space-y-4">
+        <div className="glass-panel rounded-3xl p-4 sm:p-6 space-y-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-3">
               <span className="p-2.5 rounded-xl bg-primary/10 text-primary">
@@ -291,9 +291,9 @@ export function GerenciarPlanos() {
             <form
               id="form-plan-topo"
               onSubmit={salvarPlano}
-              className="bg-surface-container-highest/20 rounded-2xl p-5 space-y-5 border border-white/10"
+              className="bg-surface-container-highest/20 rounded-2xl p-4 sm:p-5 space-y-5 border border-white/10"
             >
-              <div className="flex items-center justify-between border-b border-white/5 pb-3">
+              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/5 pb-3">
                 <h3 className="font-semibold text-on-surface text-sm flex items-center gap-2">
                   <Icone
                     name={editandoId ? "edit" : "add_circle"}
@@ -397,7 +397,7 @@ export function GerenciarPlanos() {
 
               {/* Seleção de Módulos */}
               <div className="space-y-3">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-wrap items-center justify-between gap-2">
                   <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant ml-1">
                     Módulos Ativos
                   </label>
@@ -597,7 +597,7 @@ export function GerenciarPlanos() {
                   </div>
 
                   {/* Footer do card */}
-                  <div className="flex items-center justify-between gap-2 px-4 py-3 border-t border-white/5 bg-white/2">
+                  <div className="flex flex-wrap items-center justify-between gap-2 px-4 py-3 border-t border-white/5 bg-white/2">
                     <span className="text-[9px] text-on-surface-variant/50 font-medium">
                       Criado: {fmtData(plano.createdAt)}
                     </span>
@@ -650,7 +650,7 @@ export function GerenciarPlanos() {
                   {/* Painel de detalhes expandido */}
                   {detalhe?.id === plano.id && (
                     <div className="px-4 pb-4 pt-1 space-y-3 border-t border-white/5 bg-white/2">
-                      <div className="grid grid-cols-2 gap-3">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
                           <p className="text-[9px] text-on-surface-variant uppercase tracking-wider font-semibold mb-0.5">
                             Nome

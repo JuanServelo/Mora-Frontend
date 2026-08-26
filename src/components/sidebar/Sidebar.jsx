@@ -1,4 +1,5 @@
 // src/components/sidebar/Sidebar.jsx
+import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Icone } from "../icones/Icone";
 import { useAuth } from "../../contexts/AuthContext";
@@ -20,6 +21,34 @@ export function Sidebar() {
   const { pathname } = useLocation();
   const { usuario, logout } = useAuth();
   const navigate = useNavigate();
+  const [aberta, setAberta] = useState(false);
+  const [rotaAnterior, setRotaAnterior] = useState(pathname);
+
+  // Fecha o drawer ao trocar de rota (inclusive via voltar/avancar do navegador)
+  if (rotaAnterior !== pathname) {
+    setRotaAnterior(pathname);
+    setAberta(false);
+  }
+
+  // Trava o scroll do body enquanto o drawer esta aberto
+  useEffect(() => {
+    if (!aberta) return;
+    const anterior = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = anterior;
+    };
+  }, [aberta]);
+
+  // Fecha com Esc
+  useEffect(() => {
+    if (!aberta) return;
+    function handleKey(e) {
+      if (e.key === "Escape") setAberta(false);
+    }
+    document.addEventListener("keydown", handleKey);
+    return () => document.removeEventListener("keydown", handleKey);
+  }, [aberta]);
 
   const perfil = usuario?.perfil;
   const isDoorman = perfil === PERFIS.PORTEIRO;
@@ -38,18 +67,59 @@ export function Sidebar() {
     navigate("/login");
   }
 
+  const painelStyle = {
+    background: "rgba(255,255,255,0.04)",
+    borderRight: "1px solid rgba(255,255,255,0.08)",
+    backdropFilter: "blur(32px)",
+  };
+
   return (
-    <aside
-      className="fixed top-0 left-0 h-screen w-64 flex flex-col z-50"
-      style={{ background: "rgba(255,255,255,0.04)", borderRight: "1px solid rgba(255,255,255,0.08)", backdropFilter: "blur(32px)" }}
-    >
+    <>
+      {/* Barra superior — so no mobile, abre o drawer */}
+      <header
+        className="lg:hidden fixed top-0 left-0 right-0 h-14 z-40 flex items-center gap-3 px-4"
+        style={{ background: "rgba(20,18,24,0.92)", borderBottom: "1px solid rgba(255,255,255,0.08)", backdropFilter: "blur(24px)" }}
+      >
+        <button
+          onClick={() => setAberta(true)}
+          aria-label="Abrir menu"
+          aria-expanded={aberta}
+          className="w-9 h-9 shrink-0 rounded-xl flex items-center justify-center text-on-surface-variant hover:text-primary hover:bg-primary/10 transition-all cursor-pointer"
+        >
+          <Icone name="menu" className="text-xl" />
+        </button>
+        <img src={moraLogo3} alt="Mora" className="h-6 w-auto" />
+        <p className="text-sm font-bold text-on-surface truncate">{subtitulo}</p>
+      </header>
+
+      {/* Backdrop do drawer */}
+      {aberta && (
+        <div
+          className="lg:hidden fixed inset-0 z-40 bg-black/60 backdrop-blur-sm"
+          onClick={() => setAberta(false)}
+          aria-hidden="true"
+        />
+      )}
+
+      <aside
+        className={`fixed top-0 left-0 h-screen w-64 max-w-[85vw] flex flex-col z-50 transition-transform duration-300 ease-in-out
+          lg:translate-x-0 ${aberta ? "translate-x-0" : "-translate-x-full"}`}
+        style={painelStyle}
+      >
       {/* Logo */}
       <div className="flex items-center gap-3 px-5 py-4 border-b border-white/5">
-        <img src={moraLogo3} alt="Mora" className="h-7 w-auto" />
-        <div>
+        <img src={moraLogo3} alt="Mora" className="h-7 w-auto shrink-0" />
+        <div className="min-w-0">
           <p className="text-[10px] font-semibold uppercase tracking-widest text-on-surface-variant">Painel</p>
-          <p className="text-sm font-bold text-on-surface leading-tight">{subtitulo}</p>
+          <p className="text-sm font-bold text-on-surface leading-tight truncate">{subtitulo}</p>
         </div>
+        <button
+          onClick={() => setAberta(false)}
+          aria-label="Fechar menu"
+          className="lg:hidden ml-auto w-8 h-8 shrink-0 rounded-lg flex items-center justify-center text-on-surface-variant hover:text-primary hover:bg-primary/10 transition-all cursor-pointer"
+        >
+          <Icone name="close" className="text-lg" />
+        </button>
       </div>
 
       {/* Links */}
@@ -100,7 +170,8 @@ export function Sidebar() {
           </div>
           <span className="text-sm font-semibold">Sair</span>
         </button>
-      </div>
-    </aside>
+        </div>
+      </aside>
+    </>
   );
 }

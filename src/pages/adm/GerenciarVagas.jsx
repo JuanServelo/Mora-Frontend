@@ -102,7 +102,7 @@ export function GerenciarVagas() {
   };
 
   return (
-    <div className="min-h-screen w-full pt-4 pb-20 px-6">
+    <div className="min-h-screen w-full pt-4 pb-20 px-4 sm:px-6">
       <div className="max-w-6xl mx-auto space-y-8">
         {/* Header */}
         <header className="flex flex-col md:flex-row md:items-end justify-between gap-4">
@@ -110,7 +110,7 @@ export function GerenciarVagas() {
             <p className="text-on-surface-variant text-xs font-semibold uppercase tracking-widest mb-1">
               Painel Administrativo
             </p>
-            <h1 className="font-headline text-4xl font-extrabold tracking-tight text-on-surface">
+            <h1 className="font-headline text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-on-surface">
               Vagas de{" "}
               <span className="bg-gradient-to-r from-primary to-tertiary bg-clip-text text-transparent">
                 Garagem
@@ -127,7 +127,7 @@ export function GerenciarVagas() {
         </header>
 
         {/* Cards resumo */}
-        <div className="grid grid-cols-2 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {[
             { id: "ativa", label: "Ativas", color: "primary", icon: "check_circle" },
             { id: "inativa", label: "Inativas", color: "error", icon: "block" },
@@ -230,8 +230,8 @@ export function GerenciarVagas() {
         )}
 
         {/* Busca */}
-        <div className="flex gap-3 items-center">
-          <div className="relative flex-1 max-w-sm">
+        <div className="flex flex-wrap gap-3 items-center">
+          <div className="relative flex-1 min-w-[200px] sm:max-w-sm">
             <Icone name="search" className="absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant text-lg pointer-events-none" />
             <input
               type="text"
@@ -259,10 +259,10 @@ export function GerenciarVagas() {
             const cfg = statusConfig[vaga.ativa];
             const apartamento = apartamentos.find(apt => apt.id === vaga.apartamentoId);
             return (
-              <div key={vaga.id} className="glass-panel rounded-2xl p-5 space-y-4 flex flex-col">
+              <div key={vaga.id} className="glass-panel rounded-2xl p-4 sm:p-5 space-y-4 flex flex-col">
                 {/* Ícone + Status */}
                 <div className="flex items-start justify-between">
-                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${cfg.color}`}>
+                  <div className={`w-10 h-10 shrink-0 rounded-xl flex items-center justify-center ${cfg.color}`}>
                     <Icone name={cfg.icon} className="text-xl" />
                   </div>
                   <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${cfg.color}`}>
@@ -306,7 +306,7 @@ export function GerenciarVagas() {
         </div>
 
         {vagasFiltradas.length === 0 && !carregando && (
-          <div className="glass-panel rounded-2xl py-16 flex flex-col items-center gap-3 text-on-surface-variant">
+          <div className="glass-panel rounded-2xl py-12 sm:py-16 px-4 text-center flex flex-col items-center gap-3 text-on-surface-variant">
             <Icone name="local_parking" className="text-5xl opacity-30" />
             <p className="text-sm">Nenhuma vaga encontrada.</p>
           </div>

@@ -58,7 +58,7 @@ export function GerenciarPerfis() {
   const perfisAba = perfisPorCategoria[aba] || [];
 
   return (
-    <div className="min-h-screen w-full pt-4 pb-20 px-6">
+    <div className="min-h-screen w-full pt-4 pb-20 px-4 sm:px-6">
       <div className="max-w-6xl mx-auto space-y-8">
 
         {/* Header */}
@@ -67,7 +67,7 @@ export function GerenciarPerfis() {
             <p className="text-on-surface-variant text-xs font-semibold uppercase tracking-widest mb-1">
               Painel Administrativo
             </p>
-            <h1 className="font-headline text-4xl font-extrabold tracking-tight text-on-surface">
+            <h1 className="font-headline text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-on-surface">
               Gerenciar{" "}
               <span className="bg-gradient-to-r from-primary to-tertiary bg-clip-text text-transparent">
                 Perfis
@@ -93,12 +93,12 @@ export function GerenciarPerfis() {
 
         {/* Sub-navbar de abas */}
         {!abaMatriz && (
-          <div className="glass-panel rounded-2xl p-1.5 flex gap-1 w-fit">
+          <div className="glass-panel rounded-2xl p-1.5 flex flex-wrap gap-1 w-full sm:w-fit">
             {CATEGORIAS.map((cat) => (
               <button
                 key={cat}
                 onClick={() => setAba(cat)}
-                className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 cursor-pointer ${
+                className={`flex items-center gap-2 px-3 sm:px-5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 cursor-pointer ${
                   aba === cat
                     ? "bg-primary/15 text-primary"
                     : "text-on-surface-variant hover:text-on-surface hover:bg-white/5"
@@ -127,7 +127,7 @@ export function GerenciarPerfis() {
             )}
 
             {!carregando && perfisAba.length === 0 && (
-              <div className="glass-panel rounded-3xl p-10 text-center text-on-surface-variant">
+              <div className="glass-panel rounded-3xl p-6 sm:p-10 text-center text-on-surface-variant">
                 Nenhum perfil encontrado nesta categoria.
               </div>
             )}
@@ -264,17 +264,18 @@ function MatrizAcesso() {
   };
 
   return (
-    <div className="glass-panel rounded-3xl p-6 overflow-x-auto">
+    <div className="glass-panel rounded-3xl p-4 sm:p-6">
       <div className="flex items-center gap-3 mb-6">
-        <div className="w-10 h-10 rounded-xl bg-tertiary/10 flex items-center justify-center">
+        <div className="w-10 h-10 shrink-0 rounded-xl bg-tertiary/10 flex items-center justify-center">
           <Icone name="grid_on" className="text-tertiary" />
         </div>
-        <div>
+        <div className="min-w-0">
           <h2 className="font-headline text-lg font-bold text-on-surface">Matriz de Acesso ao Admin</h2>
           <p className="text-on-surface-variant text-sm">Quais perfis acessam cada aba administrativa</p>
         </div>
       </div>
 
+      <div className="-mx-4 sm:mx-0 px-4 sm:px-0 overflow-x-auto">
       <table className="w-full text-sm border-separate border-spacing-y-1">
         <thead>
           <tr>
@@ -317,6 +318,7 @@ function MatrizAcesso() {
           ))}
         </tbody>
       </table>
+      </div>
 
       {/* Perfis de nível unidade */}
       <div className="mt-6 pt-5 border-t border-outline-variant/15">

@@ -44,8 +44,8 @@ export function GerenciarEstruturas() {
 
   if (!condominioId) {
     return (
-      <div className="min-h-screen w-full pt-4 pb-20 px-6 flex items-center justify-center">
-        <div className="glass-panel rounded-3xl p-10 text-center max-w-md">
+      <div className="min-h-screen w-full pt-4 pb-20 px-4 sm:px-6 flex items-center justify-center">
+        <div className="glass-panel rounded-3xl p-6 sm:p-10 text-center max-w-md">
           <Icone name="domain" className="text-primary text-4xl mb-4" />
           <h2 className="font-headline text-xl font-bold text-on-surface mb-2">Nenhum cliente encontrado</h2>
           <p className="text-on-surface-variant text-sm">Crie um cliente em <strong>Clientes</strong> antes de gerenciar estruturas.</p>
@@ -55,7 +55,7 @@ export function GerenciarEstruturas() {
   }
 
   return (
-    <div className="min-h-screen w-full pt-4 pb-20 px-6">
+    <div className="min-h-screen w-full pt-4 pb-20 px-4 sm:px-6">
       <div className="max-w-6xl mx-auto space-y-8">
         {/* Header */}
         <header className="flex flex-col md:flex-row md:items-end justify-between gap-4">
@@ -63,7 +63,7 @@ export function GerenciarEstruturas() {
             <p className="text-on-surface-variant text-xs font-semibold uppercase tracking-widest mb-1">
               Painel Administrativo
             </p>
-            <h1 className="font-headline text-4xl font-extrabold tracking-tight text-on-surface">
+            <h1 className="font-headline text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-on-surface">
               Estruturas{" "}
               <span className="bg-gradient-to-r from-primary to-tertiary bg-clip-text text-transparent">
                 Físicas
@@ -105,7 +105,7 @@ export function GerenciarEstruturas() {
         </div>
 
         {/* Sub-navbar de abas */}
-        <div className="glass-panel rounded-2xl p-1.5 flex gap-1 w-fit flex-wrap">
+        <div className="glass-panel rounded-2xl p-1.5 flex flex-wrap gap-1 w-full sm:w-fit">
           {[
             { id: "blocos", label: "Blocos & Apartamentos", icon: "apartment" },
             { id: "areas-comuns", label: "Áreas Comuns", icon: "pool" },
@@ -114,7 +114,7 @@ export function GerenciarEstruturas() {
             <button
               key={tab.id}
               onClick={() => setAba(tab.id)}
-              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 cursor-pointer ${
+              className={`flex items-center gap-2 px-3 sm:px-5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 cursor-pointer ${
                 aba === tab.id
                   ? "bg-primary/15 text-primary"
                   : "text-on-surface-variant hover:text-on-surface hover:bg-white/5"
@@ -222,16 +222,16 @@ function AbaBlocos({ condominioId }) {
     <>
       {/* Stats + botão */}
       <div className="flex items-center justify-between gap-4 flex-wrap">
-        <div className="flex gap-3 flex-wrap">
-          <div className="glass-panel rounded-2xl px-5 py-3 text-center">
+        <div className="flex flex-wrap gap-3 w-full sm:w-auto">
+          <div className="glass-panel rounded-2xl px-4 sm:px-5 py-3 text-center flex-1 sm:flex-none min-w-[92px]">
             <p className="text-2xl font-headline font-bold text-on-surface">{blocos.length}</p>
             <p className="text-on-surface-variant text-xs uppercase tracking-wider">Total</p>
           </div>
-          <div className="glass-panel rounded-2xl px-5 py-3 text-center">
+          <div className="glass-panel rounded-2xl px-4 sm:px-5 py-3 text-center flex-1 sm:flex-none min-w-[92px]">
             <p className="text-2xl font-headline font-bold text-primary">{blocos.filter((b) => b.ativo).length}</p>
             <p className="text-on-surface-variant text-xs uppercase tracking-wider">Ativos</p>
           </div>
-          <div className="glass-panel rounded-2xl px-5 py-3 text-center">
+          <div className="glass-panel rounded-2xl px-4 sm:px-5 py-3 text-center flex-1 sm:flex-none min-w-[92px]">
             <p className="text-2xl font-headline font-bold text-error">{blocos.filter((b) => !b.ativo).length}</p>
             <p className="text-on-surface-variant text-xs uppercase tracking-wider">Inativos</p>
           </div>
@@ -249,9 +249,9 @@ function AbaBlocos({ condominioId }) {
 
       {/* Form novo bloco */}
       {criando && (
-        <div className="glass-panel rounded-3xl p-6 lg:p-8 border border-primary/15">
+        <div className="glass-panel rounded-3xl p-4 sm:p-6 lg:p-8 border border-primary/15">
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+            <div className="w-10 h-10 shrink-0 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
               <Icone name="apartment" className="text-primary" />
             </div>
             <h2 className="font-headline text-xl font-bold text-on-surface">Novo Bloco</h2>
@@ -273,17 +273,17 @@ function AbaBlocos({ condominioId }) {
 
       {/* Lista */}
       {carregando ? (
-        <div className="glass-panel rounded-3xl p-10 text-center text-on-surface-variant">Carregando...</div>
+        <div className="glass-panel rounded-3xl p-6 sm:p-10 text-center text-on-surface-variant">Carregando...</div>
       ) : (
         <div className="space-y-3">
           {filtrados.length === 0 && (
-            <div className="glass-panel rounded-3xl p-10 text-center text-on-surface-variant">Nenhum bloco encontrado.</div>
+            <div className="glass-panel rounded-3xl p-6 sm:p-10 text-center text-on-surface-variant">Nenhum bloco encontrado.</div>
           )}
           {filtrados.map((bloco) => (
             <div key={bloco.id} className="glass-panel rounded-3xl overflow-hidden">
               <button
                 onClick={() => setBlocoSelecionado(bloco)}
-                className="w-full flex items-center gap-4 p-5 text-left hover:bg-white/5 transition-all cursor-pointer"
+                className="w-full flex items-center gap-3 sm:gap-4 p-4 sm:p-5 text-left hover:bg-white/5 transition-all cursor-pointer"
               >
                 <div className="w-11 h-11 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
                   <Icone name="apartment" className="text-primary" />
@@ -362,7 +362,7 @@ function FormBloco({ inicial, onSalvar, onCancelar }) {
 function DetalhesBloco({ bloco, onEditar, onToggleAtivo }) {
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {[
           { label: "Nome", value: bloco.nome },
           { label: "Sigla", value: bloco.sigla || "—" },
@@ -376,7 +376,7 @@ function DetalhesBloco({ bloco, onEditar, onToggleAtivo }) {
           </div>
         ))}
       </div>
-      <div className="flex gap-3 pt-1">
+      <div className="flex flex-col sm:flex-row gap-3 pt-1">
         <button onClick={onEditar} className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-primary/30 text-primary hover:bg-primary/10 text-sm font-semibold transition-all cursor-pointer">
           <Icone name="edit" className="text-lg" /> Editar
         </button>
@@ -509,12 +509,12 @@ function VistaApartamentos({ bloco, condominioId, onVoltar, onEditarBloco, onTog
 
       {/* Stats + novo apartamento */}
       <div className="flex items-center justify-between gap-4 flex-wrap">
-        <div className="flex gap-3 flex-wrap">
-          <div className="glass-panel rounded-2xl px-5 py-3 text-center">
+        <div className="flex flex-wrap gap-3 w-full sm:w-auto">
+          <div className="glass-panel rounded-2xl px-4 sm:px-5 py-3 text-center flex-1 sm:flex-none min-w-[92px]">
             <p className="text-2xl font-headline font-bold text-on-surface">{apartamentos.length}</p>
             <p className="text-on-surface-variant text-xs uppercase tracking-wider">Apartamentos</p>
           </div>
-          <div className="glass-panel rounded-2xl px-5 py-3 text-center">
+          <div className="glass-panel rounded-2xl px-4 sm:px-5 py-3 text-center flex-1 sm:flex-none min-w-[92px]">
             <p className="text-2xl font-headline font-bold text-primary">{apartamentos.filter((a) => a.ativo).length}</p>
             <p className="text-on-surface-variant text-xs uppercase tracking-wider">Ativos</p>
           </div>
@@ -531,9 +531,9 @@ function VistaApartamentos({ bloco, condominioId, onVoltar, onEditarBloco, onTog
       </div>
 
       {criando && (
-        <div className="glass-panel rounded-3xl p-6 lg:p-8 border border-primary/15">
+        <div className="glass-panel rounded-3xl p-4 sm:p-6 lg:p-8 border border-primary/15">
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+            <div className="w-10 h-10 shrink-0 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
               <Icone name="door_front" className="text-primary" />
             </div>
             <h2 className="font-headline text-xl font-bold text-on-surface">Novo Apartamento em {bloco.nome}</h2>
@@ -549,17 +549,17 @@ function VistaApartamentos({ bloco, condominioId, onVoltar, onEditarBloco, onTog
 
       {/* Lista de apartamentos */}
       {carregando ? (
-        <div className="glass-panel rounded-3xl p-10 text-center text-on-surface-variant">Carregando...</div>
+        <div className="glass-panel rounded-3xl p-6 sm:p-10 text-center text-on-surface-variant">Carregando...</div>
       ) : (
         <div className="space-y-3">
           {apartamentos.length === 0 && (
-            <div className="glass-panel rounded-3xl p-10 text-center text-on-surface-variant">Nenhum apartamento neste bloco ainda.</div>
+            <div className="glass-panel rounded-3xl p-6 sm:p-10 text-center text-on-surface-variant">Nenhum apartamento neste bloco ainda.</div>
           )}
           {apartamentos.map((apt) => (
             <div key={apt.id} className="glass-panel rounded-3xl overflow-hidden">
               <button
                 onClick={() => { setExpandido((p) => (p === apt.id ? null : apt.id)); setEditando(null); }}
-                className="w-full flex items-center gap-4 p-5 text-left hover:bg-white/5 transition-all cursor-pointer"
+                className="w-full flex items-center gap-3 sm:gap-4 p-4 sm:p-5 text-left hover:bg-white/5 transition-all cursor-pointer"
               >
                 <div className="w-11 h-11 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
                   <Icone name="door_front" className="text-primary" />
@@ -831,16 +831,16 @@ function AbaApartamentos({ condominioId }) {
     <>
       {/* Stats + botão */}
       <div className="flex items-center justify-between gap-4 flex-wrap">
-        <div className="flex gap-3 flex-wrap">
-          <div className="glass-panel rounded-2xl px-5 py-3 text-center">
+        <div className="flex flex-wrap gap-3 w-full sm:w-auto">
+          <div className="glass-panel rounded-2xl px-4 sm:px-5 py-3 text-center flex-1 sm:flex-none min-w-[92px]">
             <p className="text-2xl font-headline font-bold text-on-surface">{apartamentos.length}</p>
             <p className="text-on-surface-variant text-xs uppercase tracking-wider">Total</p>
           </div>
-          <div className="glass-panel rounded-2xl px-5 py-3 text-center">
+          <div className="glass-panel rounded-2xl px-4 sm:px-5 py-3 text-center flex-1 sm:flex-none min-w-[92px]">
             <p className="text-2xl font-headline font-bold text-primary">{apartamentos.filter((a) => a.ativo).length}</p>
             <p className="text-on-surface-variant text-xs uppercase tracking-wider">Ativos</p>
           </div>
-          <div className="glass-panel rounded-2xl px-5 py-3 text-center">
+          <div className="glass-panel rounded-2xl px-4 sm:px-5 py-3 text-center flex-1 sm:flex-none min-w-[92px]">
             <p className="text-2xl font-headline font-bold text-error">{apartamentos.filter((a) => !a.ativo).length}</p>
             <p className="text-on-surface-variant text-xs uppercase tracking-wider">Inativos</p>
           </div>
@@ -858,9 +858,9 @@ function AbaApartamentos({ condominioId }) {
 
       {/* Form novo apartamento */}
       {criando && (
-        <div className="glass-panel rounded-3xl p-6 lg:p-8 border border-primary/15">
+        <div className="glass-panel rounded-3xl p-4 sm:p-6 lg:p-8 border border-primary/15">
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+            <div className="w-10 h-10 shrink-0 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
               <Icone name="door_front" className="text-primary" />
             </div>
             <h2 className="font-headline text-xl font-bold text-on-surface">Novo Apartamento</h2>
@@ -896,17 +896,17 @@ function AbaApartamentos({ condominioId }) {
 
       {/* Lista */}
       {carregando ? (
-        <div className="glass-panel rounded-3xl p-10 text-center text-on-surface-variant">Carregando...</div>
+        <div className="glass-panel rounded-3xl p-6 sm:p-10 text-center text-on-surface-variant">Carregando...</div>
       ) : (
         <div className="space-y-3">
           {filtrados.length === 0 && (
-            <div className="glass-panel rounded-3xl p-10 text-center text-on-surface-variant">Nenhum apartamento encontrado.</div>
+            <div className="glass-panel rounded-3xl p-6 sm:p-10 text-center text-on-surface-variant">Nenhum apartamento encontrado.</div>
           )}
           {filtrados.map((apt) => (
             <div key={apt.id} className="glass-panel rounded-3xl overflow-hidden">
               <button
                 onClick={() => { setExpandido((p) => (p === apt.id ? null : apt.id)); setEditando(null); }}
-                className="w-full flex items-center gap-4 p-5 text-left hover:bg-white/5 transition-all cursor-pointer"
+                className="w-full flex items-center gap-3 sm:gap-4 p-4 sm:p-5 text-left hover:bg-white/5 transition-all cursor-pointer"
               >
                 <div className="w-11 h-11 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
                   <Icone name="door_front" className="text-primary" />
@@ -936,7 +936,7 @@ function AbaApartamentos({ condominioId }) {
               </button>
 
               {expandido === apt.id && (
-                <div className="border-t border-outline-variant/15 px-5 pb-6 pt-5">
+                <div className="border-t border-outline-variant/15 px-4 sm:px-5 pb-6 pt-5">
                   {editando === apt.id ? (
                     <FormApartamento
                       inicial={apt}
@@ -1040,7 +1040,7 @@ function DetalhesApartamento({ apt, onEditar, onToggleAtivo }) {
           </div>
         ))}
       </div>
-      <div className="flex gap-3 pt-1">
+      <div className="flex flex-col sm:flex-row gap-3 pt-1">
         <button onClick={onEditar} className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-primary/30 text-primary hover:bg-primary/10 text-sm font-semibold transition-all cursor-pointer">
           <Icone name="edit" className="text-lg" /> Editar
         </button>
@@ -1132,16 +1132,16 @@ function AbaAreasComuns({ condominioId }) {
     <>
       {/* Stats + botão */}
       <div className="flex items-center justify-between gap-4 flex-wrap">
-        <div className="flex gap-3 flex-wrap">
-          <div className="glass-panel rounded-2xl px-5 py-3 text-center">
+        <div className="flex flex-wrap gap-3 w-full sm:w-auto">
+          <div className="glass-panel rounded-2xl px-4 sm:px-5 py-3 text-center flex-1 sm:flex-none min-w-[92px]">
             <p className="text-2xl font-headline font-bold text-on-surface">{areas.length}</p>
             <p className="text-on-surface-variant text-xs uppercase tracking-wider">Total</p>
           </div>
-          <div className="glass-panel rounded-2xl px-5 py-3 text-center">
+          <div className="glass-panel rounded-2xl px-4 sm:px-5 py-3 text-center flex-1 sm:flex-none min-w-[92px]">
             <p className="text-2xl font-headline font-bold text-primary">{areas.filter((a) => a.ativo).length}</p>
             <p className="text-on-surface-variant text-xs uppercase tracking-wider">Ativas</p>
           </div>
-          <div className="glass-panel rounded-2xl px-5 py-3 text-center">
+          <div className="glass-panel rounded-2xl px-4 sm:px-5 py-3 text-center flex-1 sm:flex-none min-w-[92px]">
             <p className="text-2xl font-headline font-bold text-secondary">{areas.filter((a) => a.podeReservar).length}</p>
             <p className="text-on-surface-variant text-xs uppercase tracking-wider">Reserváveis</p>
           </div>
@@ -1159,9 +1159,9 @@ function AbaAreasComuns({ condominioId }) {
 
       {/* Form nova área comum */}
       {criando && (
-        <div className="glass-panel rounded-3xl p-6 lg:p-8 border border-primary/15">
+        <div className="glass-panel rounded-3xl p-4 sm:p-6 lg:p-8 border border-primary/15">
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+            <div className="w-10 h-10 shrink-0 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
               <Icone name="pool" className="text-primary" />
             </div>
             <h2 className="font-headline text-xl font-bold text-on-surface">Nova Área Comum</h2>
@@ -1197,17 +1197,17 @@ function AbaAreasComuns({ condominioId }) {
 
       {/* Lista */}
       {carregando ? (
-        <div className="glass-panel rounded-3xl p-10 text-center text-on-surface-variant">Carregando...</div>
+        <div className="glass-panel rounded-3xl p-6 sm:p-10 text-center text-on-surface-variant">Carregando...</div>
       ) : (
         <div className="space-y-3">
           {filtrados.length === 0 && (
-            <div className="glass-panel rounded-3xl p-10 text-center text-on-surface-variant">Nenhuma área comum encontrada.</div>
+            <div className="glass-panel rounded-3xl p-6 sm:p-10 text-center text-on-surface-variant">Nenhuma área comum encontrada.</div>
           )}
           {filtrados.map((area) => (
             <div key={area.id} className="glass-panel rounded-3xl overflow-hidden">
               <button
                 onClick={() => { setExpandido((p) => (p === area.id ? null : area.id)); setEditando(null); }}
-                className="w-full flex items-center gap-4 p-5 text-left hover:bg-white/5 transition-all cursor-pointer"
+                className="w-full flex items-center gap-3 sm:gap-4 p-4 sm:p-5 text-left hover:bg-white/5 transition-all cursor-pointer"
               >
                 <div className="w-11 h-11 rounded-full bg-secondary/10 flex items-center justify-center shrink-0">
                   <Icone name="pool" className="text-secondary" />
@@ -1238,7 +1238,7 @@ function AbaAreasComuns({ condominioId }) {
               </button>
 
               {expandido === area.id && (
-                <div className="border-t border-outline-variant/15 px-5 pb-6 pt-5">
+                <div className="border-t border-outline-variant/15 px-4 sm:px-5 pb-6 pt-5">
                   {editando === area.id ? (
                     <FormAreaComum
                       inicial={area}
@@ -1343,7 +1343,7 @@ function DetalhesAreaComum({ area, onEditar, onToggleAtivo }) {
           </div>
         ))}
       </div>
-      <div className="flex gap-3 pt-1">
+      <div className="flex flex-col sm:flex-row gap-3 pt-1">
         <button onClick={onEditar} className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-primary/30 text-primary hover:bg-primary/10 text-sm font-semibold transition-all cursor-pointer">
           <Icone name="edit" className="text-lg" /> Editar
         </button>
@@ -1449,16 +1449,16 @@ function AbaVagas({ condominioId }) {
     <>
       {/* Stats + botão */}
       <div className="flex items-center justify-between gap-4 flex-wrap">
-        <div className="flex gap-3 flex-wrap">
-          <div className="glass-panel rounded-2xl px-5 py-3 text-center">
+        <div className="flex flex-wrap gap-3 w-full sm:w-auto">
+          <div className="glass-panel rounded-2xl px-4 sm:px-5 py-3 text-center flex-1 sm:flex-none min-w-[92px]">
             <p className="text-2xl font-headline font-bold text-on-surface">{vagas.length}</p>
             <p className="text-on-surface-variant text-xs uppercase tracking-wider">Total</p>
           </div>
-          <div className="glass-panel rounded-2xl px-5 py-3 text-center">
+          <div className="glass-panel rounded-2xl px-4 sm:px-5 py-3 text-center flex-1 sm:flex-none min-w-[92px]">
             <p className="text-2xl font-headline font-bold text-primary">{vagas.filter((v) => v.ativa).length}</p>
             <p className="text-on-surface-variant text-xs uppercase tracking-wider">Ativas</p>
           </div>
-          <div className="glass-panel rounded-2xl px-5 py-3 text-center">
+          <div className="glass-panel rounded-2xl px-4 sm:px-5 py-3 text-center flex-1 sm:flex-none min-w-[92px]">
             <p className="text-2xl font-headline font-bold text-error">{vagas.filter((v) => !v.ativa).length}</p>
             <p className="text-on-surface-variant text-xs uppercase tracking-wider">Inativas</p>
           </div>
@@ -1476,9 +1476,9 @@ function AbaVagas({ condominioId }) {
 
       {/* Form nova vaga */}
       {criando && (
-        <div className="glass-panel rounded-3xl p-6 lg:p-8 border border-primary/15">
+        <div className="glass-panel rounded-3xl p-4 sm:p-6 lg:p-8 border border-primary/15">
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+            <div className="w-10 h-10 shrink-0 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
               <Icone name="local_parking" className="text-primary" />
             </div>
             <h2 className="font-headline text-xl font-bold text-on-surface">Nova Vaga</h2>
@@ -1520,17 +1520,17 @@ function AbaVagas({ condominioId }) {
 
       {/* Lista */}
       {carregando ? (
-        <div className="glass-panel rounded-3xl p-10 text-center text-on-surface-variant">Carregando...</div>
+        <div className="glass-panel rounded-3xl p-6 sm:p-10 text-center text-on-surface-variant">Carregando...</div>
       ) : (
         <div className="space-y-3">
           {filtrados.length === 0 && (
-            <div className="glass-panel rounded-3xl p-10 text-center text-on-surface-variant">Nenhuma vaga encontrada.</div>
+            <div className="glass-panel rounded-3xl p-6 sm:p-10 text-center text-on-surface-variant">Nenhuma vaga encontrada.</div>
           )}
           {filtrados.map((vaga) => (
             <div key={vaga.id} className="glass-panel rounded-3xl overflow-hidden">
               <button
                 onClick={() => { setExpandido((p) => (p === vaga.id ? null : vaga.id)); setEditando(null); }}
-                className="w-full flex items-center gap-4 p-5 text-left hover:bg-white/5 transition-all cursor-pointer"
+                className="w-full flex items-center gap-3 sm:gap-4 p-4 sm:p-5 text-left hover:bg-white/5 transition-all cursor-pointer"
               >
                 <div className="w-11 h-11 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
                   <Icone name="local_parking" className="text-primary" />
@@ -1563,7 +1563,7 @@ function AbaVagas({ condominioId }) {
               </button>
 
               {expandido === vaga.id && (
-                <div className="border-t border-outline-variant/15 px-5 pb-6 pt-5">
+                <div className="border-t border-outline-variant/15 px-4 sm:px-5 pb-6 pt-5">
                   {editando === vaga.id ? (
                     <FormVaga
                       inicial={vaga}
@@ -1666,7 +1666,7 @@ function FormVaga({ inicial, apartamentos, onSalvar, onCancelar, erro }) {
 function DetalhesVaga({ vaga, onEditar, onToggleAtivo }) {
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {[
           { label: "Número", value: vaga.numero },
           { label: "Tipo", value: vaga.tipo || "—" },
@@ -1679,7 +1679,7 @@ function DetalhesVaga({ vaga, onEditar, onToggleAtivo }) {
           </div>
         ))}
       </div>
-      <div className="flex gap-3 pt-1">
+      <div className="flex flex-col sm:flex-row gap-3 pt-1">
         <button
           onClick={onEditar}
           className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-primary/30 text-primary hover:bg-primary/10 text-sm font-semibold transition-all cursor-pointer"

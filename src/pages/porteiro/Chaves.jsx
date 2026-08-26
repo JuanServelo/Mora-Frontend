@@ -3,14 +3,14 @@ import { Icone } from "../../components/icones/Icone";
 
 export function Chaves() {
   return (
-    <div className="min-h-screen w-full pt-4 pb-20 px-6">
+    <div className="min-h-screen w-full pt-4 pb-20 px-4 sm:px-6">
       <div className="max-w-4xl mx-auto space-y-8">
 
         <header>
           <p className="text-on-surface-variant text-xs font-semibold uppercase tracking-widest mb-1">
             Portaria
           </p>
-          <h1 className="font-headline text-4xl font-extrabold tracking-tight text-on-surface">
+          <h1 className="font-headline text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-on-surface">
             <span className="bg-gradient-to-r from-primary to-tertiary bg-clip-text text-transparent">
               Controle de Chaves
             </span>

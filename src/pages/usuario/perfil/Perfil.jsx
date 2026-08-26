@@ -64,27 +64,27 @@ export function Perfil() {
   if (activeView !== null) lastViewRef.current = activeView;
 
   return (
-    <div className="min-h-screen w-full pt-4 pb-20 px-6">
+    <div className="min-h-screen w-full pt-4 pb-20 px-4 sm:px-6">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <header className="text-center mb-14">
-          <h1 className="font-headline text-5xl font-extrabold tracking-tight mb-4 text-on-surface">
+        <header className="text-center mb-10 sm:mb-14">
+          <h1 className="font-headline text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight mb-4 text-on-surface">
             {t("perfil.header.titulo")}{" "}
             <span className="bg-gradient-to-r from-primary to-tertiary bg-clip-text text-transparent">
               {t("perfil.header.espaco")}
             </span>
             .
           </h1>
-          <p className="text-on-surface-variant font-light text-lg">
+          <p className="text-on-surface-variant font-light text-base sm:text-lg">
             {t("perfil.header.subtitulo")}
           </p>
         </header>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
           {/* Coluna esquerda — Perfil + Stats */}
           <div className="lg:col-span-4 space-y-6">
             {/* Card de Perfil */}
-            <div className="glass-panel rounded-[2rem] p-8 text-center flex flex-col items-center">
+            <div className="glass-panel rounded-[2rem] p-6 sm:p-8 text-center flex flex-col items-center">
               {/* Avatar */}
               <div className="relative mb-6">
                 <div className="w-28 h-28 rounded-full p-[3px] bg-gradient-to-tr from-primary via-secondary to-tertiary">
@@ -137,9 +137,9 @@ export function Perfil() {
 
           {/* Coluna direita — Navegação com sliding panel */}
           <div className="lg:col-span-8">
-            <div className="glass-panel rounded-[2.5rem] p-6 lg:p-10">
+            <div className="glass-panel rounded-[2.5rem] p-4 sm:p-6 lg:p-10">
               {/* Card Header — muda entre lista e view ativa */}
-              <div className="flex items-center gap-3 mb-8 px-4">
+              <div className="flex items-center gap-3 mb-6 sm:mb-8 px-1 sm:px-4">
                 {activeView && (
                   <button
                     onClick={() => setActiveView(null)}
@@ -148,7 +148,7 @@ export function Perfil() {
                     <Icone name="arrow_back" className="text-xl" />
                   </button>
                 )}
-                <h3 className="font-headline text-xl font-semibold text-on-surface">
+                <h3 className="font-headline text-lg sm:text-xl font-semibold text-on-surface min-w-0 truncate">
                   {activeView ? (
                     TITULOS_VIEW[activeView]
                   ) : (
@@ -174,17 +174,17 @@ export function Perfil() {
                         <button
                           key={item.id}
                           onClick={() => setActiveView(item.id)}
-                          className="w-full group flex items-center justify-between p-5 rounded-2xl hover:bg-white/5 transition-all duration-300 text-left cursor-pointer"
+                          className="w-full group flex items-center justify-between gap-3 p-3 sm:p-5 rounded-2xl hover:bg-white/5 transition-all duration-300 text-left cursor-pointer"
                         >
-                          <div className="flex items-center gap-5">
-                            <div className="w-12 h-12 rounded-xl bg-surface-container-highest flex items-center justify-center group-hover:scale-110 transition-transform">
+                          <div className="flex items-center gap-3 sm:gap-5 min-w-0">
+                            <div className="w-11 h-11 sm:w-12 sm:h-12 shrink-0 rounded-xl bg-surface-container-highest flex items-center justify-center group-hover:scale-110 transition-transform">
                               <Icone name={item.icon} className={item.color} />
                             </div>
-                            <div>
-                              <div className="text-on-surface font-semibold text-base lg:text-lg">
+                            <div className="min-w-0">
+                              <div className="text-on-surface font-semibold text-sm sm:text-base lg:text-lg">
                                 {t(item.titleId)}
                               </div>
-                              <div className="text-on-surface-variant text-sm">
+                              <div className="text-on-surface-variant text-xs sm:text-sm">
                                 {t(item.descId)}
                               </div>
                             </div>
@@ -197,10 +197,10 @@ export function Perfil() {
                       ))}
 
                       {/* Logout */}
-                      <div className="pt-8 mt-8 border-t border-outline-variant/15">
+                      <div className="pt-6 mt-6 sm:pt-8 sm:mt-8 border-t border-outline-variant/15">
                         <button
                           onClick={() => { logout(); navigate("/login"); }}
-                          className="w-full flex items-center justify-center gap-3 p-5 rounded-full border border-error/20 text-error hover:bg-error/10 transition-all duration-300 font-bold tracking-wide cursor-pointer"
+                          className="w-full flex items-center justify-center gap-3 p-4 sm:p-5 rounded-full border border-error/20 text-error hover:bg-error/10 transition-all duration-300 font-bold tracking-wide cursor-pointer"
                         >
                           <Icone name="logout" />
                           {t("perfil.sair")}
@@ -227,11 +227,11 @@ export function Perfil() {
         </div>
 
         {/* Footer */}
-        <footer className="mt-16 pt-8 border-t border-outline-variant/10 flex flex-col md:flex-row justify-between items-center gap-4">
+        <footer className="mt-12 sm:mt-16 pt-8 border-t border-outline-variant/10 flex flex-col md:flex-row justify-between items-center gap-4 text-center md:text-left">
           <div className="text-on-surface-variant/50 text-sm">
             {t("perfil.footer.copy")}
           </div>
-          <div className="flex gap-6 text-xs font-semibold tracking-widest uppercase text-on-surface-variant/50">
+          <div className="flex flex-wrap justify-center gap-4 sm:gap-6 text-xs font-semibold tracking-widest uppercase text-on-surface-variant/50">
             <a href="#" className="hover:text-primary transition-colors">
               {t("perfil.footer.privacidade")}
             </a>

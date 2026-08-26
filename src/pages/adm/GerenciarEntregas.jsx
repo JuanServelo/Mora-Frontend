@@ -153,7 +153,7 @@ export function GerenciarEntregas() {
   };
 
   return (
-    <div className="min-h-screen w-full pt-4 pb-20 px-6">
+    <div className="min-h-screen w-full pt-4 pb-20 px-4 sm:px-6">
       <div className="max-w-6xl mx-auto space-y-8">
 
         {/* Header */}
@@ -162,7 +162,7 @@ export function GerenciarEntregas() {
             <p className="text-on-surface-variant text-xs font-semibold uppercase tracking-widest mb-1">
               Painel Administrativo
             </p>
-            <h1 className="font-headline text-4xl font-extrabold tracking-tight text-on-surface">
+            <h1 className="font-headline text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-on-surface">
               Gestão de{" "}
               <span className="bg-gradient-to-r from-primary to-tertiary bg-clip-text text-transparent">
                 Entregas
@@ -183,13 +183,13 @@ export function GerenciarEntregas() {
         </header>
 
         {/* Stats */}
-        <div className="flex gap-3 flex-wrap">
+        <div className="flex flex-wrap gap-3 w-full sm:w-auto">
           {[
             { label: "Total",      value: contadores.total,    color: "text-on-surface" },
             { label: "Pendentes",  value: contadores.pendente, color: "text-secondary"  },
             { label: "Retiradas",  value: contadores.retirada, color: "text-primary"    },
           ].map((s) => (
-            <div key={s.label} className="glass-panel rounded-2xl px-5 py-3 text-center min-w-[90px]">
+            <div key={s.label} className="glass-panel rounded-2xl px-4 sm:px-5 py-3 text-center flex-1 min-w-[80px]">
               <p className={`text-2xl font-headline font-bold ${s.color}`}>{s.value}</p>
               <p className="text-on-surface-variant text-xs uppercase tracking-wider">{s.label}</p>
             </div>
@@ -198,9 +198,9 @@ export function GerenciarEntregas() {
 
         {/* Form nova entrega */}
         {criando && (
-          <div className="glass-panel rounded-3xl p-6 lg:p-8 border border-primary/15">
+          <div className="glass-panel rounded-3xl p-4 sm:p-6 lg:p-8 border border-primary/15">
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+              <div className="w-10 h-10 shrink-0 rounded-xl bg-primary/10 flex items-center justify-center">
                 <Icone name="inventory_2" className="text-primary" />
               </div>
               <h2 className="font-headline text-xl font-bold text-on-surface">Nova Entrega</h2>
@@ -297,11 +297,11 @@ export function GerenciarEntregas() {
 
         {/* Lista */}
         {carregando ? (
-          <div className="glass-panel rounded-3xl p-10 text-center text-on-surface-variant">Carregando...</div>
+          <div className="glass-panel rounded-3xl p-6 sm:p-10 text-center text-on-surface-variant">Carregando...</div>
         ) : (
           <div className="space-y-3">
             {filtradas.length === 0 && (
-              <div className="glass-panel rounded-3xl py-16 flex flex-col items-center gap-3 text-on-surface-variant">
+              <div className="glass-panel rounded-3xl py-12 sm:py-16 px-4 text-center flex flex-col items-center gap-3 text-on-surface-variant">
                 <Icone name="inventory_2" className="text-5xl opacity-30" />
                 <p className="text-sm">Nenhuma entrega encontrada.</p>
               </div>
@@ -313,7 +313,7 @@ export function GerenciarEntregas() {
                 <div key={entrega.id} className="glass-panel rounded-3xl overflow-hidden">
                   <button
                     onClick={() => { setExpandido((p) => (p === entrega.id ? null : entrega.id)); setEditando(null); }}
-                    className="w-full flex items-center gap-4 p-5 text-left hover:bg-white/5 transition-all cursor-pointer"
+                    className="w-full flex items-center gap-3 sm:gap-4 p-4 sm:p-5 text-left hover:bg-white/5 transition-all cursor-pointer"
                   >
                     <div className={`w-11 h-11 rounded-full flex items-center justify-center shrink-0 ${cfg.color}`}>
                       <Icone name={cfg.icon} className="text-xl" />
@@ -351,7 +351,7 @@ export function GerenciarEntregas() {
                   </button>
 
                   {expandido === entrega.id && (
-                    <div className="border-t border-outline-variant/15 px-5 pb-6 pt-5">
+                    <div className="border-t border-outline-variant/15 px-4 sm:px-5 pb-6 pt-5">
                       {editando === entrega.id ? (
                         <FormEntrega
                           inicial={entrega}
@@ -439,10 +439,10 @@ function PopupRetirada({ entrega, usuarios, onConfirmar, onCancelar }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-      <div className="glass-panel rounded-3xl p-6 w-full max-w-md shadow-2xl border border-primary/20 space-y-5">
+      <div className="glass-panel rounded-3xl p-5 sm:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto shadow-2xl border border-primary/20 space-y-5">
         {/* Título */}
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+          <div className="w-10 h-10 shrink-0 rounded-xl bg-primary/10 flex items-center justify-center">
             <Icone name="check_circle" className="text-primary text-xl" />
           </div>
           <div>
@@ -503,7 +503,7 @@ function PopupRetirada({ entrega, usuarios, onConfirmar, onCancelar }) {
         )}
 
         {/* Ações */}
-        <div className="flex gap-3 pt-1">
+        <div className="flex flex-col-reverse sm:flex-row gap-3 pt-1">
           <Botao type="button" onClick={handleConfirmar} className="flex-1">
             Confirmar retirada
           </Botao>
@@ -771,7 +771,7 @@ function DetalhesEntrega({ entrega, onEditar, onMarcarRetirada }) {
 
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {campos.map((item) => (
           <div key={item.label} className="bg-surface-container-highest/20 rounded-xl p-3">
             <p className="text-on-surface-variant text-xs uppercase tracking-wider mb-1">{item.label}</p>

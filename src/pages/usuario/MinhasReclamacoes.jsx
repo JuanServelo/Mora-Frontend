@@ -93,7 +93,7 @@ function AbaNovaReclamacao({ onCriada }) {
 
   if (enviado) {
     return (
-      <div className="glass-panel rounded-2xl py-16 flex flex-col items-center gap-4 text-center">
+      <div className="glass-panel rounded-2xl py-12 sm:py-16 px-4 flex flex-col items-center gap-4 text-center">
         <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
           <Icone name="check_circle" className="text-4xl text-primary" />
         </div>
@@ -115,7 +115,7 @@ function AbaNovaReclamacao({ onCriada }) {
   }
 
   return (
-    <div className="glass-panel rounded-2xl p-6 space-y-6">
+    <div className="glass-panel rounded-2xl p-4 sm:p-6 space-y-6">
       <div>
         <h2 className="font-headline text-xl font-bold text-on-surface">Abrir Reclamação</h2>
         <p className="text-sm text-on-surface-variant mt-1">
@@ -161,7 +161,7 @@ function AbaNovaReclamacao({ onCriada }) {
           onChange={handleForm}
           placeholder="https://..."
         />
-        <div className="flex justify-end pt-2">
+        <div className="flex flex-col sm:flex-row sm:justify-end pt-2">
           <Botao type="submit" disabled={enviando}>
             <span className="flex items-center gap-2">
               <Icone name="send" className="text-lg" /> {enviando ? "Enviando…" : "Enviar reclamação"}
@@ -179,7 +179,7 @@ function AbaMinhasReclamacoes({ reclamacoes }) {
 
   if (reclamacoes.length === 0) {
     return (
-      <div className="glass-panel rounded-2xl py-16 flex flex-col items-center gap-3 text-on-surface-variant">
+      <div className="glass-panel rounded-2xl py-12 sm:py-16 px-4 text-center flex flex-col items-center gap-3 text-on-surface-variant">
         <Icone name="inbox" className="text-5xl opacity-30" />
         <p className="text-sm">Você ainda não abriu nenhuma reclamação.</p>
       </div>
@@ -191,24 +191,24 @@ function AbaMinhasReclamacoes({ reclamacoes }) {
       {reclamacoes.map((rec) => (
         <div key={rec.id} className="glass-panel rounded-2xl overflow-hidden">
           <button
-            className="w-full flex items-center justify-between px-6 py-4 text-left cursor-pointer hover:bg-white/5 transition-all"
+            className="w-full flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 sm:px-6 py-4 text-left cursor-pointer hover:bg-white/5 transition-all"
             onClick={() => setExpandido(expandido === rec.id ? null : rec.id)}
           >
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3 sm:gap-4 min-w-0">
               <div
-                className={`w-10 h-10 rounded-xl flex items-center justify-center ${STATUS_COLOR[rec.status]}`}
+                className={`w-10 h-10 shrink-0 rounded-xl flex items-center justify-center ${STATUS_COLOR[rec.status]}`}
               >
                 <Icone name={STATUS_ICON[rec.status]} className="text-xl" />
               </div>
-              <div>
-                <div className="flex items-center gap-2">
+              <div className="min-w-0">
+                <div className="flex flex-wrap items-center gap-x-2">
                   <p className="font-semibold text-on-surface">{catLabel(rec.category)}</p>
                   <span className="text-xs text-on-surface-variant font-mono">{rec.protocolNumber}</span>
                 </div>
-                <p className="text-xs text-on-surface-variant line-clamp-1 max-w-md">{rec.description}</p>
+                <p className="text-xs text-on-surface-variant line-clamp-1 max-w-full sm:max-w-md">{rec.description}</p>
               </div>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center justify-between sm:justify-end gap-3 shrink-0">
               <span
                 className={`text-xs font-semibold px-3 py-1 rounded-full ${STATUS_COLOR[rec.status]}`}
               >
@@ -222,8 +222,8 @@ function AbaMinhasReclamacoes({ reclamacoes }) {
           </button>
 
           {expandido === rec.id && (
-            <div className="px-6 pb-5 border-t border-white/5 pt-4 space-y-5">
-              <div className="grid grid-cols-2 gap-3">
+            <div className="px-4 sm:px-6 pb-5 border-t border-white/5 pt-4 space-y-5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="bg-surface-container-highest/30 rounded-xl p-3">
                   <p className="text-xs text-on-surface-variant mb-1">Protocolo</p>
                   <p className="text-sm font-semibold text-on-surface font-mono">{rec.protocolNumber}</p>
@@ -331,14 +331,14 @@ export function MinhasReclamacoes() {
   ];
 
   return (
-    <div className="min-h-screen w-full pt-4 pb-20 px-6">
+    <div className="min-h-screen w-full pt-4 pb-20 px-4 sm:px-6">
       <div className="max-w-4xl mx-auto space-y-8">
         {/* Header */}
         <header>
           <p className="text-on-surface-variant text-xs font-semibold uppercase tracking-widest mb-1">
             Área do Morador
           </p>
-          <h1 className="font-headline text-4xl font-extrabold tracking-tight text-on-surface">
+          <h1 className="font-headline text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-on-surface">
             Minhas{" "}
             <span className="bg-gradient-to-r from-primary to-tertiary bg-clip-text text-transparent">
               Reclamações
@@ -347,12 +347,12 @@ export function MinhasReclamacoes() {
         </header>
 
         {/* Tabs */}
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           {tabs.map((t) => (
             <button
               key={t.id}
               onClick={() => setAba(t.id)}
-              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
+              className={`flex items-center gap-2 px-3 sm:px-5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
                 aba === t.id
                   ? "bg-primary/20 text-primary"
                   : "text-on-surface-variant hover:bg-white/5"

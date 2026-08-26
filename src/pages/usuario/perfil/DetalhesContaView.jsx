@@ -79,8 +79,8 @@ export function DetalhesContaView() {
 
   return (
     <form className="space-y-5" onSubmit={handleSalvar}>
-      <div className="flex items-center gap-4 p-4 bg-surface-container-highest/30 rounded-2xl">
-        <div className="w-16 h-16 rounded-full p-[2px] bg-gradient-to-tr from-primary via-secondary to-tertiary shrink-0 overflow-hidden">
+      <div className="flex flex-wrap items-center gap-4 p-4 bg-surface-container-highest/30 rounded-2xl">
+        <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full p-[2px] bg-gradient-to-tr from-primary via-secondary to-tertiary shrink-0 overflow-hidden">
           {foto ? (
             <img src={foto} alt="Avatar" className="w-full h-full rounded-full object-cover" />
           ) : (
@@ -89,7 +89,7 @@ export function DetalhesContaView() {
             </div>
           )}
         </div>
-        <div>
+        <div className="min-w-0">
           <p className="text-on-surface font-semibold text-sm">Foto de Perfil</p>
           <p className="text-on-surface-variant text-xs">JPG ou PNG - Max. 5MB</p>
         </div>

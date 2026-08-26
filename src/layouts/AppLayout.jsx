@@ -15,7 +15,7 @@ export function AppLayout() {
     return (
       <div className="flex min-h-screen">
         <Sidebar />
-        <main className="flex-1 ml-64 min-h-screen">
+        <main className="flex-1 lg:ml-64 min-h-screen pt-14 lg:pt-0">
           <Outlet />
         </main>
       </div>
@@ -25,7 +25,7 @@ export function AppLayout() {
   return (
     <>
       <Navbar />
-      <div className="pt-24">
+      <div className="pt-20 sm:pt-24">
         <Outlet />
       </div>
     </>
