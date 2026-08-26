@@ -204,7 +204,7 @@ function FormVeiculo({ moradores, vagas, categorias, inicial, onSalvar, onCancel
         </div>
       )}
 
-      <div className="flex gap-3 pt-1">
+      <div className="flex flex-col sm:flex-row gap-3 pt-1">
         <Botao type="submit" disabled={salvando}>
           {salvando ? "Salvando…" : inicial ? "Salvar Alterações" : "Cadastrar Veículo"}
           <Icone name={inicial ? "check" : "add"} className="text-xl" />
@@ -237,12 +237,12 @@ function ModalAlterarVaga({ veiculo, vagas, moradores, onSalvar, onFechar, salva
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
-      <div className="glass-panel rounded-3xl p-6 w-full max-w-md space-y-5">
-        <div className="flex items-center justify-between">
-          <h3 className="font-headline text-lg font-bold text-on-surface">
+      <div className="glass-panel rounded-3xl p-5 sm:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto space-y-5">
+        <div className="flex items-start justify-between gap-3">
+          <h3 className="font-headline text-lg font-bold text-on-surface min-w-0">
             Alterar Vaga — {veiculo.placa}
           </h3>
-          <button onClick={onFechar} className="text-on-surface-variant hover:text-on-surface cursor-pointer">
+          <button onClick={onFechar} className="shrink-0 text-on-surface-variant hover:text-on-surface cursor-pointer">
             <Icone name="close" className="text-xl" />
           </button>
         </div>
@@ -524,7 +524,7 @@ export function GerenciarVeiculos() {
   const semVaga = veiculos.filter((v) => !v.vagaId && v.categoria !== "VEICULO_SERVICO").length;
 
   return (
-    <div className="min-h-screen w-full pt-4 pb-20 px-6">
+    <div className="min-h-screen w-full pt-4 pb-20 px-4 sm:px-6">
       <div className="max-w-6xl mx-auto space-y-8">
 
         {/* Header */}
@@ -533,7 +533,7 @@ export function GerenciarVeiculos() {
             <p className="text-on-surface-variant text-xs font-semibold uppercase tracking-widest mb-1">
               Painel Administrativo
             </p>
-            <h1 className="font-headline text-4xl font-extrabold tracking-tight text-on-surface">
+            <h1 className="font-headline text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-on-surface">
               Gerenciar{" "}
               <span className="bg-gradient-to-r from-primary to-tertiary bg-clip-text text-transparent">
                 Veículos
@@ -560,7 +560,7 @@ export function GerenciarVeiculos() {
                 { label: "Dentro", value: dentro, color: "text-primary" },
                 { label: "Sem Vaga", value: semVaga, color: "text-error" },
               ].map((s) => (
-                <div key={s.label} className="glass-panel rounded-2xl px-5 py-3 text-center">
+                <div key={s.label} className="glass-panel rounded-2xl px-4 sm:px-5 py-3 text-center flex-1 sm:flex-none min-w-[92px]">
                   <p className={`text-2xl font-headline font-bold ${s.color}`}>{s.value}</p>
                   <p className="text-on-surface-variant text-xs uppercase tracking-wider">{s.label}</p>
                 </div>
@@ -571,9 +571,9 @@ export function GerenciarVeiculos() {
 
         {/* Formulário de cadastro */}
         {criando && (
-          <div className="glass-panel rounded-3xl p-6 lg:p-8 border border-primary/15">
+          <div className="glass-panel rounded-3xl p-4 sm:p-6 lg:p-8 border border-primary/15">
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+              <div className="w-10 h-10 shrink-0 rounded-xl bg-primary/10 flex items-center justify-center">
                 <Icone name="add" className="text-primary" />
               </div>
               <h2 className="font-headline text-xl font-bold text-on-surface">Novo Veículo</h2>
@@ -591,9 +591,9 @@ export function GerenciarVeiculos() {
 
         {/* Formulário de edição */}
         {editando && (
-          <div className="glass-panel rounded-3xl p-6 lg:p-8 border border-secondary/15">
+          <div className="glass-panel rounded-3xl p-4 sm:p-6 lg:p-8 border border-secondary/15">
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 rounded-xl bg-secondary/10 flex items-center justify-center">
+              <div className="w-10 h-10 shrink-0 rounded-xl bg-secondary/10 flex items-center justify-center">
                 <Icone name="edit" className="text-secondary" />
               </div>
               <h2 className="font-headline text-xl font-bold text-on-surface">
@@ -665,11 +665,11 @@ export function GerenciarVeiculos() {
 
         {/* Lista */}
         {carregando ? (
-          <div className="glass-panel rounded-3xl p-10 text-center text-on-surface-variant">
+          <div className="glass-panel rounded-3xl p-6 sm:p-10 text-center text-on-surface-variant">
             Carregando veículos...
           </div>
         ) : filtrados.length === 0 ? (
-          <div className="glass-panel rounded-3xl p-10 text-center text-on-surface-variant">
+          <div className="glass-panel rounded-3xl p-6 sm:p-10 text-center text-on-surface-variant">
             Nenhum veículo encontrado.
           </div>
         ) : (

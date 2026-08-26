@@ -238,7 +238,7 @@ export function AtivacaoContaForm({ tituloPasso1, subtituloPasso1, subtituloPass
 
           {erro && <p className="text-error text-sm font-medium">{erro}</p>}
 
-          <div className="flex gap-3">
+          <div className="flex flex-col-reverse sm:flex-row gap-3">
             <button
               type="button"
               onClick={() => { setPasso(1); setErro(""); }}

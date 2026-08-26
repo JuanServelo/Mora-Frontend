@@ -30,14 +30,14 @@ export function GerenciarConhecimento() {
   const [aba, setAba] = useState("conhecimento");
 
   return (
-    <div className="min-h-screen w-full pt-4 pb-20 px-6">
+    <div className="min-h-screen w-full pt-4 pb-20 px-4 sm:px-6">
       <div className="max-w-5xl mx-auto space-y-8">
         {/* Header */}
         <header>
           <p className="text-on-surface-variant text-xs font-semibold uppercase tracking-widest mb-1">
             Painel Administrativo
           </p>
-          <h1 className="font-headline text-4xl font-extrabold tracking-tight text-on-surface">
+          <h1 className="font-headline text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-on-surface">
             Base de{" "}
             <span className="bg-gradient-to-r from-primary to-tertiary bg-clip-text text-transparent">
               Conhecimento
@@ -49,7 +49,7 @@ export function GerenciarConhecimento() {
         </header>
 
         {/* Sub-navbar de abas */}
-        <div className="glass-panel rounded-2xl p-1.5 flex gap-1 w-fit">
+        <div className="glass-panel rounded-2xl p-1.5 flex flex-wrap gap-1 w-full sm:w-fit">
           {[
             { id: "conhecimento", label: "Base de Conhecimento", icon: "library_books" },
             { id: "avisos", label: "Avisos", icon: "campaign" },
@@ -57,7 +57,7 @@ export function GerenciarConhecimento() {
             <button
               key={tab.id}
               onClick={() => setAba(tab.id)}
-              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 cursor-pointer ${
+              className={`flex items-center gap-2 px-3 sm:px-5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 cursor-pointer ${
                 aba === tab.id
                   ? "bg-primary/15 text-primary"
                   : "text-on-surface-variant hover:text-on-surface hover:bg-white/5"
@@ -242,7 +242,7 @@ function AbaConhecimento() {
         </div>
       )}
 
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
         {[
           { label: "Total de artigos", valor: artigos.length, icon: "library_books", color: "primary" },
           { label: "Publicados", valor: artigos.filter((a) => a.publicado).length, icon: "check_circle", color: "primary" },
@@ -275,9 +275,9 @@ function AbaConhecimento() {
       <div className="space-y-3">
         {filtrados.map((artigo) => (
           <div key={artigo.id} className="glass-panel rounded-2xl overflow-hidden">
-            <button className="w-full flex items-center justify-between px-6 py-4 text-left cursor-pointer hover:bg-white/5 transition-all" onClick={() => setExpandido(expandido === artigo.id ? null : artigo.id)}>
-              <div className="flex items-center gap-4">
-                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+            <button className="w-full flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 sm:px-6 py-4 text-left cursor-pointer hover:bg-white/5 transition-all" onClick={() => setExpandido(expandido === artigo.id ? null : artigo.id)}>
+              <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+                <div className="w-10 h-10 shrink-0 rounded-xl bg-primary/10 flex items-center justify-center">
                   <Icone name={CATEGORIA_ICON[artigo.categoria] ?? "article"} className="text-primary text-xl" />
                 </div>
                 <div>
@@ -288,14 +288,15 @@ function AbaConhecimento() {
                   </p>
                 </div>
               </div>
-              <div className="flex items-center gap-3">
-                <span className={`text-xs font-semibold px-3 py-1 rounded-full ${categoriaColor(artigo.categoria)}`}>{CATEGORIA_LABEL[artigo.categoria] ?? artigo.categoria}</span>
+              <div className="flex items-center justify-between sm:justify-end gap-3 shrink-0">
+                <span
+                  className={`text-xs font-semibold px-3 py-1 rounded-full ${categoriaColor(artigo.categoria)}`}>{CATEGORIA_LABEL[artigo.categoria] ?? artigo.categoria}</span>
                 <span className={`text-xs font-semibold px-3 py-1 rounded-full ${artigo.publicado ? "bg-primary/10 text-primary" : "bg-error/10 text-error"}`}>{artigo.publicado ? "Publicado" : "Rascunho"}</span>
                 <Icone name={expandido === artigo.id ? "expand_less" : "expand_more"} className="text-on-surface-variant text-xl" />
               </div>
             </button>
             {expandido === artigo.id && (
-              <div className="px-6 pb-5 border-t border-white/5 pt-4 space-y-4">
+              <div className="px-4 sm:px-6 pb-5 border-t border-white/5 pt-4 space-y-4">
                 <div className="bg-surface-container-highest/30 rounded-xl p-4">
                   <p className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant mb-2">Conteúdo</p>
                   <p className="text-sm text-on-surface leading-relaxed whitespace-pre-wrap">{artigo.conteudo}</p>
@@ -313,13 +314,13 @@ function AbaConhecimento() {
           </div>
         ))}
         {filtrados.length === 0 && !carregando && (
-          <div className="glass-panel rounded-2xl py-16 flex flex-col items-center gap-3 text-on-surface-variant">
+          <div className="glass-panel rounded-2xl py-12 sm:py-16 px-4 text-center flex flex-col items-center gap-3 text-on-surface-variant">
             <Icone name="library_books" className="text-5xl opacity-30" />
             <p className="text-sm">Nenhum artigo encontrado.</p>
           </div>
         )}
         {carregando && (
-          <div className="glass-panel rounded-2xl py-16 flex flex-col items-center gap-3 text-on-surface-variant">
+          <div className="glass-panel rounded-2xl py-12 sm:py-16 px-4 text-center flex flex-col items-center gap-3 text-on-surface-variant">
             <p className="text-sm">Carregando artigos...</p>
           </div>
         )}
@@ -503,7 +504,7 @@ function AbaAvisos() {
         </div>
       )}
 
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
         {[
           { label: "Total de avisos", valor: avisos.length, icon: "campaign", color: "primary" },
           { label: "Vigentes agora", valor: avisos.filter(vigente).length, icon: "check_circle", color: "primary" },
@@ -524,9 +525,9 @@ function AbaAvisos() {
       <div className="space-y-3">
         {avisos.map((aviso) => (
           <div key={aviso.id} className="glass-panel rounded-2xl overflow-hidden">
-            <button className="w-full flex items-center justify-between px-6 py-4 text-left cursor-pointer hover:bg-white/5 transition-all" onClick={() => setExpandido(expandido === aviso.id ? null : aviso.id)}>
-              <div className="flex items-center gap-4">
-                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+            <button className="w-full flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 sm:px-6 py-4 text-left cursor-pointer hover:bg-white/5 transition-all" onClick={() => setExpandido(expandido === aviso.id ? null : aviso.id)}>
+              <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+                <div className="w-10 h-10 shrink-0 rounded-xl bg-primary/10 flex items-center justify-center">
                   <Icone name="campaign" className="text-primary text-xl" />
                 </div>
                 <div>
@@ -537,13 +538,14 @@ function AbaAvisos() {
                   </p>
                 </div>
               </div>
-              <div className="flex items-center gap-3">
-                <span className={`text-xs font-semibold px-3 py-1 rounded-full ${vigente(aviso) ? "bg-primary/10 text-primary" : "bg-error/10 text-error"}`}>{vigente(aviso) ? "Vigente" : aviso.publicado ? "Fora do período" : "Rascunho"}</span>
+              <div className="flex items-center justify-between sm:justify-end gap-3 shrink-0">
+                <span
+                  className={`text-xs font-semibold px-3 py-1 rounded-full ${vigente(aviso) ? "bg-primary/10 text-primary" : "bg-error/10 text-error"}`}>{vigente(aviso) ? "Vigente" : aviso.publicado ? "Fora do período" : "Rascunho"}</span>
                 <Icone name={expandido === aviso.id ? "expand_less" : "expand_more"} className="text-on-surface-variant text-xl" />
               </div>
             </button>
             {expandido === aviso.id && (
-              <div className="px-6 pb-5 border-t border-white/5 pt-4 space-y-4">
+              <div className="px-4 sm:px-6 pb-5 border-t border-white/5 pt-4 space-y-4">
                 <div className="bg-surface-container-highest/30 rounded-xl p-4">
                   <p className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant mb-2">Mensagem</p>
                   <p className="text-sm text-on-surface leading-relaxed whitespace-pre-wrap">{aviso.mensagem}</p>
@@ -560,13 +562,13 @@ function AbaAvisos() {
           </div>
         ))}
         {avisos.length === 0 && !carregando && (
-          <div className="glass-panel rounded-2xl py-16 flex flex-col items-center gap-3 text-on-surface-variant">
+          <div className="glass-panel rounded-2xl py-12 sm:py-16 px-4 text-center flex flex-col items-center gap-3 text-on-surface-variant">
             <Icone name="campaign" className="text-5xl opacity-30" />
             <p className="text-sm">Nenhum aviso cadastrado.</p>
           </div>
         )}
         {carregando && (
-          <div className="glass-panel rounded-2xl py-16 flex flex-col items-center gap-3 text-on-surface-variant">
+          <div className="glass-panel rounded-2xl py-12 sm:py-16 px-4 text-center flex flex-col items-center gap-3 text-on-surface-variant">
             <p className="text-sm">Carregando avisos...</p>
           </div>
         )}

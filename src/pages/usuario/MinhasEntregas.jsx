@@ -105,7 +105,7 @@ export function MinhasEntregas() {
   const temFiltro = filtroStatus !== "TODOS" || busca;
 
   return (
-    <div className="min-h-screen w-full pt-4 pb-20 px-6">
+    <div className="min-h-screen w-full pt-4 pb-20 px-4 sm:px-6">
       <div className="max-w-4xl mx-auto space-y-8">
 
         {/* Header */}
@@ -113,7 +113,7 @@ export function MinhasEntregas() {
           <p className="text-on-surface-variant text-xs font-semibold uppercase tracking-widest mb-1">
             Serviços
           </p>
-          <h1 className="font-headline text-4xl font-extrabold tracking-tight text-on-surface">
+          <h1 className="font-headline text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-on-surface">
             Minhas{" "}
             <span className="bg-gradient-to-r from-primary to-tertiary bg-clip-text text-transparent">
               Encomendas
@@ -127,7 +127,7 @@ export function MinhasEntregas() {
         </header>
 
         {/* Stats */}
-        <div className="flex gap-3 flex-wrap">
+        <div className="flex flex-wrap gap-3 w-full sm:w-auto">
           {[
             { label: "Total",      value: contadores.total,    color: "text-on-surface" },
             { label: "Pendentes",  value: contadores.pendente, color: "text-secondary"  },
@@ -135,7 +135,7 @@ export function MinhasEntregas() {
           ].map((s) => (
             <div
               key={s.label}
-              className="glass-panel rounded-2xl px-5 py-3 text-center min-w-[90px]"
+              className="glass-panel rounded-2xl px-4 sm:px-5 py-3 text-center flex-1 min-w-[80px]"
             >
               <p className={`text-2xl font-headline font-bold ${s.color}`}>{s.value}</p>
               <p className="text-on-surface-variant text-xs uppercase tracking-wider">{s.label}</p>
@@ -144,8 +144,8 @@ export function MinhasEntregas() {
         </div>
 
         {/* Filtros */}
-        <div className="glass-panel rounded-3xl p-5 space-y-4">
-          <div className="flex items-center justify-between">
+        <div className="glass-panel rounded-3xl p-4 sm:p-5 space-y-4">
+          <div className="flex flex-wrap items-center justify-between gap-3">
             <p className="text-sm font-semibold text-on-surface-variant uppercase tracking-wider flex items-center gap-2">
               <Icone name="filter_list" className="text-base" /> Filtros
             </p>
@@ -208,11 +208,11 @@ export function MinhasEntregas() {
 
         {/* Lista */}
         {carregando ? (
-          <div className="glass-panel rounded-3xl p-10 text-center text-on-surface-variant">
+          <div className="glass-panel rounded-3xl p-6 sm:p-10 text-center text-on-surface-variant">
             Carregando...
           </div>
         ) : minhasEntregas.length === 0 ? (
-          <div className="glass-panel rounded-3xl py-16 flex flex-col items-center gap-3 text-on-surface-variant">
+          <div className="glass-panel rounded-3xl py-12 sm:py-16 px-4 text-center flex flex-col items-center gap-3 text-on-surface-variant">
             <Icone name="inventory_2" className="text-5xl opacity-30" />
             <p className="text-sm font-semibold">Nenhuma encomenda encontrada.</p>
             <p className="text-xs opacity-60">
@@ -237,7 +237,7 @@ export function MinhasEntregas() {
                     onClick={() =>
                       setExpandido((p) => (p === entrega.id ? null : entrega.id))
                     }
-                    className="w-full flex items-center gap-4 p-5 text-left hover:bg-white/5 transition-all cursor-pointer"
+                    className="w-full flex items-center gap-3 sm:gap-4 p-4 sm:p-5 text-left hover:bg-white/5 transition-all cursor-pointer"
                   >
                     <div
                       className={`w-11 h-11 rounded-full flex items-center justify-center shrink-0 ${cfg.color}`}
@@ -364,10 +364,10 @@ function PopupConfirmarRetirada({ entrega, usuarioNome, erro, onConfirmar, onCan
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-      <div className="glass-panel rounded-3xl p-6 w-full max-w-sm shadow-2xl border border-primary/20 space-y-5">
+      <div className="glass-panel rounded-3xl p-5 sm:p-6 w-full max-w-sm max-h-[90vh] overflow-y-auto shadow-2xl border border-primary/20 space-y-5">
         {/* Título */}
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+          <div className="w-10 h-10 shrink-0 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
             <Icone name="check_circle" className="text-primary text-xl" />
           </div>
           <div>
@@ -415,7 +415,7 @@ function PopupConfirmarRetirada({ entrega, usuarioNome, erro, onConfirmar, onCan
         )}
 
         {/* Ações */}
-        <div className="flex gap-3 pt-1">
+        <div className="flex flex-col sm:flex-row gap-3 pt-1">
           <Botao type="button" onClick={handleConfirmar}>
             Confirmar retirada
           </Botao>

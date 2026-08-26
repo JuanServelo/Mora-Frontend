@@ -84,7 +84,7 @@ export function InicioDoorman() {
   }, [usuario?.condominioId]);
 
   return (
-    <div className="min-h-screen w-full pt-4 pb-20 px-6">
+    <div className="min-h-screen w-full pt-4 pb-20 px-4 sm:px-6">
       <div className="max-w-5xl mx-auto space-y-10">
 
         <header className="text-center max-w-3xl mx-auto">

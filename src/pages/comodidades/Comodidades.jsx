@@ -66,7 +66,7 @@ export function Comodidades() {
               className="group glass-panel rounded-3xl p-4 sm:p-5 border border-outline-variant/10 hover:border-tertiary/30 transition-all duration-300 flex flex-col"
             >
               <div className="flex items-center justify-between mb-4">
-                <div className="w-11 h-11 rounded-xl bg-tertiary/10 flex items-center justify-center group-hover:bg-tertiary/20 transition-colors">
+                <div className="w-11 h-11 shrink-0 rounded-xl bg-tertiary/10 flex items-center justify-center group-hover:bg-tertiary/20 transition-colors">
                   <Icone name={c.icon} className="text-tertiary text-2xl" />
                 </div>
                 <span className="text-[10px] font-bold uppercase tracking-widest text-primary bg-primary/10 px-2 py-1 rounded-full">

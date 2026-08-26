@@ -247,7 +247,7 @@ export function GerenciarUsuarios() {
   }
 
   return (
-    <div className="min-h-screen w-full pt-4 pb-20 px-6">
+    <div className="min-h-screen w-full pt-4 pb-20 px-4 sm:px-6">
       <div className="max-w-6xl mx-auto space-y-8">
         {/* Header */}
         <header className="flex flex-col md:flex-row md:items-end justify-between gap-4">
@@ -255,7 +255,7 @@ export function GerenciarUsuarios() {
             <p className="text-on-surface-variant text-xs font-semibold uppercase tracking-widest mb-1">
               Painel Administrativo
             </p>
-            <h1 className="font-headline text-4xl font-extrabold tracking-tight text-on-surface">
+            <h1 className="font-headline text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-on-surface">
               Gerenciar{" "}
               <span className="bg-gradient-to-r from-primary to-tertiary bg-clip-text text-transparent">
                 Usuários
@@ -264,7 +264,7 @@ export function GerenciarUsuarios() {
           </div>
 
           {/* Botão + Stats */}
-          <div className="flex items-center gap-4 shrink-0 flex-wrap">
+          <div className="flex flex-wrap items-center gap-4 w-full md:w-auto md:shrink-0">
             {aba === "gerenciamento" && (
               <button
                 onClick={() => {
@@ -287,7 +287,7 @@ export function GerenciarUsuarios() {
             )}
 
             <div className="flex gap-3">
-              <div className="glass-panel rounded-2xl px-5 py-3 text-center">
+              <div className="glass-panel rounded-2xl px-4 sm:px-5 py-3 text-center flex-1 sm:flex-none min-w-[92px]">
                 <p className="text-2xl font-headline font-bold text-on-surface">
                   {usuarios.length}
                 </p>
@@ -295,7 +295,7 @@ export function GerenciarUsuarios() {
                   Total
                 </p>
               </div>
-              <div className="glass-panel rounded-2xl px-5 py-3 text-center">
+              <div className="glass-panel rounded-2xl px-4 sm:px-5 py-3 text-center flex-1 sm:flex-none min-w-[92px]">
                 <p className="text-2xl font-headline font-bold text-primary">
                   {usuarios.filter((u) => u.status === "ativo").length}
                 </p>
@@ -303,7 +303,7 @@ export function GerenciarUsuarios() {
                   Ativos
                 </p>
               </div>
-              <div className="glass-panel rounded-2xl px-5 py-3 text-center">
+              <div className="glass-panel rounded-2xl px-4 sm:px-5 py-3 text-center flex-1 sm:flex-none min-w-[92px]">
                 <p className="text-2xl font-headline font-bold text-secondary">
                   {usuarios.filter((u) => u.status === "pendente").length}
                 </p>
@@ -316,7 +316,7 @@ export function GerenciarUsuarios() {
         </header>
 
         {/* Sub-navbar de abas */}
-        <div className="glass-panel rounded-2xl p-1.5 flex gap-1 w-fit">
+        <div className="glass-panel rounded-2xl p-1.5 flex flex-wrap gap-1 w-full sm:w-fit">
           {[
             {
               id: "gerenciamento",
@@ -331,7 +331,7 @@ export function GerenciarUsuarios() {
                 setAba(tab.id);
                 setCriando(false);
               }}
-              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 cursor-pointer ${
+              className={`flex items-center gap-2 px-3 sm:px-5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 cursor-pointer ${
                 aba === tab.id
                   ? "bg-primary/15 text-primary"
                   : "text-on-surface-variant hover:text-on-surface hover:bg-white/5"
@@ -347,9 +347,9 @@ export function GerenciarUsuarios() {
         {aba === "gerenciamento" && (
           <>
             {criando && (
-              <div className="glass-panel rounded-3xl p-6 lg:p-8 border border-primary/15">
+              <div className="glass-panel rounded-3xl p-4 sm:p-6 lg:p-8 border border-primary/15">
                 <div className="flex items-center gap-3 mb-6">
-                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                  <div className="w-10 h-10 shrink-0 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
                     <Icone name="person_add" className="text-primary" />
                   </div>
                   <h2 className="font-headline text-xl font-bold text-on-surface">
@@ -385,7 +385,7 @@ export function GerenciarUsuarios() {
             {/* Lista de usuários */}
             <div className="space-y-3">
               {filtrados.length === 0 && (
-                <div className="glass-panel rounded-3xl p-10 text-center text-on-surface-variant">
+                <div className="glass-panel rounded-3xl p-6 sm:p-10 text-center text-on-surface-variant">
                   Nenhum usuário encontrado.
                 </div>
               )}
@@ -398,7 +398,7 @@ export function GerenciarUsuarios() {
                   {/* Linha principal */}
                   <button
                     onClick={() => toggleExpandir(usuario.id)}
-                    className="w-full flex items-center gap-4 p-5 text-left group hover:bg-white/5 transition-all cursor-pointer"
+                    className="w-full flex items-center gap-3 sm:gap-4 p-4 sm:p-5 text-left group hover:bg-white/5 transition-all cursor-pointer"
                   >
                     <div className="w-11 h-11 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
                       <Icone name="person" className="text-primary" />
@@ -450,7 +450,7 @@ export function GerenciarUsuarios() {
 
                   {/* Painel expandido */}
                   {expandido === usuario.id && (
-                    <div className="border-t border-outline-variant/15 px-5 pb-6 pt-5">
+                    <div className="border-t border-outline-variant/15 px-4 sm:px-5 pb-6 pt-5">
                       {editando === usuario.id ? (
                         <FormEdicao
                           usuario={usuario}
@@ -493,7 +493,7 @@ export function GerenciarUsuarios() {
 // ─────────────────────────────────────────────
 function SecaoCondominio() {
   return (
-    <div className="glass-panel rounded-3xl p-8 lg:p-10 text-center max-w-2xl mx-auto">
+    <div className="glass-panel rounded-3xl p-6 sm:p-8 lg:p-10 text-center max-w-2xl mx-auto">
       <div className="w-14 h-14 rounded-2xl bg-secondary/10 flex items-center justify-center mx-auto mb-4">
         <Icone name="payments" className="text-secondary text-3xl" />
       </div>
@@ -539,7 +539,7 @@ function DetalhesUsuario({ usuario, onEditar, onReenviar, onDesativar }) {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         {[
           { label: "Bloco", value: usuario.bloco || "—", icon: "domain" },
           {
@@ -1095,7 +1095,7 @@ function FormNovoUsuario({ blocos, apartamentos, condominios, perfilAtor, condom
         </span>
       </div>
 
-      <div className="flex gap-3 pt-1">
+      <div className="flex flex-col sm:flex-row gap-3 pt-1">
         <Botao type="submit">
           Enviar convite
           <Icone name="send" className="text-xl" />

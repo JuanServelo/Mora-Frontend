@@ -78,7 +78,7 @@ export function EsqueceuSenha() {
             <div className="relative z-10">
               {/* Ícone */}
               <div className="mb-6 flex flex-col items-center lg:items-start">
-                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
+                <div className="w-12 h-12 shrink-0 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
                   <Icone name="lock_reset" className="text-primary text-2xl" />
                 </div>
                 <h2 className="font-headline text-2xl font-bold text-on-surface mb-1">

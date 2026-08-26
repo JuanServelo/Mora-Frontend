@@ -80,7 +80,7 @@ export function ResetPassword() {
     <div className="min-h-screen flex items-center justify-center px-4 py-8">
       <div className="glass-panel w-full max-w-sm rounded-[2rem] p-6 sm:p-8 shadow-2xl">
         <div className="mb-6">
-          <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
+          <div className="w-12 h-12 shrink-0 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
             <Icone name="lock_reset" className="text-primary text-2xl" />
           </div>
           <h1 className="text-2xl font-headline font-bold text-on-surface">Nova senha</h1>

@@ -189,7 +189,7 @@ export function Portaria() {
     : filtrar(dentro);
 
   return (
-    <div className="min-h-screen w-full pt-4 pb-20 px-6">
+    <div className="min-h-screen w-full pt-4 pb-20 px-4 sm:px-6">
       <div className="max-w-4xl mx-auto space-y-8">
 
         {/* Header */}
@@ -198,18 +198,18 @@ export function Portaria() {
             <p className="text-on-surface-variant text-xs font-semibold uppercase tracking-widest mb-1">
               Controle de Acesso
             </p>
-            <h1 className="font-headline text-4xl font-extrabold tracking-tight text-on-surface">
+            <h1 className="font-headline text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-on-surface">
               <span className="bg-gradient-to-r from-primary to-tertiary bg-clip-text text-transparent">
                 Portaria
               </span>
             </h1>
           </div>
-          <div className="flex gap-3 flex-wrap">
-            <div className="glass-panel rounded-2xl px-5 py-3 text-center">
+          <div className="flex flex-wrap gap-3 w-full sm:w-auto">
+            <div className="glass-panel rounded-2xl px-4 sm:px-5 py-3 text-center flex-1 sm:flex-none min-w-[92px]">
               <p className="text-2xl font-headline font-bold text-primary">{dentro.length}</p>
               <p className="text-on-surface-variant text-xs uppercase tracking-wider">Dentro</p>
             </div>
-            <div className="glass-panel rounded-2xl px-5 py-3 text-center">
+            <div className="glass-panel rounded-2xl px-4 sm:px-5 py-3 text-center flex-1 sm:flex-none min-w-[92px]">
               <p className="text-2xl font-headline font-bold text-on-surface">{residentes.length + guests.length}</p>
               <p className="text-on-surface-variant text-xs uppercase tracking-wider">Total</p>
             </div>
@@ -217,7 +217,7 @@ export function Portaria() {
         </header>
 
         {/* Abas */}
-        <div className="glass-panel rounded-2xl p-1.5 flex gap-1 w-fit flex-wrap">
+        <div className="glass-panel rounded-2xl p-1.5 flex flex-wrap gap-1 w-full sm:w-fit">
           {abas.map((tab) => (
             <button
               key={tab.id}
@@ -252,11 +252,11 @@ export function Portaria() {
 
         {/* Lista */}
         {carregando ? (
-          <div className="glass-panel rounded-3xl p-10 text-center text-on-surface-variant">
+          <div className="glass-panel rounded-3xl p-6 sm:p-10 text-center text-on-surface-variant">
             Carregando...
           </div>
         ) : listaAtual.length === 0 ? (
-          <div className="glass-panel rounded-3xl p-10 text-center text-on-surface-variant">
+          <div className="glass-panel rounded-3xl p-6 sm:p-10 text-center text-on-surface-variant">
             {aba === "dentro" ? "Nenhum usuário registrado dentro do condomínio." : "Nenhum resultado encontrado."}
           </div>
         ) : (

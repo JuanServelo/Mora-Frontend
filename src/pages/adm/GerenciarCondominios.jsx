@@ -92,7 +92,7 @@ export function GerenciarCondominios() {
   }
 
   return (
-    <div className="min-h-screen w-full pt-4 pb-20 px-6">
+    <div className="min-h-screen w-full pt-4 pb-20 px-4 sm:px-6">
       <div className="max-w-6xl mx-auto space-y-8">
 
         {/* Header */}
@@ -101,7 +101,7 @@ export function GerenciarCondominios() {
             <p className="text-on-surface-variant text-xs font-semibold uppercase tracking-widest mb-1">
               Painel Administrativo
             </p>
-            <h1 className="font-headline text-4xl font-extrabold tracking-tight text-on-surface">
+            <h1 className="font-headline text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-on-surface">
               Gerenciar{" "}
               <span className="bg-gradient-to-r from-primary to-tertiary bg-clip-text text-transparent">
                 Clientes
@@ -109,7 +109,7 @@ export function GerenciarCondominios() {
             </h1>
           </div>
 
-          <div className="flex items-center gap-4 shrink-0 flex-wrap">
+          <div className="flex flex-wrap items-center gap-4 w-full md:w-auto md:shrink-0">
             {isGerente && (
               <button
                 onClick={() => { setCriando((c) => !c); setExpandido(null); }}
@@ -125,11 +125,11 @@ export function GerenciarCondominios() {
             )}
 
             <div className="flex gap-3">
-              <div className="glass-panel rounded-2xl px-5 py-3 text-center">
+              <div className="glass-panel rounded-2xl px-4 sm:px-5 py-3 text-center flex-1 sm:flex-none min-w-[92px]">
                 <p className="text-2xl font-headline font-bold text-on-surface">{condominios.length}</p>
                 <p className="text-on-surface-variant text-xs uppercase tracking-wider">Total</p>
               </div>
-              <div className="glass-panel rounded-2xl px-5 py-3 text-center">
+              <div className="glass-panel rounded-2xl px-4 sm:px-5 py-3 text-center flex-1 sm:flex-none min-w-[92px]">
                 <p className="text-2xl font-headline font-bold text-primary">
                   {condominios.filter((c) => c.status === "active").length}
                 </p>
@@ -141,9 +141,9 @@ export function GerenciarCondominios() {
 
         {/* Form de criação */}
         {criando && (
-          <div className="glass-panel rounded-3xl p-6 lg:p-8 border border-primary/15">
+          <div className="glass-panel rounded-3xl p-4 sm:p-6 lg:p-8 border border-primary/15">
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+              <div className="w-10 h-10 shrink-0 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
                 <Icone name="add_business" className="text-primary" />
               </div>
               <h2 className="font-headline text-xl font-bold text-on-surface">Novo Cliente</h2>
@@ -173,7 +173,7 @@ export function GerenciarCondominios() {
         )}
 
         {!carregando && filtrados.length === 0 && (
-          <div className="glass-panel rounded-3xl p-10 text-center text-on-surface-variant">
+          <div className="glass-panel rounded-3xl p-6 sm:p-10 text-center text-on-surface-variant">
             Nenhum cliente encontrado.
           </div>
         )}
@@ -184,7 +184,7 @@ export function GerenciarCondominios() {
               {/* Linha principal */}
               <button
                 onClick={() => toggleExpandir(cond.id)}
-                className="w-full flex items-center gap-4 p-5 text-left group hover:bg-white/5 transition-all cursor-pointer"
+                className="w-full flex items-center gap-3 sm:gap-4 p-4 sm:p-5 text-left group hover:bg-white/5 transition-all cursor-pointer"
               >
                 <div className="w-11 h-11 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
                   <Icone name="domain" className="text-primary" />
@@ -219,7 +219,7 @@ export function GerenciarCondominios() {
 
               {/* Painel expandido */}
               {expandido === cond.id && (
-                <div className="border-t border-outline-variant/15 px-5 pb-6 pt-5">
+                <div className="border-t border-outline-variant/15 px-4 sm:px-5 pb-6 pt-5">
                   {editando === cond.id ? (
                     <FormCondominio
                       inicial={cond}
@@ -286,7 +286,7 @@ function DetalhesCondominio({ cond, isGerente, onEditar, onToggleStatus }) {
   return (
     <div className="space-y-5">
       {/* Detalhes */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         {[
           { label: "ID / Slug", value: cond.id, icon: "tag" },
           { label: "CNPJ", value: cond.cnpj || "—", icon: "badge" },
@@ -509,7 +509,7 @@ function FormCondominio({ inicial, onSalvar, onCancelar, isNovo }) {
         onChange={(e) => set("endereco", e.target.value)}
       />
 
-      <div className="flex gap-3 pt-1">
+      <div className="flex flex-col sm:flex-row gap-3 pt-1">
         <Botao type="submit" disabled={salvando}>
           {salvando ? "Salvando…" : isNovo ? "Criar Cliente" : "Salvar Alterações"}
           <Icone name={isNovo ? "add_business" : "check"} className="text-xl" />

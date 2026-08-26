@@ -98,7 +98,7 @@ export function GerenciarReunioes() {
   };
 
   return (
-    <div className="min-h-screen w-full pt-4 pb-20 px-6">
+    <div className="min-h-screen w-full pt-4 pb-20 px-4 sm:px-6">
       <div className="max-w-6xl mx-auto space-y-8">
         {/* Header */}
         <header className="flex flex-col md:flex-row md:items-end justify-between gap-4">
@@ -106,7 +106,7 @@ export function GerenciarReunioes() {
             <p className="text-on-surface-variant text-xs font-semibold uppercase tracking-widest mb-1">
               Painel Administrativo
             </p>
-            <h1 className="font-headline text-4xl font-extrabold tracking-tight text-on-surface">
+            <h1 className="font-headline text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-on-surface">
               Gestão de{" "}
               <span className="bg-gradient-to-r from-primary to-tertiary bg-clip-text text-transparent">
                 Reuniões
@@ -116,7 +116,7 @@ export function GerenciarReunioes() {
         </header>
 
         {/* Sub-navbar de abas */}
-        <div className="glass-panel rounded-2xl p-1.5 flex gap-1 w-fit flex-wrap">
+        <div className="glass-panel rounded-2xl p-1.5 flex flex-wrap gap-1 w-full sm:w-fit">
           {[
             { id: "reunioes", label: "Reuniões", icon: "groups" },
             { id: "votacoes", label: "Votações", icon: "how_to_vote" },
@@ -125,7 +125,7 @@ export function GerenciarReunioes() {
             <button
               key={tab.id}
               onClick={() => setAba(tab.id)}
-              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 cursor-pointer ${
+              className={`flex items-center gap-2 px-3 sm:px-5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 cursor-pointer ${
                 aba === tab.id
                   ? "bg-primary/15 text-primary"
                   : "text-on-surface-variant hover:text-on-surface hover:bg-white/5"
@@ -667,7 +667,7 @@ function AbaReunioes({ irParaVotacao }) {
       </div>
 
       {/* Toolbar */}
-      <div className="glass-panel rounded-3xl p-6 space-y-4">
+      <div className="glass-panel rounded-3xl p-4 sm:p-6 space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 className="font-headline text-xl font-bold text-on-surface">Reuniões</h2>
           <button
@@ -1009,9 +1009,9 @@ function AbaReunioes({ irParaVotacao }) {
         {/* Detalhe da reunião */}
         {detalhe && (
           <div id="meeting-detalhe-container" className="bg-surface-container-highest/20 rounded-xl border border-white/10 divide-y divide-white/5 overflow-hidden animate-fade-in">
-            <div className="p-4 flex items-start justify-between gap-3">
+            <div className="p-4 flex flex-col sm:flex-row sm:items-start justify-between gap-3">
               <div className="space-y-1">
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2 min-w-0">
                   <span className="font-semibold text-on-surface">{detalhe.titulo}</span>
                   <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${STATUS_MEETING[detalhe.status]?.cls ?? ""}`}>
                     {STATUS_MEETING[detalhe.status]?.label ?? detalhe.status}
@@ -1020,7 +1020,7 @@ function AbaReunioes({ irParaVotacao }) {
                 {detalhe.descricao && (
                   <p className="text-on-surface-variant text-xs">{detalhe.descricao}</p>
                 )}
-                <div className="flex flex-wrap gap-4 text-xs text-on-surface-variant mt-1">
+                <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-on-surface-variant mt-1">
                   <span className="flex items-center gap-1">
                     <Icone name="schedule" className="text-sm" /> Início: {fmt(detalhe.dataHoraInicio)}
                   </span>
@@ -1035,7 +1035,7 @@ function AbaReunioes({ irParaVotacao }) {
                   )}
                 </div>
               </div>
-              <div className="flex gap-2 flex-shrink-0">
+              <div className="flex flex-wrap gap-2 sm:flex-shrink-0">
                 {detalhe.status === "AGENDADA" && (
                   <>
                     {detalhe.idOrganizador === usuario?.id && (
@@ -1551,7 +1551,7 @@ function AbaVotacoes({ reuniaoPreenchida }) {
 
   return (
     <div className="space-y-6">
-      <div className="glass-panel rounded-3xl p-6 space-y-4">
+      <div className="glass-panel rounded-3xl p-4 sm:p-6 space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 className="font-headline text-xl font-bold text-on-surface">Votações</h2>
           <button
@@ -1627,8 +1627,8 @@ function AbaVotacoes({ reuniaoPreenchida }) {
         {detalhe && (
           <div className="bg-surface-container-highest/20 rounded-xl border border-white/10 divide-y divide-white/5">
             <div className="p-4 space-y-2">
-              <div className="flex items-center justify-between gap-3">
-                <div className="flex items-center gap-2">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="flex flex-wrap items-center gap-2 min-w-0">
                   <span className="font-semibold text-on-surface">{detalhe.titulo}</span>
                   <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${STATUS_POLL[detalhe.status]?.cls ?? ""}`}>
                     {STATUS_POLL[detalhe.status]?.label ?? detalhe.status}
@@ -1757,7 +1757,7 @@ function AbaAtas() {
 
   return (
     <div className="space-y-6">
-      <div className="glass-panel rounded-3xl p-6 space-y-4">
+      <div className="glass-panel rounded-3xl p-4 sm:p-6 space-y-4">
         <h2 className="font-headline text-xl font-bold text-on-surface">Atas de Reunião</h2>
 
         {/* Busca */}
@@ -1768,7 +1768,7 @@ function AbaAtas() {
           <button
             onClick={buscarAta}
             disabled={buscando}
-            className="self-end mb-0.5 flex items-center gap-1 px-4 py-2 rounded-xl bg-primary/10 text-primary hover:bg-primary/20 transition text-sm font-semibold cursor-pointer"
+            className="sm:self-end sm:mb-0.5 flex items-center justify-center gap-1 px-4 py-2 rounded-xl bg-primary/10 text-primary hover:bg-primary/20 transition text-sm font-semibold cursor-pointer"
           >
             <Icone name="search" className="text-base" />
             {buscando ? "..." : "Buscar"}
@@ -1776,7 +1776,7 @@ function AbaAtas() {
         </div>
 
         {erroDetalhe && (
-          <div className="flex items-center justify-between bg-surface-container-highest/20 rounded-xl p-3 border border-white/10">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-surface-container-highest/20 rounded-xl p-3 border border-white/10">
             <p className="text-on-surface-variant text-sm">{erroDetalhe}</p>
             <button
               onClick={() => { setModo("criar"); setErroDetalhe(""); setForm(EMPTY_ATA); }}
@@ -1790,7 +1790,7 @@ function AbaAtas() {
         {/* Detalhe da ata */}
         {detalhe && modo === "" && (
           <div className="bg-surface-container-highest/20 rounded-xl border border-white/10 p-4 space-y-3">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-wrap items-center justify-between gap-2">
               <p className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider">
                 Ata da Reunião #{detalhe.meetingId}
               </p>

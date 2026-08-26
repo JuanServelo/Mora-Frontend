@@ -86,7 +86,7 @@ export function UsuariosCondominio() {
   });
 
   return (
-    <div className="min-h-screen w-full pt-4 pb-20 px-6">
+    <div className="min-h-screen w-full pt-4 pb-20 px-4 sm:px-6">
       <div className="max-w-4xl mx-auto space-y-8">
 
         <header className="flex flex-col md:flex-row md:items-end justify-between gap-4">
@@ -94,13 +94,13 @@ export function UsuariosCondominio() {
             <p className="text-on-surface-variant text-xs font-semibold uppercase tracking-widest mb-1">
               Portaria
             </p>
-            <h1 className="font-headline text-4xl font-extrabold tracking-tight text-on-surface">
+            <h1 className="font-headline text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-on-surface">
               <span className="bg-gradient-to-r from-primary to-tertiary bg-clip-text text-transparent">
                 Usuários do Condomínio
               </span>
             </h1>
           </div>
-          <div className="glass-panel rounded-2xl px-5 py-3 text-center">
+          <div className="glass-panel rounded-2xl px-4 sm:px-5 py-3 text-center flex-1 sm:flex-none min-w-[92px]">
             <p className="text-2xl font-headline font-bold text-primary">{usuarios.length}</p>
             <p className="text-on-surface-variant text-xs uppercase tracking-wider">Total</p>
           </div>
@@ -117,11 +117,11 @@ export function UsuariosCondominio() {
         </div>
 
         {carregando ? (
-          <div className="glass-panel rounded-3xl p-10 text-center text-on-surface-variant">
+          <div className="glass-panel rounded-3xl p-6 sm:p-10 text-center text-on-surface-variant">
             Carregando...
           </div>
         ) : filtrados.length === 0 ? (
-          <div className="glass-panel rounded-3xl p-10 text-center text-on-surface-variant">
+          <div className="glass-panel rounded-3xl p-6 sm:p-10 text-center text-on-surface-variant">
             {busca ? "Nenhum resultado encontrado." : "Nenhum usuário cadastrado neste condomínio."}
           </div>
         ) : (
