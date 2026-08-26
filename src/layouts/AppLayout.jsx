@@ -7,8 +7,8 @@ import { podeAcessarAdmin, PERFIS } from "../utils/perfis";
 
 export function AppLayout() {
   const { usuario } = useAuth();
-  const isAdmin = podeAcessarAdmin(usuario?.perfil) || usuario?.role === "admin";
-  const isDoorman = usuario?.perfil === PERFIS.DOORMAN;
+  const isAdmin = podeAcessarAdmin(usuario?.perfil);
+  const isDoorman = usuario?.perfil === PERFIS.PORTEIRO;
 
   // Admins e porteiro usam layout de barra lateral; os demais, a navbar.
   if (isAdmin || isDoorman) {

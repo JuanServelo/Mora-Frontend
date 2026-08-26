@@ -21,7 +21,7 @@ const selectCls = "w-full bg-surface-container-highest/40 border-none rounded-xl
 // ════════════════════════════════════════════
 export function GerenciarEstruturas() {
   const { usuario } = useAuth();
-  const isGerente = [PERFIS.CONTRACTING_PROPERTY_MANAGER, PERFIS.CONTRACTING_SYNDIC].includes(usuario?.perfil);
+  const isGerente = usuario?.perfil === PERFIS.ADMIN_GERAL;
 
   const [condominios, setCondominios] = useState([]);
   const [condominioId, setCondominioId] = useState(null);
@@ -323,6 +323,7 @@ function AbaBlocos({ condominioId }) {
 function FormBloco({ inicial, onSalvar, onCancelar }) {
   const [form, setForm] = useState({
     nome: inicial?.nome || "",
+    sigla: inicial?.sigla || "",
     descricao: inicial?.descricao || "",
     andares: inicial?.andares || "",
     apartamentosPorAndar: inicial?.apartamentosPorAndar || "",
@@ -343,6 +344,7 @@ function FormBloco({ inicial, onSalvar, onCancelar }) {
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <Campo id="bloco-nome" label="Nome" placeholder="Ex: Bloco A" required value={form.nome} onChange={(e) => set("nome", e.target.value)} />
+        <Campo id="bloco-sigla" label="Sigla" placeholder="Ex: A" value={form.sigla} onChange={(e) => set("sigla", e.target.value)} />
         <Campo id="bloco-descricao" label="Descrição" placeholder="Ex: Torre principal" required value={form.descricao} onChange={(e) => set("descricao", e.target.value)} />
         <Campo id="bloco-andares" label="Andares" type="number" placeholder="Ex: 10" value={form.andares} onChange={(e) => set("andares", e.target.value)} />
         <Campo id="bloco-aptsandar" label="Aptos por andar" type="number" placeholder="Ex: 4" value={form.apartamentosPorAndar} onChange={(e) => set("apartamentosPorAndar", e.target.value)} />
@@ -363,6 +365,7 @@ function DetalhesBloco({ bloco, onEditar, onToggleAtivo }) {
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {[
           { label: "Nome", value: bloco.nome },
+          { label: "Sigla", value: bloco.sigla || "—" },
           { label: "Descrição", value: bloco.descricao },
           { label: "Andares", value: bloco.andares ?? "—" },
           { label: "Apts/Andar", value: bloco.apartamentosPorAndar ?? "—" },
@@ -606,10 +609,8 @@ function VistaApartamentos({ bloco, condominioId, onVoltar, onEditarBloco, onTog
 
 // ─── Convite de morador atrelado a um apartamento ───
 const PERFIS_UNIDADE_CONVITE = [
-  PERFIS.RESIDENT_OWNER,
-  PERFIS.ABSENT_OWNER,
-  PERFIS.LESSEE,
-  PERFIS.OCCUPANT,
+  PERFIS.MORADOR,
+  PERFIS.DONO_ALUGUEL,
 ];
 
 function ConviteEstrutura({ apartamento, bloco, condominioId }) {

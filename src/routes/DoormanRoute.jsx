@@ -1,13 +1,11 @@
 import { Navigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
-import { PERFIS, podeAcessarAdmin } from "../utils/perfis";
+import { PERFIS } from "../utils/perfis";
 
 const PERFIS_PERMITIDOS = [
-  PERFIS.DOORMAN,
-  PERFIS.CONTRACTING_PROPERTY_MANAGER,
-  PERFIS.CONTRACTING_SYNDIC,
-  PERFIS.OPERATIONAL_SYNDIC,
-  PERFIS.ADMINISTRATOR,
+  PERFIS.PORTEIRO,
+  PERFIS.ADMIN_GERAL,
+  PERFIS.ADMIN_SINDICO,
 ];
 
 export function DoormanRoute({ children }) {

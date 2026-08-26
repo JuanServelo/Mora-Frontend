@@ -4,6 +4,7 @@ import { Link, useLocation } from "react-router-dom";
 import { Icone } from "../icones/Icone";
 import { useAuth } from "../../contexts/AuthContext";
 import { PERFIS, isUsuarioRestrito, podeAcessarAdmin } from "../../utils/perfis";
+import { linksDoPerfil } from "../../utils/menuAdmin";
 // import moraLogo from "../../assets/Mora.png";
 // import moraLogo2 from "../../assets/Mora2.png";
 import moraLogo3 from "../../assets/Mora3.png";
@@ -11,12 +12,11 @@ import moraLogo3 from "../../assets/Mora3.png";
 const NAV_LINKS_LEFT = [
   { label: "Início", to: "/inicio" },
   { label: "Serviços", to: "/servicos" },
-  { label: "Comodidades", to: "/comodidades" },
   { label: "Espaços", to: "/espacos" },
   { label: "Reclamações", to: "/reclamacoes" },
 ];
 
-const NAV_LINKS_DOORMAN = [
+const NAV_LINKS_PORTEIRO = [
   { label: "Início", to: "/inicio" },
   { label: "Entradas e Saídas", to: "/entradas-e-saidas" },
   { label: "Entregas", to: "/entregas" },
@@ -27,17 +27,6 @@ const NAV_LINKS_RIGHT = [
   { label: "Perfil", to: "/perfil" },
 ];
 
-const ADM_LINKS = [
-  { label: "Usuários", to: "/adm/usuarios", icon: "manage_accounts", description: "Gerenciar moradores" },
-  { label: "Estruturas", to: "/adm/estruturas", icon: "apartment", description: "Blocos e apartamentos" },
-  { label: "Reuniões", to: "/adm/reunioes", icon: "groups", description: "Reuniões e votações" },
-  { label: "Reclamações", to: "/adm/reclamacoes", icon: "report", description: "Gestão de reclamações" },
-  { label: "Entregas", to: "/adm/entregas", icon: "inventory_2", description: "Gestão de entregas" },
-  { label: "Vagas", to: "/adm/vagas", icon: "local_parking", description: "Vagas de garagem" },
-  { label: "Conhecimento", to: "/adm/conhecimento", icon: "library_books", description: "Base de conhecimento e FAQ" },
-  { label: "Perfis", to: "/adm/perfis", icon: "verified_user", description: "Permissões por perfil" },
-  { label: "Clientes", to: "/adm/condominios", icon: "domain", description: "Gestão de clientes" },
-];
 
 function NavLink({ to, children }) {
   const { pathname } = useLocation();
@@ -63,13 +52,7 @@ function AdminMenu({ usuario }) {
   const ref = useRef(null);
   const { pathname } = useLocation();
 
-  const isSuperAdmin = usuario?.role === "admin";
-  const admLinks = isSuperAdmin
-    ? [
-        { label: "Planos", to: "/adm/planos", icon: "workspace_premium", description: "Gerenciar planos SaaS" },
-        ...ADM_LINKS,
-      ]
-    : ADM_LINKS;
+  const admLinks = linksDoPerfil(usuario?.perfil);
 
   const admActive = admLinks.some((l) => pathname === l.to);
 
@@ -149,13 +132,13 @@ export function Navbar() {
   const { usuario } = useAuth();
   const isRestrictedUser = isUsuarioRestrito(usuario);
   const showAdminMenu = podeAcessarAdmin(usuario?.perfil);
-  const isDoorman = usuario?.perfil === PERFIS.DOORMAN;
+  const isDoorman = usuario?.perfil === PERFIS.PORTEIRO;
 
   let visibleLeftLinks;
   if (isRestrictedUser) {
     visibleLeftLinks = [];
   } else if (isDoorman) {
-    visibleLeftLinks = NAV_LINKS_DOORMAN;
+    visibleLeftLinks = NAV_LINKS_PORTEIRO;
   } else {
     visibleLeftLinks = NAV_LINKS_LEFT;
   }

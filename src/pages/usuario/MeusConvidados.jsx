@@ -129,7 +129,7 @@ export function MeusConvidados() {
     }
   }
 
-  const podeGerenciar = usuario?.responsavelFinanceiro || ["RESIDENT_OWNER", "LESSEE"].includes(usuario?.perfil);
+  const podeGerenciar = usuario?.responsavelFinanceiro || usuario?.perfil === "MORADOR";
 
   return (
     <div className="min-h-screen w-full pt-4 pb-20 px-6">

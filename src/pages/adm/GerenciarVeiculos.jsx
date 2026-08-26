@@ -381,8 +381,8 @@ export function GerenciarVeiculos() {
   const confirm = useConfirm();
   const { usuario } = useAuth();
 
-  const isDoorman = usuario?.perfil === PERFIS.DOORMAN;
-  const isAdminLevel = podeAcessarAdmin(usuario?.perfil) || usuario?.role === 'admin';
+  const isDoorman = usuario?.perfil === PERFIS.PORTEIRO;
+  const isAdminLevel = podeAcessarAdmin(usuario?.perfil);
   // Restringe proprietários e vagas à unidade do usuário quando ele é residente
   const filtrarPorUnidade = !isAdminLevel && !isDoorman && Boolean(usuario?.unidadeId);
 

@@ -33,7 +33,9 @@ import { MeusConvidados } from "../pages/usuario/MeusConvidados";
 import { AppLayout } from "../layouts/AppLayout";
 import { ProtectedRoute } from "./ProtectedRoute";
 import { DoormanRoute } from "./DoormanRoute";
-import { SuperAdminRoute } from "./SuperAdminRoute";
+import { AdminRoute } from "./AdminRoute";
+import { IndexAdminGeralLazy } from "../pages/adm/IndexAdminGeralLazy";
+import { DetalheCondominio } from "../pages/adm/DetalheCondominio";
 
 export const router = createBrowserRouter([
   {
@@ -99,24 +101,21 @@ export const router = createBrowserRouter([
         ),
       },
       { path: "/meus-convidados", element: <MeusConvidados /> },
-      { path: "/adm/usuarios", element: <GerenciarUsuarios /> },
-      { path: "/adm/estruturas", element: <GerenciarEstruturas /> },
-      { path: "/adm/reunioes", element: <GerenciarReunioes /> },
-      { path: "/adm/reclamacoes", element: <GerenciarReclamacoes /> },
-      { path: "/adm/entregas", element: <GerenciarEntregas /> },
-      { path: "/adm/vagas", element: <GerenciarVagas /> },
-      { path: "/adm/conhecimento", element: <GerenciarConhecimento /> },
-      { path: "/adm/perfis", element: <GerenciarPerfis /> },
-      { path: "/adm/condominios", element: <GerenciarCondominios /> },
+      // Todas as telas /adm passam pelo AdminRoute, que usa o mesmo mapa do menu
+      // (src/utils/menuAdmin.js) — assim esconder do menu também barra a URL.
+      { path: "/adm/geral", element: <AdminRoute><IndexAdminGeralLazy /></AdminRoute> },
+      { path: "/adm/condominios", element: <AdminRoute><GerenciarCondominios /></AdminRoute> },
+      { path: "/adm/condominios/:id", element: <AdminRoute><DetalheCondominio /></AdminRoute> },
+      { path: "/adm/planos", element: <AdminRoute><GerenciarPlanos /></AdminRoute> },
+      { path: "/adm/usuarios", element: <AdminRoute><GerenciarUsuarios /></AdminRoute> },
+      { path: "/adm/estruturas", element: <AdminRoute><GerenciarEstruturas /></AdminRoute> },
+      { path: "/adm/perfis", element: <AdminRoute><GerenciarPerfis /></AdminRoute> },
+      { path: "/adm/reunioes", element: <AdminRoute><GerenciarReunioes /></AdminRoute> },
+      { path: "/adm/reclamacoes", element: <AdminRoute><GerenciarReclamacoes /></AdminRoute> },
+      { path: "/adm/entregas", element: <AdminRoute><GerenciarEntregas /></AdminRoute> },
+      { path: "/adm/vagas", element: <AdminRoute><GerenciarVagas /></AdminRoute> },
+      { path: "/adm/conhecimento", element: <AdminRoute><GerenciarConhecimento /></AdminRoute> },
       { path: "/adm/veiculos", element: <GerenciarVeiculos /> },
-      {
-        path: "/adm/planos",
-        element: (
-          <SuperAdminRoute>
-            <GerenciarPlanos />
-          </SuperAdminRoute>
-        ),
-      },
     ],
   },
 ]);
