@@ -51,8 +51,8 @@ export function GerenciarUsuarios() {
   useEffect(() => {
     Promise.all([
       api.get("/api/user-management/users").catch(() => api.get("/api/users")),
-      blocoApi.listar(),
-      apartamentoApi.listar(),
+      blocoApi.listar().catch(() => ({ data: [] })),
+      apartamentoApi.listar().catch(() => ({ data: [] })),
       condominiosApi.listar().catch(() => ({ data: { condominios: [] } })),
     ])
       .then(([usersRes, blocosRes, aptsRes, condsRes]) => {
