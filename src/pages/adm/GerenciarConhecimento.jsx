@@ -1,7 +1,7 @@
 // src/pages/adm/GerenciarConhecimento.jsx
 // Página ADMIN — Base de Conhecimento (FAQ, global) + Avisos e Comunicados (por condomínio)
 import { useState, useEffect } from "react";
-import { conhecimentoApi, avisoApi } from "../../services/portariaApi";
+import { conhecimentoApi, avisoApi } from "../../services/comunicacaoApi";
 import { useAuth } from "../../contexts/AuthContext";
 import { Icone } from "../../components/icones/Icone";
 import { Campo } from "../../components/campos/Campo";

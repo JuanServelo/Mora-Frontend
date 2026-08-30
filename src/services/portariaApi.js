@@ -105,34 +105,27 @@ export const veiculoApi = {
 export const carroApi = veiculoApi;
 
 // ─────────────────────────────────────────────
-// BASE DE CONHECIMENTO / FAQ
+// RESERVAS DE ÁREAS COMUNS (RF-10)
 // ─────────────────────────────────────────────
-export const conhecimentoApi = {
-  listarTodos: () => portariaApi.get("/conhecimento"),
-  listarPublicados: () => portariaApi.get("/conhecimento/publicados"),
-  listarPorCategoria: (categoria) =>
-    portariaApi.get(`/conhecimento/categoria/${categoria}`),
-  listarPublicadosPorCategoria: (categoria) =>
-    portariaApi.get(`/conhecimento/categoria/${categoria}/publicados`),
-  buscarPorTitulo: (titulo) =>
-    portariaApi.get("/conhecimento/buscar", { params: { titulo } }),
-  buscar: (id) => portariaApi.get(`/conhecimento/${id}`),
-  criar: (data) => portariaApi.post("/conhecimento", data),
-  atualizar: (id, data) => portariaApi.put(`/conhecimento/${id}`, data),
-  excluir: (id) => portariaApi.delete(`/conhecimento/${id}`),
+export const reservaApi = {
+  solicitar: (data) => portariaApi.post("/reservas", data),
+  listarMinhas: () => portariaApi.get("/reservas/minhas"),
+  listar: (status) => portariaApi.get("/reservas", { params: status ? { status } : {} }),
+  buscar: (id) => portariaApi.get(`/reservas/${id}`),
+  listarPorArea: (areaComunId) => portariaApi.get(`/reservas/area/${areaComunId}`),
+  aprovar: (id) => portariaApi.patch(`/reservas/${id}/aprovar`),
+  recusar: (id, justificativa) => portariaApi.patch(`/reservas/${id}/recusar`, { justificativa }),
+  cancelar: (id) => portariaApi.patch(`/reservas/${id}/cancelar`),
 };
 
 // ─────────────────────────────────────────────
-// AVISOS E COMUNICADOS (por condomínio)
+// PRÉ-AUTORIZAÇÕES DE VISITANTES (RF-6)
 // ─────────────────────────────────────────────
-export const avisoApi = {
-  listar: (condominioId) =>
-    portariaApi.get("/avisos", { params: condominioId ? { condominioId } : {} }),
-  listarAtivos: (condominioId) =>
-    portariaApi.get("/avisos/ativos", { params: { condominioId } }),
-  buscar: (id) => portariaApi.get(`/avisos/${id}`),
-  criar: (data) => portariaApi.post("/avisos", data),
-  atualizar: (id, data) => portariaApi.put(`/avisos/${id}`, data),
-  encerrar: (id) => portariaApi.patch(`/avisos/${id}/encerrar`),
-  excluir: (id) => portariaApi.delete(`/avisos/${id}`),
+export const preAutorizacaoApi = {
+  minhas: () => portariaApi.get("/pre-autorizacoes/minhas"),
+  ativasHoje: () => portariaApi.get("/pre-autorizacoes/hoje"),
+  buscar: (termo) => portariaApi.get("/pre-autorizacoes/buscar", { params: { termo } }),
+  cadastrar: (data) => portariaApi.post("/pre-autorizacoes", data),
+  revogar: (id) => portariaApi.delete(`/pre-autorizacoes/${id}`),
 };
+

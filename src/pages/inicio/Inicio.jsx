@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import { condominiosApi } from "../../services/condominiosApi";
-import { avisoApi } from "../../services/portariaApi";
+import { avisoApi } from "../../services/comunicacaoApi";
 import { Icone } from "../../components/icones/Icone";
 import { PERFIS } from "../../utils/perfis";
 import { InicioDoorman } from "../porteiro/InicioDoorman";

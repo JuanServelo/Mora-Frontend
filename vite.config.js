@@ -15,6 +15,11 @@ export default defineConfig({
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/portaria-api/, ""),
       },
+      "/comunicacao-api": {
+        target: "http://localhost:8094",
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/comunicacao-api/, ""),
+      },
     },
   },
 });
