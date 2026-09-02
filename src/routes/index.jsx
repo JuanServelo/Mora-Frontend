@@ -18,6 +18,7 @@ import { GerenciarConhecimento } from "../pages/adm/GerenciarConhecimento";
 import { GerenciarPerfis } from "../pages/adm/GerenciarPerfis";
 import { GerenciarCondominios } from "../pages/adm/GerenciarCondominios";
 import { GerenciarPlanos } from "../pages/adm/GerenciarPlanos";
+import { GerenciarFinanceiro } from "../pages/adm/GerenciarFinanceiro";
 import { GerenciarVeiculos } from "../pages/adm/GerenciarVeiculos";
 import { FAQ } from "../pages/usuario/FAQ";
 import { MinhasReservas } from "../pages/usuario/MinhasReservas";
@@ -110,6 +111,7 @@ export const router = createBrowserRouter([
       { path: "/adm/usuarios", element: <AdminRoute><GerenciarUsuarios /></AdminRoute> },
       { path: "/adm/estruturas", element: <AdminRoute><GerenciarEstruturas /></AdminRoute> },
       { path: "/adm/perfis", element: <AdminRoute><GerenciarPerfis /></AdminRoute> },
+      { path: "/adm/financeiro", element: <AdminRoute><GerenciarFinanceiro /></AdminRoute> },
       { path: "/adm/reunioes", element: <AdminRoute><GerenciarReunioes /></AdminRoute> },
       { path: "/adm/reclamacoes", element: <AdminRoute><GerenciarReclamacoes /></AdminRoute> },
       { path: "/adm/entregas", element: <AdminRoute><GerenciarEntregas /></AdminRoute> },
