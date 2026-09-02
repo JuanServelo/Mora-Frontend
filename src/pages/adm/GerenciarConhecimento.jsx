@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { conhecimentoApi, avisoApi } from "../../services/portariaApi";
 import { useAuth } from "../../contexts/AuthContext";
+import { useConfirm } from "../../contexts/ConfirmContext";
 import { Icone } from "../../components/icones/Icone";
 import { Campo } from "../../components/campos/Campo";
 import { Botao } from "../../components/botoes/Botao";
@@ -356,6 +357,7 @@ function vigente(aviso) {
 
 function AbaAvisos() {
   const { usuario } = useAuth();
+  const confirm = useConfirm();
   const condominioId = usuario?.condominioId;
   const [avisos, setAvisos] = useState([]);
   const [carregando, setCarregando] = useState(true);
@@ -410,12 +412,19 @@ function AbaAvisos() {
     }
   };
 
-  const excluir = async (id) => {
-    if (!confirm("Tem certeza que deseja excluir este aviso?")) return;
+  const excluir = async (aviso) => {
+    const ok = await confirm({
+      titulo: "Excluir aviso",
+      mensagem: `Tem certeza que deseja excluir "${aviso.titulo}"? Essa ação não pode ser desfeita.`,
+      confirmarTexto: "Sim, excluir",
+      cancelarTexto: "Cancelar",
+      variante: "danger",
+    });
+    if (!ok) return;
     try {
-      await avisoApi.excluir(id);
-      setAvisos((prev) => prev.filter((a) => a.id !== id));
-      if (expandido === id) setExpandido(null);
+      await avisoApi.excluir(aviso.id);
+      setAvisos((prev) => prev.filter((a) => a.id !== aviso.id));
+      if (expandido === aviso.id) setExpandido(null);
     } catch (err) {
       console.error("Erro ao excluir aviso:", err);
     }
@@ -553,7 +562,7 @@ function AbaAvisos() {
                     <button onClick={() => encerrar(aviso)} className="text-xs font-semibold px-3 py-1.5 rounded-lg border bg-error/10 text-error border-error/20 hover:bg-error/20 transition-all cursor-pointer">Encerrar</button>
                   )}
                   <button onClick={() => iniciarEdicao(aviso)} className="flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-lg bg-white/5 text-on-surface-variant hover:text-on-surface hover:bg-white/10 transition-all cursor-pointer"><Icone name="edit" className="text-sm" /> Editar</button>
-                  <button onClick={() => excluir(aviso.id)} className="flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-lg bg-error/10 text-error hover:bg-error/20 transition-all cursor-pointer"><Icone name="delete" className="text-sm" /> Excluir</button>
+                  <button onClick={() => excluir(aviso)} className="flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-lg bg-error/10 text-error hover:bg-error/20 transition-all cursor-pointer"><Icone name="delete" className="text-sm" /> Excluir</button>
                 </div>
               </div>
             )}

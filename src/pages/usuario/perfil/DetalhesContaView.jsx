@@ -144,6 +144,19 @@ export function DetalhesContaView() {
           icon="phone"
           defaultValue={usuario?.telefone || ""}
         />
+        {usuario?.dataNascimento && (
+          <div className="flex flex-col gap-1">
+            <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant ml-1">
+              Data de Nascimento
+            </label>
+            <div className="flex items-center gap-2 bg-surface-container-highest/40 rounded-xl py-3 px-4 text-on-surface">
+              <Icone name="cake" className="text-outline-variant text-lg" />
+              <span>
+                {new Date(usuario.dataNascimento).toLocaleDateString("pt-BR", { timeZone: "UTC" })}
+              </span>
+            </div>
+          </div>
+        )}
       </div>
 
       {erro && <p className="text-error text-sm font-medium">{erro}</p>}
