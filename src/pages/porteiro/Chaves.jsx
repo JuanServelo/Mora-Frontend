@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { Icone } from "../../components/icones/Icone";
-import { chaveApi, moradorApi, funcionarioApi } from "../../services/portariaApi";
+import { chaveApi } from "../../services/portariaApi";
+import { acessoApi } from "../../services/acessoApi";
 import { useToast } from "../../contexts/ToastContext";
 
 // ── helpers ───────────────────────────────────────────────────────────────────
@@ -31,6 +32,7 @@ function ModalRetirar({ chave, onClose, onSalvo }) {
   const [responsavelId, setResponsavelId] = useState("");
   const [opcoes, setOpcoes] = useState([]);
   const [loadingOpcoes, setLoadingOpcoes] = useState(false);
+  const [erroOpcoes, setErroOpcoes] = useState(null);
   const [loading, setLoading] = useState(false);
   const [erro, setErro] = useState(null);
   const toast = useToast();
@@ -38,20 +40,34 @@ function ModalRetirar({ chave, onClose, onSalvo }) {
   useEffect(() => {
     setResponsavelId("");
     setOpcoes([]);
+    setErroOpcoes(null);
     setLoadingOpcoes(true);
-    const fn = tipo === "MORADOR" ? moradorApi.listar : funcionarioApi.listar;
-    fn()
-      .then((res) => setOpcoes(res.data || []))
-      .catch(() => setOpcoes([]))
+    acessoApi.listarUsuariosCondominio()
+      .then((res) => {
+        const todos = res.data?.usuarios || [];
+        const filtrados = todos.filter((u) => {
+          if (u.status !== "active") return false;
+          if (tipo === "MORADOR") return u.perfil === "MORADOR";
+          return u.perfil === "PORTEIRO" || u.perfil === "GERENTE" || u.perfil === "FUNCIONARIO";
+        });
+        const lista = filtrados.slice().sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR"));
+        setOpcoes(lista);
+      })
+      .catch((err) => {
+        console.error("Erro ao carregar usuários:", err);
+        setErroOpcoes(err?.response?.data?.mensagem || err?.response?.data?.message || "Não foi possível carregar a lista.");
+      })
       .finally(() => setLoadingOpcoes(false));
   }, [tipo]);
 
   async function confirmar(e) {
     e.preventDefault();
     if (!responsavelId) { setErro("Selecione o responsável."); return; }
+    const selecionado = opcoes.find((o) => o.id === responsavelId);
+    const nomeResponsavel = selecionado?.nome || "";
     setLoading(true);
     try {
-      await chaveApi.retirar(chave.id, responsavelId, tipo);
+      await chaveApi.retirar(chave.id, responsavelId, tipo, nomeResponsavel);
       toast.success(`Retirada de "${chave.nomeChave}" registrada.`);
       onSalvo();
     } catch (err) {
@@ -98,14 +114,24 @@ function ModalRetirar({ chave, onClose, onSalvo }) {
               {tipo === "MORADOR" ? "Morador" : "Funcionário"}
             </label>
             {loadingOpcoes ? (
-              <p className="text-sm text-on-surface-variant/60 py-2">Carregando…</p>
+              <p className="text-sm text-on-surface-variant/60 py-2 italic">
+                {tipo === "MORADOR" ? "Carregando moradores…" : "Carregando funcionários…"}
+              </p>
+            ) : erroOpcoes ? (
+              <p className="text-red-500 text-xs py-2">{erroOpcoes}</p>
+            ) : opcoes.length === 0 ? (
+              <p className="text-sm text-on-surface-variant/60 py-2">
+                {tipo === "MORADOR" ? "Nenhum morador cadastrado." : "Nenhum funcionário cadastrado."}
+              </p>
             ) : (
               <select value={responsavelId} onChange={(e) => { setResponsavelId(e.target.value); setErro(null); }}
                 className="w-full rounded-xl border border-outline-variant/30 bg-surface px-4 py-2.5 text-sm text-on-surface focus:outline-none focus:border-primary/60 transition-colors">
                 <option value="">Selecione…</option>
-                {opcoes.map((o) => (
-                  <option key={o.id} value={o.id}>{o.nome}</option>
-                ))}
+                {opcoes.map((o) => {
+                  const loc = [o.bloco, o.apartamento].filter(Boolean).join(" / ");
+                  const label = loc ? `${o.nome} — ${loc}` : o.nome;
+                  return <option key={o.id} value={o.id}>{label}</option>;
+                })}
               </select>
             )}
             {erro && <p className="text-red-500 text-xs mt-1">{erro}</p>}
@@ -115,7 +141,7 @@ function ModalRetirar({ chave, onClose, onSalvo }) {
               className="px-4 py-2 rounded-full text-sm font-semibold text-on-surface-variant border border-outline-variant/30 hover:bg-surface-variant/20 transition-all">
               Cancelar
             </button>
-            <button type="submit" disabled={loading}
+            <button type="submit" disabled={loading || !responsavelId}
               className="px-5 py-2 rounded-full text-sm font-semibold bg-amber-500 text-white hover:opacity-90 transition-opacity disabled:opacity-60">
               {loading ? "Registrando…" : "Confirmar Retirada"}
             </button>

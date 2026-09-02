@@ -137,8 +137,8 @@ export const chaveApi = {
   listarLocais: () => portariaApi.get("/chaves/locais"),
   buscar: (id) => portariaApi.get(`/chaves/${id}`),
   cadastrar: (data) => portariaApi.post("/chaves/cadastrar", data),
-  retirar: (id, responsavelId, tipoResponsavel) =>
-    portariaApi.post(`/chaves/${id}/retirar`, { responsavelId, tipoResponsavel }),
+  retirar: (id, responsavelId, tipoResponsavel, nomeResponsavel) =>
+    portariaApi.post(`/chaves/${id}/retirar`, { responsavelId, tipoResponsavel, nomeResponsavel }),
   devolver: (id) => portariaApi.post(`/chaves/${id}/devolver`),
   deletar: (id) => portariaApi.delete(`/chaves/${id}`),
   historico: (id, params) => portariaApi.get(`/chaves/${id}/historico`, { params }),
