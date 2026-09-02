@@ -63,6 +63,13 @@ export const ADM_LINKS = [
 
   // ── Operação do condomínio: não é trabalho de quem opera a plataforma
   {
+    to: "/adm/financeiro",
+    label: "Financeiro",
+    icon: "payments",
+    description: "Taxas, rateio e cobranças",
+    perfis: CONDOMINIO,
+  },
+  {
     to: "/adm/reunioes",
     label: "Reuniões",
     icon: "groups",

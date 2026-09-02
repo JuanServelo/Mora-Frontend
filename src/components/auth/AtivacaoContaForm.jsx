@@ -21,6 +21,7 @@ export function AtivacaoContaForm({ tituloPasso1, subtituloPasso1, subtituloPass
   const [carregando, setCarregando] = useState(false);
   const [telefone, setTelefone] = useState("");
   const [cpf, setCpf] = useState("");
+  const [dataNascimento, setDataNascimento] = useState("");
 
   useEffect(() => {
     const c = searchParams.get("codigo");
@@ -78,18 +79,26 @@ export function AtivacaoContaForm({ tituloPasso1, subtituloPasso1, subtituloPass
       email: form.get("email")?.trim(),
       telefone: telefone,
       cpf: cpf,
+      dataNascimento: dataNascimento,
       senha: form.get("senha"),
       confirmacaoSenha: form.get("confirmacaoSenha"),
     };
 
     const novosErros = {};
-    const camposObrigatorios = ["nome", "email", "telefone", "cpf", "senha", "confirmacaoSenha"];
+    const camposObrigatorios = ["nome", "email", "telefone", "cpf", "dataNascimento", "senha", "confirmacaoSenha"];
     for (const c of camposObrigatorios) {
       if (!dados[c]) novosErros[c] = "Este campo é obrigatório.";
     }
 
     if (!novosErros.cpf && !validarCpf(dados.cpf)) {
       novosErros.cpf = "CPF inválido.";
+    }
+
+    if (!novosErros.dataNascimento) {
+      const d = new Date(dados.dataNascimento);
+      if (isNaN(d.getTime()) || d >= new Date()) {
+        novosErros.dataNascimento = "Data de nascimento inválida.";
+      }
     }
 
     if (!novosErros.telefone && !validarTelefone(dados.telefone)) {
@@ -210,6 +219,19 @@ export function AtivacaoContaForm({ tituloPasso1, subtituloPasso1, subtituloPass
             className={campoErro("cpf")}
           />
           {erros.cpf && <p className="text-error text-sm">{erros.cpf}</p>}
+
+          <Campo
+            id="dataNascimento"
+            name="dataNascimento"
+            label="Data de nascimento"
+            type="date"
+            icon="cake"
+            value={dataNascimento}
+            onChange={(e) => setDataNascimento(e.target.value)}
+            max={new Date().toISOString().split("T")[0]}
+            className={campoErro("dataNascimento")}
+          />
+          {erros.dataNascimento && <p className="text-error text-sm">{erros.dataNascimento}</p>}
 
           <Campo
             id="senha"
