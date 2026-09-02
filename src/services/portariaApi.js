@@ -129,3 +129,18 @@ export const preAutorizacaoApi = {
   revogar: (id) => portariaApi.delete(`/pre-autorizacoes/${id}`),
 };
 
+// ─────────────────────────────────────────────
+// CHAVES
+// ─────────────────────────────────────────────
+export const chaveApi = {
+  listar: () => portariaApi.get("/chaves"),
+  listarLocais: () => portariaApi.get("/chaves/locais"),
+  buscar: (id) => portariaApi.get(`/chaves/${id}`),
+  cadastrar: (data) => portariaApi.post("/chaves/cadastrar", data),
+  retirar: (id, responsavelId, tipoResponsavel) =>
+    portariaApi.post(`/chaves/${id}/retirar`, { responsavelId, tipoResponsavel }),
+  devolver: (id) => portariaApi.post(`/chaves/${id}/devolver`),
+  deletar: (id) => portariaApi.delete(`/chaves/${id}`),
+  historico: (id, params) => portariaApi.get(`/chaves/${id}/historico`, { params }),
+};
+
