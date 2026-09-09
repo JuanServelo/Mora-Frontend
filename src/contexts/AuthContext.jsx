@@ -8,12 +8,23 @@ export function AuthProvider({ children }) {
   const [usuario, setUsuario] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  function attachModulesToUser(userObj, tokenStr) {
+    if (!userObj || !tokenStr) return userObj;
+    try {
+      const payloadBase64 = tokenStr.split('.')[1];
+      const decoded = JSON.parse(atob(payloadBase64));
+      return { ...userObj, activeModules: decoded.activeModules || [] };
+    } catch (e) {
+      return userObj;
+    }
+  }
+
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
       api
         .get("/api/auth/me")
-        .then((res) => setUsuario(res.data.usuario))
+        .then((res) => setUsuario(attachModulesToUser(res.data.usuario, token)))
         .catch(() => localStorage.removeItem("token"))
         .finally(() => setLoading(false));
     } else {
@@ -23,7 +34,7 @@ export function AuthProvider({ children }) {
 
   function persistSession(res) {
     localStorage.setItem("token", res.data.token);
-    setUsuario(res.data.usuario);
+    setUsuario(attachModulesToUser(res.data.usuario, res.data.token));
     return res.data;
   }
 
@@ -59,7 +70,7 @@ export function AuthProvider({ children }) {
   const completarOAuth = useCallback(async (code) => {
     const res = await api.post("/api/auth/oauth/exchange", { code });
     localStorage.setItem("token", res.data.token);
-    setUsuario(res.data.usuario);
+    setUsuario(attachModulesToUser(res.data.usuario, res.data.token));
     return res.data.usuario;
   }, []);
 
@@ -70,7 +81,7 @@ export function AuthProvider({ children }) {
 
   async function atualizarPerfil(dados) {
     const res = await api.put("/api/auth/me", dados);
-    setUsuario(res.data.usuario);
+    setUsuario(attachModulesToUser(res.data.usuario, localStorage.getItem("token")));
     return res.data;
   }
 
@@ -80,7 +91,7 @@ export function AuthProvider({ children }) {
     const res = await api.post("/api/auth/me/foto", formData, {
       headers: { "Content-Type": "multipart/form-data" },
     });
-    setUsuario(res.data.usuario);
+    setUsuario(attachModulesToUser(res.data.usuario, localStorage.getItem("token")));
     return res.data;
   }
 

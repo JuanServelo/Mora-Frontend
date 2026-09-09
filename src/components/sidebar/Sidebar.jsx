@@ -54,7 +54,7 @@ export function Sidebar() {
   const isDoorman = perfil === PERFIS.PORTEIRO;
 
   // Porteiro tem o conjunto dele; os admins veem o que o próprio perfil permite.
-  const links = isDoorman ? PORTEIRO_LINKS : linksDoPerfil(perfil);
+  const links = isDoorman ? PORTEIRO_LINKS : linksDoPerfil(perfil, usuario?.activeModules);
 
   const subtitulo = isDoorman
     ? "Portaria"

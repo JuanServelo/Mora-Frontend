@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import api from "../../services/api";
 import { Icone } from "../../components/icones/Icone";
-import { ADM_LINKS, linksDoPerfil } from "../../utils/menuAdmin";
+import { ADM_LINKS, linksTotaisDoPerfil } from "../../utils/menuAdmin";
 
 // Mapa local para ícones e cores por perfil (fallback offline)
 const PERFIL_META = {
@@ -23,7 +23,7 @@ const COR_CLASSE = {
 // Abas por perfil: lidas do mapa compartilhado, para não divergir do menu.
 const ADMIN_ABAS = ADM_LINKS;
 const ACESSO_ADMIN = Object.fromEntries(
-  ["ADMIN_GERAL", "ADMIN_SINDICO"].map((p) => [p, linksDoPerfil(p).map((l) => l.label)]),
+  ["ADMIN_GERAL", "ADMIN_SINDICO"].map((p) => [p, linksTotaisDoPerfil(p).map((l) => l.label)]),
 );
 
 

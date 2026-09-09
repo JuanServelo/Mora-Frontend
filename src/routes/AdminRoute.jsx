@@ -25,7 +25,7 @@ export function AdminRoute({ children }) {
     return <Navigate to="/login" replace />;
   }
 
-  if (!podeAcessarRotaAdmin(usuario.perfil, pathname)) {
+  if (!podeAcessarRotaAdmin(usuario.perfil, pathname, usuario?.activeModules)) {
     return <Navigate to={redirectPorPerfil(usuario.perfil)} replace />;
   }
 

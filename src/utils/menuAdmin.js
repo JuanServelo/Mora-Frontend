@@ -68,6 +68,7 @@ export const ADM_LINKS = [
     icon: "groups",
     description: "Assembleias e votações",
     perfis: CONDOMINIO,
+    module: "reunioes",
   },
   {
     to: "/adm/reclamacoes",
@@ -82,6 +83,7 @@ export const ADM_LINKS = [
     icon: "inventory_2",
     description: "Encomendas na portaria",
     perfis: CONDOMINIO,
+    module: "portaria",
   },
   {
     to: "/adm/vagas",
@@ -89,6 +91,7 @@ export const ADM_LINKS = [
     icon: "local_parking",
     description: "Vagas de garagem",
     perfis: CONDOMINIO,
+    module: "vagas",
   },
   {
     to: "/adm/conhecimento",
@@ -99,16 +102,32 @@ export const ADM_LINKS = [
   },
 ];
 
-/** Links visíveis para um perfil. */
-export function linksDoPerfil(perfil) {
+/** Links visíveis para um perfil e módulos ativos. */
+export function linksDoPerfil(perfil, activeModules = []) {
+  return ADM_LINKS.filter((l) => {
+    if (!l.perfis.includes(perfil)) return false;
+    if (l.module && perfil !== PERFIS.ADMIN_GERAL) {
+      return activeModules.includes(l.module);
+    }
+    return true;
+  });
+}
+
+/** Links teóricos de um perfil (ignora módulos), para telas de configuração */
+export function linksTotaisDoPerfil(perfil) {
   return ADM_LINKS.filter((l) => l.perfis.includes(perfil));
 }
 
 /**
- * Se o perfil pode abrir a rota. Usado pelo guard: esconder do menu sem barrar
- * a URL deixaria a tela acessível a quem digitasse o endereço.
+ * Se o perfil pode abrir a rota, considerando também os módulos.
  */
-export function podeAcessarRotaAdmin(perfil, pathname) {
+export function podeAcessarRotaAdmin(perfil, pathname, activeModules = []) {
   const link = ADM_LINKS.find((l) => pathname.startsWith(l.to));
-  return link ? link.perfis.includes(perfil) : false;
+  if (!link) return false;
+  if (!link.perfis.includes(perfil)) return false;
+  
+  if (link.module && perfil !== PERFIS.ADMIN_GERAL) {
+    return activeModules.includes(link.module);
+  }
+  return true;
 }

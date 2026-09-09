@@ -36,7 +36,7 @@ const PANEL_STYLE = {
 
 /** Links administrativos visiveis para o usuario (Super Admin ganha Planos no topo). */
 function getAdmLinks(usuario) {
-  return linksDoPerfil(usuario?.perfil);
+  return linksDoPerfil(usuario?.perfil, usuario?.activeModules);
 }
 
 /** Item do painel administrativo — reutilizado no dropdown desktop e no menu mobile. */
