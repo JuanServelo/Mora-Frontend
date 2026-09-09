@@ -9,15 +9,17 @@ export const PERFIS = {
   MORADOR: 'MORADOR',
   DONO_ALUGUEL: 'DONO_ALUGUEL',
   CONVIDADO: 'CONVIDADO',
+  TERCEIRO: 'TERCEIRO',
 };
 
 export const TODOS_PERFIS = [
   { value: PERFIS.ADMIN_GERAL, label: 'Admin Geral' },
   { value: PERFIS.ADMIN_SINDICO, label: 'Admin Síndico' },
   { value: PERFIS.PORTEIRO, label: 'Porteiro' },
+  { value: PERFIS.TERCEIRO, label: 'Terceiro' },
   { value: PERFIS.MORADOR, label: 'Morador' },
   { value: PERFIS.DONO_ALUGUEL, label: 'Dono Aluguel' },
-  { value: PERFIS.CONVIDADO, label: 'Convidado' },
+  { value: PERFIS.CONVIDADO, label: 'Visitante' },
 ];
 
 /** Perfis oferecidos ao Admin Geral ao montar a gestão de um condomínio. */
@@ -34,7 +36,7 @@ export const PERFIS_CADASTRO_CONDOMINIO = [
 
 export const PERFIS_CADASTRO_UNIDADE = [
   { value: PERFIS.MORADOR, label: 'Morador' },
-  { value: PERFIS.CONVIDADO, label: 'Convidado' },
+  { value: PERFIS.CONVIDADO, label: 'Visitante' },
 ];
 
 /** Matriz: perfil do ator → perfis que pode cadastrar via convite. */
@@ -43,12 +45,14 @@ export const PERMISSOES_CADASTRO = {
     PERFIS.ADMIN_GERAL,
     PERFIS.ADMIN_SINDICO,
     PERFIS.PORTEIRO,
+    PERFIS.TERCEIRO,
     PERFIS.MORADOR,
     PERFIS.DONO_ALUGUEL,
     PERFIS.CONVIDADO,
   ],
   [PERFIS.ADMIN_SINDICO]: [
     PERFIS.PORTEIRO,
+    PERFIS.TERCEIRO,
     PERFIS.MORADOR,
     PERFIS.DONO_ALUGUEL,
     PERFIS.CONVIDADO,
@@ -82,6 +86,7 @@ export const PERFIS_CONDOMINIO = [
   PERFIS.ADMIN_GERAL,
   PERFIS.ADMIN_SINDICO,
   PERFIS.PORTEIRO,
+  PERFIS.TERCEIRO,
 ];
 
 export const PERFIS_ACESSO_ADMIN = [
@@ -106,6 +111,13 @@ export function podeAcessarAdmin(perfil) {
 
 export function podeAcessarPortaria(perfil) {
   return PERFIS_PORTARIA.includes(perfil);
+}
+
+/** Perfis que não acessam telas do sistema (acesso desabilitado por padrão). */
+export const PERFIS_SEM_ACESSO = [PERFIS.CONVIDADO, PERFIS.TERCEIRO];
+
+export function perfilTemAcessoSistema(perfil) {
+  return !PERFIS_SEM_ACESSO.includes(perfil);
 }
 
 export function isUsuarioRestrito(usuario) {

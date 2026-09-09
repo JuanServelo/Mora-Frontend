@@ -1,5 +1,5 @@
 // src/pages/adm/GerenciarEstruturas.jsx
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { blocoApi, apartamentoApi, areaComunApi } from "../../services/estruturasApi";
 import { vagaApi } from "../../services/portariaApi";
 import { condominiosApi } from "../../services/condominiosApi";
@@ -10,6 +10,8 @@ import { Botao } from "../../components/botoes/Botao";
 import { useAuth } from "../../contexts/AuthContext";
 import { useToast } from "../../contexts/ToastContext";
 import { PERFIS, perfisCadastroDisponiveis } from "../../utils/perfis";
+import { SeletorCondominio } from "../../components/adm/SeletorCondominio";
+import { formatarUnidade } from "../../utils/unidades";
 
 const TIPOS_AREA = ["PISCINA", "SALAO_FESTAS", "ACADEMIA", "CHURRASQUEIRA", "QUADRA", "PLAYGROUND", "OUTRO"];
 
@@ -29,8 +31,8 @@ export function GerenciarEstruturas() {
 
   useEffect(() => {
     if (isGerente) {
-      condominiosApi.listar().then((res) => {
-        const lista = (res.data.condominios || []).filter((c) => c.status === "active");
+      condominiosApi.listarAtivos().then((res) => {
+        const lista = res.data.condominios || [];
         setCondominios(lista);
         if (lista.length > 0) setCondominioId(lista[0].id);
       }).catch(() => {});
@@ -83,21 +85,14 @@ export function GerenciarEstruturas() {
             </p>
           </div>
 
-          {isGerente ? (
-            <select
-              value={condominioId}
-              onChange={(e) => { setCondominioId(e.target.value); setAba("blocos"); }}
-              className="flex-1 bg-surface-container-highest/40 border-none rounded-xl py-3 px-4 text-on-surface font-semibold focus:ring-2 focus:ring-primary/50 focus:outline-none"
-            >
-              {condominios.map((c) => (
-                <option key={c.id} value={c.id}>{c.nome}</option>
-              ))}
-            </select>
-          ) : (
-            <p className="text-on-surface font-semibold">
-              {condominioAtual?.nome ?? condominioId}
-            </p>
-          )}
+          <SeletorCondominio
+            condominios={isGerente ? condominios : []}
+            value={condominioId ?? ""}
+            onChange={(id) => { setCondominioId(id); setAba("blocos"); }}
+            selectClassName="flex-1 bg-surface-container-highest/40 border-none rounded-xl py-3 px-4 text-on-surface font-semibold focus:ring-2 focus:ring-primary/50 focus:outline-none"
+            readonlyClassName="text-on-surface font-semibold"
+            nomeAlternativo={condominioAtual?.nome ?? condominioId}
+          />
 
           <div className="flex gap-2 shrink-0 text-xs text-on-surface-variant font-mono">
             <span className="px-2 py-1 rounded-lg bg-surface-container-highest/30">{condominioId}</span>
@@ -127,9 +122,15 @@ export function GerenciarEstruturas() {
         </div>
 
         {/* Conteúdo por aba — passa condominioId para cada aba */}
-        {aba === "blocos" && <AbaBlocos condominioId={condominioId} />}
-        {aba === "areas-comuns" && <AbaAreasComuns condominioId={condominioId} />}
-        {aba === "vagas" && <AbaVagas condominioId={condominioId} />}
+        {aba === "blocos" && <AbaBlocos key={condominioId} condominioId={condominioId} />}
+        {aba === "areas-comuns" && (
+          <AbaAreasComuns
+            key={condominioId}
+            condominioId={condominioId}
+            condominioNome={condominioAtual?.nome ?? condominioId}
+          />
+        )}
+        {aba === "vagas" && <AbaVagas key={condominioId} condominioId={condominioId} />}
       </div>
     </div>
   );
@@ -320,34 +321,74 @@ function AbaBlocos({ condominioId }) {
   );
 }
 
+const MAX_ANDARES = 163;
+const MAX_APTOS_POR_ANDAR = 30;
+const MIN_AREA_M2 = 10;
+const MAX_AREA_M2 = 2000;
+const MIN_QUARTOS = 1;
+const MAX_QUARTOS = 10;
+const MIN_CAPACIDADE = 1;
+const MAX_CAPACIDADE = 500;
+const MIN_AREA_COMUM_M2 = 5;
+const MAX_AREA_COMUM_M2 = 10000;
+
 function FormBloco({ inicial, onSalvar, onCancelar }) {
   const [form, setForm] = useState({
     nome: inicial?.nome || "",
     sigla: inicial?.sigla || "",
     descricao: inicial?.descricao || "",
-    andares: inicial?.andares || "",
-    apartamentosPorAndar: inicial?.apartamentosPorAndar || "",
+    andares: inicial?.andares?.toString() || "",
+    apartamentosPorAndar: inicial?.apartamentosPorAndar?.toString() || "",
   });
+  const [erros, setErros] = useState({});
 
-  function set(field, value) { setForm((f) => ({ ...f, [field]: value })); }
+  function set(field, value) {
+    setForm((f) => ({ ...f, [field]: value }));
+    setErros((e) => ({ ...e, [field]: undefined }));
+  }
 
   function handleSubmit(e) {
     e.preventDefault();
-    onSalvar({
-      ...form,
-      andares: form.andares ? Number(form.andares) : null,
-      apartamentosPorAndar: form.apartamentosPorAndar ? Number(form.apartamentosPorAndar) : null,
-    });
+    const novosErros = {};
+    const andares = form.andares ? Number(form.andares) : null;
+    const aptsAndar = form.apartamentosPorAndar ? Number(form.apartamentosPorAndar) : null;
+
+    if (!form.nome.trim()) {
+      novosErros.nome = "Nome é obrigatório.";
+    }
+    if (!form.andares) {
+      novosErros.andares = "Quantidade de andares é obrigatória.";
+    } else if (andares < 1) {
+      novosErros.andares = "Informe um número inteiro maior que zero.";
+    } else if (andares > MAX_ANDARES) {
+      novosErros.andares = `O número máximo de andares permitido é ${MAX_ANDARES}.`;
+    }
+    if (!form.apartamentosPorAndar) {
+      novosErros.apartamentosPorAndar = "Apartamentos por andar é obrigatório.";
+    } else if (aptsAndar < 1) {
+      novosErros.apartamentosPorAndar = "Informe um número inteiro maior que zero.";
+    } else if (aptsAndar > MAX_APTOS_POR_ANDAR) {
+      novosErros.apartamentosPorAndar = `O número máximo de apartamentos por andar é ${MAX_APTOS_POR_ANDAR}.`;
+    }
+
+    if (Object.keys(novosErros).length > 0) {
+      setErros(novosErros);
+      const firstKey = Object.keys(novosErros)[0];
+      const ids = { nome: "bloco-nome", andares: "bloco-andares", apartamentosPorAndar: "bloco-aptsandar" };
+      document.getElementById(ids[firstKey])?.focus();
+      return;
+    }
+    onSalvar({ ...form, andares, apartamentosPorAndar: aptsAndar });
   }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <Campo id="bloco-nome" label="Nome" placeholder="Ex: Bloco A" required value={form.nome} onChange={(e) => set("nome", e.target.value)} />
-        <Campo id="bloco-sigla" label="Sigla" placeholder="Ex: A" value={form.sigla} onChange={(e) => set("sigla", e.target.value)} />
-        <Campo id="bloco-descricao" label="Descrição" placeholder="Ex: Torre principal" required value={form.descricao} onChange={(e) => set("descricao", e.target.value)} />
-        <Campo id="bloco-andares" label="Andares" type="number" placeholder="Ex: 10" value={form.andares} onChange={(e) => set("andares", e.target.value)} />
-        <Campo id="bloco-aptsandar" label="Aptos por andar" type="number" placeholder="Ex: 4" value={form.apartamentosPorAndar} onChange={(e) => set("apartamentosPorAndar", e.target.value)} />
+        <Campo id="bloco-nome" label="Nome" placeholder="Ex: Bloco A" required value={form.nome} onChange={(e) => set("nome", e.target.value)} error={erros.nome} />
+        <Campo id="bloco-sigla" label="Sigla" placeholder="Ex: A" optional value={form.sigla} onChange={(e) => set("sigla", e.target.value)} />
+        <Campo id="bloco-descricao" label="Descrição" placeholder="Ex: Torre principal" optional value={form.descricao} onChange={(e) => set("descricao", e.target.value)} />
+        <Campo id="bloco-andares" label="Andares" type="number" min="1" max={MAX_ANDARES} placeholder="Ex: 10" required value={form.andares} onChange={(e) => set("andares", e.target.value)} error={erros.andares} />
+        <Campo id="bloco-aptsandar" label="Aptos por andar" type="number" min="1" max={MAX_APTOS_POR_ANDAR} placeholder="Ex: 4" required value={form.apartamentosPorAndar} onChange={(e) => set("apartamentosPorAndar", e.target.value)} error={erros.apartamentosPorAndar} />
       </div>
       <div className="flex gap-3 pt-2">
         <Botao type="submit">{inicial ? "Salvar alterações" : "Cadastrar bloco"}</Botao>
@@ -540,6 +581,7 @@ function VistaApartamentos({ bloco, condominioId, onVoltar, onEditarBloco, onTog
           </div>
           <FormApartamento
             blocos={[bloco]}
+            apartamentos={apartamentos}
             onSalvar={(dados) => handleCriar(dados)}
             onCancelar={() => { setCriando(false); setErroCriar(""); }}
             erro={erroCriar}
@@ -585,6 +627,7 @@ function VistaApartamentos({ bloco, condominioId, onVoltar, onEditarBloco, onTog
                     <FormApartamento
                       inicial={apt}
                       blocos={[bloco]}
+                      apartamentos={apartamentos}
                       onSalvar={(dados) => handleAtualizar(apt.id, dados)}
                       onCancelar={() => { setEditando(null); setErroEditar(""); }}
                       erro={erroEditar}
@@ -958,62 +1001,173 @@ function AbaApartamentos({ condominioId }) {
   );
 }
 
-function FormApartamento({ inicial, blocos, onSalvar, onCancelar, erro }) {
+function FormApartamento({ inicial, blocos, apartamentos = [], onSalvar, onCancelar, erro }) {
+  const blocoAtual = blocos[0] ?? null;
+  const blocoId = blocoAtual?.id ?? "";
+
   const [form, setForm] = useState({
     numero: inicial?.numero || "",
-    andar: inicial?.andar || "",
-    quartos: inicial?.quartos || "",
-    areaMxComTotal: inicial?.areaMxComTotal || "",
+    andar: inicial?.andar?.toString() || "",
+    quartos: inicial?.quartos?.toString() || "",
+    areaMxComTotal: inicial?.areaMxComTotal?.toString() || "",
     observacoes: inicial?.observacoes || "",
   });
-  const [blocoId, setBlocoId] = useState(inicial?.blocoId || (blocos[0]?.id ?? ""));
+  const [erros, setErros] = useState({});
 
-  useEffect(() => {
-    if (!blocoId && blocos.length > 0) {
-      setBlocoId(blocos[0].id);
+  const totalAndares = blocoAtual?.andares ?? null;
+  const limitePorAndar = blocoAtual?.apartamentosPorAndar ?? null;
+
+  const countPorAndar = useMemo(() => {
+    const map = {};
+    apartamentos.forEach((a) => {
+      if (a.andar != null && a.blocoId === blocoId) {
+        map[a.andar] = (map[a.andar] || 0) + 1;
+      }
+    });
+    return map;
+  }, [apartamentos, blocoId]);
+
+  function set(field, value) {
+    setForm((f) => ({ ...f, [field]: value }));
+    setErros((e) => ({ ...e, [field]: undefined }));
+  }
+
+  function validate() {
+    const e = {};
+    if (!form.numero.trim()) e.numero = "Número é obrigatório.";
+    if (!form.andar) e.andar = "Andar é obrigatório.";
+
+    const quartos = form.quartos !== "" ? Number(form.quartos) : null;
+    if (quartos === null) {
+      e.quartos = "Quantidade de quartos é obrigatória.";
+    } else if (!Number.isInteger(quartos) || quartos < MIN_QUARTOS || quartos > MAX_QUARTOS) {
+      e.quartos = `A quantidade de quartos deve estar entre ${MIN_QUARTOS} e ${MAX_QUARTOS}.`;
     }
-  }, [blocos]);
 
-  function set(field, value) { setForm((f) => ({ ...f, [field]: value })); }
+    const area = form.areaMxComTotal !== "" ? Number(form.areaMxComTotal) : null;
+    if (area === null) {
+      e.areaMxComTotal = "Área total é obrigatória.";
+    } else if (area < MIN_AREA_M2 || area > MAX_AREA_M2) {
+      e.areaMxComTotal = `A área total deve estar entre ${MIN_AREA_M2} e ${MAX_AREA_M2} m².`;
+    }
+
+    return e;
+  }
 
   function handleSubmit(e) {
     e.preventDefault();
+    const novosErros = validate();
+    if (Object.keys(novosErros).length > 0) {
+      setErros(novosErros);
+      const firstKey = Object.keys(novosErros)[0];
+      const ids = { numero: "apt-numero", andar: "apt-andar", quartos: "apt-quartos", areaMxComTotal: "apt-area" };
+      document.getElementById(ids[firstKey])?.focus();
+      return;
+    }
     onSalvar(
       {
         ...form,
         andar: form.andar ? Number(form.andar) : null,
-        quartos: form.quartos ? Number(form.quartos) : null,
-        areaMxComTotal: form.areaMxComTotal ? Number(form.areaMxComTotal) : null,
+        quartos: form.quartos !== "" ? Number(form.quartos) : null,
+        areaMxComTotal: form.areaMxComTotal !== "" ? Number(form.areaMxComTotal) : null,
       },
       blocoId,
     );
   }
 
+  const andarOptions = totalAndares
+    ? Array.from({ length: totalAndares }, (_, i) => i + 1)
+    : null;
+
+  const andaresDisponiveis = useMemo(() => {
+    if (!totalAndares || !limitePorAndar) return [];
+    return Array.from({ length: totalAndares }, (_, i) => i + 1).filter(
+      (n) => (countPorAndar[n] || 0) < limitePorAndar,
+    );
+  }, [totalAndares, limitePorAndar, countPorAndar]);
+
+  const todosLotados = totalAndares != null && limitePorAndar != null && andaresDisponiveis.length === 0;
+
+  useEffect(() => {
+    if (inicial) return;
+    if (andaresDisponiveis.length === 1) {
+      setForm((f) => ({ ...f, andar: String(andaresDisponiveis[0]) }));
+    }
+  }, [andaresDisponiveis, inicial]);
+
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {/* Bloco — somente leitura (RN-03) */}
         <div className="space-y-2">
-          <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant ml-1">Bloco</label>
-          <select
-            value={blocoId}
-            onChange={(e) => setBlocoId(e.target.value)}
-            required
-            className="w-full bg-surface-container-highest/40 border-none rounded-xl py-4 px-4 text-on-surface focus:ring-2 focus:ring-primary/50 focus:outline-none backdrop-blur-sm transition-all"
-          >
-            {blocos.map((b) => (
-              <option key={b.id} value={b.id}>{b.nome}</option>
-            ))}
-          </select>
+          <p className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant ml-1">
+            Bloco <span className="text-red-500">*</span>
+          </p>
+          <div className="w-full bg-surface-container-highest/20 rounded-xl py-4 px-4 text-on-surface flex items-center gap-2 border border-outline-variant/10">
+            <Icone name="apartment" className="text-primary text-lg shrink-0" />
+            <span className="font-semibold">{blocoAtual?.nome || "—"}</span>
+          </div>
         </div>
-        <Campo id="apt-numero" label="Número" placeholder="Ex: 101" required value={form.numero} onChange={(e) => set("numero", e.target.value)} />
-        <Campo id="apt-andar" label="Andar" type="number" placeholder="Ex: 1" required value={form.andar} onChange={(e) => set("andar", e.target.value)} />
-        <Campo id="apt-quartos" label="Quartos" type="number" placeholder="Ex: 2" value={form.quartos} onChange={(e) => set("quartos", e.target.value)} />
-        <Campo id="apt-area" label="Área total (m²)" type="number" placeholder="Ex: 65.5" value={form.areaMxComTotal} onChange={(e) => set("areaMxComTotal", e.target.value)} />
-        <Campo id="apt-obs" label="Observações" placeholder="Opcional" value={form.observacoes} onChange={(e) => set("observacoes", e.target.value)} />
+
+        <Campo id="apt-numero" label="Número" placeholder="Ex: 101" required value={form.numero} onChange={(e) => set("numero", e.target.value)} error={erros.numero} />
+
+        {/* Andar */}
+        <div className="space-y-2">
+          <label htmlFor="apt-andar" className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant ml-1">
+            Andar <span className="text-red-500">*</span>
+            {limitePorAndar && (
+              <span className="font-normal normal-case tracking-normal text-on-surface-variant/60">
+                {" "}(máx. {limitePorAndar}/andar)
+              </span>
+            )}
+          </label>
+          {andarOptions ? (
+            <select
+              id="apt-andar"
+              value={form.andar}
+              onChange={(e) => set("andar", e.target.value)}
+              aria-required="true"
+              className={`w-full bg-surface-container-highest/40 border-none rounded-xl py-4 px-4 text-on-surface focus:ring-2 focus:ring-primary/50 focus:outline-none backdrop-blur-sm transition-all disabled:opacity-40 ${erros.andar ? "ring-2 ring-error/60" : ""}`}
+            >
+              <option value="">Selecione o andar</option>
+              {andarOptions.map((n) => {
+                const count = countPorAndar[n] || 0;
+                const editandoEsteAndar = inicial?.andar === n;
+                const cheio = limitePorAndar && count >= limitePorAndar && !editandoEsteAndar;
+                return (
+                  <option key={n} value={n} disabled={cheio}>
+                    {n}º andar{cheio ? " — lotado" : count > 0 ? ` (${count}/${limitePorAndar ?? "?"})` : ""}
+                  </option>
+                );
+              })}
+            </select>
+          ) : (
+            <input
+              id="apt-andar"
+              type="number"
+              min="1"
+              placeholder="Ex: 1"
+              aria-required="true"
+              value={form.andar}
+              onChange={(e) => set("andar", e.target.value)}
+              className={`w-full bg-surface-container-highest/40 border-none rounded-xl py-4 px-4 text-on-surface focus:ring-2 focus:ring-primary/50 focus:outline-none backdrop-blur-sm transition-all ${erros.andar ? "ring-2 ring-error/60" : ""}`}
+            />
+          )}
+          {erros.andar && <p className="text-xs text-error ml-1">{erros.andar}</p>}
+        </div>
+
+        <Campo id="apt-quartos" label="Quartos" type="number" min={MIN_QUARTOS} max={MAX_QUARTOS} step="1" placeholder="Ex: 2" required value={form.quartos} onChange={(e) => set("quartos", e.target.value)} error={erros.quartos} />
+        <Campo id="apt-area" label="Área total (m²)" type="number" min={MIN_AREA_M2} max={MAX_AREA_M2} step="0.01" placeholder="Ex: 65.50" required value={form.areaMxComTotal} onChange={(e) => set("areaMxComTotal", e.target.value)} error={erros.areaMxComTotal} />
+        <Campo id="apt-obs" label="Observações" placeholder="Opcional" optional value={form.observacoes} onChange={(e) => set("observacoes", e.target.value)} />
       </div>
       {erro && <p className="text-error text-xs">{erro}</p>}
+      {todosLotados && !inicial && (
+        <p className="text-xs text-on-surface-variant bg-surface-container-highest/30 rounded-xl px-4 py-3">
+          Todos os andares deste bloco já atingiram o limite de apartamentos.
+        </p>
+      )}
       <div className="flex gap-3 pt-2">
-        <Botao type="submit">{inicial ? "Salvar alterações" : "Cadastrar apartamento"}</Botao>
+        <Botao type="submit" disabled={todosLotados && !inicial}>{inicial ? "Salvar alterações" : "Cadastrar apartamento"}</Botao>
         <button type="button" onClick={onCancelar} className="flex-1 py-4 rounded-full border border-outline-variant/30 text-on-surface-variant hover:bg-white/5 font-semibold transition-all cursor-pointer">
           Cancelar
         </button>
@@ -1061,7 +1215,7 @@ function DetalhesApartamento({ apt, onEditar, onToggleAtivo }) {
 // ════════════════════════════════════════════
 // ABA: ÁREAS COMUNS
 // ════════════════════════════════════════════
-function AbaAreasComuns({ condominioId }) {
+function AbaAreasComuns({ condominioId, condominioNome }) {
   const toast = useToast();
   const [areas, setAreas] = useState([]);
   const [carregando, setCarregando] = useState(true);
@@ -1166,7 +1320,7 @@ function AbaAreasComuns({ condominioId }) {
             </div>
             <h2 className="font-headline text-xl font-bold text-on-surface">Nova Área Comum</h2>
           </div>
-          <FormAreaComum onSalvar={handleCriar} onCancelar={() => setCriando(false)} />
+          <FormAreaComum onSalvar={handleCriar} onCancelar={() => setCriando(false)} condominioNome={condominioNome} />
         </div>
       )}
 
@@ -1244,6 +1398,7 @@ function AbaAreasComuns({ condominioId }) {
                       inicial={area}
                       onSalvar={(dados) => handleAtualizar(area.id, dados)}
                       onCancelar={() => setEditando(null)}
+                      condominioNome={condominioNome}
                     />
                   ) : (
                     <DetalhesAreaComum area={area} onEditar={() => setEditando(area.id)} onToggleAtivo={() => handleToggleAtivo(area)} />
@@ -1258,50 +1413,102 @@ function AbaAreasComuns({ condominioId }) {
   );
 }
 
-function FormAreaComum({ inicial, onSalvar, onCancelar }) {
+function FormAreaComum({ inicial, onSalvar, onCancelar, condominioNome }) {
   const [form, setForm] = useState({
     nome: inicial?.nome || "",
     tipo: inicial?.tipo || TIPOS_AREA[0],
     descricao: inicial?.descricao || "",
     localizacao: inicial?.localizacao || "",
-    capacidadeMaxima: inicial?.capacidadeMaxima || "",
-    area: inicial?.area || "",
+    capacidadeMaxima: inicial?.capacidadeMaxima?.toString() || "",
+    area: inicial?.area?.toString() || "",
     podeReservar: inicial?.podeReservar ?? false,
     observacoes: inicial?.observacoes || "",
   });
+  const [erros, setErros] = useState({});
 
-  function set(field, value) { setForm((f) => ({ ...f, [field]: value })); }
+  function set(field, value) {
+    setForm((f) => ({ ...f, [field]: value }));
+    setErros((e) => ({ ...e, [field]: undefined }));
+  }
+
+  function validate() {
+    const e = {};
+    if (!form.nome.trim()) e.nome = "Nome é obrigatório.";
+
+    const capacidade = form.capacidadeMaxima !== "" ? Number(form.capacidadeMaxima) : null;
+    if (capacidade === null) {
+      e.capacidadeMaxima = "Capacidade máxima é obrigatória.";
+    } else if (!Number.isInteger(capacidade) || capacidade < MIN_CAPACIDADE || capacidade > MAX_CAPACIDADE) {
+      e.capacidadeMaxima = `A capacidade máxima deve estar entre ${MIN_CAPACIDADE} e ${MAX_CAPACIDADE} pessoas.`;
+    }
+
+    const area = form.area !== "" ? Number(form.area) : null;
+    if (area === null) {
+      e.area = "Área é obrigatória.";
+    } else if (area < MIN_AREA_COMUM_M2 || area > MAX_AREA_COMUM_M2) {
+      e.area = `A área deve estar entre ${MIN_AREA_COMUM_M2} e ${MAX_AREA_COMUM_M2} m².`;
+    }
+
+    return e;
+  }
 
   function handleSubmit(e) {
     e.preventDefault();
+    const novosErros = validate();
+    if (Object.keys(novosErros).length > 0) {
+      setErros(novosErros);
+      const firstKey = Object.keys(novosErros)[0];
+      const ids = { nome: "area-nome", capacidadeMaxima: "area-cap", area: "area-m2" };
+      document.getElementById(ids[firstKey])?.focus();
+      return;
+    }
     onSalvar({
       ...form,
-      capacidadeMaxima: form.capacidadeMaxima ? Number(form.capacidadeMaxima) : null,
-      area: form.area ? Number(form.area) : null,
+      capacidadeMaxima: Number(form.capacidadeMaxima),
+      area: Number(form.area),
     });
   }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <Campo id="area-nome" label="Nome" placeholder="Ex: Piscina Principal" required value={form.nome} onChange={(e) => set("nome", e.target.value)} />
+        {/* Condomínio — somente leitura (RN-04) */}
+        {condominioNome && (
+          <div className="space-y-2">
+            <p className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant ml-1">
+              Condomínio <span className="text-red-500">*</span>
+            </p>
+            <div className="w-full bg-surface-container-highest/20 rounded-xl py-4 px-4 text-on-surface flex items-center gap-2 border border-outline-variant/10">
+              <Icone name="domain" className="text-primary text-lg shrink-0" />
+              <span className="font-semibold">{condominioNome}</span>
+            </div>
+          </div>
+        )}
+
+        <Campo id="area-nome" label="Nome" placeholder="Ex: Piscina Principal" required value={form.nome} onChange={(e) => set("nome", e.target.value)} error={erros.nome} />
+
         <div className="space-y-2">
-          <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant ml-1">Tipo</label>
+          <label htmlFor="area-tipo" className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant ml-1">
+            Tipo
+          </label>
           <select
+            id="area-tipo"
             value={form.tipo}
             onChange={(e) => set("tipo", e.target.value)}
-            className="w-full bg-surface-container-highest/40 border-none rounded-xl py-4 px-4 text-on-surface focus:ring-2 focus:ring-primary/50 focus:outline-none backdrop-blur-sm transition-all"
+            className={selectCls}
           >
             {TIPOS_AREA.map((t) => (
               <option key={t} value={t}>{t.replace(/_/g, " ")}</option>
             ))}
           </select>
         </div>
-        <Campo id="area-desc" label="Descrição" placeholder="Opcional" value={form.descricao} onChange={(e) => set("descricao", e.target.value)} />
-        <Campo id="area-local" label="Localização" placeholder="Ex: Térreo, ao lado da portaria" value={form.localizacao} onChange={(e) => set("localizacao", e.target.value)} />
-        <Campo id="area-cap" label="Capacidade máxima" type="number" placeholder="Ex: 50" value={form.capacidadeMaxima} onChange={(e) => set("capacidadeMaxima", e.target.value)} />
-        <Campo id="area-m2" label="Área (m²)" type="number" placeholder="Ex: 120" value={form.area} onChange={(e) => set("area", e.target.value)} />
-        <Campo id="area-obs" label="Observações" placeholder="Opcional" value={form.observacoes} onChange={(e) => set("observacoes", e.target.value)} />
+
+        <Campo id="area-cap" label="Capacidade máxima (pessoas)" type="number" min={MIN_CAPACIDADE} max={MAX_CAPACIDADE} step="1" placeholder="Ex: 50" required value={form.capacidadeMaxima} onChange={(e) => set("capacidadeMaxima", e.target.value)} error={erros.capacidadeMaxima} />
+        <Campo id="area-m2" label="Área (m²)" type="number" min={MIN_AREA_COMUM_M2} max={MAX_AREA_COMUM_M2} step="0.01" placeholder="Ex: 120.00" required value={form.area} onChange={(e) => set("area", e.target.value)} error={erros.area} />
+        <Campo id="area-desc" label="Descrição" placeholder="Descreva a área comum" optional value={form.descricao} onChange={(e) => set("descricao", e.target.value)} />
+        <Campo id="area-local" label="Localização" placeholder="Ex: Térreo, ao lado da portaria" optional value={form.localizacao} onChange={(e) => set("localizacao", e.target.value)} />
+        <Campo id="area-obs" label="Observações" placeholder="Informações adicionais" optional value={form.observacoes} onChange={(e) => set("observacoes", e.target.value)} />
+
         <div className="flex items-center gap-3 mt-4">
           <button
             type="button"
@@ -1368,6 +1575,10 @@ function AbaVagas({ condominioId }) {
   const [vagas, setVagas] = useState([]);
   const [apartamentos, setApartamentos] = useState([]);
   const [carregando, setCarregando] = useState(true);
+  const aptMap = useMemo(
+    () => Object.fromEntries(apartamentos.map((a) => [a.id, a])),
+    [apartamentos],
+  );
   const [busca, setBusca] = useState("");
   const [filtroAptId, setFiltroAptId] = useState("todos");
   const [criando, setCriando] = useState(false);
@@ -1380,15 +1591,9 @@ function AbaVagas({ condominioId }) {
     setCarregando(true);
     setVagas([]);
     setApartamentos([]);
-    // Vagas não têm condominioId direto: filtramos pelos apartamentos do cliente
-    Promise.all([vagaApi.listarTodas(), apartamentoApi.listarTodos(condominioId)])
+    Promise.all([vagaApi.listarTodas(condominioId), apartamentoApi.listarTodos(condominioId)])
       .then(([resVagas, resApts]) => {
-        const aptIds = new Set((resApts.data || []).map((a) => a.id));
-        // Filtra vagas que pertencem a apartamentos do condomínio selecionado
-        const vagasFiltradas = (resVagas.data || []).filter(
-          (v) => !v.apartamentoId || aptIds.has(v.apartamentoId),
-        );
-        setVagas(vagasFiltradas);
+        setVagas(resVagas.data || []);
         setApartamentos(resApts.data || []);
       })
       .catch((err) => console.error("Erro ao carregar vagas:", err))
@@ -1512,7 +1717,7 @@ function AbaVagas({ condominioId }) {
             <option value="todos">Todos</option>
             <option value="sem-apt">Sem apartamento</option>
             {apartamentos.map((a) => (
-              <option key={a.id} value={a.id}>Apt {a.numero} · {a.blocoNome}</option>
+              <option key={a.id} value={a.id}>{formatarUnidade(a.blocoNome, a.numero)}</option>
             ))}
           </select>
         </div>
@@ -1538,14 +1743,14 @@ function AbaVagas({ condominioId }) {
                 <div className="flex-1 min-w-0">
                   <p className="text-on-surface font-semibold truncate">Vaga {vaga.numero}</p>
                   <p className="text-on-surface-variant text-sm truncate">
-                    {vaga.apartamentoNumero ? `Apt ${vaga.apartamentoNumero}` : "Sem apartamento"}
+                    {formatarUnidade(aptMap[vaga.apartamentoId]?.blocoNome, aptMap[vaga.apartamentoId]?.numero ?? vaga.apartamentoNumero)}
                     {vaga.localizacao ? ` · ${vaga.localizacao}` : ""}
                   </p>
                 </div>
                 <div className="hidden sm:flex gap-6 text-sm shrink-0">
                   {[
                     { label: "Tipo", value: vaga.tipo || "—" },
-                    { label: "Apartamento", value: vaga.apartamentoNumero ? `Apt ${vaga.apartamentoNumero}` : "—" },
+                    { label: "Apartamento", value: formatarUnidade(aptMap[vaga.apartamentoId]?.blocoNome, aptMap[vaga.apartamentoId]?.numero ?? vaga.apartamentoNumero) },
                   ].map((col) => (
                     <div key={col.label} className="text-center">
                       <p className="text-on-surface-variant text-xs uppercase tracking-wider">{col.label}</p>
@@ -1575,6 +1780,7 @@ function AbaVagas({ condominioId }) {
                   ) : (
                     <DetalhesVaga
                       vaga={vaga}
+                      blocoNome={aptMap[vaga.apartamentoId]?.blocoNome}
                       onEditar={() => setEditando(vaga.id)}
                       onToggleAtivo={() => handleToggleAtivo(vaga)}
                     />
@@ -1643,7 +1849,7 @@ function FormVaga({ inicial, apartamentos, onSalvar, onCancelar, erro }) {
           >
             <option value="">Sem apartamento</option>
             {apartamentos.map((a) => (
-              <option key={a.id} value={a.id}>Apt {a.numero} · {a.blocoNome}</option>
+              <option key={a.id} value={a.id}>{formatarUnidade(a.blocoNome, a.numero)}</option>
             ))}
           </select>
         </div>
@@ -1663,7 +1869,7 @@ function FormVaga({ inicial, apartamentos, onSalvar, onCancelar, erro }) {
   );
 }
 
-function DetalhesVaga({ vaga, onEditar, onToggleAtivo }) {
+function DetalhesVaga({ vaga, blocoNome, onEditar, onToggleAtivo }) {
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -1671,7 +1877,7 @@ function DetalhesVaga({ vaga, onEditar, onToggleAtivo }) {
           { label: "Número", value: vaga.numero },
           { label: "Tipo", value: vaga.tipo || "—" },
           { label: "Localização", value: vaga.localizacao || "—" },
-          { label: "Apartamento", value: vaga.apartamentoNumero ? `Apt ${vaga.apartamentoNumero}` : "—" },
+          { label: "Apartamento", value: formatarUnidade(blocoNome, vaga.apartamentoNumero) },
         ].map((item) => (
           <div key={item.label} className="bg-surface-container-highest/20 rounded-xl p-3">
             <p className="text-on-surface-variant text-xs uppercase tracking-wider mb-1">{item.label}</p>

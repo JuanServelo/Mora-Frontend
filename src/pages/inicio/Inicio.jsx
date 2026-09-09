@@ -3,9 +3,9 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import { condominiosApi } from "../../services/condominiosApi";
-import { avisoApi } from "../../services/portariaApi";
+import { avisoApi } from "../../services/comunicacaoApi";
 import { Icone } from "../../components/icones/Icone";
-import { PERFIS } from "../../utils/perfis";
+import { PERFIS, perfilTemAcessoSistema } from "../../utils/perfis";
 import { InicioDoorman } from "../porteiro/InicioDoorman";
 
 const ACESSO_RAPIDO = [
@@ -54,6 +54,25 @@ export function Inicio() {
 
   if (usuario?.perfil === PERFIS.PORTEIRO) {
     return <InicioDoorman />;
+  }
+
+  if (!perfilTemAcessoSistema(usuario?.perfil)) {
+    return (
+      <div className="min-h-screen w-full flex items-center justify-center px-6">
+        <div className="glass-panel rounded-3xl p-10 max-w-md w-full text-center space-y-4 border border-outline-variant/15">
+          <div className="w-16 h-16 rounded-2xl bg-on-surface-variant/10 flex items-center justify-center mx-auto">
+            <Icone name="lock" className="text-on-surface-variant text-3xl" />
+          </div>
+          <h1 className="font-headline text-2xl font-bold text-on-surface">
+            Acesso não configurado
+          </h1>
+          <p className="text-on-surface-variant text-sm leading-relaxed">
+            Seu perfil ainda não possui acesso a nenhuma área do sistema.
+            Procure a administração do condomínio se isso for um engano.
+          </p>
+        </div>
+      </div>
+    );
   }
 
   return (

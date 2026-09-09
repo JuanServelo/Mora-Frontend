@@ -11,6 +11,7 @@ import moraLogo3 from "../../assets/Mora3.png";
 // Telas do porteiro (mesmo layout de Sidebar dos admins).
 const PORTEIRO_LINKS = [
   { to: "/inicio", label: "Início", icon: "home" },
+  { to: "/atendimento", label: "Cadastros", icon: "waving_hand" },
   { to: "/entradas-e-saidas", label: "Entradas e Saídas", icon: "swap_horiz" },
   { to: "/entregas", label: "Entregas", icon: "inventory_2" },
   { to: "/chaves", label: "Chaves", icon: "vpn_key" },

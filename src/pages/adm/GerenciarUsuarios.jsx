@@ -1,5 +1,6 @@
 // src/pages/adm/GerenciarUsuarios.jsx
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import api from "../../services/api";
 import { blocoApi, apartamentoApi, vagaApi } from "../../services/estruturasApi";
 import { userManagementApi } from "../../services/userManagementApi";
@@ -14,6 +15,7 @@ import {
   perfisCadastroDisponiveis,
 } from "../../utils/perfis";
 import { mascararCpf, validarCpf } from "../../utils/masks";
+import { SeletorCondominio } from "../../components/adm/SeletorCondominio";
 
 const PERFIS_EXIGEM_UNIDADE_FORM = new Set([
   PERFIS.MORADOR,
@@ -53,10 +55,10 @@ export function GerenciarUsuarios() {
       api.get("/api/user-management/users").catch(() => api.get("/api/users")),
       blocoApi.listar().catch(() => ({ data: [] })),
       apartamentoApi.listar().catch(() => ({ data: [] })),
-      condominiosApi.listar().catch(() => ({ data: { condominios: [] } })),
+      condominiosApi.listarAtivos().catch(() => ({ data: { condominios: [] } })),
     ])
       .then(([usersRes, blocosRes, aptsRes, condsRes]) => {
-        setCondominios((condsRes.data.condominios || []).filter((c) => c.status === "active"));
+        setCondominios(condsRes.data.condominios || []);
         const mapStatus = (s) => {
           if (s === "active") return "ativo";
           if (s === "inactive") return "inativo";
@@ -913,7 +915,11 @@ function FormNovoUsuario({ blocos, apartamentos, condominios, perfilAtor, condom
     cpfPrecadastro: "",
   });
   const [erroCpf, setErroCpf] = useState("");
-  const [condominioId, setCondominioId] = useState(() => condominioIdAtor || "");
+  // Quando precisaSelecionarCondominio, o condominioId do ator não restringe a seleção —
+  // deixamos vazio e o useEffect abaixo preenche conforme a quantidade de condomínios ativos.
+  const [condominioId, setCondominioId] = useState(() =>
+    precisaSelecionarCondominio ? "" : (condominioIdAtor || ""),
+  );
   const [blocoId, setBlocoId] = useState("");
   const [aptId, setAptId] = useState("");
 
@@ -924,11 +930,13 @@ function FormNovoUsuario({ blocos, apartamentos, condominios, perfilAtor, condom
     }
   }, [perfilAtor]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Pré-seleciona primeiro condomínio disponível para admins sem condomínio próprio
+  // Pré-seleciona automaticamente quando há exatamente 1 condomínio ativo;
+  // com 0 ou ≥2, limpa a seleção (RN-03).
   useEffect(() => {
-    if (precisaSelecionarCondominio && !condominioId && condominios.length > 0) {
-      setCondominioId(condominios[0].id);
-    }
+    if (!precisaSelecionarCondominio) return;
+    setCondominioId(condominios.length === 1 ? condominios[0].id : "");
+    setBlocoId("");
+    setAptId("");
   }, [condominios]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Blocos filtrados pelo condomínio selecionado
@@ -984,20 +992,35 @@ function FormNovoUsuario({ blocos, apartamentos, condominios, perfilAtor, condom
       </p>
 
       {precisaSelecionarCondominio ? (
-        <div className="space-y-2">
-          <label className={labelCls}>Condomínio *</label>
-          <select
-            value={condominioId}
-            onChange={(e) => { setCondominioId(e.target.value); setBlocoId(""); setAptId(""); }}
-            required
-            className={selectCls}
-          >
-            <option value="">— Selecione o condomínio —</option>
-            {condominios.map((c) => (
-              <option key={c.id} value={c.id}>{c.nome}</option>
-            ))}
-          </select>
-        </div>
+        condominios.length === 0 ? (
+          /* RN-04: nenhum condomínio ativo disponível */
+          <div className="flex flex-col gap-3 px-4 py-4 rounded-xl bg-error/5 border border-error/20">
+            <div className="flex items-start gap-2">
+              <Icone name="error" className="text-error text-base shrink-0 mt-0.5" />
+              <p className="text-sm text-error font-medium">
+                Não há condomínios ativos disponíveis. Ative ou cadastre um condomínio antes de criar usuários.
+              </p>
+            </div>
+            {perfilAtor === PERFIS.ADMIN_GERAL && (
+              <Link
+                to="/adm/condominios"
+                className="self-start text-xs font-semibold text-primary hover:underline"
+              >
+                Gerenciar condomínios →
+              </Link>
+            )}
+          </div>
+        ) : (
+          <div className="space-y-2">
+            <label className={labelCls}>Condomínio *</label>
+            <SeletorCondominio
+              condominios={condominios}
+              value={condominioId}
+              onChange={(id) => { setCondominioId(id); setBlocoId(""); setAptId(""); }}
+              selectClassName={selectCls}
+            />
+          </div>
+        )
       ) : (
         <div className="flex items-center gap-2 px-4 py-3 rounded-xl bg-surface-container-highest/30">
           <Icone name="domain" className="text-primary text-base shrink-0" />
@@ -1092,7 +1115,7 @@ function FormNovoUsuario({ blocos, apartamentos, condominios, perfilAtor, condom
       </div>
 
       <div className="flex flex-col sm:flex-row gap-3 pt-1">
-        <Botao type="submit">
+        <Botao type="submit" disabled={precisaSelecionarCondominio && condominios.length === 0}>
           Enviar convite
           <Icone name="send" className="text-xl" />
         </Botao>

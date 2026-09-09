@@ -5,6 +5,10 @@ export const condominiosApi = {
     return api.get('/api/condominios');
   },
 
+  listarAtivos() {
+    return api.get('/api/condominios', { params: { status: 'active' } });
+  },
+
   buscar(id) {
     return api.get(`/api/condominios/${id}`);
   },

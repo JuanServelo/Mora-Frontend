@@ -96,43 +96,82 @@ export const veiculoApi = {
   cadastrar: (data) => portariaApi.post("/veiculos/cadastrar", data),
   atualizar: (id, data) => portariaApi.put(`/veiculos/${id}`, data),
   alterarVaga: (id, vagaId) => portariaApi.patch(`/veiculos/${id}/vaga`, { vagaId }),
-  registrarEntrada: (id) => portariaApi.post(`/veiculos/${id}/entrada`),
+  registrarEntrada: (id, vagaId) => portariaApi.post(`/veiculos/${id}/entrada`, null, { params: vagaId ? { vagaId } : {} }),
   registrarEntradaPorPlaca: (placa) => portariaApi.post(`/veiculos/entrada/placa/${placa}`),
+  registrarEntradaAvulsa: (placa) => portariaApi.post(`/veiculos/entrada/avulsa/${placa}`),
   registrarSaida: (id) => portariaApi.post(`/veiculos/${id}/saida`),
+  registrarSaidaPorPlaca: (placa) => portariaApi.post(`/veiculos/saida/placa/${placa}`),
+  listarDentroPortaria: () => portariaApi.get('/veiculos/dentro-portaria'),
+  historicoAcesso: (params) => portariaApi.get('/veiculos/historico-acesso', { params }),
 };
 
 /** @deprecated Use veiculoApi */
 export const carroApi = veiculoApi;
 
 // ─────────────────────────────────────────────
-// BASE DE CONHECIMENTO / FAQ
+// APARTAMENTOS
 // ─────────────────────────────────────────────
-export const conhecimentoApi = {
-  listarTodos: () => portariaApi.get("/conhecimento"),
-  listarPublicados: () => portariaApi.get("/conhecimento/publicados"),
-  listarPorCategoria: (categoria) =>
-    portariaApi.get(`/conhecimento/categoria/${categoria}`),
-  listarPublicadosPorCategoria: (categoria) =>
-    portariaApi.get(`/conhecimento/categoria/${categoria}/publicados`),
-  buscarPorTitulo: (titulo) =>
-    portariaApi.get("/conhecimento/buscar", { params: { titulo } }),
-  buscar: (id) => portariaApi.get(`/conhecimento/${id}`),
-  criar: (data) => portariaApi.post("/conhecimento", data),
-  atualizar: (id, data) => portariaApi.put(`/conhecimento/${id}`, data),
-  excluir: (id) => portariaApi.delete(`/conhecimento/${id}`),
+export const apartamentoApi = {
+  listar: () => portariaApi.get("/apartamentos"),
 };
 
 // ─────────────────────────────────────────────
-// AVISOS E COMUNICADOS (por condomínio)
+// ATENDIMENTO DE PORTARIA (visitantes e terceiros)
 // ─────────────────────────────────────────────
-export const avisoApi = {
-  listar: (condominioId) =>
-    portariaApi.get("/avisos", { params: condominioId ? { condominioId } : {} }),
-  listarAtivos: (condominioId) =>
-    portariaApi.get("/avisos/ativos", { params: { condominioId } }),
-  buscar: (id) => portariaApi.get(`/avisos/${id}`),
-  criar: (data) => portariaApi.post("/avisos", data),
-  atualizar: (id, data) => portariaApi.put(`/avisos/${id}`, data),
-  encerrar: (id) => portariaApi.patch(`/avisos/${id}/encerrar`),
-  excluir: (id) => portariaApi.delete(`/avisos/${id}`),
+export const atendimentoApi = {
+  buscar: (q, tipo) =>
+    portariaApi.get("/atendimento/buscar", { params: { q, tipo } }),
+  buscarPorId: (id) =>
+    portariaApi.get(`/atendimento/${id}`),
+  vagasUnidade: (apartamentoId) =>
+    portariaApi.get(`/atendimento/vagas-unidade/${apartamentoId}`),
+  registrar: (data) =>
+    portariaApi.post("/atendimento/registrar", data),
+  registrarSaida: (id) =>
+    portariaApi.post(`/atendimento/${id}/saida`),
+  dentro: () =>
+    portariaApi.get("/atendimento/dentro"),
+  historico: (params) =>
+    portariaApi.get("/atendimento/historico", { params }),
 };
+
+// ─────────────────────────────────────────────
+// RESERVAS DE ÁREAS COMUNS (RF-10)
+// ─────────────────────────────────────────────
+export const reservaApi = {
+  solicitar: (data) => portariaApi.post("/reservas", data),
+  listarMinhas: () => portariaApi.get("/reservas/minhas"),
+  listar: (status) => portariaApi.get("/reservas", { params: status ? { status } : {} }),
+  buscar: (id) => portariaApi.get(`/reservas/${id}`),
+  listarPorArea: (areaComunId) => portariaApi.get(`/reservas/area/${areaComunId}`),
+  aprovar: (id) => portariaApi.patch(`/reservas/${id}/aprovar`),
+  recusar: (id, justificativa) => portariaApi.patch(`/reservas/${id}/recusar`, { justificativa }),
+  cancelar: (id) => portariaApi.patch(`/reservas/${id}/cancelar`),
+};
+
+// ─────────────────────────────────────────────
+// PRÉ-AUTORIZAÇÕES DE VISITANTES (RF-6)
+// ─────────────────────────────────────────────
+export const preAutorizacaoApi = {
+  minhas: () => portariaApi.get("/pre-autorizacoes/minhas"),
+  ativasHoje: () => portariaApi.get("/pre-autorizacoes/hoje"),
+  buscar: (termo) => portariaApi.get("/pre-autorizacoes/buscar", { params: { termo } }),
+  cadastrar: (data) => portariaApi.post("/pre-autorizacoes", data),
+  revogar: (id) => portariaApi.delete(`/pre-autorizacoes/${id}`),
+};
+
+// ─────────────────────────────────────────────
+// CHAVES
+// ─────────────────────────────────────────────
+export const chaveApi = {
+  listar: () => portariaApi.get("/chaves"),
+  listarLocais: () => portariaApi.get("/chaves/locais"),
+  buscar: (id) => portariaApi.get(`/chaves/${id}`),
+  cadastrar: (data) => portariaApi.post("/chaves/cadastrar", data),
+  retirar: (id, responsavelId, tipoResponsavel, nomeResponsavel) =>
+    portariaApi.post(`/chaves/${id}/retirar`, { responsavelId, tipoResponsavel, nomeResponsavel }),
+  devolver: (id) => portariaApi.post(`/chaves/${id}/devolver`),
+  deletar: (id) => portariaApi.delete(`/chaves/${id}`),
+  historico: (id, params) => portariaApi.get(`/chaves/${id}/historico`, { params }),
+};
+

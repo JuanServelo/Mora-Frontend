@@ -1,16 +1,14 @@
 // src/pages/usuario/FAQ.jsx
 import { useState, useEffect } from "react";
 import { Icone } from "../../components/icones/Icone";
-import { conhecimentoApi } from "../../services/portariaApi";
+import { conhecimentoApi } from "../../services/comunicacaoApi";
 
 const CATEGORIA_LABEL = {
-  GERAL: "Geral",
-  MANUTENCAO: "Manutenção",
-  SEGURANCA: "Segurança",
-  FINANCEIRO: "Financeiro",
-  CONVIVENCIA: "Convivência",
-  RESERVAS: "Reservas",
-  OUTROS: "Outros",
+  REGRA: "Regra",
+  MANUAL: "Manual",
+  TUTORIAL: "Tutorial",
+  ORIENTACAO_CONVIVENCIA: "Orientação de Convivência",
+  FAQ: "FAQ",
 };
 
 function ItemFAQ({ artigo }) {

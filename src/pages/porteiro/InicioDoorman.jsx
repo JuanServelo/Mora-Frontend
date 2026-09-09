@@ -6,11 +6,18 @@ import { Icone } from "../../components/icones/Icone";
 
 const CARDS_PORTEIRO = [
   {
+    to: "/atendimento",
+    label: "Cadastros",
+    desc: "Registrar entrada de visitantes e prestadores de serviço",
+    icon: "waving_hand",
+    color: "primary",
+  },
+  {
     to: "/entradas-e-saidas",
     label: "Controle de Acesso",
     desc: "Registrar entradas e saídas de moradores e visitantes",
     icon: "sensor_door",
-    color: "primary",
+    color: "secondary",
   },
   {
     to: "/entregas",
