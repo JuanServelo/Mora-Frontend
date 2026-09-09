@@ -96,13 +96,44 @@ export const veiculoApi = {
   cadastrar: (data) => portariaApi.post("/veiculos/cadastrar", data),
   atualizar: (id, data) => portariaApi.put(`/veiculos/${id}`, data),
   alterarVaga: (id, vagaId) => portariaApi.patch(`/veiculos/${id}/vaga`, { vagaId }),
-  registrarEntrada: (id) => portariaApi.post(`/veiculos/${id}/entrada`),
+  registrarEntrada: (id, vagaId) => portariaApi.post(`/veiculos/${id}/entrada`, null, { params: vagaId ? { vagaId } : {} }),
   registrarEntradaPorPlaca: (placa) => portariaApi.post(`/veiculos/entrada/placa/${placa}`),
+  registrarEntradaAvulsa: (placa) => portariaApi.post(`/veiculos/entrada/avulsa/${placa}`),
   registrarSaida: (id) => portariaApi.post(`/veiculos/${id}/saida`),
+  registrarSaidaPorPlaca: (placa) => portariaApi.post(`/veiculos/saida/placa/${placa}`),
+  listarDentroPortaria: () => portariaApi.get('/veiculos/dentro-portaria'),
+  historicoAcesso: (params) => portariaApi.get('/veiculos/historico-acesso', { params }),
 };
 
 /** @deprecated Use veiculoApi */
 export const carroApi = veiculoApi;
+
+// ─────────────────────────────────────────────
+// APARTAMENTOS
+// ─────────────────────────────────────────────
+export const apartamentoApi = {
+  listar: () => portariaApi.get("/apartamentos"),
+};
+
+// ─────────────────────────────────────────────
+// ATENDIMENTO DE PORTARIA (visitantes e terceiros)
+// ─────────────────────────────────────────────
+export const atendimentoApi = {
+  buscar: (q, tipo) =>
+    portariaApi.get("/atendimento/buscar", { params: { q, tipo } }),
+  buscarPorId: (id) =>
+    portariaApi.get(`/atendimento/${id}`),
+  vagasUnidade: (apartamentoId) =>
+    portariaApi.get(`/atendimento/vagas-unidade/${apartamentoId}`),
+  registrar: (data) =>
+    portariaApi.post("/atendimento/registrar", data),
+  registrarSaida: (id) =>
+    portariaApi.post(`/atendimento/${id}/saida`),
+  dentro: () =>
+    portariaApi.get("/atendimento/dentro"),
+  historico: (params) =>
+    portariaApi.get("/atendimento/historico", { params }),
+};
 
 // ─────────────────────────────────────────────
 // RESERVAS DE ÁREAS COMUNS (RF-10)

@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { Icone } from "../../components/icones/Icone";
-import { chaveApi } from "../../services/portariaApi";
+import { chaveApi, atendimentoApi } from "../../services/portariaApi";
 import { acessoApi } from "../../services/acessoApi";
 import { useToast } from "../../contexts/ToastContext";
 
@@ -22,10 +22,20 @@ function fmtDataHora(iso) {
   });
 }
 function hoje() {
-  return new Date().toISOString().slice(0, 10);
+  const d = new Date();
+  return [
+    d.getFullYear(),
+    String(d.getMonth() + 1).padStart(2, "0"),
+    String(d.getDate()).padStart(2, "0"),
+  ].join("-");
 }
 
 // ── Modal: retirar chave ──────────────────────────────────────────────────────
+
+function errMsg(err) {
+  const d = err?.response?.data;
+  return d?.message ?? d?.erro ?? null;
+}
 
 function ModalRetirar({ chave, onClose, onSalvo }) {
   const [tipo, setTipo] = useState("MORADOR");
@@ -42,19 +52,35 @@ function ModalRetirar({ chave, onClose, onSalvo }) {
     setOpcoes([]);
     setErroOpcoes(null);
     setLoadingOpcoes(true);
+
+    if (tipo === "TERCEIRO") {
+      // Terceiros vêm do portaria-service (Visitante com tipoVisita=SERVICO)
+      atendimentoApi.buscar("", "SERVICO")
+        .then((res) => {
+          const lista = (res.data || [])
+            .map((v) => ({ id: v.id, nome: v.nome, empresa: v.empresa }))
+            .sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR"));
+          setOpcoes(lista);
+        })
+        .catch((err) => {
+          setErroOpcoes(err?.response?.data?.mensagem || err?.response?.data?.message || "Não foi possível carregar a lista.");
+        })
+        .finally(() => setLoadingOpcoes(false));
+      return;
+    }
+
     acessoApi.listarUsuariosCondominio()
       .then((res) => {
         const todos = res.data?.usuarios || [];
         const filtrados = todos.filter((u) => {
           if (u.status !== "active") return false;
-          if (tipo === "MORADOR") return u.perfil === "MORADOR";
-          return u.perfil === "PORTEIRO" || u.perfil === "GERENTE" || u.perfil === "FUNCIONARIO";
+          if (tipo === "MORADOR") return u.perfil === "MORADOR" || u.perfil === "DONO_ALUGUEL";
+          return u.perfil === "PORTEIRO" || u.perfil === "ADMIN_SINDICO" || u.perfil === "FUNCIONARIO";
         });
         const lista = filtrados.slice().sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR"));
         setOpcoes(lista);
       })
       .catch((err) => {
-        console.error("Erro ao carregar usuários:", err);
         setErroOpcoes(err?.response?.data?.mensagem || err?.response?.data?.message || "Não foi possível carregar a lista.");
       })
       .finally(() => setLoadingOpcoes(false));
@@ -63,15 +89,17 @@ function ModalRetirar({ chave, onClose, onSalvo }) {
   async function confirmar(e) {
     e.preventDefault();
     if (!responsavelId) { setErro("Selecione o responsável."); return; }
-    const selecionado = opcoes.find((o) => o.id === responsavelId);
-    const nomeResponsavel = selecionado?.nome || "";
+    const selecionado = opcoes.find((o) => String(o.id) === String(responsavelId));
+    if (!selecionado) { setErro("Responsável inválido. Selecione novamente."); return; }
+    const nomeResponsavel = selecionado.nome;
     setLoading(true);
+    setErro(null);
     try {
-      await chaveApi.retirar(chave.id, responsavelId, tipo, nomeResponsavel);
+      await chaveApi.retirar(chave.id, String(responsavelId), tipo, nomeResponsavel);
       toast.success(`Retirada de "${chave.nomeChave}" registrada.`);
       onSalvo();
     } catch (err) {
-      setErro(err?.response?.data?.message || "Não foi possível registrar a retirada.");
+      setErro(errMsg(err) || "Não foi possível registrar a retirada.");
     } finally {
       setLoading(false);
     }
@@ -96,32 +124,36 @@ function ModalRetirar({ chave, onClose, onSalvo }) {
               Tipo de responsável
             </label>
             <div className="flex gap-2">
-              {["MORADOR", "FUNCIONARIO"].map((t) => (
-                <button key={t} type="button"
-                  onClick={() => { setTipo(t); setErro(null); }}
+              {[
+                { value: "MORADOR", label: "Morador" },
+                { value: "FUNCIONARIO", label: "Funcionário" },
+                { value: "TERCEIRO", label: "Terceiro" },
+              ].map((t) => (
+                <button key={t.value} type="button"
+                  onClick={() => { setTipo(t.value); setErro(null); }}
                   className={`flex-1 py-2 rounded-xl text-sm font-semibold border transition-all ${
-                    tipo === t
+                    tipo === t.value
                       ? "bg-primary text-on-primary border-primary"
                       : "border-outline-variant/30 text-on-surface-variant hover:bg-surface-variant/20"
                   }`}>
-                  {t === "MORADOR" ? "Morador" : "Funcionário"}
+                  {t.label}
                 </button>
               ))}
             </div>
           </div>
           <div>
             <label className="block text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-1.5">
-              {tipo === "MORADOR" ? "Morador" : "Funcionário"}
+              {tipo === "MORADOR" ? "Morador" : tipo === "FUNCIONARIO" ? "Funcionário" : "Terceiro"}
             </label>
             {loadingOpcoes ? (
               <p className="text-sm text-on-surface-variant/60 py-2 italic">
-                {tipo === "MORADOR" ? "Carregando moradores…" : "Carregando funcionários…"}
+                {tipo === "MORADOR" ? "Carregando moradores…" : tipo === "FUNCIONARIO" ? "Carregando funcionários…" : "Carregando terceiros…"}
               </p>
             ) : erroOpcoes ? (
               <p className="text-red-500 text-xs py-2">{erroOpcoes}</p>
             ) : opcoes.length === 0 ? (
               <p className="text-sm text-on-surface-variant/60 py-2">
-                {tipo === "MORADOR" ? "Nenhum morador cadastrado." : "Nenhum funcionário cadastrado."}
+                {tipo === "MORADOR" ? "Nenhum morador cadastrado." : tipo === "FUNCIONARIO" ? "Nenhum funcionário cadastrado." : "Nenhum terceiro cadastrado."}
               </p>
             ) : (
               <select value={responsavelId} onChange={(e) => { setResponsavelId(e.target.value); setErro(null); }}
@@ -129,7 +161,8 @@ function ModalRetirar({ chave, onClose, onSalvo }) {
                 <option value="">Selecione…</option>
                 {opcoes.map((o) => {
                   const loc = [o.bloco, o.apartamento].filter(Boolean).join(" / ");
-                  const label = loc ? `${o.nome} — ${loc}` : o.nome;
+                  const sufixo = loc || o.empresa || null;
+                  const label = sufixo ? `${o.nome} — ${sufixo}` : o.nome;
                   return <option key={o.id} value={o.id}>{label}</option>;
                 })}
               </select>
@@ -159,6 +192,7 @@ function AbaCadastro({ chaves, onAtualizar }) {
   const [form, setForm] = useState({ localId: "", tipoLocal: "", nomeChave: "", descricao: "" });
   const [erro, setErro] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [devolvendoId, setDevolvendoId] = useState(null);
   const [modalRetirar, setModalRetirar] = useState(null);
   const toast = useToast();
 
@@ -192,7 +226,7 @@ function AbaCadastro({ chaves, onAtualizar }) {
       setForm({ localId: "", tipoLocal: "", nomeChave: "", descricao: "" });
       onAtualizar();
     } catch (err) {
-      setErro(err?.response?.data?.message || "Não foi possível cadastrar a chave.");
+      setErro(errMsg(err) || "Não foi possível cadastrar a chave.");
     } finally {
       setLoading(false);
     }
@@ -205,17 +239,21 @@ function AbaCadastro({ chaves, onAtualizar }) {
       toast.success("Chave excluída.");
       onAtualizar();
     } catch (err) {
-      toast.error(err?.response?.data?.message || "Não foi possível excluir a chave.");
+      toast.error(errMsg(err) || "Não foi possível excluir a chave.");
     }
   }
 
   async function devolver(chave) {
+    if (devolvendoId) return;
+    setDevolvendoId(chave.id);
     try {
       await chaveApi.devolver(chave.id);
       toast.success(`Devolução de "${chave.nomeChave}" registrada.`);
       onAtualizar();
     } catch (err) {
-      toast.error(err?.response?.data?.message || "Erro ao registrar devolução.");
+      toast.error(errMsg(err) || "Erro ao registrar devolução.");
+    } finally {
+      setDevolvendoId(null);
     }
   }
 
@@ -345,9 +383,10 @@ function AbaCadastro({ chaves, onAtualizar }) {
                       </button>
                     </>
                   ) : (
-                    <button onClick={() => devolver(c)}
-                      className="flex-1 inline-flex items-center justify-center gap-1 px-3 py-2 rounded-xl text-xs font-semibold bg-green-500/15 text-green-600 dark:text-green-400 hover:bg-green-500/25 transition-colors">
-                      <Icone name="check_circle" className="text-sm" />Registrar Devolução
+                    <button onClick={() => devolver(c)} disabled={devolvendoId === c.id}
+                      className="flex-1 inline-flex items-center justify-center gap-1 px-3 py-2 rounded-xl text-xs font-semibold bg-green-500/15 text-green-600 dark:text-green-400 hover:bg-green-500/25 transition-colors disabled:opacity-60">
+                      <Icone name="check_circle" className="text-sm" />
+                      {devolvendoId === c.id ? "Registrando…" : "Registrar Devolução"}
                     </button>
                   )}
                 </div>
@@ -370,7 +409,7 @@ function AbaCadastro({ chaves, onAtualizar }) {
 
 // ── Aba 2: Histórico ──────────────────────────────────────────────────────────
 
-const PERFIS_OPCOES = ["Morador", "Funcionário"];
+const PERFIS_OPCOES = ["Morador", "Funcionário", "Terceiro"];
 
 function AbaHistorico({ chaves, onAtualizar }) {
   const [chaveId, setChaveId] = useState("");
@@ -378,7 +417,7 @@ function AbaHistorico({ chaves, onAtualizar }) {
   const [historico, setHistorico] = useState([]);
   const [loadingHist, setLoadingHist] = useState(false);
   const [filtros, setFiltros] = useState({
-    dataInicio: hoje(),
+    dataInicio: "",
     dataFim: hoje(),
     quemRetirou: "",
     perfil: "",
@@ -425,7 +464,7 @@ function AbaHistorico({ chaves, onAtualizar }) {
   }
 
   function limparFiltros() {
-    const pad = { dataInicio: hoje(), dataFim: hoje(), quemRetirou: "", perfil: "", status: "" };
+    const pad = { dataInicio: "", dataFim: hoje(), quemRetirou: "", perfil: "", status: "" };
     setFiltros(pad);
     setErroFiltro(null);
     carregarHistorico(chaveId, pad);
@@ -442,7 +481,7 @@ function AbaHistorico({ chaves, onAtualizar }) {
       onAtualizar();
       carregarHistorico(chaveId, filtros);
     } catch (err) {
-      toast.error(err?.response?.data?.message || "Erro ao registrar devolução.");
+      toast.error(errMsg(err) || "Erro ao registrar devolução.");
     }
   }
 
@@ -507,7 +546,7 @@ function AbaHistorico({ chaves, onAtualizar }) {
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
               <div>
-                <label className="block text-xs text-on-surface-variant mb-1">Data inicial</label>
+                <label className="block text-xs text-on-surface-variant mb-1">Data inicial (opcional)</label>
                 <input type="date" value={filtros.dataInicio} onChange={(e) => setF("dataInicio", e.target.value)}
                   className="w-full rounded-xl border border-outline-variant/30 bg-surface px-3 py-2 text-sm text-on-surface focus:outline-none focus:border-primary/60 transition-colors" />
               </div>

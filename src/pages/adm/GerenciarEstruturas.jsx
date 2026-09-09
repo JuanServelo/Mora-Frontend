@@ -10,6 +10,8 @@ import { Botao } from "../../components/botoes/Botao";
 import { useAuth } from "../../contexts/AuthContext";
 import { useToast } from "../../contexts/ToastContext";
 import { PERFIS, perfisCadastroDisponiveis } from "../../utils/perfis";
+import { SeletorCondominio } from "../../components/adm/SeletorCondominio";
+import { formatarUnidade } from "../../utils/unidades";
 
 const TIPOS_AREA = ["PISCINA", "SALAO_FESTAS", "ACADEMIA", "CHURRASQUEIRA", "QUADRA", "PLAYGROUND", "OUTRO"];
 
@@ -29,8 +31,8 @@ export function GerenciarEstruturas() {
 
   useEffect(() => {
     if (isGerente) {
-      condominiosApi.listar().then((res) => {
-        const lista = (res.data.condominios || []).filter((c) => c.status === "active");
+      condominiosApi.listarAtivos().then((res) => {
+        const lista = res.data.condominios || [];
         setCondominios(lista);
         if (lista.length > 0) setCondominioId(lista[0].id);
       }).catch(() => {});
@@ -83,21 +85,14 @@ export function GerenciarEstruturas() {
             </p>
           </div>
 
-          {isGerente && condominios.length > 1 ? (
-            <select
-              value={condominioId}
-              onChange={(e) => { setCondominioId(e.target.value); setAba("blocos"); }}
-              className="flex-1 bg-surface-container-highest/40 border-none rounded-xl py-3 px-4 text-on-surface font-semibold focus:ring-2 focus:ring-primary/50 focus:outline-none"
-            >
-              {condominios.map((c) => (
-                <option key={c.id} value={c.id}>{c.nome}</option>
-              ))}
-            </select>
-          ) : (
-            <p className="text-on-surface font-semibold">
-              {condominioAtual?.nome ?? condominioId}
-            </p>
-          )}
+          <SeletorCondominio
+            condominios={isGerente ? condominios : []}
+            value={condominioId ?? ""}
+            onChange={(id) => { setCondominioId(id); setAba("blocos"); }}
+            selectClassName="flex-1 bg-surface-container-highest/40 border-none rounded-xl py-3 px-4 text-on-surface font-semibold focus:ring-2 focus:ring-primary/50 focus:outline-none"
+            readonlyClassName="text-on-surface font-semibold"
+            nomeAlternativo={condominioAtual?.nome ?? condominioId}
+          />
 
           <div className="flex gap-2 shrink-0 text-xs text-on-surface-variant font-mono">
             <span className="px-2 py-1 rounded-lg bg-surface-container-highest/30">{condominioId}</span>
@@ -1084,6 +1079,22 @@ function FormApartamento({ inicial, blocos, apartamentos = [], onSalvar, onCance
     ? Array.from({ length: totalAndares }, (_, i) => i + 1)
     : null;
 
+  const andaresDisponiveis = useMemo(() => {
+    if (!totalAndares || !limitePorAndar) return [];
+    return Array.from({ length: totalAndares }, (_, i) => i + 1).filter(
+      (n) => (countPorAndar[n] || 0) < limitePorAndar,
+    );
+  }, [totalAndares, limitePorAndar, countPorAndar]);
+
+  const todosLotados = totalAndares != null && limitePorAndar != null && andaresDisponiveis.length === 0;
+
+  useEffect(() => {
+    if (inicial) return;
+    if (andaresDisponiveis.length === 1) {
+      setForm((f) => ({ ...f, andar: String(andaresDisponiveis[0]) }));
+    }
+  }, [andaresDisponiveis, inicial]);
+
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -1125,7 +1136,7 @@ function FormApartamento({ inicial, blocos, apartamentos = [], onSalvar, onCance
                 const cheio = limitePorAndar && count >= limitePorAndar && !editandoEsteAndar;
                 return (
                   <option key={n} value={n} disabled={cheio}>
-                    {n}º andar{cheio ? " (lotado)" : count > 0 ? ` (${count}/${limitePorAndar ?? "?"})` : ""}
+                    {n}º andar{cheio ? " — lotado" : count > 0 ? ` (${count}/${limitePorAndar ?? "?"})` : ""}
                   </option>
                 );
               })}
@@ -1150,8 +1161,13 @@ function FormApartamento({ inicial, blocos, apartamentos = [], onSalvar, onCance
         <Campo id="apt-obs" label="Observações" placeholder="Opcional" optional value={form.observacoes} onChange={(e) => set("observacoes", e.target.value)} />
       </div>
       {erro && <p className="text-error text-xs">{erro}</p>}
+      {todosLotados && !inicial && (
+        <p className="text-xs text-on-surface-variant bg-surface-container-highest/30 rounded-xl px-4 py-3">
+          Todos os andares deste bloco já atingiram o limite de apartamentos.
+        </p>
+      )}
       <div className="flex gap-3 pt-2">
-        <Botao type="submit">{inicial ? "Salvar alterações" : "Cadastrar apartamento"}</Botao>
+        <Botao type="submit" disabled={todosLotados && !inicial}>{inicial ? "Salvar alterações" : "Cadastrar apartamento"}</Botao>
         <button type="button" onClick={onCancelar} className="flex-1 py-4 rounded-full border border-outline-variant/30 text-on-surface-variant hover:bg-white/5 font-semibold transition-all cursor-pointer">
           Cancelar
         </button>
@@ -1559,6 +1575,10 @@ function AbaVagas({ condominioId }) {
   const [vagas, setVagas] = useState([]);
   const [apartamentos, setApartamentos] = useState([]);
   const [carregando, setCarregando] = useState(true);
+  const aptMap = useMemo(
+    () => Object.fromEntries(apartamentos.map((a) => [a.id, a])),
+    [apartamentos],
+  );
   const [busca, setBusca] = useState("");
   const [filtroAptId, setFiltroAptId] = useState("todos");
   const [criando, setCriando] = useState(false);
@@ -1697,7 +1717,7 @@ function AbaVagas({ condominioId }) {
             <option value="todos">Todos</option>
             <option value="sem-apt">Sem apartamento</option>
             {apartamentos.map((a) => (
-              <option key={a.id} value={a.id}>Apt {a.numero} · {a.blocoNome}</option>
+              <option key={a.id} value={a.id}>{formatarUnidade(a.blocoNome, a.numero)}</option>
             ))}
           </select>
         </div>
@@ -1723,14 +1743,14 @@ function AbaVagas({ condominioId }) {
                 <div className="flex-1 min-w-0">
                   <p className="text-on-surface font-semibold truncate">Vaga {vaga.numero}</p>
                   <p className="text-on-surface-variant text-sm truncate">
-                    {vaga.apartamentoNumero ? `Apt ${vaga.apartamentoNumero}` : "Sem apartamento"}
+                    {formatarUnidade(aptMap[vaga.apartamentoId]?.blocoNome, aptMap[vaga.apartamentoId]?.numero ?? vaga.apartamentoNumero)}
                     {vaga.localizacao ? ` · ${vaga.localizacao}` : ""}
                   </p>
                 </div>
                 <div className="hidden sm:flex gap-6 text-sm shrink-0">
                   {[
                     { label: "Tipo", value: vaga.tipo || "—" },
-                    { label: "Apartamento", value: vaga.apartamentoNumero ? `Apt ${vaga.apartamentoNumero}` : "—" },
+                    { label: "Apartamento", value: formatarUnidade(aptMap[vaga.apartamentoId]?.blocoNome, aptMap[vaga.apartamentoId]?.numero ?? vaga.apartamentoNumero) },
                   ].map((col) => (
                     <div key={col.label} className="text-center">
                       <p className="text-on-surface-variant text-xs uppercase tracking-wider">{col.label}</p>
@@ -1760,6 +1780,7 @@ function AbaVagas({ condominioId }) {
                   ) : (
                     <DetalhesVaga
                       vaga={vaga}
+                      blocoNome={aptMap[vaga.apartamentoId]?.blocoNome}
                       onEditar={() => setEditando(vaga.id)}
                       onToggleAtivo={() => handleToggleAtivo(vaga)}
                     />
@@ -1828,7 +1849,7 @@ function FormVaga({ inicial, apartamentos, onSalvar, onCancelar, erro }) {
           >
             <option value="">Sem apartamento</option>
             {apartamentos.map((a) => (
-              <option key={a.id} value={a.id}>Apt {a.numero} · {a.blocoNome}</option>
+              <option key={a.id} value={a.id}>{formatarUnidade(a.blocoNome, a.numero)}</option>
             ))}
           </select>
         </div>
@@ -1848,7 +1869,7 @@ function FormVaga({ inicial, apartamentos, onSalvar, onCancelar, erro }) {
   );
 }
 
-function DetalhesVaga({ vaga, onEditar, onToggleAtivo }) {
+function DetalhesVaga({ vaga, blocoNome, onEditar, onToggleAtivo }) {
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -1856,7 +1877,7 @@ function DetalhesVaga({ vaga, onEditar, onToggleAtivo }) {
           { label: "Número", value: vaga.numero },
           { label: "Tipo", value: vaga.tipo || "—" },
           { label: "Localização", value: vaga.localizacao || "—" },
-          { label: "Apartamento", value: vaga.apartamentoNumero ? `Apt ${vaga.apartamentoNumero}` : "—" },
+          { label: "Apartamento", value: formatarUnidade(blocoNome, vaga.apartamentoNumero) },
         ].map((item) => (
           <div key={item.label} className="bg-surface-container-highest/20 rounded-xl p-3">
             <p className="text-on-surface-variant text-xs uppercase tracking-wider mb-1">{item.label}</p>

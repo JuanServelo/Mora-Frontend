@@ -1,6 +1,7 @@
 // src/pages/adm/GerenciarVagas.jsx
 import { useState, useEffect } from "react";
 import { vagaApi, apartamentoApi } from "../../services/estruturasApi";
+import { formatarUnidade } from "../../utils/unidades";
 import { Icone } from "../../components/icones/Icone";
 import { Campo } from "../../components/campos/Campo";
 import { Botao } from "../../components/botoes/Botao";
@@ -205,7 +206,7 @@ export function GerenciarVagas() {
                   >
                     <option value="">Nenhum apartamento</option>
                     {apartamentos.map((apt) => (
-                      <option key={apt.id} value={apt.id}>{apt.numero} - Bloco {apt.blocoNome}</option>
+                      <option key={apt.id} value={apt.id}>{formatarUnidade(apt.blocoNome, apt.numero)}</option>
                     ))}
                   </select>
                 </div>
@@ -277,14 +278,10 @@ export function GerenciarVagas() {
                   {vaga.tipo && (
                     <p className="text-xs text-on-surface-variant">{vaga.tipo}</p>
                   )}
-                  {apartamento ? (
-                    <p className="text-xs text-primary mt-2 font-semibold">
-                      <Icone name="home" className="text-xs mr-1 inline" />
-                      Apt {apartamento.numero}
-                    </p>
-                  ) : (
-                    <p className="text-xs text-on-surface-variant mt-2 opacity-50">Sem apartamento</p>
-                  )}
+                  <p className={`text-xs mt-2 font-semibold ${apartamento ? "text-primary" : "text-on-surface-variant opacity-50"}`}>
+                    {apartamento && <Icone name="home" className="text-xs mr-1 inline" />}
+                    {formatarUnidade(apartamento?.blocoNome, apartamento?.numero)}
+                  </p>
                 </div>
 
                 {/* Ações de status */}

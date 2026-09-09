@@ -19,6 +19,7 @@ import { GerenciarPerfis } from "../pages/adm/GerenciarPerfis";
 import { GerenciarCondominios } from "../pages/adm/GerenciarCondominios";
 import { GerenciarPlanos } from "../pages/adm/GerenciarPlanos";
 import { GerenciarVeiculos } from "../pages/adm/GerenciarVeiculos";
+import { AtendimentoPortaria } from "../pages/porteiro/AtendimentoPortaria";
 import { FAQ } from "../pages/usuario/FAQ";
 import { MinhasReservas } from "../pages/usuario/MinhasReservas";
 import { MinhasReclamacoes } from "../pages/usuario/MinhasReclamacoes";
@@ -91,7 +92,8 @@ export const router = createBrowserRouter([
       { path: "/portaria", element: <Portaria /> },
       { path: "/entradas-e-saidas", element: <Portaria /> },
       { path: "/chaves", element: <Chaves /> },
-      { path: "/veiculos", element: <GerenciarVeiculos /> },
+      { path: "/atendimento", element: <DoormanRoute><AtendimentoPortaria /></DoormanRoute> },
+      { path: "/veiculos", element: <DoormanRoute><GerenciarVeiculos /></DoormanRoute> },
       {
         path: "/usuarios",
         element: (
@@ -115,7 +117,7 @@ export const router = createBrowserRouter([
       { path: "/adm/entregas", element: <AdminRoute><GerenciarEntregas /></AdminRoute> },
       { path: "/adm/vagas", element: <AdminRoute><GerenciarVagas /></AdminRoute> },
       { path: "/adm/conhecimento", element: <AdminRoute><GerenciarConhecimento /></AdminRoute> },
-      { path: "/adm/veiculos", element: <GerenciarVeiculos /> },
+      { path: "/adm/veiculos", element: <AdminRoute><GerenciarVeiculos /></AdminRoute> },
     ],
   },
 ]);
