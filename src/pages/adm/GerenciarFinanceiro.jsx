@@ -5,6 +5,8 @@ import { PainelConfiguracao } from "../../components/adm/financeiro/PainelConfig
 import { PainelTaxas } from "../../components/adm/financeiro/PainelTaxas";
 import { PainelFracoes } from "../../components/adm/financeiro/PainelFracoes";
 import { PainelGateway } from "../../components/adm/financeiro/PainelGateway";
+import { PainelContas } from "../../components/adm/financeiro/PainelContas";
+import { PainelFaturas } from "../../components/adm/financeiro/PainelFaturas";
 
 /**
  * Configuração financeira do condomínio.
@@ -38,17 +40,28 @@ const ABAS = [
     descricao: "Quanto cabe a cada unidade",
   },
   {
+    id: "contas",
+    label: "Contas",
+    icone: "water_drop",
+    descricao: "Lançamentos de água, luz, gás e outras contas do condomínio",
+  },
+  {
+    id: "faturas",
+    label: "Faturas",
+    icone: "receipt_long",
+    descricao: "Faturas emitidas para as unidades — acompanhamento e baixa manual",
+  },
+  {
     id: "gateway",
     label: "Teste de cobrança",
     icone: "science",
     descricao: "Emite uma cobrança no sandbox para conferir a integração",
+    destaque: true,
   },
 ];
 
 export function GerenciarFinanceiro() {
   const [aba, setAba] = useState("config");
-  // O modo escolhido nas Regras muda o padrão das outras duas abas, então sobe
-  // para cá em vez de cada painel buscar a configuração de novo.
   const [modoRateio, setModoRateio] = useState(null);
 
   const atual = ABAS.find((a) => a.id === aba);
@@ -79,9 +92,13 @@ export function GerenciarFinanceiro() {
                 key={a.id}
                 onClick={() => setAba(a.id)}
                 className={`flex items-center gap-2 px-5 py-3 rounded-2xl text-sm font-semibold transition cursor-pointer ${
-                  ativa
-                    ? "bg-primary/15 text-primary"
-                    : "text-on-surface-variant hover:bg-white/5 hover:text-on-surface"
+                  a.destaque
+                    ? ativa
+                      ? "bg-yellow-500/15 text-yellow-400"
+                      : "text-yellow-500/70 hover:bg-yellow-500/10 hover:text-yellow-400"
+                    : ativa
+                      ? "bg-primary/15 text-primary"
+                      : "text-on-surface-variant hover:bg-white/5 hover:text-on-surface"
                 }`}
               >
                 <Icone name={a.icone} className="text-lg" />
@@ -112,6 +129,8 @@ export function GerenciarFinanceiro() {
           {aba === "taxas" && <PainelTaxas modoRateio={modoRateio} />}
           {aba === "fracoes" && <PainelFracoes modoRateio={modoRateio} />}
           {aba === "gateway" && <PainelGateway />}
+          {aba === "contas" && <PainelContas />}
+          {aba === "faturas" && <PainelFaturas />}
         </div>
       </div>
     </div>

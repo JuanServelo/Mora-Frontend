@@ -1,8 +1,9 @@
 // src/components/navbar/Navbar.jsx
 import { useState, useRef, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Icone } from "../icones/Icone";
 import { useAuth } from "../../contexts/AuthContext";
+import { useNotificacoes } from "../../contexts/NotificacoesContext";
 import { PERFIS, isUsuarioRestrito, podeAcessarAdmin } from "../../utils/perfis";
 import { linksDoPerfil } from "../../utils/menuAdmin";
 // import moraLogo from "../../assets/Mora.png";
@@ -14,6 +15,7 @@ const NAV_LINKS_LEFT = [
   { label: "Serviços", to: "/servicos" },
   { label: "Espaços", to: "/espacos" },
   { label: "Reclamações", to: "/reclamacoes" },
+  { label: "Cobranças", to: "/financeiro" },
 ];
 
 const NAV_LINKS_PORTEIRO = [
@@ -127,6 +129,120 @@ function AdminMenu({ usuario }) {
   );
 }
 
+function SinoNotificacoes() {
+  const { notificacoes, naoLidas, marcarLida, marcarTodasLidas } = useNotificacoes();
+  const navigate = useNavigate();
+  const [aberto, setAberto] = useState(false);
+  const ref = useRef(null);
+
+  useEffect(() => {
+    function handler(e) {
+      if (ref.current && !ref.current.contains(e.target)) setAberto(false);
+    }
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  function aoClicar(n) {
+    marcarLida(n.id);
+    setAberto(false);
+    if (["NOVA_FATURA", "PAGAMENTO_CONFIRMADO", "FATURA_VENCIDA"].includes(n.tipo)) {
+      navigate("/financeiro");
+    }
+  }
+
+  const recentes = notificacoes.slice(0, 8);
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        onClick={() => setAberto((o) => !o)}
+        className="relative ml-1 w-9 h-9 rounded-full flex items-center justify-center text-on-surface-variant hover:text-primary hover:bg-primary/10 transition-all duration-200 cursor-pointer"
+        title="Notificações"
+      >
+        <Icone name="notifications" className="text-xl" />
+        {naoLidas > 0 && (
+          <span className="absolute top-1 right-1 w-4 h-4 rounded-full bg-error text-white text-[10px] font-bold flex items-center justify-center">
+            {naoLidas > 9 ? "9+" : naoLidas}
+          </span>
+        )}
+      </button>
+
+      {aberto && (
+        <div className="absolute top-[calc(100%+10px)] right-0 w-80 rounded-2xl overflow-hidden z-50 shadow-[0_16px_48px_rgba(0,0,0,0.6)]"
+          style={{ background: "rgba(18,18,24,0.97)", backdropFilter: "blur(24px)", border: "1px solid rgba(255,255,255,0.08)" }}
+        >
+          <div className="flex items-center justify-between px-4 py-3 border-b border-white/5">
+            <p className="text-xs font-semibold uppercase tracking-widest text-on-surface-variant">
+              Notificações
+            </p>
+            {naoLidas > 0 && (
+              <button
+                onClick={marcarTodasLidas}
+                className="text-xs text-primary hover:underline cursor-pointer"
+              >
+                Marcar todas como lidas
+              </button>
+            )}
+          </div>
+
+          {recentes.length === 0 ? (
+            <div className="py-8 text-center text-on-surface-variant text-sm">
+              <Icone name="notifications_none" className="text-3xl opacity-30 block mb-2 mx-auto" />
+              Sem notificações
+            </div>
+          ) : (
+            <div className="max-h-72 overflow-y-auto divide-y divide-white/5">
+              {recentes.map((n) => (
+                <button
+                  key={n.id}
+                  onClick={() => aoClicar(n)}
+                  className={`w-full text-left flex items-start gap-3 px-4 py-3 hover:bg-white/5 transition cursor-pointer ${!n.lida ? "bg-primary/5" : ""}`}
+                >
+                  <div className={`mt-0.5 p-1.5 rounded-lg shrink-0 ${
+                    n.tipo === "PAGAMENTO_CONFIRMADO" ? "bg-green-500/15 text-green-400" :
+                    n.tipo === "FATURA_VENCIDA" ? "bg-error/15 text-error" :
+                    "bg-primary/15 text-primary"
+                  }`}>
+                    <Icone name={
+                      n.tipo === "PAGAMENTO_CONFIRMADO" ? "check_circle" :
+                      n.tipo === "FATURA_VENCIDA" ? "warning" : "receipt"
+                    } className="text-sm" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className={`text-sm font-medium leading-snug ${n.lida ? "text-on-surface-variant" : "text-on-surface"}`}>
+                      {n.titulo}
+                    </p>
+                    {n.mensagem && (
+                      <p className="text-xs text-on-surface-variant mt-0.5 line-clamp-2">{n.mensagem}</p>
+                    )}
+                    <p className="text-[10px] text-on-surface-variant/50 mt-1">
+                      {new Date(n.criadoEm).toLocaleString("pt-BR")}
+                    </p>
+                  </div>
+                  {!n.lida && <div className="mt-2 shrink-0 w-2 h-2 rounded-full bg-primary" />}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* Rodapé — Ver todas */}
+          <div className="px-4 py-3 border-t border-white/5">
+            <Link
+              to="/notificacoes"
+              onClick={() => setAberto(false)}
+              className="flex items-center justify-center gap-1.5 w-full text-xs font-semibold text-on-surface-variant hover:text-primary transition"
+            >
+              Ver todas as notificações
+              <Icone name="arrow_forward" className="text-sm" />
+            </Link>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function Navbar() {
   const [darkMode, setDarkMode] = useState(true);
   const { usuario } = useAuth();
@@ -171,6 +287,8 @@ export function Navbar() {
               {l.label}
             </NavLink>
           ))}
+
+          <SinoNotificacoes />
 
           {/* Toggle Dark/Light */}
           <button

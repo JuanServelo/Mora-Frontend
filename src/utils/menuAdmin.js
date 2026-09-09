@@ -63,6 +63,13 @@ export const ADM_LINKS = [
 
   // ── Operação do condomínio: não é trabalho de quem opera a plataforma
   {
+    to: "/adm/meu-plano",
+    label: "Meu Plano",
+    icon: "workspace_premium",
+    description: "Plano contratado e módulos disponíveis",
+    perfis: CONDOMINIO,
+  },
+  {
     to: "/adm/financeiro",
     label: "Financeiro",
     icon: "payments",

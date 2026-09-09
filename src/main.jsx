@@ -6,6 +6,7 @@ import "./index.css";
 import { AuthProvider } from "./contexts/AuthContext.jsx";
 import { ToastProvider } from "./contexts/ToastContext.jsx";
 import { ConfirmProvider } from "./contexts/ConfirmContext.jsx";
+import { NotificacoesProvider } from "./contexts/NotificacoesContext.jsx";
 import App from "./App.jsx";
 
 createRoot(document.getElementById("root")).render(
@@ -13,7 +14,9 @@ createRoot(document.getElementById("root")).render(
     <ToastProvider>
       <ConfirmProvider>
         <AuthProvider>
-          <App />
+          <NotificacoesProvider>
+            <App />
+          </NotificacoesProvider>
         </AuthProvider>
       </ConfirmProvider>
     </ToastProvider>

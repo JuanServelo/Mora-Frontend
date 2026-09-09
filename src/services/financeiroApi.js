@@ -77,6 +77,71 @@ export const financeiroApi = {
   cancelarCobrancaTeste(id) {
     return financeiro.delete(`${base}/gateway/teste/${id}`);
   },
+
+  // ── Contas de consumo (síndico) ───────────────────────
+  listarContasConsumo(competencia) {
+    return financeiro.get(`${base}/contas-consumo`, {
+      params: competencia ? { competencia } : undefined,
+    });
+  },
+  criarContaConsumo(dados) {
+    return financeiro.post(`${base}/contas-consumo`, dados);
+  },
+  atualizarContaConsumo(id, dados) {
+    return financeiro.put(`${base}/contas-consumo/${id}`, dados);
+  },
+  cancelarContaConsumo(id) {
+    return financeiro.delete(`${base}/contas-consumo/${id}`);
+  },
+  ratearContaConsumo(id) {
+    return financeiro.post(`${base}/contas-consumo/${id}/ratear`);
+  },
+
+  // ── Fechamento / faturamento (síndico) ────────────────
+  previewCompetencia(competencia) {
+    return financeiro.get(`${base}/admin/fechamento/preview`, { params: { competencia } });
+  },
+  fecharCompetencia(competencia) {
+    return financeiro.post(`${base}/fechar-competencia`, { competencia });
+  },
+
+  // ── Faturas: visão síndico ────────────────────────────
+  listarFaturasCondominio({ competencia, status, unidadeId } = {}) {
+    return financeiro.get(`${base}/admin/faturas`, {
+      params: { competencia, status, unidadeId },
+    });
+  },
+  kpisFaturas(competencia) {
+    return financeiro.get(`${base}/admin/faturas/kpis`, { params: { competencia } });
+  },
+  baixaManual(id, dados) {
+    return financeiro.patch(`${base}/admin/faturas/${id}/baixa-manual`, dados);
+  },
+
+  // ── Faturas: visão morador ────────────────────────────
+  listarMinhasFaturas() {
+    return financeiro.get(`${base}/faturas`);
+  },
+  obterDetalhesFatura(id) {
+    return financeiro.get(`${base}/faturas/${id}`);
+  },
+  gerarCobranca(id, forma) {
+    return financeiro.post(`${base}/faturas/${id}/pagar`, { forma });
+  },
+  meuGastos(ano) {
+    return financeiro.get(`${base}/gastos`, { params: ano ? { ano } : {} });
+  },
+
+  // ── Notificações ──────────────────────────────────────
+  listarNotificacoes() {
+    return financeiro.get(`${base}/notificacoes`);
+  },
+  marcarNotificacaoLida(id) {
+    return financeiro.patch(`${base}/notificacoes/${id}/lida`);
+  },
+  marcarTodasNotificacoesLidas() {
+    return financeiro.patch(`${base}/notificacoes/marcar-todas-lidas`);
+  },
 };
 
 export default financeiroApi;

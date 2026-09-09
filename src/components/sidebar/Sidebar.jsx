@@ -2,6 +2,7 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Icone } from "../icones/Icone";
 import { useAuth } from "../../contexts/AuthContext";
+import { useNotificacoes } from "../../contexts/NotificacoesContext";
 import { PERFIS } from "../../utils/perfis";
 import { linksDoPerfil } from "../../utils/menuAdmin";
 import moraLogo3 from "../../assets/Mora3.png";
@@ -20,6 +21,7 @@ export function Sidebar() {
   const { pathname } = useLocation();
   const { usuario, logout } = useAuth();
   const navigate = useNavigate();
+  const { naoLidas } = useNotificacoes();
 
   const perfil = usuario?.perfil;
   const isDoorman = perfil === PERFIS.PORTEIRO;
@@ -79,6 +81,17 @@ export function Sidebar() {
 
       {/* Usuário (link p/ perfil) + Logout */}
       <div className="px-2 py-3 border-t border-white/5 space-y-0.5">
+        {naoLidas > 0 && (
+          <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-primary/5 border border-primary/10 mb-1">
+            <Icone name="notifications_active" className="text-primary text-base" />
+            <span className="text-xs text-primary font-semibold flex-1">
+              {naoLidas} notificaç{naoLidas === 1 ? "ão" : "ões"}
+            </span>
+            <span className="w-5 h-5 rounded-full bg-error text-white text-[10px] font-bold flex items-center justify-center">
+              {naoLidas > 9 ? "9+" : naoLidas}
+            </span>
+          </div>
+        )}
         <Link
           to="/perfil"
           className="flex items-center gap-3 px-3 py-2 rounded-xl bg-surface-container-highest/20 hover:bg-white/5 transition-all"

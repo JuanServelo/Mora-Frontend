@@ -19,6 +19,7 @@ import { GerenciarPerfis } from "../pages/adm/GerenciarPerfis";
 import { GerenciarCondominios } from "../pages/adm/GerenciarCondominios";
 import { GerenciarPlanos } from "../pages/adm/GerenciarPlanos";
 import { GerenciarFinanceiro } from "../pages/adm/GerenciarFinanceiro";
+import { MeuPlano } from "../pages/adm/MeuPlano";
 import { GerenciarVeiculos } from "../pages/adm/GerenciarVeiculos";
 import { FAQ } from "../pages/usuario/FAQ";
 import { MinhasReservas } from "../pages/usuario/MinhasReservas";
@@ -31,6 +32,8 @@ import { Portaria } from "../pages/portaria/Portaria";
 import { Chaves } from "../pages/porteiro/Chaves";
 import { UsuariosCondominio } from "../pages/porteiro/UsuariosCondominio";
 import { MeusConvidados } from "../pages/usuario/MeusConvidados";
+import { MinhasCobrancas } from "../pages/usuario/MinhasCobrancas";
+import { Notificacoes } from "../pages/usuario/Notificacoes";
 import { AppLayout } from "../layouts/AppLayout";
 import { ProtectedRoute } from "./ProtectedRoute";
 import { DoormanRoute } from "./DoormanRoute";
@@ -102,6 +105,8 @@ export const router = createBrowserRouter([
         ),
       },
       { path: "/meus-convidados", element: <MeusConvidados /> },
+      { path: "/financeiro", element: <MinhasCobrancas /> },
+      { path: "/notificacoes", element: <Notificacoes /> },
       // Todas as telas /adm passam pelo AdminRoute, que usa o mesmo mapa do menu
       // (src/utils/menuAdmin.js) — assim esconder do menu também barra a URL.
       { path: "/adm/geral", element: <AdminRoute><IndexAdminGeralLazy /></AdminRoute> },
@@ -111,6 +116,7 @@ export const router = createBrowserRouter([
       { path: "/adm/usuarios", element: <AdminRoute><GerenciarUsuarios /></AdminRoute> },
       { path: "/adm/estruturas", element: <AdminRoute><GerenciarEstruturas /></AdminRoute> },
       { path: "/adm/perfis", element: <AdminRoute><GerenciarPerfis /></AdminRoute> },
+      { path: "/adm/meu-plano", element: <AdminRoute><MeuPlano /></AdminRoute> },
       { path: "/adm/financeiro", element: <AdminRoute><GerenciarFinanceiro /></AdminRoute> },
       { path: "/adm/reunioes", element: <AdminRoute><GerenciarReunioes /></AdminRoute> },
       { path: "/adm/reclamacoes", element: <AdminRoute><GerenciarReclamacoes /></AdminRoute> },
