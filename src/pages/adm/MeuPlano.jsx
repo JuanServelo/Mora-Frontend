@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { Icone } from "../../components/icones/Icone";
 import { useAuth } from "../../contexts/AuthContext";
 import { planApi } from "../../services/planApi";
+import { formatarData } from "../../utils/datas";
 
 /* Mapeamento slug → label + ícone + descrição do que o módulo habilita */
 const MODULOS = {
@@ -23,12 +24,6 @@ const TODOS_MODULOS = Object.keys(MODULOS);
 function formatarBRL(valor) {
   if (valor == null) return "—";
   return Number(valor).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
-}
-
-function formatarData(iso) {
-  if (!iso) return "—";
-  const [ano, mes, dia] = String(iso).split("-");
-  return `${dia}/${mes}/${ano}`;
 }
 
 export function MeuPlano() {
@@ -148,8 +143,8 @@ export function MeuPlano() {
                   {modulosInativos.map(slug => {
                     const m = MODULOS[slug] ?? { label: slug, icone: "extension", desc: "" };
                     return (
-                      <div key={slug} className="rounded-2xl p-4 flex items-start gap-4 border border-white/5 opacity-50">
-                        <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center shrink-0 mt-0.5">
+                      <div key={slug} className="rounded-2xl p-4 flex items-start gap-4 border border-veu/5 opacity-50">
+                        <div className="w-10 h-10 rounded-xl bg-veu/5 flex items-center justify-center shrink-0 mt-0.5">
                           <Icone name={m.icone} className="text-on-surface-variant text-lg" />
                         </div>
                         <div className="min-w-0">

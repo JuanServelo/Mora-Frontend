@@ -2,6 +2,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { Icone } from "../../icones/Icone";
 import { useToast } from "../../../contexts/ToastContext";
+import { formatarData } from "../../../utils/datas";
 import { useConfirm } from "../../../contexts/ConfirmContext";
 import { financeiroApi } from "../../../services/financeiroApi";
 import { apartamentoApi } from "../../../services/estruturasApi";
@@ -16,7 +17,7 @@ const STATUS_CONFIG = {
   ABERTA: { cor: "bg-blue-500/15 text-blue-400", label: "Em aberto" },
   PAGA: { cor: "bg-green-500/15 text-green-400", label: "Paga" },
   EM_ATRASO: { cor: "bg-error/15 text-error", label: "Em atraso" },
-  CANCELADA: { cor: "bg-white/10 text-on-surface-variant", label: "Cancelada" },
+  CANCELADA: { cor: "bg-veu/10 text-on-surface-variant", label: "Cancelada" },
 };
 
 export function PainelFaturas() {
@@ -122,7 +123,7 @@ export function PainelFaturas() {
             type="month"
             value={competencia}
             onChange={(e) => setCompetencia(e.target.value)}
-            className="bg-white/5 border border-white/10 rounded-xl px-3 py-1.5 text-sm text-on-surface focus:outline-none focus:border-primary/50"
+            className="bg-veu/5 border border-veu/10 rounded-xl px-3 py-1.5 text-sm text-on-surface focus:outline-none focus:border-primary/50"
           />
         </div>
         <div className="flex items-center gap-2">
@@ -132,7 +133,7 @@ export function PainelFaturas() {
           <select
             value={statusFiltro}
             onChange={(e) => setStatusFiltro(e.target.value)}
-            className="bg-white/5 border border-white/10 rounded-xl px-3 py-1.5 text-sm text-on-surface focus:outline-none focus:border-primary/50"
+            className="bg-veu/5 border border-veu/10 rounded-xl px-3 py-1.5 text-sm text-on-surface focus:outline-none focus:border-primary/50"
           >
             <option value="">Todos</option>
             <option value="ABERTA">Em aberto</option>
@@ -158,7 +159,7 @@ export function PainelFaturas() {
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-white/5 text-on-surface-variant text-xs uppercase tracking-wider">
+              <tr className="border-b border-veu/5 text-on-surface-variant text-xs uppercase tracking-wider">
                 <th className="text-left pb-3 pr-4">Unidade</th>
                 <th className="text-left pb-3 pr-4">Vencimento</th>
                 <th className="text-right pb-3 pr-4">Valor</th>
@@ -166,15 +167,15 @@ export function PainelFaturas() {
                 <th className="text-right pb-3">Ações</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/5">
+            <tbody className="divide-y divide-veu/5">
               {faturas.map((f) => {
                 const sc = STATUS_CONFIG[f.status] ?? STATUS_CONFIG.ABERTA;
                 return (
-                  <tr key={f.id} className="hover:bg-white/2 transition">
+                  <tr key={f.id} className="hover:bg-veu/2 transition">
                     <td className="py-3 pr-4 text-on-surface font-medium text-sm">
                       {unidadeMap[f.unidadeId] ?? f.unidadeId.slice(0, 8) + "…"}
                     </td>
-                    <td className="py-3 pr-4 text-on-surface-variant">{f.vencimento}</td>
+                    <td className="py-3 pr-4 text-on-surface-variant">{formatarData(f.vencimento)}</td>
                     <td className="py-3 pr-4 text-right font-bold text-on-surface">
                       {formatarBRL(f.valorCentavos)}
                     </td>
@@ -188,7 +189,7 @@ export function PainelFaturas() {
                         <button
                           onClick={() => abrirBaixa(f)}
                           title="Baixa manual"
-                          className="text-xs px-3 py-1.5 rounded-lg bg-white/5 text-on-surface-variant hover:text-primary hover:bg-primary/10 transition cursor-pointer font-medium"
+                          className="text-xs px-3 py-1.5 rounded-lg bg-veu/5 text-on-surface-variant hover:text-primary hover:bg-primary/10 transition cursor-pointer font-medium"
                         >
                           Baixa manual
                         </button>
@@ -219,7 +220,7 @@ export function PainelFaturas() {
                 type="date"
                 value={baixaForm.pagoEm}
                 onChange={(e) => setBaixaForm((f) => ({ ...f, pagoEm: e.target.value }))}
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm text-on-surface focus:outline-none focus:border-primary/50"
+                className="w-full bg-veu/5 border border-veu/10 rounded-xl px-3 py-2 text-sm text-on-surface focus:outline-none focus:border-primary/50"
               />
             </div>
 
@@ -231,7 +232,7 @@ export function PainelFaturas() {
                 type="number"
                 value={baixaForm.valorCentavos}
                 onChange={(e) => setBaixaForm((f) => ({ ...f, valorCentavos: e.target.value }))}
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm text-on-surface focus:outline-none focus:border-primary/50"
+                className="w-full bg-veu/5 border border-veu/10 rounded-xl px-3 py-2 text-sm text-on-surface focus:outline-none focus:border-primary/50"
               />
               <p className="text-xs text-on-surface-variant mt-1">
                 {formatarBRL(Number(baixaForm.valorCentavos) || 0)}
@@ -241,7 +242,7 @@ export function PainelFaturas() {
             <div className="flex gap-3 pt-2">
               <button
                 onClick={() => setBaixaModal(null)}
-                className="flex-1 py-2.5 rounded-xl border border-white/10 text-on-surface-variant text-sm font-semibold hover:bg-white/5 transition cursor-pointer"
+                className="flex-1 py-2.5 rounded-xl border border-veu/10 text-on-surface-variant text-sm font-semibold hover:bg-veu/5 transition cursor-pointer"
               >
                 Cancelar
               </button>

@@ -9,6 +9,7 @@ import { Icone } from "../../components/icones/Icone";
 import { CartaoGrafico } from "../../components/charts/CartaoGrafico";
 import { financeiroApi } from "../../services/financeiroApi";
 import { formatarBRL } from "../../utils/dinheiro";
+import { formatarData, formatarDataHora } from "../../utils/datas";
 import { CORES, PALETA, TOOLTIP_STYLE, EIXO_STYLE, rotuloMes } from "../../utils/chartTheme";
 
 const MESES = ["jan", "fev", "mar", "abr", "mai", "jun",
@@ -24,7 +25,7 @@ const STATUS_CFG = {
   ABERTA:    { cor: "bg-blue-500/15 text-blue-400 border-blue-500/25",   label: "Em aberto",  icone: "schedule" },
   PAGA:      { cor: "bg-green-500/15 text-green-400 border-green-500/25", label: "Paga",       icone: "check_circle" },
   EM_ATRASO: { cor: "bg-error/15 text-error border-error/25",             label: "Em atraso",  icone: "warning" },
-  CANCELADA: { cor: "bg-white/5 text-on-surface-variant border-white/10", label: "Cancelada",  icone: "cancel" },
+  CANCELADA: { cor: "bg-veu/5 text-on-surface-variant border-veu/10", label: "Cancelada",  icone: "cancel" },
 };
 
 /* ─── Modal de detalhes ────────────────────────────────────────────────── */
@@ -82,12 +83,12 @@ function DetalhesFatura({ faturaId, onFechar }) {
         style={{ background: "rgba(18,18,28,0.98)", backdropFilter: "blur(32px)", border: "1px solid rgba(255,255,255,0.09)", boxShadow: "0 24px 64px rgba(0,0,0,0.7)" }}
       >
         {/* Header */}
-        <div className="sticky top-0 flex items-center justify-between px-6 py-4 border-b border-white/8"
+        <div className="sticky top-0 flex items-center justify-between px-6 py-4 border-b border-veu/8"
           style={{ background: "rgba(18,18,28,0.98)", backdropFilter: "blur(32px)" }}>
           <h3 className="font-headline text-lg font-bold text-on-surface">
             {carregando ? "Carregando..." : `Fatura ${labelCompetencia(dados?.fatura?.competencia)}`}
           </h3>
-          <button onClick={onFechar} className="w-8 h-8 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-white/10 transition cursor-pointer">
+          <button onClick={onFechar} className="w-8 h-8 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-veu/10 transition cursor-pointer">
             <Icone name="close" className="text-lg" />
           </button>
         </div>
@@ -110,7 +111,7 @@ function DetalhesFatura({ faturaId, onFechar }) {
               <div>
                 <p className="text-xs text-on-surface-variant uppercase tracking-wider mb-1">Valor total</p>
                 <p className="text-4xl font-bold text-on-surface">{formatarBRL(dados.fatura.valorCentavos)}</p>
-                <p className="text-sm text-on-surface-variant mt-1">Vence em {dados.fatura.vencimento}</p>
+                <p className="text-sm text-on-surface-variant mt-1">Vence em {formatarData(dados.fatura.vencimento)}</p>
               </div>
               <span className={`shrink-0 flex items-center gap-1.5 text-sm font-semibold px-3 py-1.5 rounded-full border ${sc.cor}`}>
                 <Icone name={sc.icone} className="text-base" />
@@ -124,9 +125,9 @@ function DetalhesFatura({ faturaId, onFechar }) {
                 <p className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant mb-3">
                   Composição da fatura
                 </p>
-                <div className="rounded-2xl overflow-hidden border border-white/8">
+                <div className="rounded-2xl overflow-hidden border border-veu/8">
                   {dados.itens.map((item, i) => (
-                    <div key={item.id} className={`flex justify-between items-center px-4 py-3 ${i < dados.itens.length - 1 ? "border-b border-white/5" : ""}`}>
+                    <div key={item.id} className={`flex justify-between items-center px-4 py-3 ${i < dados.itens.length - 1 ? "border-b border-veu/5" : ""}`}>
                       <p className="text-sm text-on-surface">{item.descricao}</p>
                       <p className={`text-sm font-semibold ${item.valorCentavos < 0 ? "text-green-400" : "text-on-surface"}`}>
                         {formatarBRL(item.valorCentavos)}
@@ -147,7 +148,7 @@ function DetalhesFatura({ faturaId, onFechar }) {
                   <p className="text-green-400 font-semibold">Pagamento confirmado</p>
                   {dados.fatura.pagoEm && (
                     <p className="text-on-surface-variant text-xs mt-0.5">
-                      {new Date(dados.fatura.pagoEm).toLocaleDateString("pt-BR")} · {dados.fatura.formaBaixa === "MANUAL" ? "Baixa manual" : "Via gateway"}
+                      {formatarDataHora(dados.fatura.pagoEm)} · {dados.fatura.formaBaixa === "MANUAL" ? "Baixa manual" : "Via gateway"}
                     </p>
                   )}
                 </div>
@@ -171,7 +172,7 @@ function DetalhesFatura({ faturaId, onFechar }) {
                         className={`flex items-center justify-center gap-2 py-3 rounded-2xl border text-sm font-semibold transition cursor-pointer ${
                           forma === f
                             ? "bg-primary/15 border-primary/50 text-primary"
-                            : "bg-white/5 border-white/10 text-on-surface-variant hover:bg-white/10"
+                            : "bg-veu/5 border-veu/10 text-on-surface-variant hover:bg-veu/10"
                         }`}
                       >
                         <Icone name={f === "PIX" ? "qr_code_2" : "receipt"} className="text-xl" />
@@ -190,7 +191,7 @@ function DetalhesFatura({ faturaId, onFechar }) {
                   >
                     {gerando ? (
                       <>
-                        <div className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+                        <div className="w-4 h-4 rounded-full border-2 border-veu/30 border-t-white animate-spin" />
                         Gerando {forma === "PIX" ? "QR Code PIX" : "Boleto"}...
                       </>
                     ) : (
@@ -222,7 +223,7 @@ function DetalhesFatura({ faturaId, onFechar }) {
                     {cobranca.pixPayload && (
                       <div>
                         <p className="text-xs text-on-surface-variant mb-2">Código copia e cola</p>
-                        <div className="flex gap-2 items-center p-3 rounded-xl border border-white/10 bg-white/5">
+                        <div className="flex gap-2 items-center p-3 rounded-xl border border-veu/10 bg-veu/5">
                           <code className="flex-1 text-xs text-on-surface-variant break-all font-mono line-clamp-2">
                             {cobranca.pixPayload}
                           </code>
@@ -251,7 +252,7 @@ function DetalhesFatura({ faturaId, onFechar }) {
                     {cobranca.pixPayload && (
                       <div>
                         <p className="text-xs text-on-surface-variant mb-2">Linha digitável</p>
-                        <div className="flex gap-2 items-center p-3 rounded-xl border border-white/10 bg-white/5">
+                        <div className="flex gap-2 items-center p-3 rounded-xl border border-veu/10 bg-veu/5">
                           <code className="flex-1 text-xs text-on-surface-variant break-all font-mono">
                             {cobranca.pixPayload}
                           </code>
@@ -296,14 +297,14 @@ function DetalhesFatura({ faturaId, onFechar }) {
 
 /* ─── Config de categorias ─────────────────────────────────────────────── */
 const CAT = {
-  TODOS:      { label: "Todos",       icone: "category",              cor: "text-on-surface-variant", bg: "bg-white/10" },
+  TODOS:      { label: "Todos",       icone: "category",              cor: "text-on-surface-variant", bg: "bg-veu/10" },
   CONDOMINIO: { label: "Condomínio",  icone: "apartment",             cor: "text-primary",            bg: "bg-primary/15" },
   AGUA:       { label: "Água",        icone: "water_drop",            cor: "text-blue-400",           bg: "bg-blue-500/15" },
   LUZ:        { label: "Luz",         icone: "bolt",                  cor: "text-yellow-400",         bg: "bg-yellow-500/15" },
   GAS:        { label: "Gás",         icone: "local_fire_department", cor: "text-orange-400",         bg: "bg-orange-500/15" },
   INTERNET:   { label: "Internet",    icone: "wifi",                  cor: "text-purple-400",         bg: "bg-purple-500/15" },
   PLATAFORMA: { label: "Plataforma",  icone: "deployed_code",         cor: "text-teal-400",           bg: "bg-teal-500/15" },
-  OUTRO:      { label: "Outro",       icone: "more_horiz",            cor: "text-on-surface-variant", bg: "bg-white/10" },
+  OUTRO:      { label: "Outro",       icone: "more_horiz",            cor: "text-on-surface-variant", bg: "bg-veu/10" },
 };
 
 function categorizar(item) {
@@ -523,8 +524,8 @@ function AbaGastos() {
                   onClick={() => setCategoriaSel(cat)}
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition cursor-pointer border ${
                     ativo
-                      ? `${cfg.bg} ${cfg.cor} border-white/20`
-                      : "bg-white/5 text-on-surface-variant border-white/10 hover:bg-white/10"
+                      ? `${cfg.bg} ${cfg.cor} border-veu/20`
+                      : "bg-veu/5 text-on-surface-variant border-veu/10 hover:bg-veu/10"
                   }`}
                 >
                   <Icone name={cfg.icone} className="text-sm" />
@@ -556,11 +557,11 @@ function AbaGastos() {
             <div className="space-y-3">
               {meses.map(({ competencia, itens: itensM, total }) => (
                 <div key={competencia} className="glass-panel rounded-2xl overflow-hidden">
-                  <div className="flex items-center justify-between px-4 py-3 border-b border-white/5">
+                  <div className="flex items-center justify-between px-4 py-3 border-b border-veu/5">
                     <p className="text-sm font-semibold text-on-surface">{labelCompetencia(competencia)}</p>
                     <p className="text-sm font-bold text-on-surface">{formatarBRL(total)}</p>
                   </div>
-                  <div className="divide-y divide-white/5">
+                  <div className="divide-y divide-veu/5">
                     {itensM.map((item) => {
                       const cfg = CAT[item.categoria];
                       return (
@@ -661,11 +662,11 @@ function AbaFaturas({ onVerDetalhe }) {
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition cursor-pointer ${
               filtro === f.id
                 ? "bg-primary/20 text-primary border border-primary/40"
-                : "bg-white/5 text-on-surface-variant border border-white/10 hover:bg-white/10"
+                : "bg-veu/5 text-on-surface-variant border border-veu/10 hover:bg-veu/10"
             }`}
           >
             {f.label}
-            <span className={`w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-bold ${filtro === f.id ? "bg-primary text-white" : "bg-white/10"}`}>
+            <span className={`w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-bold ${filtro === f.id ? "bg-primary text-white" : "bg-veu/10"}`}>
               {f.count}
             </span>
           </button>
@@ -683,7 +684,7 @@ function AbaFaturas({ onVerDetalhe }) {
               <button
                 key={fatura.id}
                 onClick={() => onVerDetalhe(fatura.id)}
-                className={`w-full text-left glass-panel rounded-2xl p-4 flex items-center gap-4 hover:bg-white/5 transition cursor-pointer group ${fatura.status === "EM_ATRASO" ? "ring-1 ring-error/20" : ""}`}
+                className={`w-full text-left glass-panel rounded-2xl p-4 flex items-center gap-4 hover:bg-veu/5 transition cursor-pointer group ${fatura.status === "EM_ATRASO" ? "ring-1 ring-error/20" : ""}`}
               >
                 <div className={`shrink-0 w-10 h-10 rounded-xl flex items-center justify-center border ${sc.cor}`}>
                   <Icone name={sc.icone} className="text-lg" />
@@ -693,7 +694,7 @@ function AbaFaturas({ onVerDetalhe }) {
                     <p className="font-semibold text-on-surface text-sm">{labelCompetencia(fatura.competencia)}</p>
                     <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full border ${sc.cor}`}>{sc.label}</span>
                   </div>
-                  <p className="text-xs text-on-surface-variant mt-0.5">Vence em {fatura.vencimento}</p>
+                  <p className="text-xs text-on-surface-variant mt-0.5">Vence em {formatarData(fatura.vencimento)}</p>
                 </div>
                 <div className="text-right shrink-0">
                   <p className="font-bold text-on-surface">{formatarBRL(fatura.valorCentavos)}</p>
@@ -737,7 +738,7 @@ export function MinhasCobrancas() {
               className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition cursor-pointer ${
                 aba === a.id
                   ? "bg-primary/20 text-primary"
-                  : "text-on-surface-variant hover:text-on-surface hover:bg-white/5"
+                  : "text-on-surface-variant hover:text-on-surface hover:bg-veu/5"
               }`}
             >
               <Icone name={a.icone} className="text-base" />

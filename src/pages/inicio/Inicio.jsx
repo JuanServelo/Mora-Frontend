@@ -27,12 +27,6 @@ const ACESSO_RAPIDO = [
     desc: "Portaria, manutenção e mais",
     icon: "room_service",
   },
-  {
-    to: "/espacos",
-    label: "Espaços",
-    desc: "Estrutura de lazer e bem-estar",
-    icon: "pool",
-  },
 ];
 
 export function Inicio() {
@@ -123,7 +117,7 @@ export function Inicio() {
           ].map((c) => (
             <div
               key={c.titulo}
-              className="glass-panel rounded-3xl p-6 border border-white/5 hover:border-primary/20 transition-colors"
+              className="glass-panel rounded-3xl p-6 border border-veu/5 hover:border-primary/20 transition-colors"
             >
               <div className="flex items-center gap-3 mb-3">
                 <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
@@ -160,7 +154,7 @@ export function Inicio() {
               <Link
                 key={item.to}
                 to={item.to}
-                className="group glass-panel rounded-3xl p-5 border border-outline-variant/15 hover:border-primary/35 hover:bg-white/[0.03] transition-all duration-300"
+                className="group glass-panel rounded-3xl p-5 border border-outline-variant/15 hover:border-primary/35 hover:bg-veu/[0.03] transition-all duration-300"
               >
                 <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
                   <Icone name={item.icon} className="text-primary text-2xl" />
@@ -205,7 +199,7 @@ export function Inicio() {
 
       <Link
         to="/faq"
-        className="fixed bottom-6 right-6 z-40 inline-flex items-center justify-center gap-2 px-5 py-3 rounded-full glass-panel border border-outline-variant/15 text-on-surface hover:border-primary/35 hover:bg-white/[0.03] transition-all duration-300"
+        className="fixed bottom-6 right-6 z-40 inline-flex items-center justify-center gap-2 px-5 py-3 rounded-full glass-panel border border-outline-variant/15 text-on-surface hover:border-primary/35 hover:bg-veu/[0.03] transition-all duration-300"
         aria-label="Abrir FAQ"
         title="FAQ"
       >

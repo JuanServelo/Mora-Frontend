@@ -2,6 +2,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { Icone } from "../../icones/Icone";
 import { useToast } from "../../../contexts/ToastContext";
+import { formatarData, paraCampoData } from "../../../utils/datas";
 import { useConfirm } from "../../../contexts/ConfirmContext";
 import { useAuth } from "../../../contexts/AuthContext";
 import { financeiroApi } from "../../../services/financeiroApi";
@@ -99,7 +100,9 @@ export function PainelContas() {
       competencia: String(conta.competencia).slice(0, 7),
       valor: centavosParaCampo(conta.valorTotalCentavos),
       modoRateio: conta.modoRateio,
-      vencimento: conta.vencimento,
+      // <input type="date"> so aceita YYYY-MM-DD; o ISO completo deixa
+      // o campo vazio sem avisar.
+      vencimento: paraCampoData(conta.vencimento),
     });
     setModalAberto(true);
   }
@@ -201,7 +204,7 @@ export function PainelContas() {
             type="month"
             value={competencia}
             onChange={(e) => setCompetencia(e.target.value)}
-            className="bg-white/5 border border-white/10 rounded-xl px-3 py-1.5 text-sm text-on-surface focus:outline-none focus:border-primary/50"
+            className="bg-veu/5 border border-veu/10 rounded-xl px-3 py-1.5 text-sm text-on-surface focus:outline-none focus:border-primary/50"
           />
         </div>
         <button
@@ -292,7 +295,7 @@ export function PainelContas() {
                       {info.label}{conta.descricao ? `: ${conta.descricao}` : ""}
                     </p>
                     <p className="text-xs text-on-surface-variant">
-                      {conta.modoRateio === "FRACAO_IDEAL" ? "Fração ideal" : "Fixo por unidade"} • Venc. {conta.vencimento}
+                      {conta.modoRateio === "FRACAO_IDEAL" ? "Fração ideal" : "Fixo por unidade"} • Venc. {formatarData(conta.vencimento)}
                     </p>
                   </div>
                 </div>
@@ -353,7 +356,7 @@ export function PainelContas() {
                   className={`flex items-center gap-2 p-3 rounded-xl border transition cursor-pointer text-sm font-medium ${
                     form.tipo === t.value
                       ? "border-primary/60 bg-primary/20 text-primary"
-                      : "border-white/15 text-on-surface-variant hover:bg-white/8 hover:border-white/25"
+                      : "border-veu/15 text-on-surface-variant hover:bg-veu/8 hover:border-veu/25"
                   }`}
                 >
                   <Icone name={t.icone} className="text-lg" />
@@ -371,7 +374,7 @@ export function PainelContas() {
                 placeholder="Ex: Conta de novembro"
                 value={form.descricao}
                 onChange={(e) => setForm((f) => ({ ...f, descricao: e.target.value }))}
-                className="w-full bg-white/8 border border-white/15 rounded-xl px-3 py-2 text-sm text-on-surface placeholder:text-on-surface-variant/50 focus:outline-none focus:border-primary/60"
+                className="w-full bg-veu/8 border border-veu/15 rounded-xl px-3 py-2 text-sm text-on-surface placeholder:text-on-surface-variant/50 focus:outline-none focus:border-primary/60"
               />
             </div>
 
@@ -384,7 +387,7 @@ export function PainelContas() {
                   type="month"
                   value={form.competencia}
                   onChange={(e) => setForm((f) => ({ ...f, competencia: e.target.value }))}
-                  className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm text-on-surface focus:outline-none focus:border-primary/50"
+                  className="w-full bg-veu/5 border border-veu/10 rounded-xl px-3 py-2 text-sm text-on-surface focus:outline-none focus:border-primary/50"
                 />
               </div>
               <div>
@@ -395,7 +398,7 @@ export function PainelContas() {
                   type="date"
                   value={form.vencimento}
                   onChange={(e) => setForm((f) => ({ ...f, vencimento: e.target.value }))}
-                  className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm text-on-surface focus:outline-none focus:border-primary/50"
+                  className="w-full bg-veu/5 border border-veu/10 rounded-xl px-3 py-2 text-sm text-on-surface focus:outline-none focus:border-primary/50"
                 />
               </div>
             </div>
@@ -409,7 +412,7 @@ export function PainelContas() {
                 placeholder="0,00"
                 value={form.valor}
                 onChange={(e) => setForm((f) => ({ ...f, valor: e.target.value }))}
-                className="w-full bg-white/8 border border-white/15 rounded-xl px-3 py-2 text-sm text-on-surface placeholder:text-on-surface-variant/50 focus:outline-none focus:border-primary/60"
+                className="w-full bg-veu/8 border border-veu/15 rounded-xl px-3 py-2 text-sm text-on-surface placeholder:text-on-surface-variant/50 focus:outline-none focus:border-primary/60"
               />
             </div>
 
@@ -420,7 +423,7 @@ export function PainelContas() {
               <select
                 value={form.modoRateio}
                 onChange={(e) => setForm((f) => ({ ...f, modoRateio: e.target.value }))}
-                className="w-full bg-white/8 border border-white/15 rounded-xl px-3 py-2 text-sm text-on-surface focus:outline-none focus:border-primary/60"
+                className="w-full bg-veu/8 border border-veu/15 rounded-xl px-3 py-2 text-sm text-on-surface focus:outline-none focus:border-primary/60"
               >
                 {MODOS.map((m) => (
                   <option key={m.value} value={m.value} className="bg-[#1a1825]">{m.label}</option>
@@ -431,7 +434,7 @@ export function PainelContas() {
             <div className="flex gap-3 pt-2">
               <button
                 onClick={() => setModalAberto(false)}
-                className="flex-1 py-2.5 rounded-xl border border-white/10 text-on-surface-variant text-sm font-semibold hover:bg-white/5 transition cursor-pointer"
+                className="flex-1 py-2.5 rounded-xl border border-veu/10 text-on-surface-variant text-sm font-semibold hover:bg-veu/5 transition cursor-pointer"
               >
                 Cancelar
               </button>

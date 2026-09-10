@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { Icone } from "../../../components/icones/Icone";
 import { financeiroApi } from "../../../services/financeiroApi";
 import { formatarBRL } from "../../../utils/dinheiro";
+import { formatarData, formatarDataHora } from "../../../utils/datas";
 
 const MESES = ["jan", "fev", "mar", "abr", "mai", "jun",
   "jul", "ago", "set", "out", "nov", "dez"];
@@ -17,7 +18,7 @@ const STATUS_CONFIG = {
   ABERTA: { cor: "bg-blue-500/15 text-blue-400 border-blue-500/20", label: "Em aberto", icone: "schedule" },
   PAGA: { cor: "bg-green-500/15 text-green-400 border-green-500/20", label: "Paga", icone: "check_circle" },
   EM_ATRASO: { cor: "bg-error/15 text-error border-error/20", label: "Em atraso", icone: "warning" },
-  CANCELADA: { cor: "bg-white/5 text-on-surface-variant border-white/10", label: "Cancelada", icone: "cancel" },
+  CANCELADA: { cor: "bg-veu/5 text-on-surface-variant border-veu/10", label: "Cancelada", icone: "cancel" },
 };
 
 function DetalhesFatura({ faturaId, onFechar }) {
@@ -42,13 +43,13 @@ function DetalhesFatura({ faturaId, onFechar }) {
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/70 backdrop-blur-sm">
       <div className="w-full sm:max-w-md rounded-t-3xl sm:rounded-3xl max-h-[90vh] overflow-y-auto" style={{ background: "rgba(18,18,28,0.98)", backdropFilter: "blur(32px)", border: "1px solid rgba(255,255,255,0.09)", boxShadow: "0 24px 64px rgba(0,0,0,0.7)" }}>
-        <div className="sticky top-0 flex items-center justify-between p-5 border-b border-white/8" style={{ background: "rgba(18,18,28,0.98)", backdropFilter: "blur(32px)" }}>
+        <div className="sticky top-0 flex items-center justify-between p-5 border-b border-veu/8" style={{ background: "rgba(18,18,28,0.98)", backdropFilter: "blur(32px)" }}>
           <h3 className="font-headline text-lg font-bold text-on-surface">
             {carregando ? "Carregando..." : `Fatura ${competenciaLabel(dados?.fatura?.competencia)}`}
           </h3>
           <button
             onClick={onFechar}
-            className="w-8 h-8 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-white/10 transition cursor-pointer"
+            className="w-8 h-8 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-veu/10 transition cursor-pointer"
           >
             <Icone name="close" className="text-lg" />
           </button>
@@ -72,7 +73,7 @@ function DetalhesFatura({ faturaId, onFechar }) {
                 <p className="text-3xl font-bold text-on-surface mt-1">
                   {formatarBRL(dados.fatura.valorCentavos)}
                 </p>
-                <p className="text-xs text-on-surface-variant mt-1">Vence em {dados.fatura.vencimento}</p>
+                <p className="text-xs text-on-surface-variant mt-1">Vence em {formatarData(dados.fatura.vencimento)}</p>
               </div>
               {(() => {
                 const sc = STATUS_CONFIG[dados.fatura.status] ?? STATUS_CONFIG.ABERTA;
@@ -93,7 +94,7 @@ function DetalhesFatura({ faturaId, onFechar }) {
                 </p>
                 <div className="space-y-1">
                   {dados.itens.map((item) => (
-                    <div key={item.id} className="flex justify-between items-center py-1.5 border-b border-white/5 last:border-0">
+                    <div key={item.id} className="flex justify-between items-center py-1.5 border-b border-veu/5 last:border-0">
                       <p className="text-sm text-on-surface">{item.descricao}</p>
                       <p className={`text-sm font-semibold ${item.valorCentavos < 0 ? "text-green-400" : "text-on-surface"}`}>
                         {formatarBRL(item.valorCentavos)}
@@ -112,7 +113,7 @@ function DetalhesFatura({ faturaId, onFechar }) {
                   <p className="text-green-400 font-semibold text-sm">Pagamento confirmado</p>
                   {dados.fatura.pagoEm && (
                     <p className="text-on-surface-variant text-xs">
-                      em {new Date(dados.fatura.pagoEm).toLocaleDateString("pt-BR")} · {dados.fatura.formaBaixa === "MANUAL" ? "Baixa manual" : "Gateway"}
+                      em {formatarDataHora(dados.fatura.pagoEm)} · {dados.fatura.formaBaixa === "MANUAL" ? "Baixa manual" : "Gateway"}
                     </p>
                   )}
                 </div>
@@ -142,7 +143,7 @@ function DetalhesFatura({ faturaId, onFechar }) {
                   <div className="space-y-2">
                     <p className="text-xs text-on-surface-variant">Código copia e cola:</p>
                     <div className="flex gap-2 items-center">
-                      <code className="flex-1 bg-white/5 rounded-xl px-3 py-2 text-xs text-on-surface-variant break-all font-mono border border-white/10">
+                      <code className="flex-1 bg-veu/5 rounded-xl px-3 py-2 text-xs text-on-surface-variant break-all font-mono border border-veu/10">
                         {dados.cobranca.pixPayload}
                       </code>
                       <button
@@ -209,7 +210,7 @@ export function CobrancaView() {
               <button
                 key={fatura.id}
                 onClick={() => setDetalhe(fatura.id)}
-                className="w-full text-left glass-panel rounded-2xl p-4 flex items-center gap-4 hover:bg-white/5 transition cursor-pointer group"
+                className="w-full text-left glass-panel rounded-2xl p-4 flex items-center gap-4 hover:bg-veu/5 transition cursor-pointer group"
               >
                 <div className={`p-2.5 rounded-xl border ${sc.cor}`}>
                   <Icone name={sc.icone} className="text-xl" />
@@ -225,7 +226,7 @@ export function CobrancaView() {
                     </span>
                   </div>
                   <p className="text-xs text-on-surface-variant mt-0.5">
-                    Vence em {fatura.vencimento}
+                    Vence em {formatarData(fatura.vencimento)}
                   </p>
                 </div>
 
