@@ -313,7 +313,7 @@ export function GerenciarEntregas() {
                 <div key={entrega.id} className="glass-panel rounded-3xl overflow-hidden">
                   <button
                     onClick={() => { setExpandido((p) => (p === entrega.id ? null : entrega.id)); setEditando(null); }}
-                    className="w-full flex items-center gap-4 p-5 text-left hover:bg-white/5 transition-all cursor-pointer"
+                    className="w-full flex items-center gap-4 p-5 text-left hover:bg-veu/5 transition-all cursor-pointer"
                   >
                     <div className={`w-11 h-11 rounded-full flex items-center justify-center shrink-0 ${cfg.color}`}>
                       <Icone name={cfg.icon} className="text-xl" />
@@ -510,7 +510,7 @@ function PopupRetirada({ entrega, usuarios, onConfirmar, onCancelar }) {
           <button
             type="button"
             onClick={onCancelar}
-            className="flex-1 py-4 rounded-full border border-outline-variant/30 text-on-surface-variant hover:bg-white/5 font-semibold text-sm transition-all cursor-pointer"
+            className="flex-1 py-4 rounded-full border border-outline-variant/30 text-on-surface-variant hover:bg-veu/5 font-semibold text-sm transition-all cursor-pointer"
           >
             Cancelar
           </button>
@@ -741,7 +741,7 @@ function FormEntrega({ inicial, usuarios, onSalvar, onCancelar, erro }) {
         <button
           type="button"
           onClick={onCancelar}
-          className="flex-1 py-4 rounded-full border border-outline-variant/30 text-on-surface-variant hover:bg-white/5 font-semibold transition-all cursor-pointer"
+          className="flex-1 py-4 rounded-full border border-outline-variant/30 text-on-surface-variant hover:bg-veu/5 font-semibold transition-all cursor-pointer"
         >
           Cancelar
         </button>

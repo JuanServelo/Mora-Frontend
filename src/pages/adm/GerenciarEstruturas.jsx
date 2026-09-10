@@ -117,7 +117,7 @@ export function GerenciarEstruturas() {
               className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 cursor-pointer ${
                 aba === tab.id
                   ? "bg-primary/15 text-primary"
-                  : "text-on-surface-variant hover:text-on-surface hover:bg-white/5"
+                  : "text-on-surface-variant hover:text-on-surface hover:bg-veu/5"
               }`}
             >
               <Icone name={tab.icon} className="text-lg" />
@@ -283,7 +283,7 @@ function AbaBlocos({ condominioId }) {
             <div key={bloco.id} className="glass-panel rounded-3xl overflow-hidden">
               <button
                 onClick={() => setBlocoSelecionado(bloco)}
-                className="w-full flex items-center gap-4 p-5 text-left hover:bg-white/5 transition-all cursor-pointer"
+                className="w-full flex items-center gap-4 p-5 text-left hover:bg-veu/5 transition-all cursor-pointer"
               >
                 <div className="w-11 h-11 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
                   <Icone name="apartment" className="text-primary" />
@@ -351,7 +351,7 @@ function FormBloco({ inicial, onSalvar, onCancelar }) {
       </div>
       <div className="flex gap-3 pt-2">
         <Botao type="submit">{inicial ? "Salvar alterações" : "Cadastrar bloco"}</Botao>
-        <button type="button" onClick={onCancelar} className="flex-1 py-4 rounded-full border border-outline-variant/30 text-on-surface-variant hover:bg-white/5 font-semibold transition-all cursor-pointer">
+        <button type="button" onClick={onCancelar} className="flex-1 py-4 rounded-full border border-outline-variant/30 text-on-surface-variant hover:bg-veu/5 font-semibold transition-all cursor-pointer">
           Cancelar
         </button>
       </div>
@@ -559,7 +559,7 @@ function VistaApartamentos({ bloco, condominioId, onVoltar, onEditarBloco, onTog
             <div key={apt.id} className="glass-panel rounded-3xl overflow-hidden">
               <button
                 onClick={() => { setExpandido((p) => (p === apt.id ? null : apt.id)); setEditando(null); }}
-                className="w-full flex items-center gap-4 p-5 text-left hover:bg-white/5 transition-all cursor-pointer"
+                className="w-full flex items-center gap-4 p-5 text-left hover:bg-veu/5 transition-all cursor-pointer"
               >
                 <div className="w-11 h-11 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
                   <Icone name="door_front" className="text-primary" />
@@ -906,7 +906,7 @@ function AbaApartamentos({ condominioId }) {
             <div key={apt.id} className="glass-panel rounded-3xl overflow-hidden">
               <button
                 onClick={() => { setExpandido((p) => (p === apt.id ? null : apt.id)); setEditando(null); }}
-                className="w-full flex items-center gap-4 p-5 text-left hover:bg-white/5 transition-all cursor-pointer"
+                className="w-full flex items-center gap-4 p-5 text-left hover:bg-veu/5 transition-all cursor-pointer"
               >
                 <div className="w-11 h-11 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
                   <Icone name="door_front" className="text-primary" />
@@ -1014,7 +1014,7 @@ function FormApartamento({ inicial, blocos, onSalvar, onCancelar, erro }) {
       {erro && <p className="text-error text-xs">{erro}</p>}
       <div className="flex gap-3 pt-2">
         <Botao type="submit">{inicial ? "Salvar alterações" : "Cadastrar apartamento"}</Botao>
-        <button type="button" onClick={onCancelar} className="flex-1 py-4 rounded-full border border-outline-variant/30 text-on-surface-variant hover:bg-white/5 font-semibold transition-all cursor-pointer">
+        <button type="button" onClick={onCancelar} className="flex-1 py-4 rounded-full border border-outline-variant/30 text-on-surface-variant hover:bg-veu/5 font-semibold transition-all cursor-pointer">
           Cancelar
         </button>
       </div>
@@ -1207,7 +1207,7 @@ function AbaAreasComuns({ condominioId }) {
             <div key={area.id} className="glass-panel rounded-3xl overflow-hidden">
               <button
                 onClick={() => { setExpandido((p) => (p === area.id ? null : area.id)); setEditando(null); }}
-                className="w-full flex items-center gap-4 p-5 text-left hover:bg-white/5 transition-all cursor-pointer"
+                className="w-full flex items-center gap-4 p-5 text-left hover:bg-veu/5 transition-all cursor-pointer"
               >
                 <div className="w-11 h-11 rounded-full bg-secondary/10 flex items-center justify-center shrink-0">
                   <Icone name="pool" className="text-secondary" />
@@ -1315,7 +1315,7 @@ function FormAreaComum({ inicial, onSalvar, onCancelar }) {
       </div>
       <div className="flex gap-3 pt-2">
         <Botao type="submit">{inicial ? "Salvar alterações" : "Cadastrar área comum"}</Botao>
-        <button type="button" onClick={onCancelar} className="flex-1 py-4 rounded-full border border-outline-variant/30 text-on-surface-variant hover:bg-white/5 font-semibold transition-all cursor-pointer">
+        <button type="button" onClick={onCancelar} className="flex-1 py-4 rounded-full border border-outline-variant/30 text-on-surface-variant hover:bg-veu/5 font-semibold transition-all cursor-pointer">
           Cancelar
         </button>
       </div>
@@ -1530,7 +1530,7 @@ function AbaVagas({ condominioId }) {
             <div key={vaga.id} className="glass-panel rounded-3xl overflow-hidden">
               <button
                 onClick={() => { setExpandido((p) => (p === vaga.id ? null : vaga.id)); setEditando(null); }}
-                className="w-full flex items-center gap-4 p-5 text-left hover:bg-white/5 transition-all cursor-pointer"
+                className="w-full flex items-center gap-4 p-5 text-left hover:bg-veu/5 transition-all cursor-pointer"
               >
                 <div className="w-11 h-11 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
                   <Icone name="local_parking" className="text-primary" />
@@ -1654,7 +1654,7 @@ function FormVaga({ inicial, apartamentos, onSalvar, onCancelar, erro }) {
         <button
           type="button"
           onClick={onCancelar}
-          className="flex-1 py-4 rounded-full border border-outline-variant/30 text-on-surface-variant hover:bg-white/5 font-semibold transition-all cursor-pointer"
+          className="flex-1 py-4 rounded-full border border-outline-variant/30 text-on-surface-variant hover:bg-veu/5 font-semibold transition-all cursor-pointer"
         >
           Cancelar
         </button>

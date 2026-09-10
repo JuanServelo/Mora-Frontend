@@ -87,7 +87,7 @@ export function PainelFracoes({ modoRateio }) {
 
   if (!itens.length) {
     return (
-      <div className="text-center py-12 rounded-2xl border border-dashed border-white/10">
+      <div className="text-center py-12 rounded-2xl border border-dashed border-veu/10">
         <Icone name="apartment" className="text-4xl text-outline-variant" />
         <p className="mt-3 text-on-surface-variant text-sm">
           Nenhuma unidade cadastrada neste condomínio.
@@ -138,7 +138,7 @@ export function PainelFracoes({ modoRateio }) {
         <div className="ml-auto flex gap-2">
           <button
             onClick={propor}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-white/5 text-on-surface-variant hover:text-on-surface hover:bg-white/10 text-sm font-semibold transition cursor-pointer"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-veu/5 text-on-surface-variant hover:text-on-surface hover:bg-veu/10 text-sm font-semibold transition cursor-pointer"
             title="Calcula uma proposta a partir da área de cada apartamento"
           >
             <Icone name="calculate" className="text-lg" />
@@ -183,7 +183,7 @@ export function PainelFracoes({ modoRateio }) {
               return (
                 <tr
                   key={u.id}
-                  className="border-t border-white/5 hover:bg-white/[0.02]"
+                  className="border-t border-veu/5 hover:bg-veu/[0.02]"
                 >
                   <td className="py-2.5 px-3 text-on-surface font-medium">
                     {u.numero}

@@ -142,7 +142,7 @@ export function PainelTaxas({ modoRateio }) {
       )}
 
       {!carregando && taxas.length === 0 && !form && (
-        <div className="text-center py-12 rounded-2xl border border-dashed border-white/10">
+        <div className="text-center py-12 rounded-2xl border border-dashed border-veu/10">
           <Icone name="receipt_long" className="text-4xl text-outline-variant" />
           <p className="mt-3 text-on-surface-variant text-sm">
             Nenhuma taxa cadastrada ainda.
@@ -181,7 +181,7 @@ export function PainelTaxas({ modoRateio }) {
               <button
                 onClick={() => abrirEdicao(t)}
                 title="Editar"
-                className="p-2 rounded-lg hover:bg-white/5 text-on-surface-variant hover:text-on-surface transition cursor-pointer"
+                className="p-2 rounded-lg hover:bg-veu/5 text-on-surface-variant hover:text-on-surface transition cursor-pointer"
               >
                 <Icone name="edit" className="text-lg" />
               </button>
@@ -317,7 +317,7 @@ function FormularioTaxa({ form, setForm, salvando, editando, aoSalvar, aoCancela
       <div className="flex justify-end gap-2 pt-2">
         <button
           onClick={aoCancelar}
-          className="px-5 py-2.5 rounded-full text-on-surface-variant hover:bg-white/5 transition cursor-pointer"
+          className="px-5 py-2.5 rounded-full text-on-surface-variant hover:bg-veu/5 transition cursor-pointer"
         >
           Cancelar
         </button>

@@ -98,7 +98,7 @@ export function GerenciarFinanceiro() {
                       : "text-yellow-500/70 hover:bg-yellow-500/10 hover:text-yellow-400"
                     : ativa
                       ? "bg-primary/15 text-primary"
-                      : "text-on-surface-variant hover:bg-white/5 hover:text-on-surface"
+                      : "text-on-surface-variant hover:bg-veu/5 hover:text-on-surface"
                 }`}
               >
                 <Icone name={a.icone} className="text-lg" />
@@ -109,7 +109,7 @@ export function GerenciarFinanceiro() {
         </nav>
 
         <div className="glass-panel rounded-3xl p-6 md:p-8 space-y-6">
-          <div className="flex items-center gap-3 pb-4 border-b border-white/5">
+          <div className="flex items-center gap-3 pb-4 border-b border-veu/5">
             <span className="p-2.5 rounded-xl bg-primary/10 text-primary">
               <Icone name={atual.icone} className="text-xl" />
             </span>

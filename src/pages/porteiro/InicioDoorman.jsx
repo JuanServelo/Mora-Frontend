@@ -110,7 +110,7 @@ export function InicioDoorman() {
                 <Link
                   key={item.to}
                   to={item.to}
-                  className={`group glass-panel rounded-3xl p-6 border border-outline-variant/15 ${c.hover} hover:bg-white/[0.03] transition-all duration-300`}
+                  className={`group glass-panel rounded-3xl p-6 border border-outline-variant/15 ${c.hover} hover:bg-veu/[0.03] transition-all duration-300`}
                 >
                   <div
                     className={`w-14 h-14 rounded-2xl ${c.bg} flex items-center justify-center mb-5 group-hover:scale-105 transition-transform`}

@@ -41,7 +41,7 @@ function NavLink({ to, children }) {
         ${
           active
             ? "text-primary bg-primary/10"
-            : "text-on-surface-variant hover:text-on-surface hover:bg-white/5"
+            : "text-on-surface-variant hover:text-on-surface hover:bg-veu/5"
         }`}
     >
       {children}
@@ -73,7 +73,7 @@ function AdminMenu({ usuario }) {
         className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-200 cursor-pointer
           ${admActive || open
             ? "text-primary bg-primary/10"
-            : "text-on-surface-variant hover:text-on-surface hover:bg-white/5"
+            : "text-on-surface-variant hover:text-on-surface hover:bg-veu/5"
           }`}
       >
         <Icone name="admin_panel_settings" className="text-base" />
@@ -87,7 +87,7 @@ function AdminMenu({ usuario }) {
       {open && (
         <div className="absolute top-[calc(100%+10px)] left-1/2 -translate-x-1/2 w-72 rounded-2xl overflow-hidden z-50 shadow-[0_16px_48px_rgba(0,0,0,0.6)]" style={{ background: "rgba(18,18,24,0.97)", backdropFilter: "blur(24px)", border: "1px solid rgba(255,255,255,0.08)" }}>
           {/* Header do painel */}
-          <div className="px-4 py-3 border-b border-white/5">
+          <div className="px-4 py-3 border-b border-veu/5">
             <p className="text-xs font-semibold uppercase tracking-widest text-on-surface-variant">
               Painel Administrativo
             </p>
@@ -105,7 +105,7 @@ function AdminMenu({ usuario }) {
                   className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group
                     ${active
                       ? "bg-primary/10 text-primary"
-                      : "text-on-surface-variant hover:bg-white/5 hover:text-on-surface"
+                      : "text-on-surface-variant hover:bg-veu/5 hover:text-on-surface"
                     }`}
                 >
                   <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all
@@ -172,7 +172,7 @@ function SinoNotificacoes() {
         <div className="absolute top-[calc(100%+10px)] right-0 w-80 rounded-2xl overflow-hidden z-50 shadow-[0_16px_48px_rgba(0,0,0,0.6)]"
           style={{ background: "rgba(18,18,24,0.97)", backdropFilter: "blur(24px)", border: "1px solid rgba(255,255,255,0.08)" }}
         >
-          <div className="flex items-center justify-between px-4 py-3 border-b border-white/5">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-veu/5">
             <p className="text-xs font-semibold uppercase tracking-widest text-on-surface-variant">
               Notificações
             </p>
@@ -192,12 +192,12 @@ function SinoNotificacoes() {
               Sem notificações
             </div>
           ) : (
-            <div className="max-h-72 overflow-y-auto divide-y divide-white/5">
+            <div className="max-h-72 overflow-y-auto divide-y divide-veu/5">
               {recentes.map((n) => (
                 <button
                   key={n.id}
                   onClick={() => aoClicar(n)}
-                  className={`w-full text-left flex items-start gap-3 px-4 py-3 hover:bg-white/5 transition cursor-pointer ${!n.lida ? "bg-primary/5" : ""}`}
+                  className={`w-full text-left flex items-start gap-3 px-4 py-3 hover:bg-veu/5 transition cursor-pointer ${!n.lida ? "bg-primary/5" : ""}`}
                 >
                   <div className={`mt-0.5 p-1.5 rounded-lg shrink-0 ${
                     n.tipo === "PAGAMENTO_CONFIRMADO" ? "bg-green-500/15 text-green-400" :
@@ -227,7 +227,7 @@ function SinoNotificacoes() {
           )}
 
           {/* Rodapé — Ver todas */}
-          <div className="px-4 py-3 border-t border-white/5">
+          <div className="px-4 py-3 border-t border-veu/5">
             <Link
               to="/notificacoes"
               onClick={() => setAberto(false)}
@@ -244,7 +244,6 @@ function SinoNotificacoes() {
 }
 
 export function Navbar() {
-  const [darkMode, setDarkMode] = useState(true);
   const { usuario } = useAuth();
   const isRestrictedUser = isUsuarioRestrito(usuario);
   const showAdminMenu = podeAcessarAdmin(usuario?.perfil);
@@ -290,17 +289,6 @@ export function Navbar() {
 
           <SinoNotificacoes />
 
-          {/* Toggle Dark/Light */}
-          <button
-            onClick={() => setDarkMode((d) => !d)}
-            className="ml-1 w-9 h-9 rounded-full flex items-center justify-center text-on-surface-variant hover:text-primary hover:bg-primary/10 transition-all duration-200 cursor-pointer"
-            title={darkMode ? "Modo Claro" : "Modo Escuro"}
-          >
-            <Icone
-              name={darkMode ? "dark_mode" : "light_mode"}
-              className="text-xl"
-            />
-          </button>
         </div>
       </nav>
     </div>

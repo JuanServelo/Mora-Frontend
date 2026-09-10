@@ -21,7 +21,7 @@ const TIPO_CFG = {
   },
   SISTEMA: {
     icone: "info",
-    cor: "bg-white/10 text-on-surface-variant",
+    cor: "bg-veu/10 text-on-surface-variant",
     destino: null,
   },
 };
@@ -93,14 +93,14 @@ export function Notificacoes() {
             <p className="text-xs font-semibold uppercase tracking-widest text-on-surface-variant px-1">
               {label}
             </p>
-            <div className="glass-panel rounded-3xl overflow-hidden divide-y divide-white/5">
+            <div className="glass-panel rounded-3xl overflow-hidden divide-y divide-veu/5">
               {itens.map((n) => {
                 const cfg = TIPO_CFG[n.tipo] ?? TIPO_CFG.SISTEMA;
                 return (
                   <button
                     key={n.id}
                     onClick={() => aoClicar(n)}
-                    className={`w-full text-left flex items-start gap-4 px-5 py-4 hover:bg-white/5 transition cursor-pointer ${!n.lida ? "bg-primary/3" : ""}`}
+                    className={`w-full text-left flex items-start gap-4 px-5 py-4 hover:bg-veu/5 transition cursor-pointer ${!n.lida ? "bg-primary/3" : ""}`}
                   >
                     {/* Ícone */}
                     <div className={`shrink-0 mt-0.5 w-10 h-10 rounded-xl flex items-center justify-center ${cfg.cor}`}>

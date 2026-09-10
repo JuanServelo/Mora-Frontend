@@ -82,7 +82,7 @@ export function PainelConfiguracao({ aoSalvar }) {
                 className={`text-left p-5 rounded-2xl border transition cursor-pointer ${
                   ativo
                     ? "border-primary/60 bg-primary/10"
-                    : "border-white/10 hover:border-white/25 bg-surface-container-highest/20"
+                    : "border-veu/10 hover:border-veu/25 bg-surface-container-highest/20"
                 }`}
               >
                 <div className="flex items-center gap-2 mb-2">

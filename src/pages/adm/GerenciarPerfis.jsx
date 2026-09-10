@@ -101,7 +101,7 @@ export function GerenciarPerfis() {
                 className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 cursor-pointer ${
                   aba === cat
                     ? "bg-primary/15 text-primary"
-                    : "text-on-surface-variant hover:text-on-surface hover:bg-white/5"
+                    : "text-on-surface-variant hover:text-on-surface hover:bg-veu/5"
                 }`}
               >
                 {CATEGORIA_LABEL[cat]}
@@ -150,11 +150,11 @@ function CardPerfil({ perfil }) {
   const [expandido, setExpandido] = useState(false);
 
   return (
-    <div className="glass-panel rounded-3xl overflow-hidden border border-white/5">
+    <div className="glass-panel rounded-3xl overflow-hidden border border-veu/5">
       {/* Topo do card */}
       <button
         onClick={() => setExpandido((v) => !v)}
-        className="w-full flex items-start gap-4 p-6 text-left hover:bg-white/3 transition-all cursor-pointer group"
+        className="w-full flex items-start gap-4 p-6 text-left hover:bg-veu/3 transition-all cursor-pointer group"
       >
         <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 border ${corClasse}`}>
           <Icone name={meta.icon} className="text-2xl" />

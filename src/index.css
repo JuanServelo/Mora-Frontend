@@ -1,4 +1,4 @@
-﻿/* src/index.css */
+/* src/index.css */
 @import "tailwindcss";
 
 /* ================================================================
@@ -54,6 +54,13 @@
   --color-inverse-surface:              #e7e0e9;
   --color-on-tertiary-container:        #003032;
 
+  /* Véu de sobreposição — o branco translúcido de bordas e hovers.
+     No tema escuro é branco; no claro vira quase preto, senão as bordas
+     `veu/10` somem sobre fundo claro. É por isso que existe como token e não
+     como `white/10` solto pelos componentes. */
+  --color-veu:                          #ffffff;
+
+
   /* Typography */
   --font-headline: "Manrope", sans-serif;
   --font-body:     "Inter", sans-serif;
@@ -64,6 +71,86 @@
   --radius-lg:      0.5rem;
   --radius-xl:      0.75rem;
   --radius-full:    9999px;
+}
+
+/* Estes dois ficam FORA do @theme de propósito.
+   O Tailwind resolve `var()` de variáveis do @theme em tempo de compilação
+   dentro de `@utility`, embutindo o valor — e aí trocar a variável em tempo de
+   execução não muda nada. Como `:root` comum, a substituição por tema funciona. */
+:root {
+  --vidro-fundo: rgba(54, 52, 58, 0.4);
+  --malha-canto: rgba(20, 18, 24, 1);
+}
+
+/* ================================================================
+   TEMA CLARO
+   ================================================================
+   Sobrescreve os mesmos tokens do @theme. As utilitárias do Tailwind
+   referenciam `var(--color-*)`, então trocar a variável re-tematiza a
+   aplicação inteira sem mexer em componente nenhum.
+
+   O seletor é `:root[data-tema="claro"]` (especificidade 0,2,0) para vencer o
+   `:root` (0,1,0) que o @theme gera, independente da ordem no arquivo.
+   ================================================================ */
+:root[data-tema="claro"] {
+  --color-primary:                      #36666a;
+  --color-on-primary:                   #ffffff;
+  --color-primary-container:            #baebf0;
+  --color-on-primary-container:         #002022;
+  --color-primary-fixed:                #baebf0;
+  --color-primary-fixed-dim:            #9fcfd4;
+  --color-on-primary-fixed:             #002022;
+  --color-on-primary-fixed-variant:     #1c4e52;
+  --color-inverse-primary:              #9fcfd4;
+  --color-surface-tint:                 #36666a;
+
+  --color-secondary:                    #6d5b00;
+  --color-on-secondary:                 #ffffff;
+  --color-secondary-container:          #ffdf9b;
+  --color-on-secondary-container:       #221b00;
+  --color-secondary-fixed:              #ffdf9b;
+  --color-secondary-fixed-dim:          #e5c277;
+  --color-on-secondary-fixed:           #221b00;
+  --color-on-secondary-fixed-variant:   #524400;
+
+  --color-tertiary:                     #00696d;
+  --color-on-tertiary:                  #ffffff;
+  --color-tertiary-container:           #91f2f7;
+  --color-on-tertiary-container:        #002021;
+  --color-tertiary-fixed:               #91f2f7;
+  --color-tertiary-fixed-dim:           #74d6db;
+  --color-on-tertiary-fixed:            #002021;
+  --color-on-tertiary-fixed-variant:    #004f52;
+
+  --color-error:                        #ba1a1a;
+  --color-on-error:                     #ffffff;
+  --color-error-container:              #ffdad6;
+  --color-on-error-container:           #410002;
+
+  --color-background:                   #f5fafa;
+  --color-on-background:                #171d1d;
+  --color-surface:                      #f5fafa;
+  --color-on-surface:                   #171d1d;
+  --color-surface-variant:              #dbe4e5;
+  --color-on-surface-variant:           #3f4849;
+  --color-surface-dim:                  #d5dbdb;
+  --color-surface-bright:               #f5fafa;
+  --color-surface-container-lowest:     #ffffff;
+  --color-surface-container-low:        #eff5f5;
+  --color-surface-container:            #e9efef;
+  --color-surface-container-high:       #e3e9ea;
+  --color-surface-container-highest:    #dee3e4;
+  --color-inverse-surface:              #2b3232;
+  --color-inverse-on-surface:           #eff1f1;
+
+  --color-outline:                      #6f7979;
+  --color-outline-variant:              #bfc8c9;
+
+  /* O véu inverte: bordas e hovers precisam escurecer sobre fundo claro. */
+  --color-veu:                          #171d1d;
+
+  --vidro-fundo:                        rgba(255, 255, 255, 0.72);
+  --malha-canto:                        rgba(245, 250, 250, 1);
 }
 
 /* ================================================================
@@ -87,14 +174,18 @@ body {
 /* ================================================================
    CUSTOM UTILITIES
    ================================================================ */
-@utility glass-panel {
-  background: rgba(54, 52, 58, 0.4);
+/* Classes comuns, e não `@utility`.
+   Como utilitária do Tailwind, o `var(--vidro-fundo)` era avaliado uma única
+   vez e o painel ficava congelado no tema do primeiro carregamento. Em CSS
+   comum a variável é lida a cada repintura, e a troca de tema pega. */
+.glass-panel {
+  background-color: var(--vidro-fundo);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
 }
 
-@utility glass-card {
-  background: rgba(54, 52, 58, 0.4);
+.glass-card {
+  background-color: var(--vidro-fundo);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
 }
@@ -104,7 +195,7 @@ body {
     radial-gradient(at 0% 0%,     rgba(159, 207, 212, 0.15) 0px, transparent 50%),
     radial-gradient(at 100% 0%,   rgba(229, 194, 119, 0.1)  0px, transparent 50%),
     radial-gradient(at 100% 100%, rgba(159, 207, 212, 0.1)  0px, transparent 50%),
-    radial-gradient(at 0% 100%,   rgba(20, 18, 24, 1)       0px, transparent 50%);
+    radial-gradient(at 0% 100%,   var(--malha-canto)        0px, transparent 50%);
 }
 
 @keyframes slideIn {

@@ -17,7 +17,7 @@ const PORTEIRO_LINKS = [
   { to: "/usuarios", label: "Usuários do Condomínio", icon: "groups" },
 ];
 
-export function Sidebar() {
+export function Sidebar({ aberta = false, aoFechar }) {
   const { pathname } = useLocation();
   const { usuario, logout } = useAuth();
   const navigate = useNavigate();
@@ -42,11 +42,27 @@ export function Sidebar() {
 
   return (
     <aside
-      className="fixed top-0 left-0 h-screen w-64 flex flex-col z-50"
+      /* No desktop fica sempre visível; no celular desliza de fora da tela,
+         porque 256px fixos sobre um viewport de 375px cobriam o conteúdo. */
+      /* Alterna exibição em vez de deslocar.
+         Com `translate`, o valor ficava preso em -100% depois que a classe saía:
+         a transição não tem para onde interpolar quando a propriedade é
+         removida, e a gaveta nunca aparecia. `hidden`/`flex` não interpola nada
+         e o resultado é determinístico. */
+      className={`fixed top-0 left-0 h-screen w-64 flex-col z-50 lg:flex ${
+        aberta ? "flex" : "hidden"
+      }`}
       style={{ background: "rgba(255,255,255,0.04)", borderRight: "1px solid rgba(255,255,255,0.08)", backdropFilter: "blur(32px)" }}
     >
       {/* Logo */}
-      <div className="flex items-center gap-3 px-5 py-4 border-b border-white/5">
+      <div className="flex items-center gap-3 px-5 py-4 border-b border-veu/5">
+        <button
+          onClick={aoFechar}
+          aria-label="Fechar menu"
+          className="lg:hidden p-1 -ml-1 rounded-lg text-on-surface-variant hover:bg-veu/5 cursor-pointer"
+        >
+          <Icone name="close" />
+        </button>
         <img src={moraLogo3} alt="Mora" className="h-7 w-auto" />
         <div>
           <p className="text-[10px] font-semibold uppercase tracking-widest text-on-surface-variant">Painel</p>
@@ -62,10 +78,11 @@ export function Sidebar() {
             <Link
               key={link.to}
               to={link.to}
+              onClick={aoFechar}
               className={`flex items-center gap-3 px-3 py-2 rounded-xl transition-all duration-200 group
                 ${active
                   ? "bg-primary/10 text-primary"
-                  : "text-on-surface-variant hover:bg-white/5 hover:text-on-surface"
+                  : "text-on-surface-variant hover:bg-veu/5 hover:text-on-surface"
                 }`}
             >
               <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-all
@@ -80,7 +97,7 @@ export function Sidebar() {
       </nav>
 
       {/* Usuário (link p/ perfil) + Logout */}
-      <div className="px-2 py-3 border-t border-white/5 space-y-0.5">
+      <div className="px-2 py-3 border-t border-veu/5 space-y-0.5">
         {naoLidas > 0 && (
           <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-primary/5 border border-primary/10 mb-1">
             <Icone name="notifications_active" className="text-primary text-base" />
@@ -94,7 +111,8 @@ export function Sidebar() {
         )}
         <Link
           to="/perfil"
-          className="flex items-center gap-3 px-3 py-2 rounded-xl bg-surface-container-highest/20 hover:bg-white/5 transition-all"
+          onClick={aoFechar}
+          className="flex items-center gap-3 px-3 py-2 rounded-xl bg-surface-container-highest/20 hover:bg-veu/5 transition-all"
         >
           <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center shrink-0">
             <Icone name={isDoorman ? "badge" : "admin_panel_settings"} className="text-base text-primary" />

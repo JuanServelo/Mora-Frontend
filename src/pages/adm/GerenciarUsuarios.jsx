@@ -331,7 +331,7 @@ export function GerenciarUsuarios() {
               className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 cursor-pointer ${
                 aba === tab.id
                   ? "bg-primary/15 text-primary"
-                  : "text-on-surface-variant hover:text-on-surface hover:bg-white/5"
+                  : "text-on-surface-variant hover:text-on-surface hover:bg-veu/5"
               }`}
             >
               <Icone name={tab.icon} className="text-lg" />
@@ -394,7 +394,7 @@ export function GerenciarUsuarios() {
                   {/* Linha principal */}
                   <button
                     onClick={() => toggleExpandir(usuario.id)}
-                    className="w-full flex items-center gap-4 p-5 text-left group hover:bg-white/5 transition-all cursor-pointer"
+                    className="w-full flex items-center gap-4 p-5 text-left group hover:bg-veu/5 transition-all cursor-pointer"
                   >
                     <div className="w-11 h-11 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
                       <Icone name="person" className="text-primary" />

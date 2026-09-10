@@ -225,7 +225,7 @@ export function Portaria() {
               className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 cursor-pointer ${
                 aba === tab.id
                   ? "bg-primary/15 text-primary"
-                  : "text-on-surface-variant hover:text-on-surface hover:bg-white/5"
+                  : "text-on-surface-variant hover:text-on-surface hover:bg-veu/5"
               }`}
             >
               <Icone name={tab.icon} className="text-lg" />

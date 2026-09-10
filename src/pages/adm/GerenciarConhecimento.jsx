@@ -61,7 +61,7 @@ export function GerenciarConhecimento() {
               className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 cursor-pointer ${
                 aba === tab.id
                   ? "bg-primary/15 text-primary"
-                  : "text-on-surface-variant hover:text-on-surface hover:bg-white/5"
+                  : "text-on-surface-variant hover:text-on-surface hover:bg-veu/5"
               }`}
             >
               <Icone name={tab.icon} className="text-lg" />
@@ -236,7 +236,7 @@ function AbaConhecimento() {
               <label htmlFor="art-publicado" className="text-sm text-on-surface-variant">Publicar artigo (visível para todos os moradores)</label>
             </div>
             <div className="flex gap-3 justify-end pt-2">
-              <button type="button" onClick={() => { setCriando(false); setEditando(null); setForm(ARTIGO_INICIAL); }} className="px-5 py-2.5 rounded-xl text-sm font-semibold text-on-surface-variant hover:bg-white/5 transition-all cursor-pointer">Cancelar</button>
+              <button type="button" onClick={() => { setCriando(false); setEditando(null); setForm(ARTIGO_INICIAL); }} className="px-5 py-2.5 rounded-xl text-sm font-semibold text-on-surface-variant hover:bg-veu/5 transition-all cursor-pointer">Cancelar</button>
               <Botao type="submit">{editando ? "Salvar alterações" : "Criar artigo"}</Botao>
             </div>
           </form>
@@ -276,7 +276,7 @@ function AbaConhecimento() {
       <div className="space-y-3">
         {filtrados.map((artigo) => (
           <div key={artigo.id} className="glass-panel rounded-2xl overflow-hidden">
-            <button className="w-full flex items-center justify-between px-6 py-4 text-left cursor-pointer hover:bg-white/5 transition-all" onClick={() => setExpandido(expandido === artigo.id ? null : artigo.id)}>
+            <button className="w-full flex items-center justify-between px-6 py-4 text-left cursor-pointer hover:bg-veu/5 transition-all" onClick={() => setExpandido(expandido === artigo.id ? null : artigo.id)}>
               <div className="flex items-center gap-4">
                 <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
                   <Icone name={CATEGORIA_ICON[artigo.categoria] ?? "article"} className="text-primary text-xl" />
@@ -296,7 +296,7 @@ function AbaConhecimento() {
               </div>
             </button>
             {expandido === artigo.id && (
-              <div className="px-6 pb-5 border-t border-white/5 pt-4 space-y-4">
+              <div className="px-6 pb-5 border-t border-veu/5 pt-4 space-y-4">
                 <div className="bg-surface-container-highest/30 rounded-xl p-4">
                   <p className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant mb-2">Conteúdo</p>
                   <p className="text-sm text-on-surface leading-relaxed whitespace-pre-wrap">{artigo.conteudo}</p>
@@ -306,7 +306,7 @@ function AbaConhecimento() {
                 )}
                 <div className="flex flex-wrap gap-2 pt-1">
                   <button onClick={() => alternarPublicado(artigo)} className={`text-xs font-semibold px-3 py-1.5 rounded-lg border transition-all cursor-pointer ${artigo.publicado ? "bg-error/10 text-error border-error/20 hover:bg-error/20" : "bg-primary/10 text-primary border-primary/20 hover:bg-primary/20"}`}>{artigo.publicado ? "Despublicar" : "Publicar"}</button>
-                  <button onClick={() => iniciarEdicao(artigo)} className="flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-lg bg-white/5 text-on-surface-variant hover:text-on-surface hover:bg-white/10 transition-all cursor-pointer"><Icone name="edit" className="text-sm" /> Editar</button>
+                  <button onClick={() => iniciarEdicao(artigo)} className="flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-lg bg-veu/5 text-on-surface-variant hover:text-on-surface hover:bg-veu/10 transition-all cursor-pointer"><Icone name="edit" className="text-sm" /> Editar</button>
                   <button onClick={() => excluir(artigo.id)} className="flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-lg bg-error/10 text-error hover:bg-error/20 transition-all cursor-pointer"><Icone name="delete" className="text-sm" /> Excluir</button>
                 </div>
               </div>
@@ -505,7 +505,7 @@ function AbaAvisos() {
             </div>
             {erro && <p className="text-sm text-error bg-error/10 rounded-xl px-4 py-2">{erro}</p>}
             <div className="flex gap-3 justify-end pt-2">
-              <button type="button" onClick={() => { setCriando(false); setEditando(null); setForm(AVISO_INICIAL); setErro(""); }} className="px-5 py-2.5 rounded-xl text-sm font-semibold text-on-surface-variant hover:bg-white/5 transition-all cursor-pointer">Cancelar</button>
+              <button type="button" onClick={() => { setCriando(false); setEditando(null); setForm(AVISO_INICIAL); setErro(""); }} className="px-5 py-2.5 rounded-xl text-sm font-semibold text-on-surface-variant hover:bg-veu/5 transition-all cursor-pointer">Cancelar</button>
               <Botao type="submit">{editando ? "Salvar alterações" : "Criar aviso"}</Botao>
             </div>
           </form>
@@ -533,7 +533,7 @@ function AbaAvisos() {
       <div className="space-y-3">
         {avisos.map((aviso) => (
           <div key={aviso.id} className="glass-panel rounded-2xl overflow-hidden">
-            <button className="w-full flex items-center justify-between px-6 py-4 text-left cursor-pointer hover:bg-white/5 transition-all" onClick={() => setExpandido(expandido === aviso.id ? null : aviso.id)}>
+            <button className="w-full flex items-center justify-between px-6 py-4 text-left cursor-pointer hover:bg-veu/5 transition-all" onClick={() => setExpandido(expandido === aviso.id ? null : aviso.id)}>
               <div className="flex items-center gap-4">
                 <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
                   <Icone name="campaign" className="text-primary text-xl" />
@@ -552,7 +552,7 @@ function AbaAvisos() {
               </div>
             </button>
             {expandido === aviso.id && (
-              <div className="px-6 pb-5 border-t border-white/5 pt-4 space-y-4">
+              <div className="px-6 pb-5 border-t border-veu/5 pt-4 space-y-4">
                 <div className="bg-surface-container-highest/30 rounded-xl p-4">
                   <p className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant mb-2">Mensagem</p>
                   <p className="text-sm text-on-surface leading-relaxed whitespace-pre-wrap">{aviso.mensagem}</p>
@@ -561,7 +561,7 @@ function AbaAvisos() {
                   {aviso.publicado && (
                     <button onClick={() => encerrar(aviso)} className="text-xs font-semibold px-3 py-1.5 rounded-lg border bg-error/10 text-error border-error/20 hover:bg-error/20 transition-all cursor-pointer">Encerrar</button>
                   )}
-                  <button onClick={() => iniciarEdicao(aviso)} className="flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-lg bg-white/5 text-on-surface-variant hover:text-on-surface hover:bg-white/10 transition-all cursor-pointer"><Icone name="edit" className="text-sm" /> Editar</button>
+                  <button onClick={() => iniciarEdicao(aviso)} className="flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-lg bg-veu/5 text-on-surface-variant hover:text-on-surface hover:bg-veu/10 transition-all cursor-pointer"><Icone name="edit" className="text-sm" /> Editar</button>
                   <button onClick={() => excluir(aviso)} className="flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-lg bg-error/10 text-error hover:bg-error/20 transition-all cursor-pointer"><Icone name="delete" className="text-sm" /> Excluir</button>
                 </div>
               </div>

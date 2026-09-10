@@ -257,7 +257,7 @@ export function GerenciarPlanos() {
               <button
                 onClick={carregarPlanos}
                 disabled={carregando}
-                className="p-2.5 rounded-xl hover:bg-white/5 text-on-surface-variant hover:text-on-surface transition cursor-pointer"
+                className="p-2.5 rounded-xl hover:bg-veu/5 text-on-surface-variant hover:text-on-surface transition cursor-pointer"
                 title="Atualizar"
               >
                 <Icone
@@ -291,9 +291,9 @@ export function GerenciarPlanos() {
             <form
               id="form-plan-topo"
               onSubmit={salvarPlano}
-              className="bg-surface-container-highest/20 rounded-2xl p-5 space-y-5 border border-white/10"
+              className="bg-surface-container-highest/20 rounded-2xl p-5 space-y-5 border border-veu/10"
             >
-              <div className="flex items-center justify-between border-b border-white/5 pb-3">
+              <div className="flex items-center justify-between border-b border-veu/5 pb-3">
                 <h3 className="font-semibold text-on-surface text-sm flex items-center gap-2">
                   <Icone
                     name={editandoId ? "edit" : "add_circle"}
@@ -431,7 +431,7 @@ export function GerenciarPlanos() {
                         className={`flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 border cursor-pointer ${
                           selected
                             ? "bg-primary/15 border-primary/30 text-primary shadow-sm shadow-primary/5"
-                            : "bg-surface-container-highest/20 border-white/5 text-on-surface-variant hover:border-primary/20 hover:text-on-surface"
+                            : "bg-surface-container-highest/20 border-veu/5 text-on-surface-variant hover:border-primary/20 hover:text-on-surface"
                         }`}
                       >
                         <Icone
@@ -482,7 +482,7 @@ export function GerenciarPlanos() {
               Carregando planos...
             </div>
           ) : planos.length === 0 ? (
-            <div className="text-center py-16 text-on-surface-variant flex flex-col items-center justify-center gap-3 bg-white/2 rounded-2xl border border-white/5">
+            <div className="text-center py-16 text-on-surface-variant flex flex-col items-center justify-center gap-3 bg-veu/2 rounded-2xl border border-veu/5">
               <Icone
                 name="inventory_2"
                 className="text-4xl text-primary/30"
@@ -501,7 +501,7 @@ export function GerenciarPlanos() {
                   key={plano.id}
                   className={`relative bg-surface-container-highest/20 hover:bg-surface-container-highest/30 rounded-2xl border transition-all duration-300 hover:scale-[1.01] hover:shadow-lg overflow-hidden ${
                     plano.isActive
-                      ? "border-white/5"
+                      ? "border-veu/5"
                       : "border-error/15 opacity-75"
                   }`}
                 >
@@ -542,7 +542,7 @@ export function GerenciarPlanos() {
 
                     {/* Limites */}
                     <div className="grid grid-cols-2 gap-2">
-                      <div className="bg-white/3 rounded-xl p-2.5 border border-white/5">
+                      <div className="bg-veu/3 rounded-xl p-2.5 border border-veu/5">
                         <p className="text-[9px] text-on-surface-variant uppercase tracking-wider font-semibold mb-0.5">
                           Condomínios
                         </p>
@@ -554,7 +554,7 @@ export function GerenciarPlanos() {
                           {plano.maxCondominiums}
                         </p>
                       </div>
-                      <div className="bg-white/3 rounded-xl p-2.5 border border-white/5">
+                      <div className="bg-veu/3 rounded-xl p-2.5 border border-veu/5">
                         <p className="text-[9px] text-on-surface-variant uppercase tracking-wider font-semibold mb-0.5">
                           Usuários/Cond.
                         </p>
@@ -597,7 +597,7 @@ export function GerenciarPlanos() {
                   </div>
 
                   {/* Footer do card */}
-                  <div className="flex items-center justify-between gap-2 px-4 py-3 border-t border-white/5 bg-white/2">
+                  <div className="flex items-center justify-between gap-2 px-4 py-3 border-t border-veu/5 bg-veu/2">
                     <span className="text-[9px] text-on-surface-variant/50 font-medium">
                       Criado: {fmtData(plano.createdAt)}
                     </span>
@@ -632,7 +632,7 @@ export function GerenciarPlanos() {
                       <button
                         type="button"
                         onClick={() => setDetalhe(detalhe?.id === plano.id ? null : plano)}
-                        className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[10px] font-semibold bg-white/5 text-on-surface-variant hover:bg-white/10 hover:text-on-surface transition cursor-pointer"
+                        className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[10px] font-semibold bg-veu/5 text-on-surface-variant hover:bg-veu/10 hover:text-on-surface transition cursor-pointer"
                       >
                         <Icone
                           name={
@@ -649,7 +649,7 @@ export function GerenciarPlanos() {
 
                   {/* Painel de detalhes expandido */}
                   {detalhe?.id === plano.id && (
-                    <div className="px-4 pb-4 pt-1 space-y-3 border-t border-white/5 bg-white/2">
+                    <div className="px-4 pb-4 pt-1 space-y-3 border-t border-veu/5 bg-veu/2">
                       <div className="grid grid-cols-2 gap-3">
                         <div>
                           <p className="text-[9px] text-on-surface-variant uppercase tracking-wider font-semibold mb-0.5">
@@ -720,7 +720,7 @@ export function GerenciarPlanos() {
                                 className={`flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-[10px] font-medium border ${
                                   ativo
                                     ? "bg-primary/8 border-primary/15 text-primary"
-                                    : "bg-white/3 border-white/5 text-on-surface-variant/40 line-through"
+                                    : "bg-veu/3 border-veu/5 text-on-surface-variant/40 line-through"
                                 }`}
                               >
                                 <Icone

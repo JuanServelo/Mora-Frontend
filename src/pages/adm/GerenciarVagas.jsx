@@ -185,7 +185,7 @@ export function GerenciarVagas() {
                     name="tipo"
                     value={form.tipo}
                     onChange={handleForm}
-                    className="appearance-none bg-surface-container-highest/50 border border-white/10 rounded-xl py-3 pl-4 pr-10 text-on-surface focus:ring-2 focus:ring-primary/50 focus:outline-none transition-all cursor-pointer"
+                    className="appearance-none bg-surface-container-highest/50 border border-veu/10 rounded-xl py-3 pl-4 pr-10 text-on-surface focus:ring-2 focus:ring-primary/50 focus:outline-none transition-all cursor-pointer"
                   >
                     <option value="">Selecione um tipo</option>
                     <option value="Coberta">Coberta</option>
@@ -201,7 +201,7 @@ export function GerenciarVagas() {
                     name="apartamentoId"
                     value={form.apartamentoId}
                     onChange={handleForm}
-                    className="appearance-none bg-surface-container-highest/50 border border-white/10 rounded-xl py-3 pl-4 pr-10 text-on-surface focus:ring-2 focus:ring-primary/50 focus:outline-none transition-all cursor-pointer"
+                    className="appearance-none bg-surface-container-highest/50 border border-veu/10 rounded-xl py-3 pl-4 pr-10 text-on-surface focus:ring-2 focus:ring-primary/50 focus:outline-none transition-all cursor-pointer"
                   >
                     <option value="">Nenhum apartamento</option>
                     {apartamentos.map((apt) => (
@@ -217,7 +217,7 @@ export function GerenciarVagas() {
                 <button
                   type="button"
                   onClick={() => { setCriando(false); setErro(null); }}
-                  className="px-5 py-2.5 rounded-xl text-sm font-semibold text-on-surface-variant hover:bg-white/5 transition-all cursor-pointer"
+                  className="px-5 py-2.5 rounded-xl text-sm font-semibold text-on-surface-variant hover:bg-veu/5 transition-all cursor-pointer"
                 >
                   Cancelar
                 </button>
@@ -238,7 +238,7 @@ export function GerenciarVagas() {
               placeholder="Buscar por identificador ou unidade..."
               value={busca}
               onChange={(e) => setBusca(e.target.value)}
-              className="w-full pl-11 pr-4 py-2.5 bg-surface-container-highest/40 border border-white/10 rounded-xl text-on-surface placeholder:text-outline-variant focus:ring-2 focus:ring-primary/50 focus:outline-none transition-all text-sm"
+              className="w-full pl-11 pr-4 py-2.5 bg-surface-container-highest/40 border border-veu/10 rounded-xl text-on-surface placeholder:text-outline-variant focus:ring-2 focus:ring-primary/50 focus:outline-none transition-all text-sm"
             />
           </div>
           {filtroStatus !== "TODOS" && (
@@ -288,7 +288,7 @@ export function GerenciarVagas() {
                 </div>
 
                 {/* Ações de status */}
-                <div className="mt-auto pt-2 border-t border-white/5">
+                <div className="mt-auto pt-2 border-t border-veu/5">
                   <p className="text-xs text-on-surface-variant mb-2">Mudar status:</p>
                   <div className="flex gap-2">
                     <button

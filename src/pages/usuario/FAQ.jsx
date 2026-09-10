@@ -26,7 +26,7 @@ function ItemFAQ({ artigo }) {
     >
       <button
         onClick={() => setAberto((a) => !a)}
-        className="w-full flex items-center gap-4 px-6 py-4 text-left cursor-pointer hover:bg-white/5 transition-colors"
+        className="w-full flex items-center gap-4 px-6 py-4 text-left cursor-pointer hover:bg-veu/5 transition-colors"
       >
         <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
           <Icone name="help_outline" className="text-primary text-lg" />
@@ -50,7 +50,7 @@ function ItemFAQ({ artigo }) {
       </button>
 
       {aberto && (
-        <div className="px-6 pb-5 border-t border-white/5">
+        <div className="px-6 pb-5 border-t border-veu/5">
           <p className="text-sm text-on-surface-variant leading-relaxed mt-4 whitespace-pre-wrap">
             {artigo.conteudo}
           </p>
@@ -141,7 +141,7 @@ export function FAQ() {
                 ${
                   categoriaAtiva === cat
                     ? "bg-primary text-on-primary"
-                    : "bg-surface-container-highest/40 text-on-surface-variant hover:bg-white/10"
+                    : "bg-surface-container-highest/40 text-on-surface-variant hover:bg-veu/10"
                 }`}
             >
               {cat === "TODAS" ? "Todas" : (CATEGORIA_LABEL[cat] ?? cat)}

@@ -191,7 +191,7 @@ function AbaMinhasReclamacoes({ reclamacoes }) {
       {reclamacoes.map((rec) => (
         <div key={rec.id} className="glass-panel rounded-2xl overflow-hidden">
           <button
-            className="w-full flex items-center justify-between px-6 py-4 text-left cursor-pointer hover:bg-white/5 transition-all"
+            className="w-full flex items-center justify-between px-6 py-4 text-left cursor-pointer hover:bg-veu/5 transition-all"
             onClick={() => setExpandido(expandido === rec.id ? null : rec.id)}
           >
             <div className="flex items-center gap-4">
@@ -222,7 +222,7 @@ function AbaMinhasReclamacoes({ reclamacoes }) {
           </button>
 
           {expandido === rec.id && (
-            <div className="px-6 pb-5 border-t border-white/5 pt-4 space-y-5">
+            <div className="px-6 pb-5 border-t border-veu/5 pt-4 space-y-5">
               <div className="grid grid-cols-2 gap-3">
                 <div className="bg-surface-container-highest/30 rounded-xl p-3">
                   <p className="text-xs text-on-surface-variant mb-1">Protocolo</p>
@@ -355,7 +355,7 @@ export function MinhasReclamacoes() {
               className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
                 aba === t.id
                   ? "bg-primary/20 text-primary"
-                  : "text-on-surface-variant hover:bg-white/5"
+                  : "text-on-surface-variant hover:bg-veu/5"
               }`}
             >
               <Icone name={t.icon} className="text-lg" />

@@ -128,7 +128,7 @@ export function GerenciarReunioes() {
               className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 cursor-pointer ${
                 aba === tab.id
                   ? "bg-primary/15 text-primary"
-                  : "text-on-surface-variant hover:text-on-surface hover:bg-white/5"
+                  : "text-on-surface-variant hover:text-on-surface hover:bg-veu/5"
               }`}
             >
               <Icone name={tab.icon} className="text-lg" />
@@ -492,8 +492,8 @@ function AbaReunioes({ irParaVotacao }) {
 
 
       {/* Minhas Reuniões da Semana */}
-      <div className="glass-panel rounded-3xl p-6 space-y-4 border border-white/5">
-        <div className="flex items-center justify-between gap-3 border-b border-white/5 pb-3">
+      <div className="glass-panel rounded-3xl p-6 space-y-4 border border-veu/5">
+        <div className="flex items-center justify-between gap-3 border-b border-veu/5 pb-3">
           <div className="flex items-center gap-2">
             <span className="p-2 rounded-xl bg-primary/10 text-primary">
               <Icone name="date_range" className="text-xl" />
@@ -508,7 +508,7 @@ function AbaReunioes({ irParaVotacao }) {
           <button
             onClick={carregarReunioesSemana}
             disabled={carregandoSemana}
-            className="p-2 rounded-xl hover:bg-white/5 text-on-surface-variant hover:text-on-surface transition cursor-pointer"
+            className="p-2 rounded-xl hover:bg-veu/5 text-on-surface-variant hover:text-on-surface transition cursor-pointer"
             title="Atualizar reuniões"
           >
             <Icone name="refresh" className={`text-lg ${carregandoSemana ? "animate-spin" : ""}`} />
@@ -521,7 +521,7 @@ function AbaReunioes({ irParaVotacao }) {
             Carregando reuniões...
           </div>
         ) : reunioesSemana.length === 0 ? (
-          <div className="text-center py-10 text-on-surface-variant text-sm flex flex-col items-center justify-center gap-2 bg-white/2 rounded-2xl border border-white/5">
+          <div className="text-center py-10 text-on-surface-variant text-sm flex flex-col items-center justify-center gap-2 bg-veu/2 rounded-2xl border border-veu/5">
             <Icone name="event_busy" className="text-3xl text-primary/40" />
             <p className="font-medium text-xs">Você não tem reuniões agendadas para esta semana.</p>
           </div>
@@ -533,7 +533,7 @@ function AbaReunioes({ irParaVotacao }) {
               const meuStatusPresenca = meuConvidado?.status || "PENDENTE";
 
               return (
-                <div key={reuniao.id} className="relative bg-surface-container-highest/20 hover:bg-surface-container-highest/30 rounded-2xl border border-white/5 p-4 flex flex-col justify-between gap-4 transition-all duration-300 hover:scale-[1.01] hover:shadow-lg">
+                <div key={reuniao.id} className="relative bg-surface-container-highest/20 hover:bg-surface-container-highest/30 rounded-2xl border border-veu/5 p-4 flex flex-col justify-between gap-4 transition-all duration-300 hover:scale-[1.01] hover:shadow-lg">
                   <div className="space-y-2">
                     <div className="flex items-start justify-between gap-2">
                       <div className="space-y-0.5 min-w-0">
@@ -550,7 +550,7 @@ function AbaReunioes({ irParaVotacao }) {
                             Organizador
                           </span>
                         )}
-                        <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider ${STATUS_MEETING[reuniao.status]?.cls ?? "bg-white/10 text-white"}`}>
+                        <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider ${STATUS_MEETING[reuniao.status]?.cls ?? "bg-veu/10 text-white"}`}>
                           {STATUS_MEETING[reuniao.status]?.label ?? reuniao.status}
                         </span>
                       </div>
@@ -562,7 +562,7 @@ function AbaReunioes({ irParaVotacao }) {
                       </p>
                     )}
 
-                    <div className="space-y-1 pt-1 border-t border-white/5">
+                    <div className="space-y-1 pt-1 border-t border-veu/5">
                       <p className="flex items-center gap-1.5 text-[11px] text-on-surface-variant">
                         <Icone name="schedule" className="text-xs text-primary" />
                         Início: {fmt(reuniao.dataHoraInicio)}
@@ -589,7 +589,7 @@ function AbaReunioes({ irParaVotacao }) {
                   </div>
 
                   {!isOrganizador && reuniao.status === "AGENDADA" && (
-                    <div className="flex items-center justify-between gap-2 bg-white/5 p-2 rounded-xl border border-white/5">
+                    <div className="flex items-center justify-between gap-2 bg-veu/5 p-2 rounded-xl border border-veu/5">
                       <div className="flex flex-col">
                         <span className="text-[9px] text-on-surface-variant font-semibold uppercase tracking-wider">Sua Presença</span>
                         <span className={`text-[10px] font-bold ${
@@ -605,7 +605,7 @@ function AbaReunioes({ irParaVotacao }) {
                           className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[10px] font-semibold transition cursor-pointer ${
                             meuStatusPresenca === 'CONFIRMADO' 
                               ? 'bg-primary/20 text-primary border border-primary/30' 
-                              : 'bg-white/5 text-on-surface-variant hover:bg-primary/10 hover:text-primary'
+                              : 'bg-veu/5 text-on-surface-variant hover:bg-primary/10 hover:text-primary'
                           }`}
                         >
                           <Icone name="check" className="text-xs" />
@@ -617,7 +617,7 @@ function AbaReunioes({ irParaVotacao }) {
                           className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[10px] font-semibold transition cursor-pointer ${
                             meuStatusPresenca === 'RECUSADO' 
                               ? 'bg-error/20 text-error border border-error/30' 
-                              : 'bg-white/5 text-on-surface-variant hover:bg-error/10 hover:text-error'
+                              : 'bg-veu/5 text-on-surface-variant hover:bg-error/10 hover:text-error'
                           }`}
                         >
                           <Icone name="close" className="text-xs" />
@@ -688,8 +688,8 @@ function AbaReunioes({ irParaVotacao }) {
 
         {/* Formulário criação / edição */}
         {criando && (
-          <form id="form-meeting-topo" onSubmit={salvarReuniao} className="bg-surface-container-highest/20 rounded-xl p-4 space-y-4 border border-white/10">
-            <div className="flex items-center justify-between border-b border-white/5 pb-2">
+          <form id="form-meeting-topo" onSubmit={salvarReuniao} className="bg-surface-container-highest/20 rounded-xl p-4 space-y-4 border border-veu/10">
+            <div className="flex items-center justify-between border-b border-veu/5 pb-2">
               <h3 className="font-semibold text-on-surface text-sm">
                 {editandoMeetingId ? `Editar Reunião #${editandoMeetingId}` : "Nova Reunião"}
               </h3>
@@ -722,7 +722,7 @@ function AbaReunioes({ irParaVotacao }) {
             {/* Indicação visual do organizador logado */}
             <div className="space-y-2">
               <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant ml-1">Organizador</label>
-              <div className="w-full bg-surface-container-highest/40 rounded-xl py-3 px-4 text-on-surface-variant flex items-center gap-2 border border-white/5 backdrop-blur-sm">
+              <div className="w-full bg-surface-container-highest/40 rounded-xl py-3 px-4 text-on-surface-variant flex items-center gap-2 border border-veu/5 backdrop-blur-sm">
                 <Icone name="verified_user" className="text-primary text-base shrink-0" />
                 <span className="text-xs font-medium">Você ({usuario?.nome || "Carregando..."})</span>
               </div>
@@ -769,14 +769,14 @@ function AbaReunioes({ irParaVotacao }) {
               </div>
 
               {/* Lista e Busca de Moradores */}
-              <div className="bg-surface-container-highest/10 border border-white/5 rounded-2xl p-4 space-y-3">
+              <div className="bg-surface-container-highest/10 border border-veu/5 rounded-2xl p-4 space-y-3">
                 <Campo
                   placeholder="Buscar moradores por nome, e-mail, bloco ou apt..."
                   icon="search"
                   value={buscaUsuario}
                   onChange={(e) => setBuscaUsuario(e.target.value)}
                 />
-                <div className="max-h-48 overflow-y-auto divide-y divide-white/5 pr-1 custom-scrollbar">
+                <div className="max-h-48 overflow-y-auto divide-y divide-veu/5 pr-1 custom-scrollbar">
                   {todosUsuarios
                     .filter((u) => {
                       if (u.id === usuario?.id) return false;
@@ -808,7 +808,7 @@ function AbaReunioes({ irParaVotacao }) {
                             setForm((p) => ({ ...p, idConvidados: updated }));
                           }}
                           className={`w-full flex items-center justify-between gap-3 py-2 px-3 rounded-xl transition text-left cursor-pointer ${
-                            isSelected ? "bg-primary/10 text-primary" : "hover:bg-white/5 text-on-surface-variant hover:text-on-surface"
+                            isSelected ? "bg-primary/10 text-primary" : "hover:bg-veu/5 text-on-surface-variant hover:text-on-surface"
                           }`}
                         >
                           <div className="flex items-center gap-2">
@@ -873,7 +873,7 @@ function AbaReunioes({ irParaVotacao }) {
                 const meuStatusPresenca = meuConvidado?.status || "PENDENTE";
 
                 return (
-                  <div key={reuniao.id} className="relative bg-surface-container-highest/20 hover:bg-surface-container-highest/30 rounded-2xl border border-white/5 p-4 flex flex-col justify-between gap-4 transition-all duration-300 hover:scale-[1.01] hover:shadow-lg">
+                  <div key={reuniao.id} className="relative bg-surface-container-highest/20 hover:bg-surface-container-highest/30 rounded-2xl border border-veu/5 p-4 flex flex-col justify-between gap-4 transition-all duration-300 hover:scale-[1.01] hover:shadow-lg">
                     <div className="space-y-2">
                       <div className="flex items-start justify-between gap-2">
                         <div className="space-y-0.5 min-w-0">
@@ -890,7 +890,7 @@ function AbaReunioes({ irParaVotacao }) {
                               Organizador
                             </span>
                           )}
-                          <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider ${STATUS_MEETING[reuniao.status]?.cls ?? "bg-white/10 text-white"}`}>
+                          <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider ${STATUS_MEETING[reuniao.status]?.cls ?? "bg-veu/10 text-white"}`}>
                             {STATUS_MEETING[reuniao.status]?.label ?? reuniao.status}
                           </span>
                         </div>
@@ -902,7 +902,7 @@ function AbaReunioes({ irParaVotacao }) {
                         </p>
                       )}
 
-                      <div className="space-y-1 pt-1 border-t border-white/5">
+                      <div className="space-y-1 pt-1 border-t border-veu/5">
                         <p className="flex items-center gap-1.5 text-[11px] text-on-surface-variant">
                           <Icone name="schedule" className="text-xs text-primary" />
                           Início: {fmt(reuniao.dataHoraInicio)}
@@ -929,7 +929,7 @@ function AbaReunioes({ irParaVotacao }) {
                     </div>
 
                     {!isOrganizador && reuniao.status === "AGENDADA" && (
-                      <div className="flex items-center justify-between gap-2 bg-white/5 p-2 rounded-xl border border-white/5">
+                      <div className="flex items-center justify-between gap-2 bg-veu/5 p-2 rounded-xl border border-veu/5">
                         <div className="flex flex-col">
                           <span className="text-[9px] text-on-surface-variant font-semibold uppercase tracking-wider">Sua Presença</span>
                           <span className={`text-[10px] font-bold ${
@@ -945,7 +945,7 @@ function AbaReunioes({ irParaVotacao }) {
                             className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[10px] font-semibold transition cursor-pointer ${
                               meuStatusPresenca === 'CONFIRMADO' 
                                 ? 'bg-primary/20 text-primary border border-primary/30' 
-                                : 'bg-white/5 text-on-surface-variant hover:bg-primary/10 hover:text-primary'
+                                : 'bg-veu/5 text-on-surface-variant hover:bg-primary/10 hover:text-primary'
                             }`}
                           >
                             <Icone name="check" className="text-xs" />
@@ -957,7 +957,7 @@ function AbaReunioes({ irParaVotacao }) {
                             className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[10px] font-semibold transition cursor-pointer ${
                               meuStatusPresenca === 'RECUSADO' 
                                 ? 'bg-error/20 text-error border border-error/30' 
-                                : 'bg-white/5 text-on-surface-variant hover:bg-error/10 hover:text-error'
+                                : 'bg-veu/5 text-on-surface-variant hover:bg-error/10 hover:text-error'
                             }`}
                           >
                             <Icone name="close" className="text-xs" />
@@ -967,7 +967,7 @@ function AbaReunioes({ irParaVotacao }) {
                       </div>
                     )}
 
-                    <div className="flex justify-end pt-1 gap-3 border-t border-white/5">
+                    <div className="flex justify-end pt-1 gap-3 border-t border-veu/5">
                       {isOrganizador && reuniao.status === "AGENDADA" && (
                         <button
                           type="button"
@@ -1008,7 +1008,7 @@ function AbaReunioes({ irParaVotacao }) {
 
         {/* Detalhe da reunião */}
         {detalhe && (
-          <div id="meeting-detalhe-container" className="bg-surface-container-highest/20 rounded-xl border border-white/10 divide-y divide-white/5 overflow-hidden animate-fade-in">
+          <div id="meeting-detalhe-container" className="bg-surface-container-highest/20 rounded-xl border border-veu/10 divide-y divide-veu/5 overflow-hidden animate-fade-in">
             <div className="p-4 flex items-start justify-between gap-3">
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
@@ -1082,7 +1082,7 @@ function AbaReunioes({ irParaVotacao }) {
                       : "";
                     
                     return (
-                      <div key={convidado.usuarioId} className="flex flex-col justify-between bg-white/5 border border-white/5 rounded-2xl p-4 gap-3">
+                      <div key={convidado.usuarioId} className="flex flex-col justify-between bg-veu/5 border border-veu/5 rounded-2xl p-4 gap-3">
                         <div className="flex items-start justify-between gap-2">
                           <div className="min-w-0">
                             <p className="font-semibold text-xs text-on-surface truncate">{nome}</p>
@@ -1104,19 +1104,19 @@ function AbaReunioes({ irParaVotacao }) {
 
                         {/* Avaliação (se houver nota/comentário) */}
                         {convidado.nota !== null && convidado.nota !== undefined && (
-                          <div className="mt-1 pt-2 border-t border-white/5 space-y-1">
+                          <div className="mt-1 pt-2 border-t border-veu/5 space-y-1">
                             <div className="flex items-center gap-1 text-[10px] text-tertiary">
                               <span className="font-semibold uppercase tracking-wider text-[8px] text-on-surface-variant mr-1">Avaliação:</span>
                               {Array.from({ length: 5 }).map((_, idx) => (
                                 <Icone 
                                   key={idx} 
                                   name="star" 
-                                  className={`text-xs ${idx < convidado.nota ? "text-amber-400" : "text-white/10"}`} 
+                                  className={`text-xs ${idx < convidado.nota ? "text-amber-400" : "text-veu/10"}`} 
                                 />
                               ))}
                             </div>
                             {convidado.comentario && (
-                              <p className="text-[11px] text-on-surface-variant italic bg-white/2 p-2 rounded-xl border border-white/2 mt-1">
+                              <p className="text-[11px] text-on-surface-variant italic bg-veu/2 p-2 rounded-xl border border-veu/2 mt-1">
                                 "{convidado.comentario}"
                               </p>
                             )}
@@ -1131,7 +1131,7 @@ function AbaReunioes({ irParaVotacao }) {
 
             {/* Avaliação (só para FINALIZADA) */}
             {detalhe.status === "FINALIZADA" && (
-              <div className="p-4 space-y-4 border-t border-white/5">
+              <div className="p-4 space-y-4 border-t border-veu/5">
                 <p className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider flex items-center gap-2">
                   <Icone name="rate_review" className="text-base text-primary" />
                   Registrar Avaliação
@@ -1145,7 +1145,7 @@ function AbaReunioes({ irParaVotacao }) {
                       value={avalUsuarioId}
                       onChange={(e) => setAvalUsuarioId(e.target.value)}
                       required
-                      className="w-full bg-surface-container-highest/40 border border-white/5 rounded-xl py-3 px-4 text-on-surface focus:ring-2 focus:ring-primary/50 focus:outline-none backdrop-blur-sm transition-all"
+                      className="w-full bg-surface-container-highest/40 border border-veu/5 rounded-xl py-3 px-4 text-on-surface focus:ring-2 focus:ring-primary/50 focus:outline-none backdrop-blur-sm transition-all"
                     >
                       <option value="" className="bg-surface-container-highest text-on-surface">Selecione um convidado...</option>
                       {detalhe.convidados?.filter(c => c.status === "CONFIRMADO").map((c) => {
@@ -1169,7 +1169,7 @@ function AbaReunioes({ irParaVotacao }) {
             )}
 
             {/* Seção de Votações da Reunião */}
-            <div className="p-5 space-y-4 border-t border-white/5">
+            <div className="p-5 space-y-4 border-t border-veu/5">
               <div className="flex items-center justify-between">
                 <h4 className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider flex items-center gap-2">
                   <Icone name="how_to_vote" className="text-base text-primary" />
@@ -1188,7 +1188,7 @@ function AbaReunioes({ irParaVotacao }) {
               {votacoesReuniao.length > 0 ? (
                 <div className="grid gap-2 mt-2">
                   {votacoesReuniao.map((poll) => (
-                    <div key={poll.id} className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition cursor-pointer" onClick={() => irParaVotacao(detalhe.id)}>
+                    <div key={poll.id} className="flex items-center justify-between p-3 rounded-xl bg-veu/5 border border-veu/10 hover:bg-veu/10 transition cursor-pointer" onClick={() => irParaVotacao(detalhe.id)}>
                       <div className="flex items-center gap-2">
                         <span className="text-xs font-medium text-on-surface">{poll.titulo}</span>
                         <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${poll.status === 'ABERTA' ? 'bg-primary/20 text-primary' : 'bg-surface-container text-on-surface-variant'}`}>{poll.status}</span>
@@ -1204,13 +1204,13 @@ function AbaReunioes({ irParaVotacao }) {
 
             {/* Seção da Ata da Reunião integrada */}
             {carregandoAta ? (
-              <div className="p-5 text-center text-xs text-on-surface-variant flex items-center justify-center gap-2 border-t border-white/5">
+              <div className="p-5 text-center text-xs text-on-surface-variant flex items-center justify-center gap-2 border-t border-veu/5">
                 <Icone name="sync" className="text-sm animate-spin text-primary" />
                 Carregando Ata...
               </div>
             ) : ataReuniao ? (
               /* Visualização e edição da Ata Existente */
-              <div className="p-5 space-y-4 border-t border-white/5">
+              <div className="p-5 space-y-4 border-t border-veu/5">
                 <div className="flex items-center justify-between">
                   <h4 className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider flex items-center gap-2">
                     <Icone name="description" className="text-base text-primary" />
@@ -1228,7 +1228,7 @@ function AbaReunioes({ irParaVotacao }) {
 
                 {escrevendoAta ? (
                   /* Form de Edição da Ata */
-                  <form onSubmit={salvarAtaInline} className="space-y-4 bg-white/5 rounded-2xl p-4 border border-white/5 animate-fade-in">
+                  <form onSubmit={salvarAtaInline} className="space-y-4 bg-veu/5 rounded-2xl p-4 border border-veu/5 animate-fade-in">
                     <TextArea
                       label="Tópicos Discutidos"
                       value={ataForm.topicosDiscutidos}
@@ -1256,7 +1256,7 @@ function AbaReunioes({ irParaVotacao }) {
                       <button
                         type="button"
                         onClick={() => setEscrevendoAta(false)}
-                        className="px-4 py-2 rounded-xl text-xs font-semibold text-on-surface-variant hover:text-on-surface hover:bg-white/5 transition cursor-pointer"
+                        className="px-4 py-2 rounded-xl text-xs font-semibold text-on-surface-variant hover:text-on-surface hover:bg-veu/5 transition cursor-pointer"
                       >
                         Cancelar
                       </button>
@@ -1267,16 +1267,16 @@ function AbaReunioes({ irParaVotacao }) {
                   </form>
                 ) : (
                   /* Detalhes da Ata */
-                  <div className="bg-white/5 border border-white/5 rounded-2xl p-4 space-y-3">
+                  <div className="bg-veu/5 border border-veu/5 rounded-2xl p-4 space-y-3">
                     <div>
                       <p className="text-[10px] text-on-surface-variant uppercase font-semibold tracking-wider">Tópicos Discutidos</p>
                       <p className="text-xs text-on-surface leading-relaxed whitespace-pre-wrap">{ataReuniao.topicosDiscutidos}</p>
                     </div>
-                    <div className="pt-2 border-t border-white/5">
+                    <div className="pt-2 border-t border-veu/5">
                       <p className="text-[10px] text-on-surface-variant uppercase font-semibold tracking-wider">Decisões Tomadas</p>
                       <p className="text-xs text-on-surface leading-relaxed whitespace-pre-wrap">{ataReuniao.decisoesTomadas}</p>
                     </div>
-                    <div className="pt-2 border-t border-white/5">
+                    <div className="pt-2 border-t border-veu/5">
                       <p className="text-[10px] text-on-surface-variant uppercase font-semibold tracking-wider">Presentes na Reunião</p>
                       <div className="flex flex-wrap gap-1.5 mt-1">
                         {(ataReuniao.idPresentes || []).map((id) => {
@@ -1300,7 +1300,7 @@ function AbaReunioes({ irParaVotacao }) {
             ) : (
               /* Sem Ata - Se for o Organizador, mostra o botão para Criar */
               detalhe.idOrganizador === usuario?.id && (
-                <div className="p-5 space-y-4 border-t border-white/5">
+                <div className="p-5 space-y-4 border-t border-veu/5">
                   <div className="flex items-center justify-between">
                     <h4 className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider flex items-center gap-2">
                       <Icone name="description" className="text-base text-primary" />
@@ -1330,7 +1330,7 @@ function AbaReunioes({ irParaVotacao }) {
                   </div>
 
                   {escrevendoAta && (
-                    <form onSubmit={salvarAtaInline} className="space-y-4 bg-white/5 rounded-2xl p-4 border border-white/5 animate-fade-in">
+                    <form onSubmit={salvarAtaInline} className="space-y-4 bg-veu/5 rounded-2xl p-4 border border-veu/5 animate-fade-in">
                       <TextArea
                         label="Tópicos Discutidos"
                         value={ataForm.topicosDiscutidos}
@@ -1358,7 +1358,7 @@ function AbaReunioes({ irParaVotacao }) {
                         <button
                           type="button"
                           onClick={() => setEscrevendoAta(false)}
-                          className="px-4 py-2 rounded-xl text-xs font-semibold text-on-surface-variant hover:text-on-surface hover:bg-white/5 transition cursor-pointer"
+                          className="px-4 py-2 rounded-xl text-xs font-semibold text-on-surface-variant hover:text-on-surface hover:bg-veu/5 transition cursor-pointer"
                         >
                           Cancelar
                         </button>
@@ -1382,7 +1382,7 @@ function AbaReunioes({ irParaVotacao }) {
             className="absolute inset-0 bg-black/60 backdrop-blur-md transition-all duration-300 animate-fade-in"
             onClick={() => setConfirmModal({ aberto: false })}
           />
-          <div className="relative w-full max-w-md glass-panel rounded-3xl p-6 border border-white/10 shadow-2xl bg-surface-container-highest/95 backdrop-blur-xl animate-scale-up space-y-6">
+          <div className="relative w-full max-w-md glass-panel rounded-3xl p-6 border border-veu/10 shadow-2xl bg-surface-container-highest/95 backdrop-blur-xl animate-scale-up space-y-6">
             <div className="flex items-center gap-4">
               <span className="p-3.5 rounded-2xl bg-warning/10 text-warning shrink-0 animate-pulse">
                 <Icone name="warning" className="text-2xl" />
@@ -1400,7 +1400,7 @@ function AbaReunioes({ irParaVotacao }) {
               <button
                 type="button"
                 onClick={() => setConfirmModal({ aberto: false })}
-                className="px-4 py-2.5 rounded-xl text-xs font-semibold text-on-surface-variant hover:text-on-surface hover:bg-white/5 transition cursor-pointer"
+                className="px-4 py-2.5 rounded-xl text-xs font-semibold text-on-surface-variant hover:text-on-surface hover:bg-veu/5 transition cursor-pointer"
               >
                 Cancelar
               </button>
@@ -1564,7 +1564,7 @@ function AbaVotacoes({ reuniaoPreenchida }) {
         </div>
 
         {criando && (
-          <form onSubmit={salvarPoll} className="bg-surface-container-highest/20 rounded-xl p-4 space-y-3 border border-white/10">
+          <form onSubmit={salvarPoll} className="bg-surface-container-highest/20 rounded-xl p-4 space-y-3 border border-veu/10">
             <h3 className="font-semibold text-on-surface text-sm">Nova Votação</h3>
             {erro && <p className="text-error text-xs">{erro}</p>}
             <Campo label="Título" name="titulo" value={form.titulo} onChange={handleForm} placeholder="Ex: Aprovação do orçamento" required />
@@ -1609,7 +1609,7 @@ function AbaVotacoes({ reuniaoPreenchida }) {
           <div className="space-y-2">
             <h3 className="font-semibold text-sm text-on-surface">Votações de {buscaData}</h3>
             {resultadosBusca.map(poll => (
-              <div key={poll.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition cursor-pointer" onClick={() => setDetalhe(poll)}>
+              <div key={poll.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-3 rounded-xl bg-veu/5 border border-veu/10 hover:bg-veu/10 transition cursor-pointer" onClick={() => setDetalhe(poll)}>
                 <div>
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-bold text-on-surface">{poll.titulo}</span>
@@ -1625,7 +1625,7 @@ function AbaVotacoes({ reuniaoPreenchida }) {
 
         {/* Detalhe da votação */}
         {detalhe && (
-          <div className="bg-surface-container-highest/20 rounded-xl border border-white/10 divide-y divide-white/5">
+          <div className="bg-surface-container-highest/20 rounded-xl border border-veu/10 divide-y divide-veu/5">
             <div className="p-4 space-y-2">
               <div className="flex items-center justify-between gap-3">
                 <div className="flex items-center gap-2">
@@ -1776,7 +1776,7 @@ function AbaAtas() {
         </div>
 
         {erroDetalhe && (
-          <div className="flex items-center justify-between bg-surface-container-highest/20 rounded-xl p-3 border border-white/10">
+          <div className="flex items-center justify-between bg-surface-container-highest/20 rounded-xl p-3 border border-veu/10">
             <p className="text-on-surface-variant text-sm">{erroDetalhe}</p>
             <button
               onClick={() => { setModo("criar"); setErroDetalhe(""); setForm(EMPTY_ATA); }}
@@ -1789,7 +1789,7 @@ function AbaAtas() {
 
         {/* Detalhe da ata */}
         {detalhe && modo === "" && (
-          <div className="bg-surface-container-highest/20 rounded-xl border border-white/10 p-4 space-y-3">
+          <div className="bg-surface-container-highest/20 rounded-xl border border-veu/10 p-4 space-y-3">
             <div className="flex items-center justify-between">
               <p className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider">
                 Ata da Reunião #{detalhe.meetingId}
@@ -1831,7 +1831,7 @@ function AbaAtas() {
 
         {/* Formulário criar/editar ata */}
         {(modo === "criar" || modo === "editar") && (
-          <form onSubmit={salvarAta} className="bg-surface-container-highest/20 rounded-xl p-4 space-y-3 border border-white/10">
+          <form onSubmit={salvarAta} className="bg-surface-container-highest/20 rounded-xl p-4 space-y-3 border border-veu/10">
             <div className="flex items-center justify-between">
               <h3 className="font-semibold text-on-surface text-sm">
                 {modo === "criar" ? "Nova Ata" : "Editar Ata"}

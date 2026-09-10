@@ -8,6 +8,7 @@ import { DetalhesContaView } from "./DetalhesContaView";
 import { PrivacidadeView } from "./PrivacidadeView";
 import { FamiliaView } from "./FamiliaView";
 import { CobrancaView } from "./CobrancaView";
+import { AparenciaView } from "./AparenciaView";
 
 const ITENS_CONTA = [
   {
@@ -27,6 +28,15 @@ const ITENS_CONTA = [
     titleDefault: "Privacidade e Segurança",
     descId: "perfil.privacidade.desc",
     descDefault: "Senha, biometria e acessos",
+  },
+  {
+    id: "aparencia",
+    icon: "palette",
+    color: "text-primary",
+    titleId: "perfil.aparencia.titulo",
+    titleDefault: "Aparência",
+    descId: "perfil.aparencia.desc",
+    descDefault: "Tema claro, escuro ou o do seu aparelho",
   },
   {
     id: "familia",
@@ -51,6 +61,7 @@ const ITENS_CONTA = [
 const TITULOS_VIEW = {
   detalhes: "Detalhes da Conta",
   privacidade: "Privacidade e Segurança",
+  aparencia: "Aparência",
   familia: "Ocupantes da unidade",
   cobranca: "Histórico de Cobrança",
 };
@@ -143,7 +154,7 @@ export function Perfil() {
                 {activeView && (
                   <button
                     onClick={() => setActiveView(null)}
-                    className="w-9 h-9 rounded-xl bg-surface-container-highest flex items-center justify-center text-on-surface-variant hover:text-primary hover:bg-white/5 transition-all shrink-0 cursor-pointer"
+                    className="w-9 h-9 rounded-xl bg-surface-container-highest flex items-center justify-center text-on-surface-variant hover:text-primary hover:bg-veu/5 transition-all shrink-0 cursor-pointer"
                   >
                     <Icone name="arrow_back" className="text-xl" />
                   </button>
@@ -174,7 +185,7 @@ export function Perfil() {
                         <button
                           key={item.id}
                           onClick={() => setActiveView(item.id)}
-                          className="w-full group flex items-center justify-between p-5 rounded-2xl hover:bg-white/5 transition-all duration-300 text-left cursor-pointer"
+                          className="w-full group flex items-center justify-between p-5 rounded-2xl hover:bg-veu/5 transition-all duration-300 text-left cursor-pointer"
                         >
                           <div className="flex items-center gap-5">
                             <div className="w-12 h-12 rounded-xl bg-surface-container-highest flex items-center justify-center group-hover:scale-110 transition-transform">
@@ -217,6 +228,7 @@ export function Perfil() {
                     {lastViewRef.current === "privacidade" && (
                       <PrivacidadeView />
                     )}
+                    {lastViewRef.current === "aparencia" && <AparenciaView />}
                     {lastViewRef.current === "familia" && <FamiliaView />}
                     {lastViewRef.current === "cobranca" && <CobrancaView />}
                   </div>

@@ -82,7 +82,7 @@ export function MinhasReservas() {
               className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 cursor-pointer ${
                 aba === tab.id
                   ? "bg-primary/15 text-primary"
-                  : "text-on-surface-variant hover:text-on-surface hover:bg-white/5"
+                  : "text-on-surface-variant hover:text-on-surface hover:bg-veu/5"
               }`}
             >
               <Icone name={tab.icon} className="text-lg" />
@@ -338,7 +338,7 @@ function AbaAreas() {
                     <span className="text-on-surface font-medium">R$ {area.taxaLocacao}</span>
                   </div>
                 )}
-                <div className="border-t border-white/10 pt-2 flex justify-between text-sm font-bold">
+                <div className="border-t border-veu/10 pt-2 flex justify-between text-sm font-bold">
                   <span className="text-on-surface">Total estimado</span>
                   <span className="text-primary">R$ {custoTotal}</span>
                 </div>
@@ -352,7 +352,7 @@ function AbaAreas() {
                   setSelecionada(null);
                   setAvisoReserva(null);
                 }}
-                className="px-5 py-2.5 rounded-xl text-sm font-semibold text-on-surface-variant hover:bg-white/5 transition-all cursor-pointer"
+                className="px-5 py-2.5 rounded-xl text-sm font-semibold text-on-surface-variant hover:bg-veu/5 transition-all cursor-pointer"
               >
                 Cancelar
               </button>
