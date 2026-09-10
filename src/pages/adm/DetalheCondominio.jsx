@@ -4,6 +4,7 @@ import { condominiosApi } from "../../services/condominiosApi";
 import { gestaoApi } from "../../services/gestaoApi";
 import { FormCondominio } from "../../components/adm/FormCondominio";
 import { CartaoKpi } from "../../components/cards/CartaoKpi";
+import { PainelPlanoCliente } from "../../components/adm/PainelPlanoCliente";
 import { Icone } from "../../components/icones/Icone";
 import { useToast } from "../../contexts/ToastContext";
 import { useConfirm } from "../../contexts/ConfirmContext";
@@ -12,6 +13,7 @@ import { mascararCnpj, mascararTelefone } from "../../utils/masks";
 
 const ABAS = [
   { id: "dados", label: "Dados", icon: "badge" },
+  { id: "plano", label: "Plano", icon: "workspace_premium" },
   { id: "usuarios", label: "Usuários", icon: "group" },
   { id: "resumo", label: "Resumo", icon: "analytics" },
 ];
@@ -241,6 +243,10 @@ export function DetalheCondominio() {
               </dl>
             )}
           </section>
+        )}
+
+        {aba === "plano" && (
+          <PainelPlanoCliente condominioId={id} aoMudar={carregar} />
         )}
 
         {aba === "usuarios" && (

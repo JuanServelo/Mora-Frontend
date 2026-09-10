@@ -18,6 +18,8 @@ import {
 import { gestaoApi } from "../../services/gestaoApi";
 import { CartaoKpi } from "../../components/cards/CartaoKpi";
 import { CartaoGrafico } from "../../components/charts/CartaoGrafico";
+import { SecaoReceita } from "../../components/adm/SecaoReceita";
+import { FiltroPainel } from "../../components/adm/FiltroPainel";
 import { Icone } from "../../components/icones/Icone";
 import { labelPerfil } from "../../utils/perfis";
 import { CORES, EIXO_STYLE, PALETA, TOOLTIP_STYLE, rotuloMes } from "../../utils/chartTheme";
@@ -27,14 +29,29 @@ export function IndexAdminGeral() {
   const [dados, setDados] = useState(null);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState("");
+  const [filtros, setFiltros] = useState({ meses: 12, status: "todos" });
 
+  // Cada mudança de filtro refaz a consulta: quem recorta é o backend.
+  // `dados` continua na tela durante a busca, para o painel não piscar vazio a
+  // cada clique.
   useEffect(() => {
     gestaoApi
-      .plataforma()
-      .then((res) => setDados(res.data))
+      .plataforma(filtros)
+      .then((res) => {
+        setDados(res.data);
+        setErro("");
+      })
       .catch(() => setErro("Não foi possível carregar os indicadores da plataforma."))
       .finally(() => setCarregando(false));
-  }, []);
+  }, [filtros]);
+
+  // Derivado, não um estado à parte: o backend ecoa o filtro que aplicou, então
+  // "os números na tela ainda são de outro filtro" é uma comparação, não algo a
+  // sincronizar. Evita marcar estado dentro do efeito.
+  const atualizando =
+    dados != null &&
+    (dados.filtros?.meses !== filtros.meses ||
+      dados.filtros?.status !== filtros.status);
 
   const serieCondominios = useMemo(() => {
     const meses = dados?.condominios?.criadosPorMes ?? [];
@@ -63,7 +80,7 @@ export function IndexAdminGeral() {
 
   if (carregando) {
     return (
-      <div className="min-h-screen w-full pt-4 pb-20 px-6">
+      <div className="min-h-screen w-full pt-4 pb-20 px-4 sm:px-6">
         <div className="max-w-6xl mx-auto space-y-8">
           <div className="glass-panel rounded-2xl h-24 animate-pulse" />
           <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
@@ -79,7 +96,7 @@ export function IndexAdminGeral() {
 
   if (erro) {
     return (
-      <div className="min-h-screen w-full pt-4 pb-20 px-6">
+      <div className="min-h-screen w-full pt-4 pb-20 px-4 sm:px-6">
         <div className="max-w-6xl mx-auto">
           <div className="glass-panel rounded-3xl p-8 text-center space-y-3">
             <Icone name="error" className="text-error text-3xl" />
@@ -96,14 +113,14 @@ export function IndexAdminGeral() {
     : 0;
 
   return (
-    <div className="min-h-screen w-full pt-4 pb-20 px-6">
+    <div className="min-h-screen w-full pt-4 pb-20 px-4 sm:px-6">
       <div className="max-w-6xl mx-auto space-y-8">
         <header className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
             <p className="text-on-surface-variant text-xs font-semibold uppercase tracking-widest mb-1">
               Painel Administrativo
             </p>
-            <h1 className="font-headline text-4xl font-extrabold tracking-tight text-on-surface">
+            <h1 className="font-headline text-3xl sm:text-4xl font-extrabold tracking-tight text-on-surface">
               Visão{" "}
               <span className="bg-gradient-to-r from-primary to-tertiary bg-clip-text text-transparent">
                 Geral
@@ -122,6 +139,8 @@ export function IndexAdminGeral() {
             Gerenciar clientes
           </button>
         </header>
+
+        <FiltroPainel filtros={filtros} aoMudar={setFiltros} carregando={atualizando} />
 
         <section className="grid grid-cols-2 lg:grid-cols-3 gap-4">
           <CartaoKpi
@@ -165,6 +184,8 @@ export function IndexAdminGeral() {
             icone="report"
           />
         </section>
+
+        <SecaoReceita meses={filtros.meses} />
 
         <CartaoGrafico
           titulo="Crescimento da carteira"

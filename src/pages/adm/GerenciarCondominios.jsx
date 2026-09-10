@@ -1,6 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { condominiosApi } from "../../services/condominiosApi";
+import { gestaoApi } from "../../services/gestaoApi";
+import { CartaoKpi } from "../../components/cards/CartaoKpi";
+import { formatarBRL } from "../../utils/dinheiro";
 import { Icone } from "../../components/icones/Icone";
 import { Campo } from "../../components/campos/Campo";
 import { Botao } from "../../components/botoes/Botao";
@@ -25,12 +28,27 @@ export function GerenciarCondominios() {
 
   const isGerente = usuario?.perfil === PERFIS.ADMIN_GERAL;
 
+  // Plano e mensalidade vivem no plan-service, agregados pelo gestao-geral.
+  // Falha aqui não impede listar os clientes: a coluna some, a lista fica.
+  const [receita, setReceita] = useState(null);
+
   useEffect(() => {
     condominiosApi.listar()
       .then((res) => setCondominios(res.data.condominios || []))
       .catch(() => toast.error("Erro ao carregar clientes."))
       .finally(() => setCarregando(false));
+
+    if (isGerente) {
+      gestaoApi.receita().then((r) => setReceita(r.data)).catch(() => setReceita(null));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const planoPorCliente = useMemo(() => {
+    const mapa = new Map();
+    for (const c of receita?.clientes ?? []) mapa.set(c.condominioId, c);
+    return mapa;
+  }, [receita]);
 
   const filtrados = condominios.filter(
     (c) =>
@@ -115,6 +133,41 @@ export function GerenciarCondominios() {
         )}
 
         {/* Busca */}
+        {receita && (
+          <section className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <CartaoKpi
+              valor={formatarBRL(receita.indicadores.mrrCentavos)}
+              label="Receita mensal"
+              sub={`${receita.indicadores.clientesAtivos} cliente(s) com plano`}
+              tom="primary"
+              icone="account_balance_wallet"
+            />
+            <CartaoKpi
+              valor={formatarBRL(receita.indicadores.arrCentavos)}
+              label="Projeção anual"
+              sub="Receita mensal × 12"
+              tom="tertiary"
+              icone="trending_up"
+            />
+            <CartaoKpi
+              valor={formatarBRL(receita.indicadores.ticketMedioCentavos)}
+              label="Ticket médio"
+              sub="Por cliente ativo"
+              tom="neutro"
+              icone="analytics"
+            />
+            <CartaoKpi
+              valor={receita.indicadores.clientesSemAssinatura}
+              label="Sem plano"
+              sub={receita.indicadores.clientesSemAssinatura > 0
+                ? "Não estão sendo cobrados"
+                : "Todos com assinatura"}
+              tom={receita.indicadores.clientesSemAssinatura > 0 ? "error" : "neutro"}
+              icone="money_off"
+            />
+          </section>
+        )}
+
         <div className="max-w-md">
           <Campo
             id="busca-cond"
@@ -146,7 +199,7 @@ export function GerenciarCondominios() {
               {/* Linha principal */}
               <button
                 onClick={() => navigate(`/adm/condominios/${cond.id}`)}
-                className="w-full flex items-center gap-4 p-5 text-left group hover:bg-white/5 transition-all cursor-pointer"
+                className="w-full flex items-center gap-4 p-5 text-left group hover:bg-veu/5 transition-all cursor-pointer"
               >
                 <div className="w-11 h-11 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
                   <Icone name="domain" className="text-primary" />
@@ -159,12 +212,24 @@ export function GerenciarCondominios() {
 
                 <div className="hidden sm:flex gap-6 text-sm shrink-0">
                   {[
-                    { label: "CNPJ", value: cond.cnpj || "—" },
+                    {
+                      label: "Plano",
+                      value: planoPorCliente.get(cond.id)?.plano ?? "sem plano",
+                      alerta: !planoPorCliente.has(cond.id),
+                    },
+                    {
+                      label: "Mensalidade",
+                      value: planoPorCliente.has(cond.id)
+                        ? formatarBRL(planoPorCliente.get(cond.id).mensalidadeCentavos)
+                        : "—",
+                    },
                     { label: "E-mail", value: cond.email || "—" },
                   ].map((col) => (
                     <div key={col.label} className="text-center">
                       <p className="text-on-surface-variant text-xs uppercase tracking-wider">{col.label}</p>
-                      <p className="text-on-surface font-semibold text-sm truncate max-w-[140px]">{col.value}</p>
+                      <p className={`font-semibold text-sm truncate max-w-[140px] ${
+                        col.alerta ? "text-error" : "text-on-surface"
+                      }`}>{col.value}</p>
                     </div>
                   ))}
                 </div>
