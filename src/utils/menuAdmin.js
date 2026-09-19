@@ -1,4 +1,5 @@
 import { PERFIS } from "./perfis";
+import { linkLiberado } from "./modulosPlano";
 
 /**
  * Fonte única do menu administrativo.
@@ -9,6 +10,9 @@ import { PERFIS } from "./perfis";
  * A divisão segue a camada do perfil:
  *   Admin Geral   → opera a PLATAFORMA: clientes, planos, quem acessa
  *   Admin Síndico → opera o CONDOMÍNIO: o dia a dia dos moradores
+ *
+ * O campo `modulo` (quando presente) indica qual módulo do plano contratado
+ * habilita este link. Links sem `modulo` são estruturais e sempre aparecem.
  */
 const PLATAFORMA = [PERFIS.ADMIN_GERAL];
 const CONDOMINIO = [PERFIS.ADMIN_SINDICO];
@@ -68,6 +72,7 @@ export const ADM_LINKS = [
     icon: "payments",
     description: "Taxas, rateio e cobranças",
     perfis: CONDOMINIO,
+    modulo: "financeiro",
   },
   {
     to: "/adm/reunioes",
@@ -75,6 +80,7 @@ export const ADM_LINKS = [
     icon: "groups",
     description: "Assembleias e votações",
     perfis: CONDOMINIO,
+    modulo: "reunioes",
   },
   {
     to: "/adm/reclamacoes",
@@ -82,6 +88,7 @@ export const ADM_LINKS = [
     icon: "report",
     description: "Ocorrências dos moradores",
     perfis: CONDOMINIO,
+    modulo: "reclamacoes",
   },
   {
     to: "/adm/entregas",
@@ -89,6 +96,7 @@ export const ADM_LINKS = [
     icon: "inventory_2",
     description: "Encomendas na portaria",
     perfis: CONDOMINIO,
+    modulo: "entregas",
   },
   {
     to: "/adm/vagas",
@@ -96,6 +104,7 @@ export const ADM_LINKS = [
     icon: "local_parking",
     description: "Vagas de garagem",
     perfis: CONDOMINIO,
+    modulo: "vagas",
   },
   {
     to: "/adm/conhecimento",
@@ -103,12 +112,20 @@ export const ADM_LINKS = [
     icon: "library_books",
     description: "Base de conhecimento e FAQ",
     perfis: CONDOMINIO,
+    modulo: "conhecimento",
   },
 ];
 
 /** Links visíveis para um perfil. */
 export function linksDoPerfil(perfil) {
   return ADM_LINKS.filter((l) => l.perfis.includes(perfil));
+}
+
+/** Links visíveis para um perfil, filtrados também pelos módulos contratados. */
+export function linksFiltradosPorModulo(perfil, activeModules) {
+  return ADM_LINKS.filter(
+    (l) => l.perfis.includes(perfil) && linkLiberado(activeModules, l)
+  );
 }
 
 /**

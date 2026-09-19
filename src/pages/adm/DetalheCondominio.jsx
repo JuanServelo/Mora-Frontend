@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { condominiosApi } from "../../services/condominiosApi";
 import { gestaoApi } from "../../services/gestaoApi";
+import { planApi } from "../../services/planApi";
 import { FormCondominio } from "../../components/adm/FormCondominio";
 import { CartaoKpi } from "../../components/cards/CartaoKpi";
 import { Icone } from "../../components/icones/Icone";
@@ -13,6 +14,7 @@ import { mascararCnpj, mascararTelefone } from "../../utils/masks";
 const ABAS = [
   { id: "dados", label: "Dados", icon: "badge" },
   { id: "usuarios", label: "Usuários", icon: "group" },
+  { id: "assinatura", label: "Assinatura", icon: "card_membership" },
   { id: "resumo", label: "Resumo", icon: "analytics" },
 ];
 
@@ -30,6 +32,10 @@ export function DetalheCondominio() {
   const [condominio, setCondominio] = useState(null);
   const [resumo, setResumo] = useState(null);
   const [usuarios, setUsuarios] = useState([]);
+  const [assinatura, setAssinatura] = useState(null);
+  const [planos, setPlanos] = useState([]);
+  const [planoSelecionado, setPlanoSelecionado] = useState("");
+  const [carregandoAssinatura, setCarregandoAssinatura] = useState(false);
   const [aba, setAba] = useState("dados");
   const [editando, setEditando] = useState(false);
   const [carregando, setCarregando] = useState(true);
@@ -63,6 +69,95 @@ export function DetalheCondominio() {
       .then((res) => setUsuarios(res.data.usuarios ?? []))
       .catch(() => toast.error("Não foi possível carregar os usuários."));
   }, [aba, id, usuarios.length, toast]);
+
+  useEffect(() => {
+    if (aba !== "assinatura") return;
+    async function carregarDadosAssinatura() {
+      setCarregandoAssinatura(true);
+      try {
+        try {
+          const resAssinatura = await planApi.buscarAssinatura(id);
+          setAssinatura(resAssinatura.data);
+        } catch (e) {
+          if (e.response?.status === 404 || e.response?.status === 204) {
+             setAssinatura(null);
+          } else {
+             console.error(e);
+             toast.error("Erro ao carregar assinatura.");
+          }
+        }
+        const resPlanos = await planApi.listar();
+        setPlanos(resPlanos.data || []);
+      } catch (e) {
+        console.error(e);
+        toast.error("Erro ao carregar planos disponíveis.");
+      } finally {
+        setCarregandoAssinatura(false);
+      }
+    }
+    carregarDadosAssinatura();
+  }, [aba, id, toast]);
+
+  async function ativarAssinatura() {
+    if (!planoSelecionado) {
+      toast.error("Selecione um plano.");
+      return;
+    }
+    const ok = await confirm({
+      titulo: "Ativar Assinatura",
+      mensagem: "Deseja ativar a assinatura deste plano para o condomínio?",
+      confirmarTexto: "Ativar",
+    });
+    if (!ok) return;
+
+    try {
+      const res = await planApi.criarAssinatura({
+        condominioId: id,
+        planId: Number(planoSelecionado),
+        startDate: new Date().toISOString().split('T')[0]
+      });
+      setAssinatura(res.data);
+      toast.success("Assinatura ativada com sucesso!");
+    } catch (e) {
+      toast.error(e.response?.data?.message || "Erro ao ativar assinatura.");
+    }
+  }
+
+  async function gerenciarAssinatura(acao) {
+    let fn, mensagem, toastMsg, confMsg;
+    if (acao === "suspender") {
+      fn = planApi.suspenderAssinatura;
+      mensagem = "Deseja suspender a assinatura? O acesso do condomínio será bloqueado.";
+      toastMsg = "Assinatura suspensa.";
+      confMsg = "Suspender";
+    } else if (acao === "cancelar") {
+      fn = planApi.cancelarAssinatura;
+      mensagem = "Deseja cancelar a assinatura definitivamente?";
+      toastMsg = "Assinatura cancelada.";
+      confMsg = "Cancelar";
+    }
+
+    const ok = await confirm({
+      titulo: `${confMsg} Assinatura`,
+      mensagem,
+      confirmarTexto: confMsg,
+      variante: "danger",
+    });
+    if (!ok) return;
+
+    try {
+      const res = await fn(assinatura.id);
+      if (acao === "cancelar") {
+        setAssinatura(null);
+        setPlanoSelecionado("");
+      } else {
+        setAssinatura(res.data);
+      }
+      toast.success(toastMsg);
+    } catch (e) {
+      toast.error(e.response?.data?.message || `Erro ao ${acao} assinatura.`);
+    }
+  }
 
   async function salvar(dados) {
     try {
@@ -274,6 +369,87 @@ export function DetalheCondominio() {
                   </li>
                 ))}
               </ul>
+            )}
+          </section>
+        )}
+
+        {aba === "assinatura" && (
+          <section className="glass-panel rounded-3xl p-6">
+            {carregandoAssinatura ? (
+              <p className="text-on-surface-variant text-center py-8 animate-pulse">Carregando dados da assinatura...</p>
+            ) : assinatura ? (
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-on-surface font-semibold text-xl">{assinatura.planName || "Plano"}</h3>
+                    <p className="text-on-surface-variant mt-1 text-sm">
+                      Início: {new Date(assinatura.startDate).toLocaleDateString()}
+                    </p>
+                  </div>
+                  <span
+                    className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                      assinatura.status === "ACTIVE"
+                        ? "bg-primary/10 text-primary"
+                        : assinatura.status === "SUSPENDED"
+                        ? "bg-secondary/10 text-secondary"
+                        : "bg-error/10 text-error"
+                    }`}
+                  >
+                    {assinatura.status === "ACTIVE" ? "ATIVA" : assinatura.status === "SUSPENDED" ? "SUSPENSA" : "CANCELADA"}
+                  </span>
+                </div>
+
+                <div className="flex gap-3 pt-4 border-t border-outline-variant/20">
+                  {assinatura.status === "ACTIVE" && (
+                    <button
+                      type="button"
+                      onClick={() => gerenciarAssinatura("suspender")}
+                      className="px-4 py-2 rounded-xl text-sm font-medium bg-secondary/10 text-secondary hover:bg-secondary/20 transition"
+                    >
+                      Suspender
+                    </button>
+                  )}
+                  {(assinatura.status === "ACTIVE" || assinatura.status === "SUSPENDED") && (
+                    <button
+                      type="button"
+                      onClick={() => gerenciarAssinatura("cancelar")}
+                      className="px-4 py-2 rounded-xl text-sm font-medium bg-error/10 text-error hover:bg-error/20 transition"
+                    >
+                      Cancelar
+                    </button>
+                  )}
+                  {assinatura.status === "CANCELED" && (
+                    <p className="text-error text-sm font-medium">Esta assinatura está cancelada.</p>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-4 max-w-md">
+                <div>
+                  <h3 className="text-on-surface font-semibold mb-2">Vincular Plano</h3>
+                  <p className="text-on-surface-variant text-sm mb-4">
+                    Este cliente ainda não possui uma assinatura ativa. Escolha um plano abaixo para ativá-lo.
+                  </p>
+                  <select
+                    value={planoSelecionado}
+                    onChange={(e) => setPlanoSelecionado(e.target.value)}
+                    className="w-full bg-surface text-on-surface border border-outline-variant rounded-xl px-4 py-3 outline-none focus:border-primary focus:ring-1 focus:ring-primary transition appearance-none"
+                  >
+                    <option value="" disabled>Selecione um plano...</option>
+                    {planos.filter(p => p.isActive).map(p => (
+                      <option key={p.id} value={p.id}>{p.name} - R$ {p.monthlyPrice}</option>
+                    ))}
+                  </select>
+                </div>
+                <button
+                  type="button"
+                  onClick={ativarAssinatura}
+                  disabled={!planoSelecionado}
+                  className="w-full bg-primary text-on-primary py-3 rounded-xl font-semibold hover:bg-primary/90 transition disabled:opacity-50"
+                >
+                  Ativar Assinatura
+                </button>
+              </div>
             )}
           </section>
         )}

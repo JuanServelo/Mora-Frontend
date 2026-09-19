@@ -2,10 +2,12 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
+import { useModules } from "../../contexts/ModulesContext";
 import { condominiosApi } from "../../services/condominiosApi";
 import { avisoApi } from "../../services/comunicacaoApi";
 import { Icone } from "../../components/icones/Icone";
 import { PERFIS, perfilTemAcessoSistema } from "../../utils/perfis";
+import { linkLiberado } from "../../utils/modulosPlano";
 import { InicioDoorman } from "../porteiro/InicioDoorman";
 
 const ACESSO_RAPIDO = [
@@ -14,12 +16,14 @@ const ACESSO_RAPIDO = [
     label: "Espaços",
     desc: "Reservar áreas comuns",
     icon: "event_available",
+    modulo: "areas_comuns",
   },
   {
     to: "/reclamacoes",
     label: "Reclamações",
     desc: "Abrir ou acompanhar chamados",
     icon: "report",
+    modulo: "reclamacoes",
   },
   {
     to: "/servicos",
@@ -32,11 +36,13 @@ const ACESSO_RAPIDO = [
     label: "Espaços",
     desc: "Estrutura de lazer e bem-estar",
     icon: "pool",
+    modulo: "areas_comuns",
   },
 ];
 
 export function Inicio() {
   const { usuario } = useAuth();
+  const { activeModules } = useModules();
 
   const primeiroNome = usuario?.nome?.split(" ")[0] || "Morador";
   const [nomeCondominio, setNomeCondominio] = useState(null);
@@ -175,7 +181,7 @@ export function Inicio() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {ACESSO_RAPIDO.map((item) => (
+            {ACESSO_RAPIDO.filter((item) => linkLiberado(activeModules, item)).map((item) => (
               <Link
                 key={item.to}
                 to={item.to}
