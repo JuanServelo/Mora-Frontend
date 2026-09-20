@@ -20,4 +20,13 @@ export const planApi = {
   atualizar: (id, data) => planHttp.put(`/api/plans/${id}`, data),
   toggleStatus: (id) => planHttp.patch(`/api/plans/${id}/toggle-status`),
   atualizarModulos: (id, modules) => planHttp.patch(`/api/plans/${id}/modules`, modules),
+
+  // Assinaturas
+  criarAssinatura: (data) => planHttp.post("/api/plans/subscriptions", data),
+  listarAssinaturas: () => planHttp.get("/api/plans/subscriptions"),
+  buscarAssinatura: (condominioId) => planHttp.get(`/api/plans/subscriptions/condominio/${condominioId}`),
+  suspenderAssinatura: (id) => planHttp.patch(`/api/plans/subscriptions/${id}/suspend`),
+  cancelarAssinatura: (id) => planHttp.patch(`/api/plans/subscriptions/${id}/cancel`),
+  trocarPlano: (condominioId, data) => planHttp.put(`/api/plans/subscriptions/${condominioId}/change-plan`, data),
+  buscarModulosCondominio: (condominioId) => planHttp.get(`/api/plans/subscriptions/condominio/${condominioId}/modules`),
 };

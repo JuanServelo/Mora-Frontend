@@ -3,8 +3,10 @@ import { useState, useRef, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Icone } from "../icones/Icone";
 import { useAuth } from "../../contexts/AuthContext";
+import { useModules } from "../../contexts/ModulesContext";
 import { PERFIS, isUsuarioRestrito, podeAcessarAdmin } from "../../utils/perfis";
-import { linksDoPerfil } from "../../utils/menuAdmin";
+import { linksFiltradosPorModulo } from "../../utils/menuAdmin";
+import { linkLiberado } from "../../utils/modulosPlano";
 // import moraLogo from "../../assets/Mora.png";
 // import moraLogo2 from "../../assets/Mora2.png";
 import moraLogo3 from "../../assets/Mora3.png";
@@ -12,15 +14,15 @@ import moraLogo3 from "../../assets/Mora3.png";
 const NAV_LINKS_LEFT = [
   { label: "Início", to: "/inicio" },
   { label: "Serviços", to: "/servicos" },
-  { label: "Espaços", to: "/espacos" },
-  { label: "Reclamações", to: "/reclamacoes" },
+  { label: "Espaços", to: "/espacos", modulo: "areas_comuns" },
+  { label: "Reclamações", to: "/reclamacoes", modulo: "reclamacoes" },
 ];
 
 const NAV_LINKS_PORTEIRO = [
   { label: "Início", to: "/inicio" },
-  { label: "Entradas e Saídas", to: "/entradas-e-saidas" },
-  { label: "Entregas", to: "/entregas" },
-  { label: "Chaves", to: "/chaves" },
+  { label: "Entradas e Saídas", to: "/entradas-e-saidas", modulo: "portaria" },
+  { label: "Entregas", to: "/entregas", modulo: "entregas" },
+  { label: "Chaves", to: "/chaves", modulo: "chaves" },
 ];
 
 const NAV_LINKS_RIGHT = [
@@ -34,9 +36,9 @@ const PANEL_STYLE = {
   border: "1px solid rgba(255,255,255,0.08)",
 };
 
-/** Links administrativos visiveis para o usuario (Super Admin ganha Planos no topo). */
-function getAdmLinks(usuario) {
-  return linksDoPerfil(usuario?.perfil);
+/** Links administrativos visiveis para o usuario, filtrados por módulo. */
+function getAdmLinks(usuario, activeModules) {
+  return linksFiltradosPorModulo(usuario?.perfil, activeModules);
 }
 
 /** Item do painel administrativo — reutilizado no dropdown desktop e no menu mobile. */
@@ -88,12 +90,12 @@ function NavLink({ to, children }) {
   );
 }
 
-function AdminMenu({ usuario }) {
+function AdminMenu({ usuario, activeModules }) {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
   const { pathname } = useLocation();
 
-  const admLinks = getAdmLinks(usuario);
+  const admLinks = getAdmLinks(usuario, activeModules);
   const admActive = admLinks.some((l) => pathname === l.to);
 
   useEffect(() => {
@@ -231,6 +233,7 @@ export function Navbar() {
   const { pathname } = useLocation();
   const [rotaAnterior, setRotaAnterior] = useState(pathname);
   const { usuario } = useAuth();
+  const { activeModules } = useModules();
   const isRestrictedUser = isUsuarioRestrito(usuario);
   const showAdminMenu = podeAcessarAdmin(usuario?.perfil);
   const isDoorman = usuario?.perfil === PERFIS.PORTEIRO;
@@ -239,13 +242,13 @@ export function Navbar() {
   if (isRestrictedUser) {
     visibleLeftLinks = [];
   } else if (isDoorman) {
-    visibleLeftLinks = NAV_LINKS_PORTEIRO;
+    visibleLeftLinks = NAV_LINKS_PORTEIRO.filter((l) => linkLiberado(activeModules, l));
   } else {
-    visibleLeftLinks = NAV_LINKS_LEFT;
+    visibleLeftLinks = NAV_LINKS_LEFT.filter((l) => linkLiberado(activeModules, l));
   }
 
   const showAdmin = !isRestrictedUser && !isDoorman && showAdminMenu;
-  const admLinksMobile = showAdmin ? getAdmLinks(usuario) : [];
+  const admLinksMobile = showAdmin ? getAdmLinks(usuario, activeModules) : [];
 
   // Fecha o menu ao trocar de rota (inclusive via voltar/avancar do navegador)
   if (rotaAnterior !== pathname) {
@@ -277,7 +280,7 @@ export function Navbar() {
                 {l.label}
               </NavLink>
             ))}
-            {showAdmin && <AdminMenu usuario={usuario} />}
+            {showAdmin && <AdminMenu usuario={usuario} activeModules={activeModules} />}
           </div>
         </div>
 

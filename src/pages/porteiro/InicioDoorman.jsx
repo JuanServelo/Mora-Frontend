@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
+import { useModules } from "../../contexts/ModulesContext";
 import { condominiosApi } from "../../services/condominiosApi";
 import { Icone } from "../../components/icones/Icone";
+import { linkLiberado } from "../../utils/modulosPlano";
 
 const CARDS_PORTEIRO = [
   {
@@ -11,6 +13,7 @@ const CARDS_PORTEIRO = [
     desc: "Registrar entrada de visitantes e prestadores de serviço",
     icon: "waving_hand",
     color: "primary",
+    modulo: "portaria",
   },
   {
     to: "/entradas-e-saidas",
@@ -18,6 +21,7 @@ const CARDS_PORTEIRO = [
     desc: "Registrar entradas e saídas de moradores e visitantes",
     icon: "sensor_door",
     color: "secondary",
+    modulo: "portaria",
   },
   {
     to: "/entregas",
@@ -25,6 +29,7 @@ const CARDS_PORTEIRO = [
     desc: "Receber e registrar encomendas e pacotes",
     icon: "inventory_2",
     color: "secondary",
+    modulo: "entregas",
   },
   {
     to: "/chaves",
@@ -32,6 +37,7 @@ const CARDS_PORTEIRO = [
     desc: "Gerenciar chaves e acessos do condomínio",
     icon: "key",
     color: "tertiary",
+    modulo: "chaves",
   },
   {
     to: "/espacos",
@@ -39,6 +45,7 @@ const CARDS_PORTEIRO = [
     desc: "Visualizar e acompanhar áreas comuns",
     icon: "deck",
     color: "primary",
+    modulo: "areas_comuns",
   },
   {
     to: "/veiculos",
@@ -46,6 +53,7 @@ const CARDS_PORTEIRO = [
     desc: "Cadastrar e gerenciar veículos de serviço",
     icon: "local_shipping",
     color: "secondary",
+    modulo: "veiculos",
   },
   {
     to: "/usuarios",
@@ -79,6 +87,7 @@ const COLOR_MAP = {
 
 export function InicioDoorman() {
   const { usuario } = useAuth();
+  const { activeModules } = useModules();
   const primeiroNome = usuario?.nome?.split(" ")[0] || "Porteiro";
   const [nomeCondominio, setNomeCondominio] = useState(null);
 
@@ -111,7 +120,7 @@ export function InicioDoorman() {
 
         <section>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {CARDS_PORTEIRO.map((item) => {
+            {CARDS_PORTEIRO.filter((item) => linkLiberado(activeModules, item)).map((item) => {
               const c = COLOR_MAP[item.color];
               return (
                 <Link

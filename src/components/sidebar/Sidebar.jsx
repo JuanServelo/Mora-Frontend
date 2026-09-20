@@ -3,18 +3,20 @@ import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Icone } from "../icones/Icone";
 import { useAuth } from "../../contexts/AuthContext";
+import { useModules } from "../../contexts/ModulesContext";
 import { PERFIS } from "../../utils/perfis";
-import { linksDoPerfil } from "../../utils/menuAdmin";
+import { linksFiltradosPorModulo } from "../../utils/menuAdmin";
+import { linkLiberado } from "../../utils/modulosPlano";
 import moraLogo3 from "../../assets/Mora3.png";
 
 
 // Telas do porteiro (mesmo layout de Sidebar dos admins).
 const PORTEIRO_LINKS = [
   { to: "/inicio", label: "Início", icon: "home" },
-  { to: "/atendimento", label: "Cadastros", icon: "waving_hand" },
-  { to: "/entradas-e-saidas", label: "Entradas e Saídas", icon: "swap_horiz" },
-  { to: "/entregas", label: "Entregas", icon: "inventory_2" },
-  { to: "/chaves", label: "Chaves", icon: "vpn_key" },
+  { to: "/atendimento", label: "Cadastros", icon: "waving_hand", modulo: "portaria" },
+  { to: "/entradas-e-saidas", label: "Entradas e Saídas", icon: "swap_horiz", modulo: "portaria" },
+  { to: "/entregas", label: "Entregas", icon: "inventory_2", modulo: "entregas" },
+  { to: "/chaves", label: "Chaves", icon: "vpn_key", modulo: "chaves" },
   { to: "/usuarios", label: "Usuários do Condomínio", icon: "groups" },
 ];
 
@@ -53,9 +55,13 @@ export function Sidebar() {
 
   const perfil = usuario?.perfil;
   const isDoorman = perfil === PERFIS.PORTEIRO;
+  const { activeModules } = useModules();
 
   // Porteiro tem o conjunto dele; os admins veem o que o próprio perfil permite.
-  const links = isDoorman ? PORTEIRO_LINKS : linksDoPerfil(perfil);
+  // Ambos são filtrados pelos módulos contratados.
+  const links = isDoorman
+    ? PORTEIRO_LINKS.filter((l) => linkLiberado(activeModules, l))
+    : linksFiltradosPorModulo(perfil, activeModules);
 
   const subtitulo = isDoorman
     ? "Portaria"
