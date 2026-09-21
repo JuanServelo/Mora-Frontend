@@ -89,6 +89,29 @@ export const PERFIS_CONDOMINIO = [
   PERFIS.TERCEIRO,
 ];
 
+/**
+ * Perfis que atuam como "funcionário responsável".
+ *
+ * Fonte única: vale para a aba Funcionários do registro de entrada e saída e
+ * para o responsável da reserva de evento do condomínio. Espelha
+ * PERFIS_FUNCIONARIO de services/auth-api/constants/perfis.js — duas listas
+ * paralelas divergiriam na primeira inclusão ou remoção de perfil.
+ */
+export const PERFIS_FUNCIONARIO = [PERFIS.PORTEIRO, PERFIS.ADMIN_SINDICO];
+
+/**
+ * Perfis que decidem sobre reservas pendentes.
+ *
+ * Espelha PERFIS_APROVAM de ReservaService.java: o porteiro registra reservas
+ * mas não aprova as dos outros, senão a exigência de aprovação do espaço
+ * deixaria de significar alguma coisa.
+ */
+export const PERFIS_APROVAM_RESERVA = [PERFIS.ADMIN_SINDICO, PERFIS.ADMIN_GERAL];
+
+export function podeAprovarReserva(perfil) {
+  return PERFIS_APROVAM_RESERVA.includes(perfil);
+}
+
 export const PERFIS_ACESSO_ADMIN = [
   PERFIS.ADMIN_GERAL,
   PERFIS.ADMIN_SINDICO,

@@ -48,14 +48,6 @@ const CARDS_PORTEIRO = [
     modulo: "areas_comuns",
   },
   {
-    to: "/veiculos",
-    label: "Veículos de Serviço",
-    desc: "Cadastrar e gerenciar veículos de serviço",
-    icon: "local_shipping",
-    color: "secondary",
-    modulo: "veiculos",
-  },
-  {
     to: "/usuarios",
     label: "Usuários do Condomínio",
     desc: "Consultar moradores, porteiros e funcionários",

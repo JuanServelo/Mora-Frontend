@@ -12,11 +12,11 @@ import { InicioDoorman } from "../porteiro/InicioDoorman";
 
 const ACESSO_RAPIDO = [
   {
-    to: "/espacos",
-    label: "Espaços",
-    desc: "Reservar áreas comuns",
-    icon: "event_available",
-    modulo: "areas_comuns",
+    to: "/entregas",
+    label: "Encomendas",
+    desc: "Acompanhar entregas recebidas",
+    icon: "inventory_2",
+    modulo: "entregas",
   },
   {
     to: "/reclamacoes",

@@ -18,7 +18,7 @@ export const MAPA_MODULOS = {
   reclamacoes: ["/adm/reclamacoes", "/reclamacoes"],
   conhecimento: ["/adm/conhecimento", "/faq"],
   votacoes: [],
-  veiculos: ["/adm/veiculos", "/veiculos"],
+  veiculos: ["/adm/veiculos", "/meus-veiculos"],
   chaves: ["/chaves"],
   comunicacao: [],
   financeiro: ["/adm/financeiro"],
@@ -41,6 +41,8 @@ const ROTAS_LIVRES = [
   "/adm/usuarios",
   "/adm/estruturas",
   "/adm/perfis",
+  // Gestão da própria equipe é estrutural: não depende de módulo contratado.
+  "/adm/funcionarios",
   "/usuarios",
 ];
 

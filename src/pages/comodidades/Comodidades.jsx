@@ -43,7 +43,7 @@ export function Comodidades() {
               </span>
             </h1>
             <p className="text-on-surface-variant text-sm mt-2 max-w-xl">
-              Textos institucionais em public/data/comodidades.json. Para áreas reserváveis cadastradas pela gestão, use Espaços.
+              Para áreas reserváveis cadastradas pela gestão, use Espaços.
             </p>
           </div>
           <Link

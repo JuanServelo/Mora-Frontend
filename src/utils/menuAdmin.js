@@ -67,12 +67,30 @@ export const ADM_LINKS = [
 
   // ── Operação do condomínio: não é trabalho de quem opera a plataforma
   {
+    // Fora de /adm porque é a mesma tela do morador, com as abas de operação
+    // a mais. Sem esta entrada o síndico não tem como chegar nela: a sidebar
+    // dele troca os links de morador pelos administrativos.
+    to: "/espacos",
+    label: "Reservas",
+    icon: "event_available",
+    description: "Agenda dos espaços e aprovações",
+    perfis: CONDOMINIO,
+    modulo: "areas_comuns",
+  },
+  {
     to: "/adm/financeiro",
     label: "Financeiro",
     icon: "payments",
     description: "Taxas, rateio e cobranças",
     perfis: CONDOMINIO,
     modulo: "financeiro",
+  },
+  {
+    to: "/adm/funcionarios",
+    label: "Funcionários",
+    icon: "badge",
+    description: "Situação funcional, turnos e liberações",
+    perfis: CONDOMINIO,
   },
   {
     to: "/adm/reunioes",

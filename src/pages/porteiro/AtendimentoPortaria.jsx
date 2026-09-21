@@ -7,6 +7,7 @@ import {
   atendimentoApi,
   apartamentoApi,
   veiculoApi,
+  preAutorizacaoApi,
 } from "../../services/portariaApi";
 import { acessoApi } from "../../services/acessoApi";
 import { formatarUnidade } from "../../utils/unidades";
@@ -202,6 +203,10 @@ export function AtendimentoPortaria() {
   const [formVeiculo, setFormVeiculo] = useState({ placa: "", modelo: "", cor: "" });
   const [errosVeiculo, setErrosVeiculo] = useState({});
   const [vagasUnidade, setVagasUnidade] = useState([]);
+  // Pré-liberação ativa (RN-08). Duas origens independentes: a placa digitada
+  // na etapa do veículo e o CPF da pessoa confirmada na etapa anterior.
+  const [preLiberacao, setPreLiberacao] = useState(null);
+  const [preLibPessoa, setPreLibPessoa] = useState(null);
   const [vagasCarregando, setVagasCarregando] = useState(false);
   const [erroVagas, setErroVagas] = useState(null);
   const [vagaId, setVagaId] = useState(null);
@@ -458,6 +463,32 @@ export function AtendimentoPortaria() {
 
   // ─── veículo por placa ───────────────────────────────────────────────────
 
+  // Pessoa confirmada: procurar pré-liberação ativa pelo CPF dela (RN-08).
+  useEffect(() => {
+    const cpf = String(pessoaConfirmada?.documento || "").replace(/\D/g, "");
+    if (cpf.length !== 11) { setPreLibPessoa(null); return; }
+    let ok = true;
+    preAutorizacaoApi.porCpf(cpf)
+      .then((r) => {
+        if (ok) setPreLibPessoa(Array.isArray(r.data) && r.data.length ? r.data[0] : null);
+      })
+      .catch(() => { if (ok) setPreLibPessoa(null); });
+    return () => { ok = false; };
+  }, [pessoaConfirmada]);
+
+  // Placa completa: procurar pré-liberação ativa para destacá-la (RN-08).
+  useEffect(() => {
+    const placa = normalizarPlaca(buscaPlaca);
+    if (placa.length !== 7) { setPreLiberacao(null); return; }
+    let ok = true;
+    preAutorizacaoApi.porPlaca(placa)
+      .then((r) => {
+        if (ok) setPreLiberacao(Array.isArray(r.data) && r.data.length ? r.data[0] : null);
+      })
+      .catch(() => { if (ok) setPreLiberacao(null); });
+    return () => { ok = false; };
+  }, [buscaPlaca]);
+
   const veiculosFiltrados = buscaPlaca.length >= 3
     ? veiculosCondo.filter((v) =>
         normalizarPlaca(v.placa).includes(normalizarPlaca(buscaPlaca))
@@ -663,6 +694,34 @@ export function AtendimentoPortaria() {
                         {busca.trim() && `: "${busca.trim()}"`}
                       </button>
                     </div>
+                  )}
+                </div>
+              )}
+
+              {/* RN-08: autorização prévia deste visitante */}
+              {pessoaConfirmada && preLibPessoa && (
+                <div className="rounded-2xl border border-primary/30 bg-primary/5 p-4 space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Icone name="verified" className="text-primary text-xl" />
+                    <p className="font-semibold text-primary text-sm">Pré-liberação ativa</p>
+                  </div>
+                  <p className="text-xs text-on-surface-variant">
+                    Autorizada por{" "}
+                    <span className="font-semibold text-on-surface">
+                      {apartamentos.find((a) => a.id === preLibPessoa.unidadeId)?.numero
+                        ? `Apto ${apartamentos.find((a) => a.id === preLibPessoa.unidadeId).numero}`
+                        : "morador da unidade"}
+                    </span>
+                    {" · válida até "}
+                    {String(preLibPessoa.validadeFim || "").split("-").reverse().join("/")}
+                  </p>
+                  {preLibPessoa.placaVeiculo && (
+                    <p className="text-xs text-on-surface-variant">
+                      Veículo autorizado:{" "}
+                      <span className="font-mono font-semibold text-on-surface">{preLibPessoa.placaVeiculo}</span>
+                      {preLibPessoa.modeloVeiculo ? ` · ${preLibPessoa.modeloVeiculo}` : ""}
+                      {" — a vaga ainda é conferida na entrada."}
+                    </p>
                   )}
                 </div>
               )}
@@ -1029,6 +1088,37 @@ export function AtendimentoPortaria() {
                               onChange={(e) => { setBuscaPlaca(e.target.value); setVeiculoConfirmado(null); setModoFormVeiculo(false); }}
                               autoComplete="off"
                             />
+
+                            {/* RN-08: autorização prévia desta placa, com responsável e unidade */}
+                            {preLiberacao && (
+                              <div className="rounded-2xl border border-primary/30 bg-primary/5 p-4 space-y-2">
+                                <div className="flex items-center gap-2">
+                                  <Icone name="verified" className="text-primary text-xl" />
+                                  <p className="font-semibold text-primary text-sm">Pré-liberação ativa</p>
+                                </div>
+                                <p className="text-sm text-on-surface">
+                                  <span className="font-semibold">{preLiberacao.nomeVisitante}</span>
+                                  {" · "}
+                                  <span className="font-mono font-semibold">{preLiberacao.placaVeiculo}</span>
+                                  {preLiberacao.modeloVeiculo ? ` · ${preLiberacao.modeloVeiculo}` : ""}
+                                  {preLiberacao.corVeiculo ? ` · ${preLiberacao.corVeiculo}` : ""}
+                                </p>
+                                <p className="text-xs text-on-surface-variant">
+                                  Unidade responsável:{" "}
+                                  <span className="font-semibold text-on-surface">
+                                    {apartamentos.find((a) => a.id === preLiberacao.unidadeId)?.numero
+                                      ? `Apto ${apartamentos.find((a) => a.id === preLiberacao.unidadeId).numero}`
+                                      : "—"}
+                                  </span>
+                                  {" · válida até "}
+                                  {String(preLiberacao.validadeFim || "").split("-").reverse().join("/")}
+                                </p>
+                                <p className="text-xs text-on-surface-variant flex items-start gap-1.5">
+                                  <Icone name="info" className="text-sm shrink-0 mt-0.5" />
+                                  A pré-liberação não reserva vaga — a disponibilidade é conferida na entrada.
+                                </p>
+                              </div>
+                            )}
 
                             {buscaPlaca.length >= 3 && (
                               <div className="space-y-2">

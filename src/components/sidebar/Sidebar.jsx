@@ -4,7 +4,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Icone } from "../icones/Icone";
 import { useAuth } from "../../contexts/AuthContext";
 import { useModules } from "../../contexts/ModulesContext";
-import { PERFIS } from "../../utils/perfis";
+import { PERFIS, podeAcessarAdmin, isUsuarioRestrito } from "../../utils/perfis";
 import { linksFiltradosPorModulo } from "../../utils/menuAdmin";
 import { linkLiberado } from "../../utils/modulosPlano";
 import moraLogo3 from "../../assets/Mora3.png";
@@ -17,7 +17,21 @@ const PORTEIRO_LINKS = [
   { to: "/entradas-e-saidas", label: "Entradas e Saídas", icon: "swap_horiz", modulo: "portaria" },
   { to: "/entregas", label: "Entregas", icon: "inventory_2", modulo: "entregas" },
   { to: "/chaves", label: "Chaves", icon: "vpn_key", modulo: "chaves" },
+  { to: "/espacos", label: "Espaços", icon: "deck", modulo: "areas_comuns" },
   { to: "/usuarios", label: "Usuários do Condomínio", icon: "groups" },
+];
+
+// Telas do morador — mesmo layout de Sidebar do porteiro e dos admins.
+const MORADOR_LINKS = [
+  { to: "/inicio", label: "Início", icon: "home" },
+  { to: "/servicos", label: "Serviços", icon: "room_service" },
+  { to: "/espacos", label: "Espaços", icon: "deck", modulo: "areas_comuns" },
+  { to: "/comodidades", label: "Comodidades", icon: "spa" },
+  { to: "/meus-convidados", label: "Convidados", icon: "group_add" },
+  { to: "/meus-veiculos", label: "Meus Veículos", icon: "directions_car", modulo: "veiculos" },
+  { to: "/entregas", label: "Encomendas", icon: "inventory_2", modulo: "entregas" },
+  { to: "/reclamacoes", label: "Reclamações", icon: "report", modulo: "reclamacoes" },
+  { to: "/faq", label: "FAQ", icon: "help", modulo: "conhecimento" },
 ];
 
 export function Sidebar() {
@@ -55,19 +69,25 @@ export function Sidebar() {
 
   const perfil = usuario?.perfil;
   const isDoorman = perfil === PERFIS.PORTEIRO;
+  const isAdmin = podeAcessarAdmin(perfil);
+  // Sem vínculo com unidade não há o que operar: só perfil e logout no rodapé.
+  const restrito = isUsuarioRestrito(usuario);
   const { activeModules } = useModules();
 
-  // Porteiro tem o conjunto dele; os admins veem o que o próprio perfil permite.
-  // Ambos são filtrados pelos módulos contratados.
-  const links = isDoorman
-    ? PORTEIRO_LINKS.filter((l) => linkLiberado(activeModules, l))
-    : linksFiltradosPorModulo(perfil, activeModules);
+  // Cada perfil tem o conjunto dele; todos filtrados pelos módulos contratados.
+  let links;
+  if (restrito) links = [];
+  else if (isDoorman) links = PORTEIRO_LINKS.filter((l) => linkLiberado(activeModules, l));
+  else if (isAdmin) links = linksFiltradosPorModulo(perfil, activeModules);
+  else links = MORADOR_LINKS.filter((l) => linkLiberado(activeModules, l));
 
   const subtitulo = isDoorman
     ? "Portaria"
     : perfil === PERFIS.ADMIN_GERAL
       ? "Plataforma"
-      : "Administrativo";
+      : isAdmin
+        ? "Administrativo"
+        : "Morador";
 
   async function handleLogout() {
     await logout();
@@ -161,7 +181,7 @@ export function Sidebar() {
           className="flex items-center gap-3 px-3 py-2 rounded-xl bg-surface-container-highest/20 hover:bg-white/5 transition-all"
         >
           <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center shrink-0">
-            <Icone name={isDoorman ? "badge" : "admin_panel_settings"} className="text-base text-primary" />
+            <Icone name={isDoorman ? "badge" : isAdmin ? "admin_panel_settings" : "person"} className="text-base text-primary" />
           </div>
           <div className="min-w-0">
             <p className="text-sm font-semibold text-on-surface truncate leading-tight">{usuario?.nome || "Admin"}</p>

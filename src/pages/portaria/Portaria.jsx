@@ -1,10 +1,11 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { acessoApi } from "../../services/acessoApi";
-import { veiculoApi, atendimentoApi, apartamentoApi } from "../../services/portariaApi";
+import { veiculoApi, atendimentoApi, apartamentoApi, preAutorizacaoApi } from "../../services/portariaApi";
 import { Icone } from "../../components/icones/Icone";
 import { Campo } from "../../components/campos/Campo";
 import { useToast } from "../../contexts/ToastContext";
+import { PERFIS_FUNCIONARIO } from "../../utils/perfis";
 
 // ─── helpers ───────────────────────────────────────────────────────────────
 
@@ -50,7 +51,7 @@ function hoje() {
 const PERFIS_OPCOES = ["Morador", "Dono Aluguel", "Visitante", "Porteiro", "Terceiro", "Admin Síndico", "Admin Geral"];
 
 // Perfis de funcionário que aparecem na aba Funcionários (auth-api)
-const PERFIS_FUNCIONARIO = ["PORTEIRO", "ADMIN_SINDICO"];
+// Importada de utils/perfis para não haver lista paralela com a reserva de evento.
 
 // ─── sub-componentes registrar acesso ──────────────────────────────────────
 
@@ -244,6 +245,137 @@ function AbaFuncionarios({ residentes, portTerceiros = [], acao, onEntrada, onSa
   );
 }
 
+// ─── visitantes pré-aprovados ──────────────────────────────────────────────
+//
+// Mesma lista nas duas telas: em Pessoas mostra todos os pré-liberados de hoje;
+// em Veículos, só os que têm placa. Registrar a entrada usa um único endpoint
+// que grava visitante e veículo na mesma transação e consome a autorização.
+
+function ListaPreAprovados({ somenteComVeiculo = false, onRegistrado }) {
+  const toast = useToast();
+  const [lista, setLista] = useState([]);
+  const [carregando, setCarregando] = useState(true);
+  const [erro, setErro] = useState(null);
+  const [acao, setAcao] = useState(null);
+
+  const carregar = useCallback(async () => {
+    setCarregando(true);
+    setErro(null);
+    try {
+      const res = await preAutorizacaoApi.ativasHoje();
+      const todas = Array.isArray(res.data) ? res.data : [];
+      setLista(somenteComVeiculo ? todas.filter((p) => p.placaVeiculo) : todas);
+    } catch (err) {
+      setErro(errMsg(err) || "Não foi possível carregar os visitantes pré-aprovados.");
+    } finally {
+      setCarregando(false);
+    }
+  }, [somenteComVeiculo]);
+
+  useEffect(() => { carregar(); }, [carregar]);
+
+  async function registrar(pa, incluirVeiculo) {
+    setAcao(pa.id);
+    try {
+      const res = await preAutorizacaoApi.registrarEntrada(pa.id, { incluirVeiculo });
+      const placa = incluirVeiculo && pa.placaVeiculo ? ` e do veículo ${pa.placaVeiculo}` : "";
+      toast.success(res.data?.mensagem || `Entrada de ${pa.nomeVisitante}${placa} registrada.`);
+      await carregar();
+      onRegistrado?.();
+    } catch (err) {
+      toast.error(errMsg(err) || "Não foi possível registrar a entrada.");
+    } finally {
+      setAcao(null);
+    }
+  }
+
+  if (carregando) {
+    return <div className="glass-panel rounded-3xl p-6 sm:p-10 text-center text-on-surface-variant">Carregando...</div>;
+  }
+  if (erro) {
+    return (
+      <div className="glass-panel rounded-3xl p-6 sm:p-10 text-center space-y-4">
+        <div className="flex items-center justify-center gap-2 text-error">
+          <Icone name="error_outline" className="text-2xl" />
+          <p className="font-semibold">Falha ao carregar</p>
+        </div>
+        <p className="text-on-surface-variant text-sm">{erro}</p>
+        <button onClick={carregar} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-primary/30 text-primary hover:bg-primary/10 text-sm font-semibold transition-all cursor-pointer">
+          <Icone name="refresh" className="text-base" />Tentar novamente
+        </button>
+      </div>
+    );
+  }
+  if (lista.length === 0) {
+    return (
+      <div className="glass-panel rounded-3xl p-6 sm:p-10 text-center text-on-surface-variant">
+        {somenteComVeiculo
+          ? "Nenhum veículo de visitante pré-aprovado para hoje."
+          : "Nenhum visitante pré-aprovado para hoje."}
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-start gap-2 px-4 py-3 rounded-xl bg-surface-container-highest/30 text-on-surface-variant text-xs">
+        <Icone name="info" className="text-primary text-base shrink-0 mt-0.5" />
+        <span>
+          Autorizados previamente pelo morador. Registrar a entrada aqui grava o visitante
+          {somenteComVeiculo ? " junto com o veículo dele" : " (e o veículo, se houver)"} e
+          consome a autorização — a vaga é conferida neste momento.
+        </span>
+      </div>
+
+      {lista.map((pa) => (
+        <div key={pa.id} className="glass-panel rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center gap-3">
+          <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+            <Icone name={pa.placaVeiculo ? "directions_car" : "how_to_reg"} className="text-primary" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="font-semibold text-on-surface truncate">{pa.nomeVisitante}</p>
+            <p className="text-xs text-on-surface-variant">
+              {pa.cpfVisitante ? `CPF: ${formatarCpfMask(pa.cpfVisitante)}` : "Sem CPF"}
+              {pa.telefoneVisitante ? ` · ${pa.telefoneVisitante}` : ""}
+            </p>
+            {pa.placaVeiculo && (
+              <p className="text-xs text-on-surface-variant mt-0.5">
+                <span className="font-mono font-semibold text-on-surface">{pa.placaVeiculo}</span>
+                {pa.modeloVeiculo ? ` · ${pa.modeloVeiculo}` : ""}
+                {pa.corVeiculo ? ` · ${pa.corVeiculo}` : ""}
+              </p>
+            )}
+            <p className="text-xs text-on-surface-variant mt-0.5">
+              Válida até {String(pa.validadeFim || "").split("-").reverse().join("/")}
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2 shrink-0">
+            <button
+              onClick={() => registrar(pa, true)}
+              disabled={acao === pa.id}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-semibold border border-primary/30 text-primary hover:bg-primary/10 transition-all cursor-pointer disabled:opacity-50"
+            >
+              <Icone name="login" className="text-base" />
+              {acao === pa.id ? "Registrando…" : pa.placaVeiculo ? "Entrada com veículo" : "Entrada"}
+            </button>
+            {pa.placaVeiculo && (
+              // Sem vaga na chegada o veículo não entra, mas a pessoa pode entrar a pé.
+              <button
+                onClick={() => registrar(pa, false)}
+                disabled={acao === pa.id}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-semibold border border-outline-variant/30 text-on-surface-variant hover:bg-white/5 transition-all cursor-pointer disabled:opacity-50"
+              >
+                <Icone name="directions_walk" className="text-base" />
+                Só a pé
+              </button>
+            )}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 // ─── aba "Registrar acesso" ────────────────────────────────────────────────
 
 function AbaRegistrar({ residentes, guests, portVisitantes = [], portTerceiros = [], dentro, carregando, erroCarregamento, onCarregar, acao, onEntrada, onSaida }) {
@@ -289,9 +421,10 @@ function AbaRegistrar({ residentes, guests, portVisitantes = [], portTerceiros =
   }
 
   const abasSub = [
-    { id: "residentes",    label: "Moradores",    icon: "people",         count: moradores.length },
-    { id: "guests",        label: "Visitantes",   icon: "person_outline", count: allGuests.length },
-    { id: "funcionarios",  label: "Funcionários", icon: "badge",          count: funcCount },
+    { id: "residentes",    label: "Moradores",     icon: "people",         count: moradores.length },
+    { id: "guests",        label: "Visitantes",    icon: "person_outline", count: allGuests.length },
+    { id: "preaprovados",  label: "Pré-aprovados", icon: "how_to_reg" },
+    { id: "funcionarios",  label: "Funcionários",  icon: "badge",          count: funcCount },
   ];
 
   const listaAtual = abaSub === "residentes" ? filtrar(moradores) : filtrar(allGuests);
@@ -321,8 +454,10 @@ function AbaRegistrar({ residentes, guests, portVisitantes = [], portTerceiros =
         ))}
       </div>
 
-      {/* Aba Funcionários tem seus próprios filtros internos */}
-      {abaSub === "funcionarios" ? (
+      {/* Pré-aprovados busca a própria lista; não usa a busca por nome/CPF */}
+      {abaSub === "preaprovados" ? (
+        <ListaPreAprovados onRegistrado={onCarregar} />
+      ) : abaSub === "funcionarios" ? (
         carregando ? (
           <div className="glass-panel rounded-3xl p-6 sm:p-10 text-center text-on-surface-variant">Carregando...</div>
         ) : erroCarregamento ? (
@@ -854,7 +989,20 @@ function AbaRegistrarVeiculo() {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
+      {/* Veículos de visitantes pré-aprovados pelo morador */}
+      <section className="space-y-3">
+        <h3 className="font-headline font-bold text-on-surface text-base">
+          Veículos pré-aprovados
+        </h3>
+        <ListaPreAprovados somenteComVeiculo onRegistrado={carregar} />
+      </section>
+
+      <div className="border-t border-outline-variant/15 pt-6 space-y-4">
+        <h3 className="font-headline font-bold text-on-surface text-base">
+          Veículos cadastrados
+        </h3>
+
       {/* Campo de busca */}
       <div className="max-w-sm">
         <Campo
@@ -977,6 +1125,7 @@ function AbaRegistrarVeiculo() {
           })}
         </div>
       )}
+      </div>
     </div>
   );
 }

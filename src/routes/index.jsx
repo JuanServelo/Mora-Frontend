@@ -16,6 +16,7 @@ import { GerenciarEntregas } from "../pages/adm/GerenciarEntregas";
 import { GerenciarVagas } from "../pages/adm/GerenciarVagas";
 import { GerenciarConhecimento } from "../pages/adm/GerenciarConhecimento";
 import { GerenciarPerfis } from "../pages/adm/GerenciarPerfis";
+import { GerenciarFuncionarios } from "../pages/adm/GerenciarFuncionarios";
 import { GerenciarCondominios } from "../pages/adm/GerenciarCondominios";
 import { GerenciarPlanos } from "../pages/adm/GerenciarPlanos";
 import { GerenciarFinanceiro } from "../pages/adm/GerenciarFinanceiro";
@@ -32,6 +33,7 @@ import { Portaria } from "../pages/portaria/Portaria";
 import { Chaves } from "../pages/porteiro/Chaves";
 import { UsuariosCondominio } from "../pages/porteiro/UsuariosCondominio";
 import { MeusConvidados } from "../pages/usuario/MeusConvidados";
+import { MeusVeiculos } from "../pages/usuario/MeusVeiculos";
 import { AppLayout } from "../layouts/AppLayout";
 import { ProtectedRoute } from "./ProtectedRoute";
 import { DoormanRoute } from "./DoormanRoute";
@@ -94,7 +96,6 @@ export const router = createBrowserRouter([
       { path: "/entradas-e-saidas", element: <Portaria /> },
       { path: "/chaves", element: <Chaves /> },
       { path: "/atendimento", element: <DoormanRoute><AtendimentoPortaria /></DoormanRoute> },
-      { path: "/veiculos", element: <DoormanRoute><GerenciarVeiculos /></DoormanRoute> },
       {
         path: "/usuarios",
         element: (
@@ -104,6 +105,7 @@ export const router = createBrowserRouter([
         ),
       },
       { path: "/meus-convidados", element: <MeusConvidados /> },
+      { path: "/meus-veiculos", element: <MeusVeiculos /> },
       // Todas as telas /adm passam pelo AdminRoute, que usa o mesmo mapa do menu
       // (src/utils/menuAdmin.js) — assim esconder do menu também barra a URL.
       { path: "/adm/geral", element: <AdminRoute><IndexAdminGeralLazy /></AdminRoute> },
@@ -113,6 +115,7 @@ export const router = createBrowserRouter([
       { path: "/adm/usuarios", element: <AdminRoute><GerenciarUsuarios /></AdminRoute> },
       { path: "/adm/estruturas", element: <AdminRoute><GerenciarEstruturas /></AdminRoute> },
       { path: "/adm/perfis", element: <AdminRoute><GerenciarPerfis /></AdminRoute> },
+      { path: "/adm/funcionarios", element: <AdminRoute><GerenciarFuncionarios /></AdminRoute> },
       { path: "/adm/financeiro", element: <AdminRoute><GerenciarFinanceiro /></AdminRoute> },
       { path: "/adm/reunioes", element: <AdminRoute><GerenciarReunioes /></AdminRoute> },
       { path: "/adm/reclamacoes", element: <AdminRoute><GerenciarReclamacoes /></AdminRoute> },
