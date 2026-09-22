@@ -36,4 +36,15 @@ export const planApi = {
 
   alterarStatusAssinatura: (id, status) =>
     planHttp.patch(`/api/assinaturas/${id}/status`, null, { params: { status } }),
+
+  // Assinaturas pelo SubscriptionController. Os dois controladores existem no
+  // plan-service e atendem caminhos diferentes — `/api/plans/subscriptions` é
+  // o que o Traefik roteia, porque a tag do Consul cobre só `/api/plans`.
+  criarAssinatura: (data) => planHttp.post("/api/plans/subscriptions", data),
+  listarAssinaturas: () => planHttp.get("/api/plans/subscriptions"),
+  buscarAssinatura: (condominioId) => planHttp.get(`/api/plans/subscriptions/condominio/${condominioId}`),
+  suspenderAssinatura: (id) => planHttp.patch(`/api/plans/subscriptions/${id}/suspend`),
+  cancelarAssinatura: (id) => planHttp.patch(`/api/plans/subscriptions/${id}/cancel`),
+  trocarPlano: (condominioId, data) => planHttp.put(`/api/plans/subscriptions/${condominioId}/change-plan`, data),
+  buscarModulosCondominio: (condominioId) => planHttp.get(`/api/plans/subscriptions/condominio/${condominioId}/modules`),
 };

@@ -1,16 +1,27 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
+import { useModules } from "../../contexts/ModulesContext";
 import { condominiosApi } from "../../services/condominiosApi";
 import { Icone } from "../../components/icones/Icone";
+import { linkLiberado } from "../../utils/modulosPlano";
 
 const CARDS_PORTEIRO = [
+  {
+    to: "/atendimento",
+    label: "Cadastros",
+    desc: "Registrar entrada de visitantes e prestadores de serviço",
+    icon: "waving_hand",
+    color: "primary",
+    modulo: "portaria",
+  },
   {
     to: "/entradas-e-saidas",
     label: "Controle de Acesso",
     desc: "Registrar entradas e saídas de moradores e visitantes",
     icon: "sensor_door",
-    color: "primary",
+    color: "secondary",
+    modulo: "portaria",
   },
   {
     to: "/portaria/entregas",
@@ -18,6 +29,7 @@ const CARDS_PORTEIRO = [
     desc: "Receber e registrar encomendas e pacotes",
     icon: "inventory_2",
     color: "secondary",
+    modulo: "entregas",
   },
   {
     to: "/chaves",
@@ -25,6 +37,7 @@ const CARDS_PORTEIRO = [
     desc: "Gerenciar chaves e acessos do condomínio",
     icon: "key",
     color: "tertiary",
+    modulo: "chaves",
   },
   {
     to: "/espacos",
@@ -32,13 +45,7 @@ const CARDS_PORTEIRO = [
     desc: "Visualizar e acompanhar áreas comuns",
     icon: "deck",
     color: "primary",
-  },
-  {
-    to: "/veiculos",
-    label: "Veículos de Serviço",
-    desc: "Cadastrar e gerenciar veículos de serviço",
-    icon: "local_shipping",
-    color: "secondary",
+    modulo: "areas_comuns",
   },
   {
     to: "/usuarios",
@@ -72,6 +79,7 @@ const COLOR_MAP = {
 
 export function InicioDoorman() {
   const { usuario } = useAuth();
+  const { activeModules } = useModules();
   const primeiroNome = usuario?.nome?.split(" ")[0] || "Porteiro";
   const [nomeCondominio, setNomeCondominio] = useState(null);
 
@@ -84,7 +92,7 @@ export function InicioDoorman() {
   }, [usuario?.condominioId]);
 
   return (
-    <div className="min-h-screen w-full pt-4 pb-20 px-6">
+    <div className="min-h-screen w-full pt-4 pb-20 px-4 sm:px-6">
       <div className="max-w-5xl mx-auto space-y-10">
 
         <header className="text-center max-w-3xl mx-auto">
@@ -104,7 +112,7 @@ export function InicioDoorman() {
 
         <section>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {CARDS_PORTEIRO.map((item) => {
+            {CARDS_PORTEIRO.filter((item) => linkLiberado(activeModules, item)).map((item) => {
               const c = COLOR_MAP[item.color];
               return (
                 <Link

@@ -37,6 +37,46 @@ const TIPOS = {
     cor: "bg-primary/15 text-primary",
     destino: () => "/avisos",
   },
+
+  // ── tipos do enum do serviço ────────────────────────────
+  // `TipoNotificacao` no comunicacao-service. Sem eles a notificação cai no
+  // padrão e vira um "info" cinza sem destino — o usuário vê que chegou algo
+  // e não tem para onde clicar.
+  AVISO: {
+    icone: "campaign",
+    cor: "bg-primary/15 text-primary",
+    destino: () => "/avisos",
+  },
+  ENTREGA: {
+    icone: "inventory_2",
+    cor: "bg-secondary/15 text-secondary",
+    destino: () => "/entregas",
+  },
+  RESERVA: {
+    icone: "event_available",
+    cor: "bg-tertiary/15 text-tertiary",
+    destino: () => "/espacos",
+  },
+  ALUGUEL_VAGA: {
+    icone: "directions_car",
+    cor: "bg-secondary/15 text-secondary",
+    destino: () => "/meus-veiculos",
+  },
+  PRE_AUTORIZACAO: {
+    icone: "group_add",
+    cor: "bg-tertiary/15 text-tertiary",
+    destino: () => "/meus-convidados",
+  },
+  CHAT: {
+    icone: "forum",
+    cor: "bg-tertiary/15 text-tertiary",
+    destino: (dados) => (dados?.conversaId ? `/conversas/${dados.conversaId}` : "/conversas"),
+  },
+  SISTEMA: {
+    icone: "info",
+    cor: "bg-veu/10 text-on-surface-variant",
+    destino: () => null,
+  },
 };
 
 const PADRAO = {

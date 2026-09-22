@@ -1,16 +1,14 @@
 // src/pages/usuario/FAQ.jsx
 import { useState, useEffect } from "react";
 import { Icone } from "../../components/icones/Icone";
-import { conhecimentoApi } from "../../services/portariaApi";
+import { conhecimentoApi } from "../../services/comunicacaoApi";
 
 const CATEGORIA_LABEL = {
-  GERAL: "Geral",
-  MANUTENCAO: "Manutenção",
-  SEGURANCA: "Segurança",
-  FINANCEIRO: "Financeiro",
-  CONVIVENCIA: "Convivência",
-  RESERVAS: "Reservas",
-  OUTROS: "Outros",
+  REGRA: "Regra",
+  MANUAL: "Manual",
+  TUTORIAL: "Tutorial",
+  ORIENTACAO_CONVIVENCIA: "Orientação de Convivência",
+  FAQ: "FAQ",
 };
 
 function ItemFAQ({ artigo }) {
@@ -26,7 +24,7 @@ function ItemFAQ({ artigo }) {
     >
       <button
         onClick={() => setAberto((a) => !a)}
-        className="w-full flex items-center gap-4 px-6 py-4 text-left cursor-pointer hover:bg-veu/5 transition-colors"
+        className="w-full flex items-center gap-3 sm:gap-4 px-4 sm:px-6 py-4 text-left cursor-pointer hover:bg-veu/5 transition-colors"
       >
         <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
           <Icone name="help_outline" className="text-primary text-lg" />
@@ -50,7 +48,7 @@ function ItemFAQ({ artigo }) {
       </button>
 
       {aberto && (
-        <div className="px-6 pb-5 border-t border-veu/5">
+        <div className="px-4 sm:px-6 pb-5 border-t border-veu/5">
           <p className="text-sm text-on-surface-variant leading-relaxed mt-4 whitespace-pre-wrap">
             {artigo.conteudo}
           </p>
@@ -104,10 +102,11 @@ export function FAQ() {
   });
 
   return (
-    <div className="max-w-3xl mx-auto px-4 pb-16">
+    <div className="min-h-screen w-full pt-4 pb-20 px-4 sm:px-6">
+      <div className="max-w-3xl mx-auto">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-on-surface">
+        <h1 className="font-headline text-2xl sm:text-3xl font-extrabold tracking-tight text-on-surface">
           Perguntas Frequentes
         </h1>
         <p className="text-sm text-on-surface-variant mt-1">
@@ -156,12 +155,12 @@ export function FAQ() {
           <div className="w-8 h-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
         </div>
       ) : erro ? (
-        <div className="glass-panel rounded-2xl p-8 text-center">
+        <div className="glass-panel rounded-2xl p-6 sm:p-8 text-center">
           <Icone name="error_outline" className="text-3xl text-tertiary mb-2" />
           <p className="text-sm text-on-surface-variant">{erro}</p>
         </div>
       ) : filtrados.length === 0 ? (
-        <div className="glass-panel rounded-2xl p-12 text-center">
+        <div className="glass-panel rounded-2xl p-5 sm:p-8 sm:p-12 text-center">
           <Icone name="search_off" className="text-4xl text-on-surface-variant mb-3" />
           <p className="text-sm text-on-surface-variant">
             {busca ? "Nenhum resultado para sua busca." : "Nenhum artigo publicado ainda."}
@@ -174,6 +173,7 @@ export function FAQ() {
           ))}
         </div>
       )}
+      </div>
     </div>
   );
 }

@@ -44,12 +44,12 @@ export function EsqueceuSenha() {
         {/* Coluna esquerda — Marca + Suporte */}
         <div className="lg:col-span-7 hidden lg:flex flex-col space-y-8">
           <div className="space-y-2">
-            <h1 className="font-headline text-6xl font-extrabold tracking-tighter bg-gradient-to-br from-primary to-primary-container bg-clip-text text-transparent">
+            <h1 className="font-headline text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tighter bg-gradient-to-br from-primary to-primary-container bg-clip-text text-transparent">
               Mora
             </h1>
           </div>
 
-          <p className="text-on-surface-variant text-lg max-w-md leading-relaxed">
+          <p className="text-on-surface-variant text-base lg:text-lg max-w-md leading-relaxed">
             {t("recovery.left.description")}
           </p>
 
@@ -72,13 +72,13 @@ export function EsqueceuSenha() {
 
         {/* Coluna direita — Card de recuperação */}
         <div className="lg:col-span-5 flex justify-center lg:justify-end w-full">
-          <div className="glass-panel w-full max-w-sm rounded-[2rem] p-8 shadow-2xl relative overflow-hidden group">
+          <div className="glass-panel w-full max-w-sm rounded-[2rem] p-6 sm:p-8 shadow-2xl relative overflow-hidden group">
             <div className="absolute -top-24 -left-24 w-48 h-48 bg-primary/20 blur-[60px] pointer-events-none transition-all duration-700 group-hover:bg-primary/30" />
 
             <div className="relative z-10">
               {/* Ícone */}
               <div className="mb-6 flex flex-col items-center lg:items-start">
-                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
+                <div className="w-12 h-12 shrink-0 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
                   <Icone name="lock_reset" className="text-primary text-2xl" />
                 </div>
                 <h2 className="font-headline text-2xl font-bold text-on-surface mb-1">

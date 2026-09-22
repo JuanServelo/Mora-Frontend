@@ -30,13 +30,13 @@ export function Servicos() {
   }, []);
 
   return (
-    <div className="min-h-screen w-full pt-4 pb-20 px-6">
+    <div className="min-h-screen w-full pt-4 pb-20 px-4 sm:px-6">
       <div className="max-w-6xl mx-auto space-y-10">
         <header>
           <p className="text-on-surface-variant text-xs font-semibold uppercase tracking-widest mb-1">
             Condomínio
           </p>
-          <h1 className="font-headline text-4xl font-extrabold tracking-tight text-on-surface">
+          <h1 className="font-headline text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-on-surface">
             Serviços{" "}
             <span className="bg-gradient-to-r from-primary to-tertiary bg-clip-text text-transparent">
               do prédio
@@ -56,7 +56,7 @@ export function Servicos() {
           {itens.map((s) => (
             <article
               key={s.titulo}
-              className="glass-panel rounded-3xl p-6 lg:p-8 border border-outline-variant/10 hover:border-primary/25 transition-colors flex flex-col"
+              className="glass-panel rounded-3xl p-4 sm:p-6 lg:p-8 border border-outline-variant/10 hover:border-primary/25 transition-colors flex flex-col"
             >
               <div className="flex items-start gap-4 mb-4">
                 <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0">
@@ -102,7 +102,7 @@ export function Servicos() {
 
         <div className="glass-panel rounded-3xl p-6 md:p-8 flex flex-col sm:flex-row gap-6 items-start sm:items-center justify-between border border-secondary/15">
           <div className="flex gap-4">
-            <div className="w-12 h-12 rounded-xl bg-secondary/15 flex items-center justify-center shrink-0">
+            <div className="w-12 h-12 shrink-0 rounded-xl bg-secondary/15 flex items-center justify-center shrink-0">
               <Icone name="info" className="text-secondary text-2xl" />
             </div>
             <div>

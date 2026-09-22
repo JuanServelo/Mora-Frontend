@@ -26,22 +26,22 @@ export function ConfirmDialog({
         onClick={onCancelar}
         aria-label="Fechar"
       />
-      <div className="relative glass-panel rounded-3xl p-6 w-full max-w-md shadow-2xl border border-outline-variant/20 animate-[fadeIn_0.2s_ease-out]">
-        <div className="flex items-start gap-4 mb-6">
+      <div className="relative glass-panel rounded-3xl p-5 sm:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto shadow-2xl border border-outline-variant/20 animate-[fadeIn_0.2s_ease-out]">
+        <div className="flex items-start gap-3 sm:gap-4 mb-6">
           <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${isDanger ? "bg-error/15" : "bg-primary/15"}`}>
             <Icone
               name={isDanger ? "warning" : "help"}
               className={`text-2xl ${isDanger ? "text-error" : "text-primary"}`}
             />
           </div>
-          <div>
+          <div className="min-w-0">
             <h2 className="font-headline text-lg font-bold text-on-surface">{titulo}</h2>
             {mensagem && (
               <p className="text-on-surface-variant text-sm mt-1 leading-relaxed">{mensagem}</p>
             )}
           </div>
         </div>
-        <div className="flex gap-3 justify-end">
+        <div className="flex flex-col-reverse sm:flex-row gap-3 sm:justify-end">
           <button
             type="button"
             onClick={onCancelar}

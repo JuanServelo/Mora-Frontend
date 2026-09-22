@@ -1,79 +1,156 @@
 // src/components/sidebar/Sidebar.jsx
+import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Icone } from "../icones/Icone";
-import { FotoUsuario } from "../avatar/FotoUsuario";
 import { useAuth } from "../../contexts/AuthContext";
+import { useModules } from "../../contexts/ModulesContext";
 import { useNotificacoes } from "../../contexts/NotificacoesContext";
-import { PERFIS } from "../../utils/perfis";
-import { linksDoPerfil } from "../../utils/menuAdmin";
+import { PERFIS, podeAcessarAdmin, isUsuarioRestrito } from "../../utils/perfis";
+import { linksFiltradosPorModulo } from "../../utils/menuAdmin";
+import { linkLiberado } from "../../utils/modulosPlano";
+import { FotoUsuario } from "../avatar/FotoUsuario";
 import moraLogo3 from "../../assets/Mora3.png";
 
 
 // Telas do porteiro (mesmo layout de Sidebar dos admins).
 const PORTEIRO_LINKS = [
   { to: "/inicio", label: "Início", icon: "home" },
-  { to: "/entradas-e-saidas", label: "Entradas e Saídas", icon: "swap_horiz" },
-  { to: "/portaria/entregas", label: "Entregas", icon: "inventory_2" },
-  { to: "/chaves", label: "Chaves", icon: "vpn_key" },
+  { to: "/atendimento", label: "Cadastros", icon: "waving_hand", modulo: "portaria" },
+  { to: "/entradas-e-saidas", label: "Entradas e Saídas", icon: "swap_horiz", modulo: "portaria" },
+  { to: "/entregas", label: "Entregas", icon: "inventory_2", modulo: "entregas" },
+  { to: "/chaves", label: "Chaves", icon: "vpn_key", modulo: "chaves" },
+  { to: "/espacos", label: "Espaços", icon: "deck", modulo: "areas_comuns" },
   { to: "/usuarios", label: "Usuários do Condomínio", icon: "groups" },
-  { to: "/conversas", label: "Conversas", icon: "forum" },
-  // O porteiro é destinatário dos avisos de público FUNCIONARIOS. Sem esta
-  // entrada ele recebia comunicado que não tinha como abrir — a rota existe,
-  // mas só a navbar dos moradores levava até ela.
-  { to: "/avisos", label: "Avisos", icon: "campaign" },
 ];
 
-export function Sidebar({ aberta = false, aoFechar }) {
+// Telas do morador — mesmo layout de Sidebar do porteiro e dos admins.
+const MORADOR_LINKS = [
+  { to: "/inicio", label: "Início", icon: "home" },
+  { to: "/avisos", label: "Avisos", icon: "campaign", modulo: "comunicacao" },
+  { to: "/servicos", label: "Serviços", icon: "room_service" },
+  { to: "/espacos", label: "Espaços", icon: "deck", modulo: "areas_comuns" },
+  { to: "/comodidades", label: "Comodidades", icon: "spa" },
+  { to: "/meus-convidados", label: "Convidados", icon: "group_add" },
+  { to: "/meus-veiculos", label: "Meus Veículos", icon: "directions_car", modulo: "veiculos" },
+  { to: "/entregas", label: "Encomendas", icon: "inventory_2", modulo: "entregas" },
+  { to: "/reclamacoes", label: "Reclamações", icon: "report", modulo: "reclamacoes" },
+  { to: "/faq", label: "FAQ", icon: "help", modulo: "conhecimento" },
+];
+
+export function Sidebar() {
   const { pathname } = useLocation();
   const { usuario, logout } = useAuth();
   const navigate = useNavigate();
+  const [aberta, setAberta] = useState(false);
   const { naoLidas, conversasNaoLidas } = useNotificacoes();
+  const [rotaAnterior, setRotaAnterior] = useState(pathname);
+
+  // Fecha o drawer ao trocar de rota (inclusive via voltar/avancar do navegador)
+  if (rotaAnterior !== pathname) {
+    setRotaAnterior(pathname);
+    setAberta(false);
+  }
+
+  // Trava o scroll do body enquanto o drawer esta aberto
+  useEffect(() => {
+    if (!aberta) return;
+    const anterior = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = anterior;
+    };
+  }, [aberta]);
+
+  // Fecha com Esc
+  useEffect(() => {
+    if (!aberta) return;
+    function handleKey(e) {
+      if (e.key === "Escape") setAberta(false);
+    }
+    document.addEventListener("keydown", handleKey);
+    return () => document.removeEventListener("keydown", handleKey);
+  }, [aberta]);
 
   const perfil = usuario?.perfil;
   const isDoorman = perfil === PERFIS.PORTEIRO;
+  const isAdmin = podeAcessarAdmin(perfil);
+  // Sem vínculo com unidade não há o que operar: só perfil e logout no rodapé.
+  const restrito = isUsuarioRestrito(usuario);
+  const { activeModules } = useModules();
 
-  // Porteiro tem o conjunto dele; os admins veem o que o próprio perfil permite.
-  const links = isDoorman ? PORTEIRO_LINKS : linksDoPerfil(perfil);
+  // Cada perfil tem o conjunto dele; todos filtrados pelos módulos contratados.
+  let links;
+  if (restrito) links = [];
+  else if (isDoorman) links = PORTEIRO_LINKS.filter((l) => linkLiberado(activeModules, l));
+  else if (isAdmin) links = linksFiltradosPorModulo(perfil, activeModules);
+  else links = MORADOR_LINKS.filter((l) => linkLiberado(activeModules, l));
 
   const subtitulo = isDoorman
     ? "Portaria"
     : perfil === PERFIS.ADMIN_GERAL
       ? "Plataforma"
-      : "Administrativo";
+      : isAdmin
+        ? "Administrativo"
+        : "Morador";
 
   async function handleLogout() {
     await logout();
     navigate("/login");
   }
 
+  const painelStyle = {
+    background: "rgba(255,255,255,0.04)",
+    borderRight: "1px solid rgba(255,255,255,0.08)",
+    backdropFilter: "blur(32px)",
+  };
+
   return (
-    <aside
-      /* No desktop fica sempre visível; no celular desliza de fora da tela,
-         porque 256px fixos sobre um viewport de 375px cobriam o conteúdo. */
-      /* Alterna exibição em vez de deslocar.
-         Com `translate`, o valor ficava preso em -100% depois que a classe saía:
-         a transição não tem para onde interpolar quando a propriedade é
-         removida, e a gaveta nunca aparecia. `hidden`/`flex` não interpola nada
-         e o resultado é determinístico. */
-      className={`fixed top-0 left-0 h-screen w-64 flex-col z-50 lg:flex ${
-        aberta ? "flex" : "hidden"
-      }`}
-      style={{ background: "rgba(255,255,255,0.04)", borderRight: "1px solid rgba(255,255,255,0.08)", backdropFilter: "blur(32px)" }}
-    >
+    <>
+      {/* Barra superior — so no mobile, abre o drawer */}
+      <header
+        className="lg:hidden fixed top-0 left-0 right-0 h-14 z-40 flex items-center gap-3 px-4"
+        style={{ background: "rgba(20,18,24,0.92)", borderBottom: "1px solid rgba(255,255,255,0.08)", backdropFilter: "blur(24px)" }}
+      >
+        <button
+          onClick={() => setAberta(true)}
+          aria-label="Abrir menu"
+          aria-expanded={aberta}
+          className="w-9 h-9 shrink-0 rounded-xl flex items-center justify-center text-on-surface-variant hover:text-primary hover:bg-primary/10 transition-all cursor-pointer"
+        >
+          <Icone name="menu" className="text-xl" />
+        </button>
+        <img src={moraLogo3} alt="Mora" className="h-6 w-auto" />
+        <p className="text-sm font-bold text-on-surface truncate">{subtitulo}</p>
+      </header>
+
+      {/* Backdrop do drawer */}
+      {aberta && (
+        <div
+          className="lg:hidden fixed inset-0 z-40 bg-black/60 backdrop-blur-sm"
+          onClick={() => setAberta(false)}
+          aria-hidden="true"
+        />
+      )}
+
+      <aside
+        className={`fixed top-0 left-0 h-screen w-64 max-w-[85vw] flex flex-col z-50 transition-transform duration-300 ease-in-out
+          lg:translate-x-0 ${aberta ? "translate-x-0" : "-translate-x-full"}`}
+        style={painelStyle}
+      >
       {/* Logo */}
       <div className="flex items-center gap-3 px-5 py-4 border-b border-veu/5">
-        <button
-          onClick={aoFechar}
-          aria-label="Fechar menu"
-          className="lg:hidden p-1 -ml-1 rounded-lg text-on-surface-variant hover:bg-veu/5 cursor-pointer"
-        >
-          <Icone name="close" />
-        </button>
-        <img src={moraLogo3} alt="Mora" className="h-7 w-auto" />
-        <div>
+        <img src={moraLogo3} alt="Mora" className="h-7 w-auto shrink-0" />
+        <div className="min-w-0">
           <p className="text-[10px] font-semibold uppercase tracking-widest text-on-surface-variant">Painel</p>
-          <p className="text-sm font-bold text-on-surface leading-tight">{subtitulo}</p>
+          <p className="text-sm font-bold text-on-surface leading-tight truncate">{subtitulo}</p>
         </div>
+        <button
+          onClick={() => setAberta(false)}
+          aria-label="Fechar menu"
+          className="lg:hidden ml-auto w-8 h-8 shrink-0 rounded-lg flex items-center justify-center text-on-surface-variant hover:text-primary hover:bg-primary/10 transition-all cursor-pointer"
+        >
+          <Icone name="close" className="text-lg" />
+        </button>
       </div>
 
       {/* Links */}
@@ -84,7 +161,6 @@ export function Sidebar({ aberta = false, aoFechar }) {
             <Link
               key={link.to}
               to={link.to}
-              onClick={aoFechar}
               className={`flex items-center gap-3 px-3 py-2 rounded-xl transition-all duration-200 group
                 ${active
                   ? "bg-primary/10 text-primary"
@@ -116,19 +192,9 @@ export function Sidebar({ aberta = false, aoFechar }) {
 
       {/* Usuário (link p/ perfil) + Logout */}
       <div className="px-2 py-3 border-t border-veu/5 space-y-0.5">
-        {/*
-          Precisa ser link, e não apenas um aviso: quem usa a barra lateral não
-          tem Navbar, logo não tem o sino nem o "ver todas". Como uma `div`, o
-          contador ficava eterno — sem caminho para a tela que marca como lido.
-
-          Conta só notificação. Conversa não lida já tem selo próprio no item
-          "Conversas" do menu, e somar as duas aqui recriaria o mesmo problema:
-          um número que não zera ao abrir o destino.
-        */}
         {naoLidas > 0 && (
           <Link
             to="/notificacoes"
-            onClick={aoFechar}
             className="flex items-center gap-2 px-3 py-2 rounded-xl bg-primary/5 border border-primary/10 mb-1 hover:bg-primary/10 transition-all cursor-pointer"
           >
             <Icone name="notifications_active" className="text-primary text-base" />
@@ -142,13 +208,12 @@ export function Sidebar({ aberta = false, aoFechar }) {
         )}
         <Link
           to="/perfil"
-          onClick={aoFechar}
           className="flex items-center gap-3 px-3 py-2 rounded-xl bg-surface-container-highest/20 hover:bg-veu/5 transition-all"
         >
           <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center shrink-0 overflow-hidden">
             <FotoUsuario
               usuario={usuario}
-              iconeVazio={isDoorman ? "badge" : "admin_panel_settings"}
+              iconeVazio={isDoorman ? "badge" : isAdmin ? "admin_panel_settings" : "person"}
               classeIcone="text-base text-primary"
             />
           </div>
@@ -166,7 +231,8 @@ export function Sidebar({ aberta = false, aoFechar }) {
           </div>
           <span className="text-sm font-semibold">Sair</span>
         </button>
-      </div>
-    </aside>
+        </div>
+      </aside>
+    </>
   );
 }

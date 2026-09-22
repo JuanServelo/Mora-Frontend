@@ -58,8 +58,10 @@ export const areaComunApi = {
 };
 
 export const vagaApi = {
-  listar: () => estruturasApi.get("/vagas"),
-  listarTodas: () => estruturasApi.get("/vagas/todas"),
+  listar: (condominioId) =>
+    estruturasApi.get("/vagas", { params: condominioId ? { condominioId } : {} }),
+  listarTodas: (condominioId) =>
+    estruturasApi.get("/vagas/todas", { params: condominioId ? { condominioId } : {} }),
   buscar: (id) => estruturasApi.get(`/vagas/${id}`),
   listarPorApartamento: (apartamentoId) => estruturasApi.get(`/vagas/apartamento/${apartamentoId}`),
   cadastrar: (data, apartamentoId) =>
@@ -68,7 +70,6 @@ export const vagaApi = {
     }),
   atualizar: (id, data, apartamentoId) =>
     estruturasApi.put(`/vagas/${id}?apartamentoId=${apartamentoId}`, data),
-  ativar: (id) => estruturasApi.put(`/vagas/${id}/ativar`),
-  desativar: (id) => estruturasApi.put(`/vagas/${id}/desativar`),
-  deletar: (id) => estruturasApi.delete(`/vagas/${id}`),
+  ativar: (id) => estruturasApi.post(`/vagas/${id}/ativar`),
+  desativar: (id) => estruturasApi.delete(`/vagas/${id}`),
 };

@@ -4,7 +4,7 @@ import { AtivacaoContaForm } from "../../components/auth/AtivacaoContaForm";
 export function AtivarConta() {
   return (
     <div className="min-h-screen w-full flex items-center justify-center px-4 py-8">
-      <div className="glass-panel w-full max-w-lg rounded-[2rem] p-8 shadow-2xl">
+      <div className="glass-panel w-full max-w-lg rounded-[2rem] p-5 sm:p-8 shadow-2xl">
         <div className="mb-2">
           <h1 className="text-2xl font-headline font-bold text-on-surface">Ativar conta</h1>
         </div>

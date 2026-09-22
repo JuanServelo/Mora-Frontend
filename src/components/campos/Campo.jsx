@@ -1,4 +1,4 @@
-﻿// src/components/campos/Campo.jsx
+// src/components/campos/Campo.jsx
 import { Icone } from "../icones/Icone";
 
 export function Campo({
@@ -8,7 +8,9 @@ export function Campo({
   placeholder,
   icon,
   error,
+  optional,
   className = "",
+  required,
   ...rest
 }) {
   return (
@@ -19,6 +21,12 @@ export function Campo({
           className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant ml-1"
         >
           {label}
+          {required && <span className="text-red-500 ml-0.5">*</span>}
+          {optional && (
+            <span className="font-normal normal-case tracking-normal text-on-surface-variant/60">
+              {" "}(opcional)
+            </span>
+          )}
         </label>
       )}
       <div className="relative">
@@ -31,6 +39,8 @@ export function Campo({
         <input
           id={id}
           type={type}
+          required={required}
+          aria-required={required ? "true" : undefined}
           placeholder={placeholder}
           className={`w-full bg-surface-container-highest/40 border-none rounded-xl py-4 ${icon ? "pl-12" : "pl-4"} pr-4 text-on-surface placeholder:text-outline-variant focus:outline-none backdrop-blur-sm transition-all ${error ? "ring-2 ring-error/60" : "focus:ring-2 focus:ring-primary/50"} ${className}`}
           {...rest}

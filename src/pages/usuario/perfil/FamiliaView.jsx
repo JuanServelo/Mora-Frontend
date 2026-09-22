@@ -115,7 +115,7 @@ function FormCadastro({ tipo, onSalvar, onCancelar, salvando, erros }) {
         </p>
       )}
 
-      <div className="flex gap-3 pt-1">
+      <div className="flex flex-col sm:flex-row gap-3 pt-1">
         <Botao type="submit" disabled={salvando}>
           {salvando ? "Salvando..." : "Cadastrar"}
           <Icone name="check" className="text-xl" />
@@ -140,7 +140,7 @@ function CardOcupante({ item, podeRemover, onRemover, responsavelFinanceiroId })
   return (
     <div className="flex items-center justify-between p-4 rounded-2xl bg-surface-container-highest/30 gap-3">
       <div className="flex items-center gap-3 min-w-0">
-        <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+        <div className="w-10 h-10 shrink-0 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
           <Icone
             name={isConvite ? "mail" : PERFIL_ICONE[item.perfil] || "person"}
             className="text-primary"
