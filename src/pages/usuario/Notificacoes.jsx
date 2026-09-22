@@ -2,41 +2,7 @@
 import { useNavigate } from "react-router-dom";
 import { Icone } from "../../components/icones/Icone";
 import { useNotificacoes } from "../../contexts/NotificacoesContext";
-
-const TIPO_CFG = {
-  NOVA_FATURA: {
-    icone: "receipt_long",
-    cor: "bg-primary/15 text-primary",
-    destino: "/financeiro",
-  },
-  PAGAMENTO_CONFIRMADO: {
-    icone: "check_circle",
-    cor: "bg-green-500/15 text-green-400",
-    destino: "/financeiro",
-  },
-  FATURA_VENCIDA: {
-    icone: "warning",
-    cor: "bg-error/15 text-error",
-    destino: "/financeiro",
-  },
-  SISTEMA: {
-    icone: "info",
-    cor: "bg-veu/10 text-on-surface-variant",
-    destino: null,
-  },
-};
-
-function tempoRelativo(isoStr) {
-  const diff = Date.now() - new Date(isoStr).getTime();
-  const min = Math.floor(diff / 60000);
-  if (min < 1) return "agora mesmo";
-  if (min < 60) return `${min} min atrás`;
-  const h = Math.floor(min / 60);
-  if (h < 24) return `${h}h atrás`;
-  const d = Math.floor(h / 24);
-  if (d < 7) return `${d}d atrás`;
-  return new Date(isoStr).toLocaleDateString("pt-BR");
-}
+import { ROTULO_ORIGEM, configDaNotificacao, tempoRelativo } from "../../utils/notificacoes";
 
 export function Notificacoes() {
   const navigate = useNavigate();
@@ -44,8 +10,8 @@ export function Notificacoes() {
 
   function aoClicar(n) {
     marcarLida(n.id);
-    const cfg = TIPO_CFG[n.tipo] ?? TIPO_CFG.SISTEMA;
-    if (cfg.destino) navigate(cfg.destino);
+    const { destino } = configDaNotificacao(n);
+    if (destino) navigate(destino);
   }
 
   const grupos = agruparPorDia(notificacoes);
@@ -81,7 +47,7 @@ export function Notificacoes() {
             <div>
               <p className="font-semibold text-on-surface mb-1">Sem notificações</p>
               <p className="text-xs text-on-surface-variant">
-                Você receberá avisos aqui quando houver novas faturas ou atualizações de pagamento.
+                Faturas, respostas da administração e comunicados aparecem aqui.
               </p>
             </div>
           </div>
@@ -95,7 +61,7 @@ export function Notificacoes() {
             </p>
             <div className="glass-panel rounded-3xl overflow-hidden divide-y divide-veu/5">
               {itens.map((n) => {
-                const cfg = TIPO_CFG[n.tipo] ?? TIPO_CFG.SISTEMA;
+                const cfg = configDaNotificacao(n);
                 return (
                   <button
                     key={n.id}
@@ -117,8 +83,11 @@ export function Notificacoes() {
                           {n.mensagem}
                         </p>
                       )}
+                      {/* A etiqueta de origem existe porque a caixa deixou de
+                          ser so do financeiro: fatura, aviso e mensagem chegam
+                          na mesma lista. */}
                       <p className="text-[11px] text-on-surface-variant/50 mt-1.5">
-                        {tempoRelativo(n.criadoEm)}
+                        {ROTULO_ORIGEM[n.origem] ?? n.origem} · {tempoRelativo(n.criadoEm)}
                       </p>
                     </div>
 

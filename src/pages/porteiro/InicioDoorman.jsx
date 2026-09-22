@@ -13,7 +13,7 @@ const CARDS_PORTEIRO = [
     color: "primary",
   },
   {
-    to: "/entregas",
+    to: "/portaria/entregas",
     label: "Controle de Entregas",
     desc: "Receber e registrar encomendas e pacotes",
     icon: "inventory_2",

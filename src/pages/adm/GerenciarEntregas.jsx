@@ -1,6 +1,6 @@
 // src/pages/adm/GerenciarEntregas.jsx
 import { useState, useEffect, useMemo } from "react";
-import api from "../../services/api";
+import { acessoApi } from "../../services/acessoApi";
 import { entregaApi } from "../../services/entregasApi";
 import { Icone } from "../../components/icones/Icone";
 import { Campo } from "../../components/campos/Campo";
@@ -51,7 +51,10 @@ export function GerenciarEntregas() {
   const [filtroRetAte, setFiltroRetAte] = useState("");
 
   useEffect(() => {
-    Promise.all([entregaApi.listarTodas(), api.get("/api/users")])
+    // `/api/users` recusa o porteiro — ele nao esta em PERFIS_GESTAO_USUARIOS.
+    // `/api/portaria/usuarios-condominio` responde para porteiro e gestao, ja
+    // filtrado pelo condominio do token, que e o recorte certo de qualquer jeito.
+    Promise.all([entregaApi.listarTodas(), acessoApi.listarUsuariosCondominio()])
       .then(([resEntregas, resUsuarios]) => {
         setEntregas(resEntregas.data || []);
         setUsuarios(resUsuarios.data?.usuarios || []);

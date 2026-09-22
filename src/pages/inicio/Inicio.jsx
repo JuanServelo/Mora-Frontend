@@ -1,19 +1,57 @@
 // src/pages/inicio/Inicio.jsx
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import { condominiosApi } from "../../services/condominiosApi";
-import { avisoApi } from "../../services/portariaApi";
+import { comunicacaoApi, urlDaImagem } from "../../services/comunicacaoApi";
+import { useNotificacoes } from "../../contexts/NotificacoesContext";
 import { Icone } from "../../components/icones/Icone";
-import { PERFIS } from "../../utils/perfis";
+import { PERFIS, isUsuarioRestrito } from "../../utils/perfis";
+import { formatarData } from "../../utils/datas";
 import { InicioDoorman } from "../porteiro/InicioDoorman";
 
 const ACESSO_RAPIDO = [
+  {
+    to: "/avisos",
+    label: "Avisos",
+    desc: "Comunicados da administração",
+    icon: "campaign",
+  },
+  {
+    to: "/conversas",
+    label: "Conversas",
+    desc: "Falar com a administração",
+    icon: "forum",
+  },
+  {
+    to: "/financeiro",
+    label: "Cobranças",
+    desc: "Faturas, boleto e PIX",
+    icon: "receipt_long",
+  },
   {
     to: "/espacos",
     label: "Espaços",
     desc: "Reservar áreas comuns",
     icon: "event_available",
+  },
+  {
+    to: "/entregas",
+    label: "Entregas",
+    desc: "Encomendas na portaria",
+    icon: "inventory_2",
+  },
+  {
+    to: "/meus-convidados",
+    label: "Convidados",
+    desc: "Autorizar a entrada de visitantes",
+    icon: "group_add",
+  },
+  {
+    to: "/veiculos",
+    label: "Veículos",
+    desc: "Carros e vagas da sua unidade",
+    icon: "directions_car",
   },
   {
     to: "/reclamacoes",
@@ -29,22 +67,165 @@ const ACESSO_RAPIDO = [
   },
 ];
 
+/**
+ * O comunicado aberto.
+ *
+ * Fecha por três caminhos — botão, clique fora e Escape — e todos passam por
+ * `aoFechar`, que é quem registra a leitura. Se algum deles fechasse por outro
+ * caminho, existiria um jeito de ler o aviso sem que a leitura fosse contada.
+ */
+function PopupAviso({ aviso, aoFechar }) {
+  const caixa = useRef(null);
+
+  useEffect(() => {
+    const aoTeclar = (e) => {
+      if (e.key === "Escape") aoFechar();
+    };
+    document.addEventListener("keydown", aoTeclar);
+
+    // Trava a rolagem do fundo: sem isso a página atrás desliza junto e o
+    // pop-up parece solto.
+    const overflowAnterior = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    caixa.current?.focus();
+
+    return () => {
+      document.removeEventListener("keydown", aoTeclar);
+      document.body.style.overflow = overflowAnterior;
+    };
+  }, [aoFechar]);
+
+  return (
+    <div
+      onClick={aoFechar}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+    >
+      <div
+        ref={caixa}
+        role="dialog"
+        aria-modal="true"
+        aria-label={aviso.titulo}
+        tabIndex={-1}
+        onClick={(e) => e.stopPropagation()}
+        className="glass-panel rounded-3xl w-full max-w-lg max-h-[85dvh] flex flex-col outline-none"
+      >
+        <header className="flex items-start gap-3 p-6 pb-4">
+          <div className="w-11 h-11 rounded-xl bg-primary/15 text-primary flex items-center justify-center shrink-0">
+            <Icone name="campaign" className="text-xl" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <h2 className="font-headline text-xl font-bold text-on-surface leading-snug">
+              {aviso.titulo}
+            </h2>
+            <p className="text-[11px] text-on-surface-variant mt-0.5">
+              {aviso.autor ? `${aviso.autor} · ` : ""}
+              vigente de {formatarData(aviso.dataInicio)} a {formatarData(aviso.dataFim)}
+            </p>
+          </div>
+          <button
+            onClick={aoFechar}
+            aria-label="Fechar"
+            className="shrink-0 -mt-1 -mr-1 p-2 rounded-xl text-on-surface-variant hover:bg-veu/5 cursor-pointer"
+          >
+            <Icone name="close" />
+          </button>
+        </header>
+
+        <div className="px-6 overflow-y-auto space-y-4">
+          {aviso.imagemUrl && (
+            <img
+              src={urlDaImagem(aviso.imagemUrl)}
+              alt=""
+              className="w-full max-h-72 object-contain rounded-2xl border border-veu/10 bg-surface-container-low"
+            />
+          )}
+          {/* `break-words` junto do `pre-wrap`: sem ele uma palavra longa sem
+              espaços não quebra, e o comunicado ganha rolagem horizontal. */}
+          <p className="text-sm text-on-surface-variant leading-relaxed whitespace-pre-wrap break-words">
+            {aviso.mensagem}
+          </p>
+        </div>
+
+        <footer className="p-6 pt-4 flex items-center justify-between gap-3">
+          <p className="text-[11px] text-on-surface-variant/70">
+            Ao fechar, o aviso será marcado como lido.
+          </p>
+          <button
+            onClick={aoFechar}
+            className="shrink-0 px-5 py-2.5 rounded-xl bg-primary text-on-primary text-sm font-semibold hover:bg-primary/90 transition cursor-pointer"
+          >
+            Entendi
+          </button>
+        </footer>
+      </div>
+    </div>
+  );
+}
+
 export function Inicio() {
   const { usuario } = useAuth();
+  const { buscar: recarregarSino } = useNotificacoes();
 
   const primeiroNome = usuario?.nome?.split(" ")[0] || "Morador";
   const [nomeCondominio, setNomeCondominio] = useState(null);
   const [avisos, setAvisos] = useState([]);
+  const [avisoAberto, setAvisoAberto] = useState(null);
 
   useEffect(() => {
     if (!usuario?.condominioId) return;
     condominiosApi.buscar(usuario.condominioId)
       .then((res) => setNomeCondominio(res.data.condominio?.nome ?? null))
       .catch(() => {});
-    avisoApi.listarAtivos(usuario.condominioId)
-      .then((res) => setAvisos(res.data || []))
+    // Pelo comunicacao-service, e não direto no portaria: é ele que recorta
+    // pelo público-alvo e sabe o que esta pessoa já leu. Buscando no portaria,
+    // esta seção mostrava a todo mundo os avisos de todo mundo — inclusive
+    // comunicado interno de funcionário para o morador.
+    comunicacaoApi.listarAvisos()
+      .then((res) => setAvisos(res.data?.avisos ?? []))
       .catch(() => {});
   }, [usuario?.condominioId]);
+
+  // `destinatario` vem falso para a gestão; `lido` some da lista assim que a
+  // pessoa abre o aviso em /avisos.
+  const naoLidos = avisos.filter((a) => a.destinatario !== false && !a.lido);
+
+  /**
+   * Fechar o comunicado é o que registra a leitura.
+   *
+   * Registrar na abertura seria mais fácil, e pior: bastaria um toque errado na
+   * lista para o sistema afirmar que a pessoa leu. Fechando, ela teve o texto
+   * na frente — que é o que o síndico precisa poder alegar.
+   *
+   * A falha é silenciosa de propósito: o aviso continua na lista e será
+   * oferecido de novo. Um alerta de erro aqui atrapalharia sem dar o que fazer.
+   */
+  // Estável: o pop-up a tem nas dependências do efeito que escuta o Escape e
+  // dá foco ao diálogo. Recriada a cada render, esse efeito rodaria de novo a
+  // cada render do pai — e o `focus()` arrancaria o foco de quem estivesse
+  // navegando por teclado.
+  const fecharEMarcar = useCallback(async () => {
+    const aviso = avisoAberto;
+    setAvisoAberto(null);
+    if (!aviso || aviso.lido) return;
+
+    try {
+      const { data } = await comunicacaoApi.confirmarLeitura(aviso.id);
+      setAvisos((lista) =>
+        lista.map((a) =>
+          a.id === aviso.id ? { ...a, lido: true, lidoEm: data.leitura?.confirmadaEm } : a,
+        ),
+      );
+      recarregarSino();
+    } catch {
+      /* fica pendente, e reaparece na próxima visita */
+    }
+  }, [avisoAberto, recarregarSino]);
+
+  // Sem vínculo com unidade, a navbar já esconde todos os links. Os atalhos
+  // precisavam seguir a mesma regra: ofereciam por outro caminho exatamente o
+  // que ela esconde — e agora são nove, não três.
+  const restrito = isUsuarioRestrito(usuario);
 
   if (usuario?.perfil === PERFIS.PORTEIRO) {
     return <InicioDoorman />;
@@ -68,70 +249,59 @@ export function Inicio() {
           </p>
         </header>
 
-        {/* Avisos vigentes do condomínio */}
-        {avisos.length > 0 && (
+        {avisoAberto && <PopupAviso aviso={avisoAberto} aoFechar={fecharEMarcar} />}
+
+        {/*
+          Só o que ainda não foi lido, e só para quem é destinatário. A gestão
+          publica os avisos: mostrá-los aqui como se fossem para ela confundia
+          quem escreveu o comunicado com quem precisa lê-lo. A visão de quem
+          publica é a tela Comunicados.
+        */}
+        {naoLidos.length > 0 && (
           <section className="space-y-4">
             <div className="flex items-center gap-2">
               <Icone name="campaign" className="text-primary text-xl" />
               <h2 className="font-headline text-2xl font-bold text-on-surface">Avisos</h2>
             </div>
             <div className="space-y-3">
-              {avisos.map((a) => (
-                <div key={a.id} className="glass-panel rounded-2xl p-5 border border-primary/15">
+              {naoLidos.map((a) => (
+                <button
+                  key={a.id}
+                  onClick={() => setAvisoAberto(a)}
+                  className="w-full text-left glass-panel rounded-2xl p-5 border border-primary/15 hover:border-primary/40 hover:bg-veu/[0.03] transition cursor-pointer"
+                >
                   <div className="flex items-start gap-3">
                     <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
                       <Icone name="campaign" className="text-primary" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="font-semibold text-on-surface">{a.titulo}</p>
-                      <p className="text-sm text-on-surface-variant whitespace-pre-wrap mt-1">{a.mensagem}</p>
-                      <p className="text-xs text-on-surface-variant/70 mt-2">
-                        Até {new Date(a.dataFim).toLocaleDateString("pt-BR")}
+                      {/* Prévia de duas linhas: o texto inteiro é o conteúdo do
+                          pop-up, e é abri-lo que conta como leitura. */}
+                      <p className="text-sm text-on-surface-variant mt-1 line-clamp-2 break-words">{a.mensagem}</p>
+                      <p className="text-xs text-on-surface-variant/70 mt-2 flex items-center gap-1.5">
+                        Até {formatarData(a.dataFim)}
                         {a.autor ? ` · ${a.autor}` : ""}
+                        {a.imagemUrl && <Icone name="image" className="text-sm" />}
                       </p>
                     </div>
+                    <Icone name="chevron_right" className="text-on-surface-variant/40 shrink-0 mt-2" />
                   </div>
-                </div>
+                </button>
               ))}
             </div>
           </section>
         )}
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          {[
-            {
-              icon: "calendar_month",
-              titulo: "Reservas",
-              texto: "Áreas comuns cadastradas pela administração aparecem em Espaços.",
-            },
-            {
-              icon: "campaign",
-              titulo: "Comunicação",
-              texto: "Reclamações e chamados são registrados na área dedicada.",
-            },
-            {
-              icon: "shield",
-              titulo: "Acesso",
-              texto: "Seu perfil e vínculo com a unidade seguem as regras definidas pela gestão.",
-            },
-          ].map((c) => (
-            <div
-              key={c.titulo}
-              className="glass-panel rounded-3xl p-6 border border-veu/5 hover:border-primary/20 transition-colors"
-            >
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                  <Icone name={c.icon} className="text-primary text-xl" />
-                </div>
-                <span className="text-on-surface-variant text-xs font-semibold uppercase tracking-wider">
-                  {c.titulo}
-                </span>
-              </div>
-              <p className="text-on-surface-variant text-sm leading-relaxed">{c.texto}</p>
-            </div>
-          ))}
-        </div>
-
+        {restrito ? (
+          <div className="glass-panel rounded-3xl p-6 flex items-start gap-3">
+            <Icone name="info" className="text-primary text-xl shrink-0 mt-0.5" />
+            <p className="text-sm text-on-surface-variant leading-relaxed">
+              Seu usuário ainda não está vinculado a uma unidade. Assim que a
+              administração fizer o vínculo, os atalhos do condomínio aparecem aqui.
+            </p>
+          </div>
+        ) : (
         <section className="space-y-5">
           <div className="flex items-end justify-between gap-4 flex-wrap">
             <div>
@@ -169,6 +339,7 @@ export function Inicio() {
             ))}
           </div>
         </section>
+        )}
 
         <div className="glass-panel rounded-[2rem] p-8 md:p-10 relative overflow-hidden border border-primary/10">
           <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-tertiary/5 pointer-events-none" />

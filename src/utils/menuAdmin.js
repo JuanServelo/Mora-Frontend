@@ -91,17 +91,20 @@ export const ADM_LINKS = [
     perfis: CONDOMINIO,
   },
   {
-    to: "/adm/entregas",
-    label: "Entregas",
-    icon: "inventory_2",
-    description: "Encomendas na portaria",
+    // Nao e rota /adm, e nao precisa ser: a tela e a mesma do morador, e quem
+    // decide o que cada perfil enxerga e o servico. Fica aqui so para aparecer
+    // na barra lateral de quem usa o layout administrativo.
+    to: "/conversas",
+    label: "Conversas",
+    icon: "forum",
+    description: "Chamados dos moradores",
     perfis: CONDOMINIO,
   },
   {
-    to: "/adm/vagas",
-    label: "Vagas",
-    icon: "local_parking",
-    description: "Vagas de garagem",
+    to: "/adm/comunicados",
+    label: "Comunicados",
+    icon: "campaign",
+    description: "Quem confirmou a leitura dos avisos",
     perfis: CONDOMINIO,
   },
   {
@@ -121,6 +124,8 @@ export function linksDoPerfil(perfil) {
 /**
  * Se o perfil pode abrir a rota. Usado pelo guard: esconder do menu sem barrar
  * a URL deixaria a tela acessível a quem digitasse o endereço.
+ *
+ * Só decide sobre rotas `/adm`; as demais desta lista passam pelo guard comum.
  */
 export function podeAcessarRotaAdmin(perfil, pathname) {
   const link = ADM_LINKS.find((l) => pathname.startsWith(l.to));

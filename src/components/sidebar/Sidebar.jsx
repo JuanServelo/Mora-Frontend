@@ -1,6 +1,7 @@
 // src/components/sidebar/Sidebar.jsx
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Icone } from "../icones/Icone";
+import { FotoUsuario } from "../avatar/FotoUsuario";
 import { useAuth } from "../../contexts/AuthContext";
 import { useNotificacoes } from "../../contexts/NotificacoesContext";
 import { PERFIS } from "../../utils/perfis";
@@ -12,16 +13,21 @@ import moraLogo3 from "../../assets/Mora3.png";
 const PORTEIRO_LINKS = [
   { to: "/inicio", label: "Início", icon: "home" },
   { to: "/entradas-e-saidas", label: "Entradas e Saídas", icon: "swap_horiz" },
-  { to: "/entregas", label: "Entregas", icon: "inventory_2" },
+  { to: "/portaria/entregas", label: "Entregas", icon: "inventory_2" },
   { to: "/chaves", label: "Chaves", icon: "vpn_key" },
   { to: "/usuarios", label: "Usuários do Condomínio", icon: "groups" },
+  { to: "/conversas", label: "Conversas", icon: "forum" },
+  // O porteiro é destinatário dos avisos de público FUNCIONARIOS. Sem esta
+  // entrada ele recebia comunicado que não tinha como abrir — a rota existe,
+  // mas só a navbar dos moradores levava até ela.
+  { to: "/avisos", label: "Avisos", icon: "campaign" },
 ];
 
 export function Sidebar({ aberta = false, aoFechar }) {
   const { pathname } = useLocation();
   const { usuario, logout } = useAuth();
   const navigate = useNavigate();
-  const { naoLidas } = useNotificacoes();
+  const { naoLidas, conversasNaoLidas } = useNotificacoes();
 
   const perfil = usuario?.perfil;
   const isDoorman = perfil === PERFIS.PORTEIRO;
@@ -90,7 +96,19 @@ export function Sidebar({ aberta = false, aoFechar }) {
                 <Icone name={link.icon} className={`text-base ${active ? "text-primary" : "group-hover:text-primary"}`} />
               </div>
               <span className="text-sm font-semibold leading-tight">{link.label}</span>
-              {active && <Icone name="arrow_forward_ios" className="text-xs text-primary ml-auto shrink-0" />}
+
+              {/* O chamado que um morador abre com a administracao nao gera
+                  notificacao — nao ha participante da gestao a quem endereca-la.
+                  Sem este contador, o sindico so descobriria abrindo a tela. */}
+              {link.to === "/conversas" && conversasNaoLidas > 0 && (
+                <span className="ml-auto shrink-0 min-w-5 h-5 px-1.5 rounded-full bg-error text-white text-[10px] font-bold flex items-center justify-center">
+                  {conversasNaoLidas > 9 ? "9+" : conversasNaoLidas}
+                </span>
+              )}
+
+              {active && link.to !== "/conversas" && (
+                <Icone name="arrow_forward_ios" className="text-xs text-primary ml-auto shrink-0" />
+              )}
             </Link>
           );
         })}
@@ -98,8 +116,21 @@ export function Sidebar({ aberta = false, aoFechar }) {
 
       {/* Usuário (link p/ perfil) + Logout */}
       <div className="px-2 py-3 border-t border-veu/5 space-y-0.5">
+        {/*
+          Precisa ser link, e não apenas um aviso: quem usa a barra lateral não
+          tem Navbar, logo não tem o sino nem o "ver todas". Como uma `div`, o
+          contador ficava eterno — sem caminho para a tela que marca como lido.
+
+          Conta só notificação. Conversa não lida já tem selo próprio no item
+          "Conversas" do menu, e somar as duas aqui recriaria o mesmo problema:
+          um número que não zera ao abrir o destino.
+        */}
         {naoLidas > 0 && (
-          <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-primary/5 border border-primary/10 mb-1">
+          <Link
+            to="/notificacoes"
+            onClick={aoFechar}
+            className="flex items-center gap-2 px-3 py-2 rounded-xl bg-primary/5 border border-primary/10 mb-1 hover:bg-primary/10 transition-all cursor-pointer"
+          >
             <Icone name="notifications_active" className="text-primary text-base" />
             <span className="text-xs text-primary font-semibold flex-1">
               {naoLidas} notificaç{naoLidas === 1 ? "ão" : "ões"}
@@ -107,15 +138,19 @@ export function Sidebar({ aberta = false, aoFechar }) {
             <span className="w-5 h-5 rounded-full bg-error text-white text-[10px] font-bold flex items-center justify-center">
               {naoLidas > 9 ? "9+" : naoLidas}
             </span>
-          </div>
+          </Link>
         )}
         <Link
           to="/perfil"
           onClick={aoFechar}
           className="flex items-center gap-3 px-3 py-2 rounded-xl bg-surface-container-highest/20 hover:bg-veu/5 transition-all"
         >
-          <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center shrink-0">
-            <Icone name={isDoorman ? "badge" : "admin_panel_settings"} className="text-base text-primary" />
+          <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center shrink-0 overflow-hidden">
+            <FotoUsuario
+              usuario={usuario}
+              iconeVazio={isDoorman ? "badge" : "admin_panel_settings"}
+              classeIcone="text-base text-primary"
+            />
           </div>
           <div className="min-w-0">
             <p className="text-sm font-semibold text-on-surface truncate leading-tight">{usuario?.nome || "Admin"}</p>

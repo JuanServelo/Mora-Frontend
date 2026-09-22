@@ -6,6 +6,7 @@ import { useAuth } from "../../contexts/AuthContext";
 import { useNotificacoes } from "../../contexts/NotificacoesContext";
 import { PERFIS, isUsuarioRestrito, podeAcessarAdmin } from "../../utils/perfis";
 import { linksDoPerfil } from "../../utils/menuAdmin";
+import { configDaNotificacao } from "../../utils/notificacoes";
 // import moraLogo from "../../assets/Mora.png";
 // import moraLogo2 from "../../assets/Mora2.png";
 import moraLogo3 from "../../assets/Mora3.png";
@@ -14,6 +15,8 @@ const NAV_LINKS_LEFT = [
   { label: "Início", to: "/inicio" },
   { label: "Serviços", to: "/servicos" },
   { label: "Espaços", to: "/espacos" },
+  { label: "Avisos", to: "/avisos" },
+  { label: "Conversas", to: "/conversas" },
   { label: "Reclamações", to: "/reclamacoes" },
   { label: "Cobranças", to: "/financeiro" },
 ];
@@ -21,8 +24,9 @@ const NAV_LINKS_LEFT = [
 const NAV_LINKS_PORTEIRO = [
   { label: "Início", to: "/inicio" },
   { label: "Entradas e Saídas", to: "/entradas-e-saidas" },
-  { label: "Entregas", to: "/entregas" },
+  { label: "Entregas", to: "/portaria/entregas" },
   { label: "Chaves", to: "/chaves" },
+  { label: "Conversas", to: "/conversas" },
 ];
 
 const NAV_LINKS_RIGHT = [
@@ -130,7 +134,8 @@ function AdminMenu({ usuario }) {
 }
 
 function SinoNotificacoes() {
-  const { notificacoes, naoLidas, marcarLida, marcarTodasLidas } = useNotificacoes();
+  const { notificacoes, naoLidas, conversasNaoLidas, totalPendente, marcarLida, marcarTodasLidas } =
+    useNotificacoes();
   const navigate = useNavigate();
   const [aberto, setAberto] = useState(false);
   const ref = useRef(null);
@@ -146,9 +151,11 @@ function SinoNotificacoes() {
   function aoClicar(n) {
     marcarLida(n.id);
     setAberto(false);
-    if (["NOVA_FATURA", "PAGAMENTO_CONFIRMADO", "FATURA_VENCIDA"].includes(n.tipo)) {
-      navigate("/financeiro");
-    }
+    // O destino sai de utils/notificacoes.js, que é a mesma fonte usada pela
+    // tela de Notificações. Antes a lista de tipos vivia aqui, e um tipo novo
+    // publicado por outro serviço não levava a lugar nenhum.
+    const { destino } = configDaNotificacao(n);
+    if (destino) navigate(destino);
   }
 
   const recentes = notificacoes.slice(0, 8);
@@ -161,9 +168,9 @@ function SinoNotificacoes() {
         title="Notificações"
       >
         <Icone name="notifications" className="text-xl" />
-        {naoLidas > 0 && (
+        {totalPendente > 0 && (
           <span className="absolute top-1 right-1 w-4 h-4 rounded-full bg-error text-white text-[10px] font-bold flex items-center justify-center">
-            {naoLidas > 9 ? "9+" : naoLidas}
+            {totalPendente > 9 ? "9+" : totalPendente}
           </span>
         )}
       </button>
@@ -186,11 +193,32 @@ function SinoNotificacoes() {
             )}
           </div>
 
+          {/* A conversa com a administração ainda sem resposta nao gera
+              notificacao — nao ha participante da gestao a quem endereca-la.
+              Sem esta linha, o sino acenderia e o painel nao explicaria por que. */}
+          {conversasNaoLidas > 0 && (
+            <Link
+              to="/conversas"
+              onClick={() => setAberto(false)}
+              className="flex items-center gap-3 px-4 py-3 border-b border-veu/5 hover:bg-veu/5 transition"
+            >
+              <div className="p-1.5 rounded-lg bg-tertiary/15 text-tertiary shrink-0">
+                <Icone name="forum" className="text-sm" />
+              </div>
+              <p className="text-sm text-on-surface flex-1">
+                {conversasNaoLidas} conversa{conversasNaoLidas > 1 ? "s" : ""} com mensagem nova
+              </p>
+              <Icone name="chevron_right" className="text-base text-on-surface-variant/40" />
+            </Link>
+          )}
+
           {recentes.length === 0 ? (
-            <div className="py-8 text-center text-on-surface-variant text-sm">
-              <Icone name="notifications_none" className="text-3xl opacity-30 block mb-2 mx-auto" />
-              Sem notificações
-            </div>
+            conversasNaoLidas === 0 && (
+              <div className="py-8 text-center text-on-surface-variant text-sm">
+                <Icone name="notifications_none" className="text-3xl opacity-30 block mb-2 mx-auto" />
+                Sem notificações
+              </div>
+            )
           ) : (
             <div className="max-h-72 overflow-y-auto divide-y divide-veu/5">
               {recentes.map((n) => (
@@ -199,15 +227,8 @@ function SinoNotificacoes() {
                   onClick={() => aoClicar(n)}
                   className={`w-full text-left flex items-start gap-3 px-4 py-3 hover:bg-veu/5 transition cursor-pointer ${!n.lida ? "bg-primary/5" : ""}`}
                 >
-                  <div className={`mt-0.5 p-1.5 rounded-lg shrink-0 ${
-                    n.tipo === "PAGAMENTO_CONFIRMADO" ? "bg-green-500/15 text-green-400" :
-                    n.tipo === "FATURA_VENCIDA" ? "bg-error/15 text-error" :
-                    "bg-primary/15 text-primary"
-                  }`}>
-                    <Icone name={
-                      n.tipo === "PAGAMENTO_CONFIRMADO" ? "check_circle" :
-                      n.tipo === "FATURA_VENCIDA" ? "warning" : "receipt"
-                    } className="text-sm" />
+                  <div className={`mt-0.5 p-1.5 rounded-lg shrink-0 ${configDaNotificacao(n).cor}`}>
+                    <Icone name={configDaNotificacao(n).icone} className="text-sm" />
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className={`text-sm font-medium leading-snug ${n.lida ? "text-on-surface-variant" : "text-on-surface"}`}>

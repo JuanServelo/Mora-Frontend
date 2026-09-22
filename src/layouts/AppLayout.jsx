@@ -79,10 +79,16 @@ function tituloDaRota(pathname) {
     "/adm/financeiro": "Financeiro",
     "/adm/reunioes": "Reuniões",
     "/adm/reclamacoes": "Reclamações",
-    "/adm/entregas": "Entregas",
-    "/adm/vagas": "Vagas",
+    "/adm/comunicados": "Comunicados",
     "/adm/conhecimento": "Conhecimento",
     "/adm/meu-plano": "Meu Plano",
+    // Fora de /adm, mas quem usa a barra lateral também abre estas.
+    "/portaria/entregas": "Entregas",
+    "/conversas": "Conversas",
+    "/avisos": "Avisos",
+    "/entradas-e-saidas": "Entradas e Saídas",
+    "/chaves": "Chaves",
+    "/usuarios": "Usuários",
   };
   const chave = Object.keys(mapa).find((k) => pathname.startsWith(k));
   return chave ? mapa[chave] : "Mora";

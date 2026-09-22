@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../../../contexts/AuthContext";
 import { Icone } from "../../../components/icones/Icone";
+import { FotoUsuario } from "../../../components/avatar/FotoUsuario";
 import { DetalhesContaView } from "./DetalhesContaView";
 import { PrivacidadeView } from "./PrivacidadeView";
 import { FamiliaView } from "./FamiliaView";
@@ -100,7 +101,7 @@ export function Perfil() {
               <div className="relative mb-6">
                 <div className="w-28 h-28 rounded-full p-[3px] bg-gradient-to-tr from-primary via-secondary to-tertiary">
                   <div className="w-full h-full rounded-full bg-surface-container-highest flex items-center justify-center overflow-hidden border-4 border-surface">
-                    <Icone name="person" className="text-primary text-5xl" />
+                    <FotoUsuario usuario={usuario} classeIcone="text-primary text-5xl" />
                   </div>
                 </div>
               </div>
