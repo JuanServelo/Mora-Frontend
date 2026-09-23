@@ -15,13 +15,11 @@ import { GerenciarReclamacoes } from "../pages/adm/GerenciarReclamacoes";
 import { GerenciarEntregas } from "../pages/adm/GerenciarEntregas";
 import { GerenciarConhecimento } from "../pages/adm/GerenciarConhecimento";
 import { GerenciarPerfis } from "../pages/adm/GerenciarPerfis";
-import { GerenciarFuncionarios } from "../pages/adm/GerenciarFuncionarios";
 import { GerenciarCondominios } from "../pages/adm/GerenciarCondominios";
 import { GerenciarPlanos } from "../pages/adm/GerenciarPlanos";
 import { GerenciarFinanceiro } from "../pages/adm/GerenciarFinanceiro";
 import { MeuPlano } from "../pages/adm/MeuPlano";
 import { GerenciarVeiculos } from "../pages/adm/GerenciarVeiculos";
-import { AtendimentoPortaria } from "../pages/porteiro/AtendimentoPortaria";
 import { FAQ } from "../pages/usuario/FAQ";
 import { MinhasReservas } from "../pages/usuario/MinhasReservas";
 import { MinhasReclamacoes } from "../pages/usuario/MinhasReclamacoes";
@@ -35,8 +33,9 @@ import { UsuariosCondominio } from "../pages/porteiro/UsuariosCondominio";
 import { MeusConvidados } from "../pages/usuario/MeusConvidados";
 import { MinhasCobrancas } from "../pages/usuario/MinhasCobrancas";
 import { Notificacoes } from "../pages/usuario/Notificacoes";
+import { Conversas } from "../pages/usuario/Conversas";
 import { Avisos } from "../pages/usuario/Avisos";
-import { MeusVeiculos } from "../pages/usuario/MeusVeiculos";
+import { GerenciarComunicados } from "../pages/adm/GerenciarComunicados";
 import { AppLayout } from "../layouts/AppLayout";
 import { ProtectedRoute } from "./ProtectedRoute";
 import { DoormanRoute } from "./DoormanRoute";
@@ -110,7 +109,7 @@ export const router = createBrowserRouter([
       { path: "/portaria", element: <Portaria /> },
       { path: "/entradas-e-saidas", element: <Portaria /> },
       { path: "/chaves", element: <Chaves /> },
-      { path: "/atendimento", element: <DoormanRoute><AtendimentoPortaria /></DoormanRoute> },
+      { path: "/veiculos", element: <GerenciarVeiculos /> },
       {
         path: "/usuarios",
         element: (
@@ -123,7 +122,10 @@ export const router = createBrowserRouter([
       { path: "/financeiro", element: <MinhasCobrancas /> },
       { path: "/notificacoes", element: <Notificacoes /> },
       { path: "/avisos", element: <Avisos /> },
-      { path: "/meus-veiculos", element: <MeusVeiculos /> },
+      // A mesma tela com e sem conversa aberta: o serviço decide o que cada
+      // perfil enxerga, entao nao ha rota separada para sindico e morador.
+      { path: "/conversas", element: <Conversas /> },
+      { path: "/conversas/:id", element: <Conversas /> },
       // Todas as telas /adm passam pelo AdminRoute, que usa o mesmo mapa do menu
       // (src/utils/menuAdmin.js) — assim esconder do menu também barra a URL.
       { path: "/adm/geral", element: <AdminRoute><IndexAdminGeralLazy /></AdminRoute> },
@@ -134,12 +136,12 @@ export const router = createBrowserRouter([
       { path: "/adm/estruturas", element: <AdminRoute><GerenciarEstruturas /></AdminRoute> },
       { path: "/adm/perfis", element: <AdminRoute><GerenciarPerfis /></AdminRoute> },
       { path: "/adm/meu-plano", element: <AdminRoute><MeuPlano /></AdminRoute> },
-      { path: "/adm/funcionarios", element: <AdminRoute><GerenciarFuncionarios /></AdminRoute> },
       { path: "/adm/financeiro", element: <AdminRoute><GerenciarFinanceiro /></AdminRoute> },
+      { path: "/adm/comunicados", element: <AdminRoute><GerenciarComunicados /></AdminRoute> },
       { path: "/adm/reunioes", element: <AdminRoute><GerenciarReunioes /></AdminRoute> },
       { path: "/adm/reclamacoes", element: <AdminRoute><GerenciarReclamacoes /></AdminRoute> },
       { path: "/adm/conhecimento", element: <AdminRoute><GerenciarConhecimento /></AdminRoute> },
-      { path: "/adm/veiculos", element: <AdminRoute><GerenciarVeiculos /></AdminRoute> },
+      { path: "/adm/veiculos", element: <GerenciarVeiculos /> },
 
       // Endereços antigos, mantidos como atalho: quem tiver link salvo ou
       // histórico do navegador chega ao lugar novo em vez de um 404 cru.

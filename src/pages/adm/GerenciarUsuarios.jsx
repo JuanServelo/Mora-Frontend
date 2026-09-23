@@ -1,6 +1,5 @@
 // src/pages/adm/GerenciarUsuarios.jsx
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
 import api from "../../services/api";
 import { blocoApi, apartamentoApi, vagaApi } from "../../services/estruturasApi";
 import { userManagementApi } from "../../services/userManagementApi";
@@ -15,7 +14,6 @@ import {
   perfisCadastroDisponiveis,
 } from "../../utils/perfis";
 import { mascararCpf, validarCpf } from "../../utils/masks";
-import { SeletorCondominio } from "../../components/adm/SeletorCondominio";
 
 const PERFIS_EXIGEM_UNIDADE_FORM = new Set([
   PERFIS.MORADOR,
@@ -53,12 +51,12 @@ export function GerenciarUsuarios() {
   useEffect(() => {
     Promise.all([
       api.get("/api/user-management/users").catch(() => api.get("/api/users")),
-      blocoApi.listar().catch(() => ({ data: [] })),
-      apartamentoApi.listar().catch(() => ({ data: [] })),
-      condominiosApi.listarAtivos().catch(() => ({ data: { condominios: [] } })),
+      blocoApi.listar(),
+      apartamentoApi.listar(),
+      condominiosApi.listar().catch(() => ({ data: { condominios: [] } })),
     ])
       .then(([usersRes, blocosRes, aptsRes, condsRes]) => {
-        setCondominios(condsRes.data.condominios || []);
+        setCondominios((condsRes.data.condominios || []).filter((c) => c.status === "active"));
         const mapStatus = (s) => {
           if (s === "active") return "ativo";
           if (s === "inactive") return "inativo";
@@ -246,7 +244,7 @@ export function GerenciarUsuarios() {
   }
 
   return (
-    <div className="min-h-screen w-full pt-4 pb-20 px-4 sm:px-6">
+    <div className="min-h-screen w-full pt-4 pb-20 px-6">
       <div className="max-w-6xl mx-auto space-y-8">
         {/* Header */}
         <header className="flex flex-col md:flex-row md:items-end justify-between gap-4">
@@ -254,7 +252,7 @@ export function GerenciarUsuarios() {
             <p className="text-on-surface-variant text-xs font-semibold uppercase tracking-widest mb-1">
               Painel Administrativo
             </p>
-            <h1 className="font-headline text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-on-surface">
+            <h1 className="font-headline text-4xl font-extrabold tracking-tight text-on-surface">
               Gerenciar{" "}
               <span className="bg-gradient-to-r from-primary to-tertiary bg-clip-text text-transparent">
                 Usuários
@@ -263,7 +261,7 @@ export function GerenciarUsuarios() {
           </div>
 
           {/* Botão + Stats */}
-          <div className="flex flex-wrap items-center gap-4 w-full md:w-auto md:shrink-0">
+          <div className="flex items-center gap-4 shrink-0 flex-wrap">
             {aba === "gerenciamento" && (
               <button
                 onClick={() => {
@@ -286,7 +284,7 @@ export function GerenciarUsuarios() {
             )}
 
             <div className="flex gap-3">
-              <div className="glass-panel rounded-2xl px-4 sm:px-5 py-3 text-center flex-1 sm:flex-none min-w-[92px]">
+              <div className="glass-panel rounded-2xl px-5 py-3 text-center">
                 <p className="text-2xl font-headline font-bold text-on-surface">
                   {usuarios.length}
                 </p>
@@ -294,7 +292,7 @@ export function GerenciarUsuarios() {
                   Total
                 </p>
               </div>
-              <div className="glass-panel rounded-2xl px-4 sm:px-5 py-3 text-center flex-1 sm:flex-none min-w-[92px]">
+              <div className="glass-panel rounded-2xl px-5 py-3 text-center">
                 <p className="text-2xl font-headline font-bold text-primary">
                   {usuarios.filter((u) => u.status === "ativo").length}
                 </p>
@@ -302,7 +300,7 @@ export function GerenciarUsuarios() {
                   Ativos
                 </p>
               </div>
-              <div className="glass-panel rounded-2xl px-4 sm:px-5 py-3 text-center flex-1 sm:flex-none min-w-[92px]">
+              <div className="glass-panel rounded-2xl px-5 py-3 text-center">
                 <p className="text-2xl font-headline font-bold text-secondary">
                   {usuarios.filter((u) => u.status === "pendente").length}
                 </p>
@@ -315,7 +313,7 @@ export function GerenciarUsuarios() {
         </header>
 
         {/* Sub-navbar de abas */}
-        <div className="glass-panel rounded-2xl p-1.5 flex flex-wrap gap-1 w-full sm:w-fit">
+        <div className="glass-panel rounded-2xl p-1.5 flex gap-1 w-fit">
           {[
             {
               id: "gerenciamento",
@@ -330,7 +328,7 @@ export function GerenciarUsuarios() {
                 setAba(tab.id);
                 setCriando(false);
               }}
-              className={`flex items-center gap-2 px-3 sm:px-5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 cursor-pointer ${
+              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 cursor-pointer ${
                 aba === tab.id
                   ? "bg-primary/15 text-primary"
                   : "text-on-surface-variant hover:text-on-surface hover:bg-veu/5"
@@ -346,9 +344,9 @@ export function GerenciarUsuarios() {
         {aba === "gerenciamento" && (
           <>
             {criando && (
-              <div className="glass-panel rounded-3xl p-4 sm:p-6 lg:p-8 border border-primary/15">
+              <div className="glass-panel rounded-3xl p-6 lg:p-8 border border-primary/15">
                 <div className="flex items-center gap-3 mb-6">
-                  <div className="w-10 h-10 shrink-0 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
                     <Icone name="person_add" className="text-primary" />
                   </div>
                   <h2 className="font-headline text-xl font-bold text-on-surface">
@@ -383,7 +381,7 @@ export function GerenciarUsuarios() {
             {/* Lista de usuários */}
             <div className="space-y-3">
               {filtrados.length === 0 && (
-                <div className="glass-panel rounded-3xl p-6 sm:p-10 text-center text-on-surface-variant">
+                <div className="glass-panel rounded-3xl p-10 text-center text-on-surface-variant">
                   Nenhum usuário encontrado.
                 </div>
               )}
@@ -396,7 +394,7 @@ export function GerenciarUsuarios() {
                   {/* Linha principal */}
                   <button
                     onClick={() => toggleExpandir(usuario.id)}
-                    className="w-full flex items-center gap-3 sm:gap-4 p-4 sm:p-5 text-left group hover:bg-veu/5 transition-all cursor-pointer"
+                    className="w-full flex items-center gap-4 p-5 text-left group hover:bg-veu/5 transition-all cursor-pointer"
                   >
                     <div className="w-11 h-11 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
                       <Icone name="person" className="text-primary" />
@@ -448,7 +446,7 @@ export function GerenciarUsuarios() {
 
                   {/* Painel expandido */}
                   {expandido === usuario.id && (
-                    <div className="border-t border-outline-variant/15 px-4 sm:px-5 pb-6 pt-5">
+                    <div className="border-t border-outline-variant/15 px-5 pb-6 pt-5">
                       {editando === usuario.id ? (
                         <FormEdicao
                           usuario={usuario}
@@ -491,7 +489,7 @@ export function GerenciarUsuarios() {
 // ─────────────────────────────────────────────
 function SecaoCondominio() {
   return (
-    <div className="glass-panel rounded-3xl p-6 sm:p-8 lg:p-10 text-center max-w-2xl mx-auto">
+    <div className="glass-panel rounded-3xl p-8 lg:p-10 text-center max-w-2xl mx-auto">
       <div className="w-14 h-14 rounded-2xl bg-secondary/10 flex items-center justify-center mx-auto mb-4">
         <Icone name="payments" className="text-secondary text-3xl" />
       </div>
@@ -537,7 +535,7 @@ function DetalhesUsuario({ usuario, onEditar, onReenviar, onDesativar }) {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
           { label: "Bloco", value: usuario.bloco || "—", icon: "domain" },
           {
@@ -915,11 +913,7 @@ function FormNovoUsuario({ blocos, apartamentos, condominios, perfilAtor, condom
     cpfPrecadastro: "",
   });
   const [erroCpf, setErroCpf] = useState("");
-  // Quando precisaSelecionarCondominio, o condominioId do ator não restringe a seleção —
-  // deixamos vazio e o useEffect abaixo preenche conforme a quantidade de condomínios ativos.
-  const [condominioId, setCondominioId] = useState(() =>
-    precisaSelecionarCondominio ? "" : (condominioIdAtor || ""),
-  );
+  const [condominioId, setCondominioId] = useState(() => condominioIdAtor || "");
   const [blocoId, setBlocoId] = useState("");
   const [aptId, setAptId] = useState("");
 
@@ -930,13 +924,11 @@ function FormNovoUsuario({ blocos, apartamentos, condominios, perfilAtor, condom
     }
   }, [perfilAtor]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Pré-seleciona automaticamente quando há exatamente 1 condomínio ativo;
-  // com 0 ou ≥2, limpa a seleção (RN-03).
+  // Pré-seleciona primeiro condomínio disponível para admins sem condomínio próprio
   useEffect(() => {
-    if (!precisaSelecionarCondominio) return;
-    setCondominioId(condominios.length === 1 ? condominios[0].id : "");
-    setBlocoId("");
-    setAptId("");
+    if (precisaSelecionarCondominio && !condominioId && condominios.length > 0) {
+      setCondominioId(condominios[0].id);
+    }
   }, [condominios]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Blocos filtrados pelo condomínio selecionado
@@ -992,35 +984,20 @@ function FormNovoUsuario({ blocos, apartamentos, condominios, perfilAtor, condom
       </p>
 
       {precisaSelecionarCondominio ? (
-        condominios.length === 0 ? (
-          /* RN-04: nenhum condomínio ativo disponível */
-          <div className="flex flex-col gap-3 px-4 py-4 rounded-xl bg-error/5 border border-error/20">
-            <div className="flex items-start gap-2">
-              <Icone name="error" className="text-error text-base shrink-0 mt-0.5" />
-              <p className="text-sm text-error font-medium">
-                Não há condomínios ativos disponíveis. Ative ou cadastre um condomínio antes de criar usuários.
-              </p>
-            </div>
-            {perfilAtor === PERFIS.ADMIN_GERAL && (
-              <Link
-                to="/adm/condominios"
-                className="self-start text-xs font-semibold text-primary hover:underline"
-              >
-                Gerenciar condomínios →
-              </Link>
-            )}
-          </div>
-        ) : (
-          <div className="space-y-2">
-            <label className={labelCls}>Condomínio *</label>
-            <SeletorCondominio
-              condominios={condominios}
-              value={condominioId}
-              onChange={(id) => { setCondominioId(id); setBlocoId(""); setAptId(""); }}
-              selectClassName={selectCls}
-            />
-          </div>
-        )
+        <div className="space-y-2">
+          <label className={labelCls}>Condomínio *</label>
+          <select
+            value={condominioId}
+            onChange={(e) => { setCondominioId(e.target.value); setBlocoId(""); setAptId(""); }}
+            required
+            className={selectCls}
+          >
+            <option value="">— Selecione o condomínio —</option>
+            {condominios.map((c) => (
+              <option key={c.id} value={c.id}>{c.nome}</option>
+            ))}
+          </select>
+        </div>
       ) : (
         <div className="flex items-center gap-2 px-4 py-3 rounded-xl bg-surface-container-highest/30">
           <Icone name="domain" className="text-primary text-base shrink-0" />
@@ -1114,8 +1091,8 @@ function FormNovoUsuario({ blocos, apartamentos, condominios, perfilAtor, condom
         </span>
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-3 pt-1">
-        <Botao type="submit" disabled={precisaSelecionarCondominio && condominios.length === 0}>
+      <div className="flex gap-3 pt-1">
+        <Botao type="submit">
           Enviar convite
           <Icone name="send" className="text-xl" />
         </Botao>

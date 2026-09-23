@@ -2,13 +2,11 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
-import { useModules } from "../../contexts/ModulesContext";
 import { condominiosApi } from "../../services/condominiosApi";
 import { comunicacaoApi, urlDaImagem } from "../../services/comunicacaoApi";
 import { useNotificacoes } from "../../contexts/NotificacoesContext";
 import { Icone } from "../../components/icones/Icone";
-import { PERFIS, isUsuarioRestrito, perfilTemAcessoSistema } from "../../utils/perfis";
-import { linkLiberado } from "../../utils/modulosPlano";
+import { PERFIS, isUsuarioRestrito } from "../../utils/perfis";
 import { formatarData } from "../../utils/datas";
 import { InicioDoorman } from "../porteiro/InicioDoorman";
 
@@ -18,28 +16,30 @@ const ACESSO_RAPIDO = [
     label: "Avisos",
     desc: "Comunicados da administração",
     icon: "campaign",
-    modulo: "comunicacao",
+  },
+  {
+    to: "/conversas",
+    label: "Conversas",
+    desc: "Falar com a administração",
+    icon: "forum",
   },
   {
     to: "/financeiro",
     label: "Cobranças",
     desc: "Faturas, boleto e PIX",
     icon: "receipt_long",
-    modulo: "financeiro",
   },
   {
     to: "/espacos",
     label: "Espaços",
     desc: "Reservar áreas comuns",
     icon: "event_available",
-    modulo: "areas_comuns",
   },
   {
     to: "/entregas",
     label: "Entregas",
     desc: "Encomendas na portaria",
     icon: "inventory_2",
-    modulo: "entregas",
   },
   {
     to: "/meus-convidados",
@@ -48,18 +48,16 @@ const ACESSO_RAPIDO = [
     icon: "group_add",
   },
   {
-    to: "/meus-veiculos",
+    to: "/veiculos",
     label: "Veículos",
     desc: "Carros e vagas da sua unidade",
     icon: "directions_car",
-    modulo: "veiculos",
   },
   {
     to: "/reclamacoes",
     label: "Reclamações",
     desc: "Abrir ou acompanhar chamados",
     icon: "report",
-    modulo: "reclamacoes",
   },
   {
     to: "/servicos",
@@ -168,7 +166,6 @@ function PopupAviso({ aviso, aoFechar }) {
 export function Inicio() {
   const { usuario } = useAuth();
   const { buscar: recarregarSino } = useNotificacoes();
-  const { activeModules } = useModules();
 
   const primeiroNome = usuario?.nome?.split(" ")[0] || "Morador";
   const [nomeCondominio, setNomeCondominio] = useState(null);
@@ -234,27 +231,8 @@ export function Inicio() {
     return <InicioDoorman />;
   }
 
-  if (!perfilTemAcessoSistema(usuario?.perfil)) {
-    return (
-      <div className="min-h-screen w-full flex items-center justify-center px-6">
-        <div className="glass-panel rounded-3xl p-10 max-w-md w-full text-center space-y-4 border border-outline-variant/15">
-          <div className="w-16 h-16 rounded-2xl bg-on-surface-variant/10 flex items-center justify-center mx-auto">
-            <Icone name="lock" className="text-on-surface-variant text-3xl" />
-          </div>
-          <h1 className="font-headline text-2xl font-bold text-on-surface">
-            Acesso não configurado
-          </h1>
-          <p className="text-on-surface-variant text-sm leading-relaxed">
-            Seu perfil ainda não possui acesso a nenhuma área do sistema.
-            Procure a administração do condomínio se isso for um engano.
-          </p>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen w-full pt-4 pb-20 px-4 sm:px-6">
+    <div className="min-h-screen w-full pt-4 pb-20 px-6">
       <div className="max-w-6xl mx-auto space-y-10">
         <header className="text-center max-w-3xl mx-auto">
           <p className="text-on-surface-variant text-xs font-semibold uppercase tracking-widest mb-2">
@@ -293,7 +271,7 @@ export function Inicio() {
                   className="w-full text-left glass-panel rounded-2xl p-5 border border-primary/15 hover:border-primary/40 hover:bg-veu/[0.03] transition cursor-pointer"
                 >
                   <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 shrink-0 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                    <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
                       <Icone name="campaign" className="text-primary" />
                     </div>
                     <div className="flex-1 min-w-0">
@@ -342,7 +320,7 @@ export function Inicio() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {ACESSO_RAPIDO.filter((item) => linkLiberado(activeModules, item)).map((item) => (
+            {ACESSO_RAPIDO.map((item) => (
               <Link
                 key={item.to}
                 to={item.to}

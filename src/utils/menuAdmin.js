@@ -1,5 +1,4 @@
 import { PERFIS } from "./perfis";
-import { linkLiberado } from "./modulosPlano";
 
 /**
  * Fonte única do menu administrativo.
@@ -10,9 +9,6 @@ import { linkLiberado } from "./modulosPlano";
  * A divisão segue a camada do perfil:
  *   Admin Geral   → opera a PLATAFORMA: clientes, planos, quem acessa
  *   Admin Síndico → opera o CONDOMÍNIO: o dia a dia dos moradores
- *
- * O campo `modulo` (quando presente) indica qual módulo do plano contratado
- * habilita este link. Links sem `modulo` são estruturais e sempre aparecem.
  */
 const PLATAFORMA = [PERFIS.ADMIN_GERAL];
 const CONDOMINIO = [PERFIS.ADMIN_SINDICO];
@@ -74,29 +70,10 @@ export const ADM_LINKS = [
     perfis: CONDOMINIO,
   },
   {
-    // Fora de /adm porque é a mesma tela do morador, com as abas de operação
-    // a mais. Sem esta entrada o síndico não tem como chegar nela: a sidebar
-    // dele troca os links de morador pelos administrativos.
-    to: "/espacos",
-    label: "Reservas",
-    icon: "event_available",
-    description: "Agenda dos espaços e aprovações",
-    perfis: CONDOMINIO,
-    modulo: "areas_comuns",
-  },
-  {
     to: "/adm/financeiro",
     label: "Financeiro",
     icon: "payments",
     description: "Taxas, rateio e cobranças",
-    perfis: CONDOMINIO,
-    modulo: "financeiro",
-  },
-  {
-    to: "/adm/funcionarios",
-    label: "Funcionários",
-    icon: "badge",
-    description: "Situação funcional, turnos e liberações",
     perfis: CONDOMINIO,
   },
   {
@@ -105,7 +82,6 @@ export const ADM_LINKS = [
     icon: "groups",
     description: "Assembleias e votações",
     perfis: CONDOMINIO,
-    modulo: "reunioes",
   },
   {
     to: "/adm/reclamacoes",
@@ -113,7 +89,23 @@ export const ADM_LINKS = [
     icon: "report",
     description: "Ocorrências dos moradores",
     perfis: CONDOMINIO,
-    modulo: "reclamacoes",
+  },
+  {
+    // Nao e rota /adm, e nao precisa ser: a tela e a mesma do morador, e quem
+    // decide o que cada perfil enxerga e o servico. Fica aqui so para aparecer
+    // na barra lateral de quem usa o layout administrativo.
+    to: "/conversas",
+    label: "Conversas",
+    icon: "forum",
+    description: "Chamados dos moradores",
+    perfis: CONDOMINIO,
+  },
+  {
+    to: "/adm/comunicados",
+    label: "Comunicados",
+    icon: "campaign",
+    description: "Quem confirmou a leitura dos avisos",
+    perfis: CONDOMINIO,
   },
   {
     to: "/adm/conhecimento",
@@ -121,20 +113,12 @@ export const ADM_LINKS = [
     icon: "library_books",
     description: "Base de conhecimento e FAQ",
     perfis: CONDOMINIO,
-    modulo: "conhecimento",
   },
 ];
 
 /** Links visíveis para um perfil. */
 export function linksDoPerfil(perfil) {
   return ADM_LINKS.filter((l) => l.perfis.includes(perfil));
-}
-
-/** Links visíveis para um perfil, filtrados também pelos módulos contratados. */
-export function linksFiltradosPorModulo(perfil, activeModules) {
-  return ADM_LINKS.filter(
-    (l) => l.perfis.includes(perfil) && linkLiberado(activeModules, l)
-  );
 }
 
 /**

@@ -1,12 +1,21 @@
-// src/services/comunicacaoApi.js
-// src/services/http.js
 import axios from "axios";
 
-const http = axios.create({
-  baseURL: import.meta.env.VITE_COMUNICACAO_API_URL || "/comunicacao-api",
+/**
+ * Client do comunicacao-service.
+ *
+ * Instância própria porque é outro serviço, em outra porta — mesmo desenho de
+ * financeiroApi.js e gestaoApi.js.
+ *
+ * A caixa de notificações vinha do financeiro-service. Mudou de lugar porque a
+ * caixa é **do usuário**, não de um serviço: ela mistura fatura, aviso e
+ * mensagem, e com uma tabela por serviço a tela teria que juntar as fontes e
+ * ordenar sozinha.
+ */
+const comunicacao = axios.create({
+  baseURL: import.meta.env.VITE_COMUNICACAO_API_URL || "http://localhost:3003",
 });
 
-http.interceptors.request.use((config) => {
+comunicacao.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
@@ -14,65 +23,7 @@ http.interceptors.request.use((config) => {
   return config;
 });
 
-// ─────────────────────────────────────────────
-// BASE DE CONHECIMENTO / FAQ
-// ─────────────────────────────────────────────
-export const conhecimentoApi = {
-  listarTodos: () => http.get("/artigos"),
-  listarPublicados: () => http.get("/artigos", { params: { publicadosOnly: true } }),
-  listarPorCategoria: (categoria) =>
-    http.get("/artigos", { params: { categoria } }),
-  listarPublicadosPorCategoria: (categoria) =>
-    http.get("/artigos", { params: { publicadosOnly: true, categoria } }),
-  buscarPorTitulo: (titulo) =>
-    http.get("/artigos/buscar", { params: { titulo } }),
-  buscar: (id) => http.get(`/artigos/${id}`),
-  criar: (data) => http.post("/artigos", data),
-  atualizar: (id, data) => http.put(`/artigos/${id}`, data),
-  excluir: (id) => http.delete(`/artigos/${id}`),
-};
-
-// ─────────────────────────────────────────────
-// AVISOS E COMUNICADOS (por condomínio)
-// ─────────────────────────────────────────────
-export const avisoApi = {
-  listar: () => http.get("/avisos"),
-  listarAtivos: () => http.get("/avisos/ativos"),
-  buscar: (id) => http.get(`/avisos/${id}`),
-  criar: (data) => http.post("/avisos", data),
-  atualizar: (id, data) => http.put(`/avisos/${id}`, data),
-  encerrar: (id) => http.patch(`/avisos/${id}/encerrar`),
-  excluir: (id) => http.delete(`/avisos/${id}`),
-};
-
-// ─────────────────────────────────────────────
-// NOTIFICAÇÕES
-// ─────────────────────────────────────────────
-export const notificacaoApi = {
-  listar: (params) => http.get("/notificacoes", { params }),
-  listarNaoLidas: () => http.get("/notificacoes/nao-lidas"),
-  contador: () => http.get("/notificacoes/contador"),
-  marcarLida: (id) => http.patch(`/notificacoes/${id}/lida`),
-  marcarTodasLidas: () => http.patch("/notificacoes/todas-lidas"),
-};
-
-// ─────────────────────────────────────────────
-// CHAT
-// ─────────────────────────────────────────────
-export const chatApi = {
-  enviar: (data) => http.post("/chat/mensagem", data),
-  buscarConversa: (outroUsuarioId) =>
-    http.get(`/chat/conversa/${outroUsuarioId}`),
-  marcarConversaLida: (outroUsuarioId) =>
-    http.patch(`/chat/conversa/${outroUsuarioId}/lida`),
-  marcarMensagemLida: (id) => http.patch(`/chat/mensagem/${id}/lida`),
-  listarNaoLidas: () => http.get("/chat/nao-lidas"),
-  contador: () => http.get("/chat/contador"),
-};
-
-// ─────────────────────────────────────────────
-// URL de arquivo servido pelo próprio serviço
-// ─────────────────────────────────────────────
+const base = "/api/comunicacao";
 
 /**
  * Endereço completo de uma imagem de aviso.
@@ -86,62 +37,71 @@ export const chatApi = {
 export function urlDaImagem(caminho) {
   if (!caminho) return null;
   if (caminho.startsWith("http")) return caminho;
-  return `${http.defaults.baseURL}${caminho}`;
+  return `${comunicacao.defaults.baseURL}${caminho}`;
 }
 
-// ─────────────────────────────────────────────
-// A caixa do usuário: notificações e avisos
-// ─────────────────────────────────────────────
-
-/**
- * O mesmo serviço, visto pelas telas do morador.
- *
- * Convive com `avisoApi` e `notificacaoApi` acima em vez de substituí-los:
- * aqueles são a visão de CRUD que as telas de gestão usam, e este é o que a
- * caixa de entrada e a tela de avisos consomem. Batem no mesmo backend.
- */
 export const comunicacaoApi = {
   // ── Notificações ──────────────────────────────────────
-  /**
-   * A caixa do usuário, no formato que as telas esperam.
-   *
-   * O serviço devolve um `Page` do Spring — `content`, `totalElements` e o
-   * resto da paginação. Converter aqui, e não lá, mantém o endpoint como está
-   * para quem já o consome, e evita que cada tela aprenda a desembrulhar
-   * página.
-   */
-  async listarNotificacoes(params) {
-    const resposta = await http.get("/notificacoes", { params });
-    const itens = resposta.data?.content ?? resposta.data ?? [];
-    return {
-      ...resposta,
-      data: {
-        sucesso: true,
-        notificacoes: itens,
-        naoLidas: itens.filter((n) => !n.lida).length,
-      },
-    };
+  listarNotificacoes(params) {
+    return comunicacao.get(`${base}/notificacoes`, { params });
   },
   /** Contador do sino: notificações não lidas + conversas com mensagem nova. */
   resumo() {
-    return http.get("/notificacoes/resumo");
+    return comunicacao.get(`${base}/notificacoes/resumo`);
   },
   marcarNotificacaoLida(id) {
-    return http.patch(`/notificacoes/${id}/lida`);
+    return comunicacao.patch(`${base}/notificacoes/${id}/lida`);
   },
   marcarTodasNotificacoesLidas() {
-    return http.patch("/notificacoes/todas-lidas");
+    return comunicacao.post(`${base}/notificacoes/lidas`);
+  },
+
+  // ── Conversas ─────────────────────────────────────────
+  listarConversas(incluirEncerradas = false) {
+    return comunicacao.get(`${base}/conversas`, {
+      params: incluirEncerradas ? { encerradas: "true" } : undefined,
+    });
+  },
+  abrirConversa(dados) {
+    return comunicacao.post(`${base}/conversas`, dados);
+  },
+  verConversa(id) {
+    return comunicacao.get(`${base}/conversas/${id}`);
+  },
+  responder(id, corpo) {
+    return comunicacao.post(`${base}/conversas/${id}/mensagens`, { corpo });
+  },
+  encerrarConversa(id) {
+    return comunicacao.patch(`${base}/conversas/${id}/encerrar`);
+  },
+  removerMensagem(id) {
+    return comunicacao.delete(`${base}/mensagens/${id}`);
+  },
+  /** Só a gestão: o morador alcança a rota, mas recortada na unidade dele. */
+  listarContatos() {
+    return comunicacao.get(`${base}/contatos`);
   },
 
   // ── Avisos e confirmação de leitura ───────────────────
-  /** Avisos ativos do condomínio, já marcados com o que este usuário leu. */
+  /** Envia a imagem e devolve a URL para gravar junto do aviso. */
+  enviarImagemAviso(arquivo) {
+    const dados = new FormData();
+    dados.append("imagem", arquivo);
+    return comunicacao.post(`${base}/avisos/imagem`, dados, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+  },
   listarAvisos() {
-    return http.get("/avisos/ativos");
+    return comunicacao.get(`${base}/avisos`);
   },
   confirmarLeitura(avisoId) {
-    return http.post(`/avisos/${avisoId}/lido`);
+    return comunicacao.post(`${base}/avisos/${avisoId}/leitura`);
+  },
+  /** Panorama da gestão: avisos ativos e quantos confirmaram cada um. */
+  panoramaLeituras() {
+    return comunicacao.get(`${base}/avisos/leituras`);
   },
   relatorioLeitura(avisoId) {
-    return http.get(`/avisos/${avisoId}/leituras`);
+    return comunicacao.get(`${base}/avisos/${avisoId}/leituras`);
   },
 };
