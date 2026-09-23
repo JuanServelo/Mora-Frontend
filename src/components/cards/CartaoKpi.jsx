@@ -20,7 +20,7 @@ export function CartaoKpi({ valor, label, sub, tom = "neutro", icone, onClick })
     <Tag
       {...(clicavel ? { type: "button", onClick } : {})}
       className={`glass-panel rounded-2xl px-5 py-4 text-left w-full transition ${
-        clicavel ? "hover:bg-white/5 cursor-pointer" : ""
+        clicavel ? "hover:bg-veu/5 cursor-pointer" : ""
       }`}
     >
       <div className="flex items-start justify-between gap-3">

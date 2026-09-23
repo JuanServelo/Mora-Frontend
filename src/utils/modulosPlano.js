@@ -13,15 +13,20 @@ export const MAPA_MODULOS = {
   portaria: ["/portaria", "/entradas-e-saidas", "/atendimento"],
   reunioes: ["/adm/reunioes"],
   vagas: ["/adm/vagas"],
-  entregas: ["/adm/entregas", "/entregas"],
+  entregas: ["/adm/entregas", "/entregas", "/portaria/entregas"],
   areas_comuns: ["/espacos"],
   reclamacoes: ["/adm/reclamacoes", "/reclamacoes"],
   conhecimento: ["/adm/conhecimento", "/faq"],
   votacoes: [],
-  veiculos: ["/adm/veiculos", "/veiculos"],
+  veiculos: ["/adm/veiculos", "/meus-veiculos"],
   chaves: ["/chaves"],
-  comunicacao: [],
-  financeiro: ["/adm/financeiro"],
+  // O slug existia sem rota nenhuma. Estas são as telas que ele governa:
+  // avisos e a caixa de entrada do morador, mais conversas e o relatório de
+  // leitura, que chegam junto com os endpoints correspondentes no serviço.
+  comunicacao: ["/avisos", "/notificacoes", "/conversas", "/adm/comunicados"],
+  // `/financeiro` é a tela do morador (as faturas da unidade dele); a de /adm
+  // é a configuração. Sem as duas aqui, o morador batia em rota bloqueada.
+  financeiro: ["/adm/financeiro", "/financeiro"],
 };
 
 /**
@@ -41,7 +46,11 @@ const ROTAS_LIVRES = [
   "/adm/usuarios",
   "/adm/estruturas",
   "/adm/perfis",
+  // Gestão da própria equipe é estrutural: não depende de módulo contratado.
+  "/adm/funcionarios",
   "/usuarios",
+  // Ver e trocar o próprio plano não pode depender do plano.
+  "/adm/meu-plano",
 ];
 
 /**

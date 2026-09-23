@@ -1,6 +1,6 @@
 // src/pages/adm/GerenciarEntregas.jsx
 import { useState, useEffect, useMemo } from "react";
-import api from "../../services/api";
+import { acessoApi } from "../../services/acessoApi";
 import { entregaApi } from "../../services/entregasApi";
 import { Icone } from "../../components/icones/Icone";
 import { Campo } from "../../components/campos/Campo";
@@ -51,7 +51,10 @@ export function GerenciarEntregas() {
   const [filtroRetAte, setFiltroRetAte] = useState("");
 
   useEffect(() => {
-    Promise.all([entregaApi.listarTodas(), api.get("/api/users")])
+    // `/api/users` recusa o porteiro — ele nao esta em PERFIS_GESTAO_USUARIOS.
+    // `/api/portaria/usuarios-condominio` responde para porteiro e gestao, ja
+    // filtrado pelo condominio do token, que e o recorte certo de qualquer jeito.
+    Promise.all([entregaApi.listarTodas(), acessoApi.listarUsuariosCondominio()])
       .then(([resEntregas, resUsuarios]) => {
         setEntregas(resEntregas.data || []);
         setUsuarios(resUsuarios.data?.usuarios || []);
@@ -313,7 +316,7 @@ export function GerenciarEntregas() {
                 <div key={entrega.id} className="glass-panel rounded-3xl overflow-hidden">
                   <button
                     onClick={() => { setExpandido((p) => (p === entrega.id ? null : entrega.id)); setEditando(null); }}
-                    className="w-full flex items-center gap-3 sm:gap-4 p-4 sm:p-5 text-left hover:bg-white/5 transition-all cursor-pointer"
+                    className="w-full flex items-center gap-3 sm:gap-4 p-4 sm:p-5 text-left hover:bg-veu/5 transition-all cursor-pointer"
                   >
                     <div className={`w-11 h-11 rounded-full flex items-center justify-center shrink-0 ${cfg.color}`}>
                       <Icone name={cfg.icon} className="text-xl" />
@@ -510,7 +513,7 @@ function PopupRetirada({ entrega, usuarios, onConfirmar, onCancelar }) {
           <button
             type="button"
             onClick={onCancelar}
-            className="flex-1 py-4 rounded-full border border-outline-variant/30 text-on-surface-variant hover:bg-white/5 font-semibold text-sm transition-all cursor-pointer"
+            className="flex-1 py-4 rounded-full border border-outline-variant/30 text-on-surface-variant hover:bg-veu/5 font-semibold text-sm transition-all cursor-pointer"
           >
             Cancelar
           </button>
@@ -741,7 +744,7 @@ function FormEntrega({ inicial, usuarios, onSalvar, onCancelar, erro }) {
         <button
           type="button"
           onClick={onCancelar}
-          className="flex-1 py-4 rounded-full border border-outline-variant/30 text-on-surface-variant hover:bg-white/5 font-semibold transition-all cursor-pointer"
+          className="flex-1 py-4 rounded-full border border-outline-variant/30 text-on-surface-variant hover:bg-veu/5 font-semibold transition-all cursor-pointer"
         >
           Cancelar
         </button>

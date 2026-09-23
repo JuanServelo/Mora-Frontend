@@ -78,7 +78,7 @@ export function PainelGateway() {
 
   if (!status.configurado) {
     return (
-      <div className="text-center py-12 rounded-2xl border border-dashed border-white/10">
+      <div className="text-center py-12 rounded-2xl border border-dashed border-veu/10">
         <Icone name="key_off" className="text-4xl text-outline-variant" />
         <p className="mt-3 text-on-surface-variant text-sm">
           Nenhuma credencial de gateway configurada.
@@ -169,7 +169,7 @@ export function PainelGateway() {
             <div className="ml-auto flex gap-2">
               <button
                 onClick={conferir}
-                className="px-4 py-2 rounded-full bg-white/5 text-on-surface-variant hover:text-on-surface text-sm font-semibold transition cursor-pointer"
+                className="px-4 py-2 rounded-full bg-veu/5 text-on-surface-variant hover:text-on-surface text-sm font-semibold transition cursor-pointer"
               >
                 Conferir status
               </button>

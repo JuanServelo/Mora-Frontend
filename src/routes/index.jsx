@@ -13,12 +13,13 @@ import { GerenciarEstruturas } from "../pages/adm/GerenciarEstruturas";
 import { GerenciarReunioes } from "../pages/adm/GerenciarReunioes";
 import { GerenciarReclamacoes } from "../pages/adm/GerenciarReclamacoes";
 import { GerenciarEntregas } from "../pages/adm/GerenciarEntregas";
-import { GerenciarVagas } from "../pages/adm/GerenciarVagas";
 import { GerenciarConhecimento } from "../pages/adm/GerenciarConhecimento";
 import { GerenciarPerfis } from "../pages/adm/GerenciarPerfis";
+import { GerenciarFuncionarios } from "../pages/adm/GerenciarFuncionarios";
 import { GerenciarCondominios } from "../pages/adm/GerenciarCondominios";
 import { GerenciarPlanos } from "../pages/adm/GerenciarPlanos";
 import { GerenciarFinanceiro } from "../pages/adm/GerenciarFinanceiro";
+import { MeuPlano } from "../pages/adm/MeuPlano";
 import { GerenciarVeiculos } from "../pages/adm/GerenciarVeiculos";
 import { AtendimentoPortaria } from "../pages/porteiro/AtendimentoPortaria";
 import { FAQ } from "../pages/usuario/FAQ";
@@ -32,6 +33,10 @@ import { Portaria } from "../pages/portaria/Portaria";
 import { Chaves } from "../pages/porteiro/Chaves";
 import { UsuariosCondominio } from "../pages/porteiro/UsuariosCondominio";
 import { MeusConvidados } from "../pages/usuario/MeusConvidados";
+import { MinhasCobrancas } from "../pages/usuario/MinhasCobrancas";
+import { Notificacoes } from "../pages/usuario/Notificacoes";
+import { Avisos } from "../pages/usuario/Avisos";
+import { MeusVeiculos } from "../pages/usuario/MeusVeiculos";
 import { AppLayout } from "../layouts/AppLayout";
 import { ProtectedRoute } from "./ProtectedRoute";
 import { DoormanRoute } from "./DoormanRoute";
@@ -89,12 +94,23 @@ export const router = createBrowserRouter([
       { path: "/acesso-pendente", element: <AcessoPendente /> },
       { path: "/espacos", element: <MinhasReservas /> },
       { path: "/reclamacoes", element: <MinhasReclamacoes /> },
+      // Duas telas, dois papeis: o morador ve as encomendas dele; o porteiro
+      // cadastra e da baixa nas do predio inteiro. Antes a gestao de entregas
+      // ficava em /adm, onde o porteiro nao entra — quem recebe a encomenda
+      // nao tinha onde registra-la.
       { path: "/entregas", element: <MinhasEntregas /> },
+      {
+        path: "/portaria/entregas",
+        element: (
+          <DoormanRoute>
+            <GerenciarEntregas />
+          </DoormanRoute>
+        ),
+      },
       { path: "/portaria", element: <Portaria /> },
       { path: "/entradas-e-saidas", element: <Portaria /> },
       { path: "/chaves", element: <Chaves /> },
       { path: "/atendimento", element: <DoormanRoute><AtendimentoPortaria /></DoormanRoute> },
-      { path: "/veiculos", element: <DoormanRoute><GerenciarVeiculos /></DoormanRoute> },
       {
         path: "/usuarios",
         element: (
@@ -104,6 +120,10 @@ export const router = createBrowserRouter([
         ),
       },
       { path: "/meus-convidados", element: <MeusConvidados /> },
+      { path: "/financeiro", element: <MinhasCobrancas /> },
+      { path: "/notificacoes", element: <Notificacoes /> },
+      { path: "/avisos", element: <Avisos /> },
+      { path: "/meus-veiculos", element: <MeusVeiculos /> },
       // Todas as telas /adm passam pelo AdminRoute, que usa o mesmo mapa do menu
       // (src/utils/menuAdmin.js) — assim esconder do menu também barra a URL.
       { path: "/adm/geral", element: <AdminRoute><IndexAdminGeralLazy /></AdminRoute> },
@@ -113,13 +133,19 @@ export const router = createBrowserRouter([
       { path: "/adm/usuarios", element: <AdminRoute><GerenciarUsuarios /></AdminRoute> },
       { path: "/adm/estruturas", element: <AdminRoute><GerenciarEstruturas /></AdminRoute> },
       { path: "/adm/perfis", element: <AdminRoute><GerenciarPerfis /></AdminRoute> },
+      { path: "/adm/meu-plano", element: <AdminRoute><MeuPlano /></AdminRoute> },
+      { path: "/adm/funcionarios", element: <AdminRoute><GerenciarFuncionarios /></AdminRoute> },
       { path: "/adm/financeiro", element: <AdminRoute><GerenciarFinanceiro /></AdminRoute> },
       { path: "/adm/reunioes", element: <AdminRoute><GerenciarReunioes /></AdminRoute> },
       { path: "/adm/reclamacoes", element: <AdminRoute><GerenciarReclamacoes /></AdminRoute> },
-      { path: "/adm/entregas", element: <AdminRoute><GerenciarEntregas /></AdminRoute> },
-      { path: "/adm/vagas", element: <AdminRoute><GerenciarVagas /></AdminRoute> },
       { path: "/adm/conhecimento", element: <AdminRoute><GerenciarConhecimento /></AdminRoute> },
       { path: "/adm/veiculos", element: <AdminRoute><GerenciarVeiculos /></AdminRoute> },
+
+      // Endereços antigos, mantidos como atalho: quem tiver link salvo ou
+      // histórico do navegador chega ao lugar novo em vez de um 404 cru.
+      // Vagas virou aba dentro de Estruturas; entregas passaram à portaria.
+      { path: "/adm/vagas", element: <Navigate to="/adm/estruturas" replace /> },
+      { path: "/adm/entregas", element: <Navigate to="/portaria/entregas" replace /> },
     ],
   },
 ]);

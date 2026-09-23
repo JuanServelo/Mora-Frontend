@@ -67,12 +67,37 @@ export const ADM_LINKS = [
 
   // ── Operação do condomínio: não é trabalho de quem opera a plataforma
   {
+    to: "/adm/meu-plano",
+    label: "Meu Plano",
+    icon: "workspace_premium",
+    description: "Plano contratado e módulos disponíveis",
+    perfis: CONDOMINIO,
+  },
+  {
+    // Fora de /adm porque é a mesma tela do morador, com as abas de operação
+    // a mais. Sem esta entrada o síndico não tem como chegar nela: a sidebar
+    // dele troca os links de morador pelos administrativos.
+    to: "/espacos",
+    label: "Reservas",
+    icon: "event_available",
+    description: "Agenda dos espaços e aprovações",
+    perfis: CONDOMINIO,
+    modulo: "areas_comuns",
+  },
+  {
     to: "/adm/financeiro",
     label: "Financeiro",
     icon: "payments",
     description: "Taxas, rateio e cobranças",
     perfis: CONDOMINIO,
     modulo: "financeiro",
+  },
+  {
+    to: "/adm/funcionarios",
+    label: "Funcionários",
+    icon: "badge",
+    description: "Situação funcional, turnos e liberações",
+    perfis: CONDOMINIO,
   },
   {
     to: "/adm/reunioes",
@@ -89,22 +114,6 @@ export const ADM_LINKS = [
     description: "Ocorrências dos moradores",
     perfis: CONDOMINIO,
     modulo: "reclamacoes",
-  },
-  {
-    to: "/adm/entregas",
-    label: "Entregas",
-    icon: "inventory_2",
-    description: "Encomendas na portaria",
-    perfis: CONDOMINIO,
-    modulo: "entregas",
-  },
-  {
-    to: "/adm/vagas",
-    label: "Vagas",
-    icon: "local_parking",
-    description: "Vagas de garagem",
-    perfis: CONDOMINIO,
-    modulo: "vagas",
   },
   {
     to: "/adm/conhecimento",
@@ -131,6 +140,8 @@ export function linksFiltradosPorModulo(perfil, activeModules) {
 /**
  * Se o perfil pode abrir a rota. Usado pelo guard: esconder do menu sem barrar
  * a URL deixaria a tela acessível a quem digitasse o endereço.
+ *
+ * Só decide sobre rotas `/adm`; as demais desta lista passam pelo guard comum.
  */
 export function podeAcessarRotaAdmin(perfil, pathname) {
   const link = ADM_LINKS.find((l) => pathname.startsWith(l.to));

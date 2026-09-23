@@ -20,8 +20,19 @@ gestao.interceptors.request.use((config) => {
 
 export const gestaoApi = {
   /** KPIs e séries da plataforma inteira. Exclusivo do Admin Geral. */
-  plataforma() {
-    return gestao.get("/api/gestao/dashboard");
+  /**
+   * KPIs e séries da plataforma. Exclusivo do Admin Geral.
+   *
+   * Os filtros vão como query e são aplicados no backend, na origem do dado —
+   * a tela nunca recebe a base inteira para peneirar.
+   */
+  plataforma(filtros = {}) {
+    return gestao.get("/api/gestao/dashboard", { params: filtros });
+  },
+
+  /** Receita da plataforma com as assinaturas. Exclusivo do Admin Geral. */
+  receita(filtros = {}) {
+    return gestao.get("/api/gestao/receita", { params: filtros });
   },
 
   /** Resumo de um condomínio, para a tela de detalhe. */

@@ -4,14 +4,7 @@ import { useAuth } from "../../../contexts/AuthContext";
 import { Campo } from "../../../components/campos/Campo";
 import { Botao } from "../../../components/botoes/Botao";
 import { Icone } from "../../../components/icones/Icone";
-
-const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:3001";
-
-function fotoUrlCompleta(fotoUrl) {
-  if (!fotoUrl) return null;
-  if (fotoUrl.startsWith("http")) return fotoUrl;
-  return `${API_BASE}${fotoUrl}`;
-}
+import { FotoUsuario } from "../../../components/avatar/FotoUsuario";
 
 export function DetalhesContaView() {
   const { usuario, atualizarPerfil, atualizarFoto } = useAuth();
@@ -74,20 +67,15 @@ export function DetalhesContaView() {
     }
   }
 
-  const foto = fotoUrlCompleta(usuario?.fotoUrl);
   const campoErro = (campo) => (erros[campo] ? "ring-2 ring-error/60" : "");
 
   return (
     <form className="space-y-5" onSubmit={handleSalvar}>
       <div className="flex flex-wrap items-center gap-4 p-4 bg-surface-container-highest/30 rounded-2xl">
         <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full p-[2px] bg-gradient-to-tr from-primary via-secondary to-tertiary shrink-0 overflow-hidden">
-          {foto ? (
-            <img src={foto} alt="Avatar" className="w-full h-full rounded-full object-cover" />
-          ) : (
-            <div className="w-full h-full rounded-full bg-surface-container-highest flex items-center justify-center">
-              <Icone name="person" className="text-primary text-3xl" />
-            </div>
-          )}
+          <div className="w-full h-full rounded-full overflow-hidden bg-surface-container-highest flex items-center justify-center">
+            <FotoUsuario usuario={usuario} classeIcone="text-primary text-3xl" />
+          </div>
         </div>
         <div className="min-w-0">
           <p className="text-on-surface font-semibold text-sm">Foto de Perfil</p>

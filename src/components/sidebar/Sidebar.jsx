@@ -4,9 +4,11 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Icone } from "../icones/Icone";
 import { useAuth } from "../../contexts/AuthContext";
 import { useModules } from "../../contexts/ModulesContext";
-import { PERFIS } from "../../utils/perfis";
+import { useNotificacoes } from "../../contexts/NotificacoesContext";
+import { PERFIS, podeAcessarAdmin, isUsuarioRestrito } from "../../utils/perfis";
 import { linksFiltradosPorModulo } from "../../utils/menuAdmin";
 import { linkLiberado } from "../../utils/modulosPlano";
+import { FotoUsuario } from "../avatar/FotoUsuario";
 import moraLogo3 from "../../assets/Mora3.png";
 
 
@@ -17,7 +19,22 @@ const PORTEIRO_LINKS = [
   { to: "/entradas-e-saidas", label: "Entradas e Saídas", icon: "swap_horiz", modulo: "portaria" },
   { to: "/entregas", label: "Entregas", icon: "inventory_2", modulo: "entregas" },
   { to: "/chaves", label: "Chaves", icon: "vpn_key", modulo: "chaves" },
+  { to: "/espacos", label: "Espaços", icon: "deck", modulo: "areas_comuns" },
   { to: "/usuarios", label: "Usuários do Condomínio", icon: "groups" },
+];
+
+// Telas do morador — mesmo layout de Sidebar do porteiro e dos admins.
+const MORADOR_LINKS = [
+  { to: "/inicio", label: "Início", icon: "home" },
+  { to: "/avisos", label: "Avisos", icon: "campaign", modulo: "comunicacao" },
+  { to: "/servicos", label: "Serviços", icon: "room_service" },
+  { to: "/espacos", label: "Espaços", icon: "deck", modulo: "areas_comuns" },
+  { to: "/comodidades", label: "Comodidades", icon: "spa" },
+  { to: "/meus-convidados", label: "Convidados", icon: "group_add" },
+  { to: "/meus-veiculos", label: "Meus Veículos", icon: "directions_car", modulo: "veiculos" },
+  { to: "/entregas", label: "Encomendas", icon: "inventory_2", modulo: "entregas" },
+  { to: "/reclamacoes", label: "Reclamações", icon: "report", modulo: "reclamacoes" },
+  { to: "/faq", label: "FAQ", icon: "help", modulo: "conhecimento" },
 ];
 
 export function Sidebar() {
@@ -25,6 +42,7 @@ export function Sidebar() {
   const { usuario, logout } = useAuth();
   const navigate = useNavigate();
   const [aberta, setAberta] = useState(false);
+  const { naoLidas, conversasNaoLidas } = useNotificacoes();
   const [rotaAnterior, setRotaAnterior] = useState(pathname);
 
   // Fecha o drawer ao trocar de rota (inclusive via voltar/avancar do navegador)
@@ -55,19 +73,25 @@ export function Sidebar() {
 
   const perfil = usuario?.perfil;
   const isDoorman = perfil === PERFIS.PORTEIRO;
+  const isAdmin = podeAcessarAdmin(perfil);
+  // Sem vínculo com unidade não há o que operar: só perfil e logout no rodapé.
+  const restrito = isUsuarioRestrito(usuario);
   const { activeModules } = useModules();
 
-  // Porteiro tem o conjunto dele; os admins veem o que o próprio perfil permite.
-  // Ambos são filtrados pelos módulos contratados.
-  const links = isDoorman
-    ? PORTEIRO_LINKS.filter((l) => linkLiberado(activeModules, l))
-    : linksFiltradosPorModulo(perfil, activeModules);
+  // Cada perfil tem o conjunto dele; todos filtrados pelos módulos contratados.
+  let links;
+  if (restrito) links = [];
+  else if (isDoorman) links = PORTEIRO_LINKS.filter((l) => linkLiberado(activeModules, l));
+  else if (isAdmin) links = linksFiltradosPorModulo(perfil, activeModules);
+  else links = MORADOR_LINKS.filter((l) => linkLiberado(activeModules, l));
 
   const subtitulo = isDoorman
     ? "Portaria"
     : perfil === PERFIS.ADMIN_GERAL
       ? "Plataforma"
-      : "Administrativo";
+      : isAdmin
+        ? "Administrativo"
+        : "Morador";
 
   async function handleLogout() {
     await logout();
@@ -114,7 +138,7 @@ export function Sidebar() {
         style={painelStyle}
       >
       {/* Logo */}
-      <div className="flex items-center gap-3 px-5 py-4 border-b border-white/5">
+      <div className="flex items-center gap-3 px-5 py-4 border-b border-veu/5">
         <img src={moraLogo3} alt="Mora" className="h-7 w-auto shrink-0" />
         <div className="min-w-0">
           <p className="text-[10px] font-semibold uppercase tracking-widest text-on-surface-variant">Painel</p>
@@ -140,7 +164,7 @@ export function Sidebar() {
               className={`flex items-center gap-3 px-3 py-2 rounded-xl transition-all duration-200 group
                 ${active
                   ? "bg-primary/10 text-primary"
-                  : "text-on-surface-variant hover:bg-white/5 hover:text-on-surface"
+                  : "text-on-surface-variant hover:bg-veu/5 hover:text-on-surface"
                 }`}
             >
               <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-all
@@ -148,20 +172,50 @@ export function Sidebar() {
                 <Icone name={link.icon} className={`text-base ${active ? "text-primary" : "group-hover:text-primary"}`} />
               </div>
               <span className="text-sm font-semibold leading-tight">{link.label}</span>
-              {active && <Icone name="arrow_forward_ios" className="text-xs text-primary ml-auto shrink-0" />}
+
+              {/* O chamado que um morador abre com a administracao nao gera
+                  notificacao — nao ha participante da gestao a quem endereca-la.
+                  Sem este contador, o sindico so descobriria abrindo a tela. */}
+              {link.to === "/conversas" && conversasNaoLidas > 0 && (
+                <span className="ml-auto shrink-0 min-w-5 h-5 px-1.5 rounded-full bg-error text-white text-[10px] font-bold flex items-center justify-center">
+                  {conversasNaoLidas > 9 ? "9+" : conversasNaoLidas}
+                </span>
+              )}
+
+              {active && link.to !== "/conversas" && (
+                <Icone name="arrow_forward_ios" className="text-xs text-primary ml-auto shrink-0" />
+              )}
             </Link>
           );
         })}
       </nav>
 
       {/* Usuário (link p/ perfil) + Logout */}
-      <div className="px-2 py-3 border-t border-white/5 space-y-0.5">
+      <div className="px-2 py-3 border-t border-veu/5 space-y-0.5">
+        {naoLidas > 0 && (
+          <Link
+            to="/notificacoes"
+            className="flex items-center gap-2 px-3 py-2 rounded-xl bg-primary/5 border border-primary/10 mb-1 hover:bg-primary/10 transition-all cursor-pointer"
+          >
+            <Icone name="notifications_active" className="text-primary text-base" />
+            <span className="text-xs text-primary font-semibold flex-1">
+              {naoLidas} notificaç{naoLidas === 1 ? "ão" : "ões"}
+            </span>
+            <span className="w-5 h-5 rounded-full bg-error text-white text-[10px] font-bold flex items-center justify-center">
+              {naoLidas > 9 ? "9+" : naoLidas}
+            </span>
+          </Link>
+        )}
         <Link
           to="/perfil"
-          className="flex items-center gap-3 px-3 py-2 rounded-xl bg-surface-container-highest/20 hover:bg-white/5 transition-all"
+          className="flex items-center gap-3 px-3 py-2 rounded-xl bg-surface-container-highest/20 hover:bg-veu/5 transition-all"
         >
-          <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center shrink-0">
-            <Icone name={isDoorman ? "badge" : "admin_panel_settings"} className="text-base text-primary" />
+          <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center shrink-0 overflow-hidden">
+            <FotoUsuario
+              usuario={usuario}
+              iconeVazio={isDoorman ? "badge" : isAdmin ? "admin_panel_settings" : "person"}
+              classeIcone="text-base text-primary"
+            />
           </div>
           <div className="min-w-0">
             <p className="text-sm font-semibold text-on-surface truncate leading-tight">{usuario?.nome || "Admin"}</p>

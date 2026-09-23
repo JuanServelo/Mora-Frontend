@@ -53,7 +53,7 @@ function AdminLink({ link, onNavigate }) {
       className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group
         ${active
           ? "bg-primary/10 text-primary"
-          : "text-on-surface-variant hover:bg-white/5 hover:text-on-surface"
+          : "text-on-surface-variant hover:bg-veu/5 hover:text-on-surface"
         }`}
     >
       <div className={`w-8 h-8 shrink-0 rounded-lg flex items-center justify-center transition-all
@@ -82,7 +82,7 @@ function NavLink({ to, children }) {
         ${
           active
             ? "text-primary bg-primary/10"
-            : "text-on-surface-variant hover:text-on-surface hover:bg-white/5"
+            : "text-on-surface-variant hover:text-on-surface hover:bg-veu/5"
         }`}
     >
       {children}
@@ -113,7 +113,7 @@ function AdminMenu({ usuario, activeModules }) {
         className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-200 cursor-pointer
           ${admActive || open
             ? "text-primary bg-primary/10"
-            : "text-on-surface-variant hover:text-on-surface hover:bg-white/5"
+            : "text-on-surface-variant hover:text-on-surface hover:bg-veu/5"
           }`}
       >
         <Icone name="admin_panel_settings" className="text-base" />
@@ -127,7 +127,7 @@ function AdminMenu({ usuario, activeModules }) {
       {open && (
         <div className="absolute top-[calc(100%+10px)] left-1/2 -translate-x-1/2 w-72 rounded-2xl overflow-hidden z-50 shadow-[0_16px_48px_rgba(0,0,0,0.6)]" style={PANEL_STYLE}>
           {/* Header do painel */}
-          <div className="px-4 py-3 border-b border-white/5">
+          <div className="px-4 py-3 border-b border-veu/5">
             <p className="text-xs font-semibold uppercase tracking-widest text-on-surface-variant">
               Painel Administrativo
             </p>
@@ -198,7 +198,7 @@ function MobileMenu({ open, onClose, links, admLinks }) {
                   className={`block px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-200
                     ${active
                       ? "bg-primary/10 text-primary"
-                      : "text-on-surface-variant hover:bg-white/5 hover:text-on-surface"
+                      : "text-on-surface-variant hover:bg-veu/5 hover:text-on-surface"
                     }`}
                 >
                   {l.label}
@@ -210,7 +210,7 @@ function MobileMenu({ open, onClose, links, admLinks }) {
 
         {admLinks && admLinks.length > 0 && (
           <>
-            <div className="px-4 py-3 border-y border-white/5">
+            <div className="px-4 py-3 border-y border-veu/5">
               <p className="text-xs font-semibold uppercase tracking-widest text-on-surface-variant">
                 Painel Administrativo
               </p>
@@ -268,7 +268,7 @@ export function Navbar() {
             className={`lg:hidden w-9 h-9 shrink-0 rounded-full flex items-center justify-center transition-all duration-200 cursor-pointer
               ${menuAberto
                 ? "text-primary bg-primary/10"
-                : "text-on-surface-variant hover:text-on-surface hover:bg-white/5"
+                : "text-on-surface-variant hover:text-on-surface hover:bg-veu/5"
               }`}
           >
             <Icone name={menuAberto ? "close" : "menu"} className="text-xl" />

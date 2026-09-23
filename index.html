@@ -1,5 +1,5 @@
 <!doctype html>
-<html class="dark" lang="pt-BR">
+<html lang="pt-BR">
 
 <head>
   <meta charset="UTF-8" />
@@ -12,6 +12,20 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
     rel="stylesheet" />
+  <script>
+    /* Aplica o tema antes de a página pintar. Sem isto, o app abre escuro e
+       pisca para claro quando o React monta. */
+    (function () {
+      var t;
+      try { t = localStorage.getItem('tema'); } catch (e) { /* storage bloqueado */ }
+      if (t !== 'claro' && t !== 'escuro') {
+        t = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches
+          ? 'claro' : 'escuro';
+      }
+      document.documentElement.setAttribute('data-tema', t);
+      document.documentElement.style.colorScheme = t === 'claro' ? 'light' : 'dark';
+    })();
+  </script>
 </head>
 
 <body>

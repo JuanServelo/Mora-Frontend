@@ -24,7 +24,7 @@ const CARDS_PORTEIRO = [
     modulo: "portaria",
   },
   {
-    to: "/entregas",
+    to: "/portaria/entregas",
     label: "Controle de Entregas",
     desc: "Receber e registrar encomendas e pacotes",
     icon: "inventory_2",
@@ -46,14 +46,6 @@ const CARDS_PORTEIRO = [
     icon: "deck",
     color: "primary",
     modulo: "areas_comuns",
-  },
-  {
-    to: "/veiculos",
-    label: "Veículos de Serviço",
-    desc: "Cadastrar e gerenciar veículos de serviço",
-    icon: "local_shipping",
-    color: "secondary",
-    modulo: "veiculos",
   },
   {
     to: "/usuarios",
@@ -126,7 +118,7 @@ export function InicioDoorman() {
                 <Link
                   key={item.to}
                   to={item.to}
-                  className={`group glass-panel rounded-3xl p-6 border border-outline-variant/15 ${c.hover} hover:bg-white/[0.03] transition-all duration-300`}
+                  className={`group glass-panel rounded-3xl p-6 border border-outline-variant/15 ${c.hover} hover:bg-veu/[0.03] transition-all duration-300`}
                 >
                   <div
                     className={`w-14 h-14 rounded-2xl ${c.bg} flex items-center justify-center mb-5 group-hover:scale-105 transition-transform`}

@@ -10,6 +10,7 @@ import { Botao } from "../../components/botoes/Botao";
 import { useAuth } from "../../contexts/AuthContext";
 import { useToast } from "../../contexts/ToastContext";
 import { PERFIS, perfisCadastroDisponiveis } from "../../utils/perfis";
+import { ModalFuncionamento } from "../../components/agenda/ModalFuncionamento";
 import { SeletorCondominio } from "../../components/adm/SeletorCondominio";
 import { formatarUnidade } from "../../utils/unidades";
 
@@ -112,7 +113,7 @@ export function GerenciarEstruturas() {
               className={`flex items-center gap-2 px-3 sm:px-5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 cursor-pointer ${
                 aba === tab.id
                   ? "bg-primary/15 text-primary"
-                  : "text-on-surface-variant hover:text-on-surface hover:bg-white/5"
+                  : "text-on-surface-variant hover:text-on-surface hover:bg-veu/5"
               }`}
             >
               <Icone name={tab.icon} className="text-lg" />
@@ -284,7 +285,7 @@ function AbaBlocos({ condominioId }) {
             <div key={bloco.id} className="glass-panel rounded-3xl overflow-hidden">
               <button
                 onClick={() => setBlocoSelecionado(bloco)}
-                className="w-full flex items-center gap-3 sm:gap-4 p-4 sm:p-5 text-left hover:bg-white/5 transition-all cursor-pointer"
+                className="w-full flex items-center gap-3 sm:gap-4 p-4 sm:p-5 text-left hover:bg-veu/5 transition-all cursor-pointer"
               >
                 <div className="w-11 h-11 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
                   <Icone name="apartment" className="text-primary" />
@@ -392,7 +393,7 @@ function FormBloco({ inicial, onSalvar, onCancelar }) {
       </div>
       <div className="flex gap-3 pt-2">
         <Botao type="submit">{inicial ? "Salvar alterações" : "Cadastrar bloco"}</Botao>
-        <button type="button" onClick={onCancelar} className="flex-1 py-4 rounded-full border border-outline-variant/30 text-on-surface-variant hover:bg-white/5 font-semibold transition-all cursor-pointer">
+        <button type="button" onClick={onCancelar} className="flex-1 py-4 rounded-full border border-outline-variant/30 text-on-surface-variant hover:bg-veu/5 font-semibold transition-all cursor-pointer">
           Cancelar
         </button>
       </div>
@@ -601,7 +602,7 @@ function VistaApartamentos({ bloco, condominioId, onVoltar, onEditarBloco, onTog
             <div key={apt.id} className="glass-panel rounded-3xl overflow-hidden">
               <button
                 onClick={() => { setExpandido((p) => (p === apt.id ? null : apt.id)); setEditando(null); }}
-                className="w-full flex items-center gap-3 sm:gap-4 p-4 sm:p-5 text-left hover:bg-white/5 transition-all cursor-pointer"
+                className="w-full flex items-center gap-3 sm:gap-4 p-4 sm:p-5 text-left hover:bg-veu/5 transition-all cursor-pointer"
               >
                 <div className="w-11 h-11 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
                   <Icone name="door_front" className="text-primary" />
@@ -949,7 +950,7 @@ function AbaApartamentos({ condominioId }) {
             <div key={apt.id} className="glass-panel rounded-3xl overflow-hidden">
               <button
                 onClick={() => { setExpandido((p) => (p === apt.id ? null : apt.id)); setEditando(null); }}
-                className="w-full flex items-center gap-3 sm:gap-4 p-4 sm:p-5 text-left hover:bg-white/5 transition-all cursor-pointer"
+                className="w-full flex items-center gap-3 sm:gap-4 p-4 sm:p-5 text-left hover:bg-veu/5 transition-all cursor-pointer"
               >
                 <div className="w-11 h-11 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
                   <Icone name="door_front" className="text-primary" />
@@ -1168,7 +1169,7 @@ function FormApartamento({ inicial, blocos, apartamentos = [], onSalvar, onCance
       )}
       <div className="flex gap-3 pt-2">
         <Botao type="submit" disabled={todosLotados && !inicial}>{inicial ? "Salvar alterações" : "Cadastrar apartamento"}</Botao>
-        <button type="button" onClick={onCancelar} className="flex-1 py-4 rounded-full border border-outline-variant/30 text-on-surface-variant hover:bg-white/5 font-semibold transition-all cursor-pointer">
+        <button type="button" onClick={onCancelar} className="flex-1 py-4 rounded-full border border-outline-variant/30 text-on-surface-variant hover:bg-veu/5 font-semibold transition-all cursor-pointer">
           Cancelar
         </button>
       </div>
@@ -1224,6 +1225,7 @@ function AbaAreasComuns({ condominioId, condominioNome }) {
   const [criando, setCriando] = useState(false);
   const [expandido, setExpandido] = useState(null);
   const [editando, setEditando] = useState(null);
+  const [funcionamentoDe, setFuncionamentoDe] = useState(null);
 
   useEffect(() => {
     setCarregando(true);
@@ -1361,7 +1363,7 @@ function AbaAreasComuns({ condominioId, condominioNome }) {
             <div key={area.id} className="glass-panel rounded-3xl overflow-hidden">
               <button
                 onClick={() => { setExpandido((p) => (p === area.id ? null : area.id)); setEditando(null); }}
-                className="w-full flex items-center gap-3 sm:gap-4 p-4 sm:p-5 text-left hover:bg-white/5 transition-all cursor-pointer"
+                className="w-full flex items-center gap-3 sm:gap-4 p-4 sm:p-5 text-left hover:bg-veu/5 transition-all cursor-pointer"
               >
                 <div className="w-11 h-11 rounded-full bg-secondary/10 flex items-center justify-center shrink-0">
                   <Icone name="pool" className="text-secondary" />
@@ -1375,6 +1377,12 @@ function AbaAreasComuns({ condominioId, condominioNome }) {
                     { label: "Capacidade", value: area.capacidadeMaxima ?? "—" },
                     { label: "Área (m²)", value: area.area ?? "—" },
                     { label: "Reservável", value: area.podeReservar ? "Sim" : "Não" },
+          ...(area.podeReservar
+            ? [{ label: "Aprovação", value: area.exigeAprovacao ? "Síndico" : "Automática" }]
+            : []),
+                    ...(area.podeReservar
+                      ? [{ label: "Aprovação", value: area.exigeAprovacao ? "Síndico" : "Automática" }]
+                      : []),
                   ].map((col) => (
                     <div key={col.label} className="text-center">
                       <p className="text-on-surface-variant text-xs uppercase tracking-wider">{col.label}</p>
@@ -1401,13 +1409,32 @@ function AbaAreasComuns({ condominioId, condominioNome }) {
                       condominioNome={condominioNome}
                     />
                   ) : (
-                    <DetalhesAreaComum area={area} onEditar={() => setEditando(area.id)} onToggleAtivo={() => handleToggleAtivo(area)} />
+                    <>
+                      <DetalhesAreaComum area={area} onEditar={() => setEditando(area.id)} onToggleAtivo={() => handleToggleAtivo(area)} />
+                      {area.podeReservar && (
+                        <button
+                          type="button"
+                          onClick={() => setFuncionamentoDe(area)}
+                          className="mt-3 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold border border-outline-variant/30 text-on-surface-variant hover:bg-veu/5 transition-all cursor-pointer"
+                        >
+                          <Icone name="schedule" className="text-base" />
+                          Horário de funcionamento
+                        </button>
+                      )}
+                    </>
                   )}
                 </div>
               )}
             </div>
           ))}
         </div>
+      )}
+
+      {funcionamentoDe && (
+        <ModalFuncionamento
+          area={funcionamentoDe}
+          onFechar={() => setFuncionamentoDe(null)}
+        />
       )}
     </>
   );
@@ -1422,6 +1449,7 @@ function FormAreaComum({ inicial, onSalvar, onCancelar, condominioNome }) {
     capacidadeMaxima: inicial?.capacidadeMaxima?.toString() || "",
     area: inicial?.area?.toString() || "",
     podeReservar: inicial?.podeReservar ?? false,
+    exigeAprovacao: inicial?.exigeAprovacao ?? false,
     observacoes: inicial?.observacoes || "",
   });
   const [erros, setErros] = useState({});
@@ -1512,6 +1540,7 @@ function FormAreaComum({ inicial, onSalvar, onCancelar, condominioNome }) {
         <div className="flex items-center gap-3 mt-4">
           <button
             type="button"
+            aria-pressed={form.podeReservar}
             onClick={() => set("podeReservar", !form.podeReservar)}
             className={`relative w-12 h-6 rounded-full transition-colors duration-200 cursor-pointer ${form.podeReservar ? "bg-primary" : "bg-outline-variant/40"}`}
           >
@@ -1519,10 +1548,34 @@ function FormAreaComum({ inicial, onSalvar, onCancelar, condominioNome }) {
           </button>
           <span className="text-sm text-on-surface-variant font-medium">Permite reservas</span>
         </div>
+
+        {/* Só faz sentido onde há reserva; escondido, o toggle ficaria ligado
+            sem efeito e o síndico esperaria uma fila que nunca chega. */}
+        {form.podeReservar && (
+          <div className="sm:col-span-2 flex items-start gap-3 mt-1">
+            <button
+              type="button"
+              aria-pressed={form.exigeAprovacao}
+              onClick={() => set("exigeAprovacao", !form.exigeAprovacao)}
+              className={`relative w-12 h-6 shrink-0 rounded-full transition-colors duration-200 cursor-pointer ${form.exigeAprovacao ? "bg-primary" : "bg-outline-variant/40"}`}
+            >
+              <span className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all duration-200 ${form.exigeAprovacao ? "left-7" : "left-1"}`} />
+            </button>
+            <div className="min-w-0">
+              <span className="text-sm text-on-surface-variant font-medium block">
+                Exige aprovação do síndico
+              </span>
+              <span className="text-xs text-on-surface-variant/80">
+                As solicitações ficam pendentes até serem aprovadas e expiram 24h antes do início
+                se ninguém decidir.
+              </span>
+            </div>
+          </div>
+        )}
       </div>
       <div className="flex gap-3 pt-2">
         <Botao type="submit">{inicial ? "Salvar alterações" : "Cadastrar área comum"}</Botao>
-        <button type="button" onClick={onCancelar} className="flex-1 py-4 rounded-full border border-outline-variant/30 text-on-surface-variant hover:bg-white/5 font-semibold transition-all cursor-pointer">
+        <button type="button" onClick={onCancelar} className="flex-1 py-4 rounded-full border border-outline-variant/30 text-on-surface-variant hover:bg-veu/5 font-semibold transition-all cursor-pointer">
           Cancelar
         </button>
       </div>
@@ -1735,7 +1788,7 @@ function AbaVagas({ condominioId }) {
             <div key={vaga.id} className="glass-panel rounded-3xl overflow-hidden">
               <button
                 onClick={() => { setExpandido((p) => (p === vaga.id ? null : vaga.id)); setEditando(null); }}
-                className="w-full flex items-center gap-3 sm:gap-4 p-4 sm:p-5 text-left hover:bg-white/5 transition-all cursor-pointer"
+                className="w-full flex items-center gap-3 sm:gap-4 p-4 sm:p-5 text-left hover:bg-veu/5 transition-all cursor-pointer"
               >
                 <div className="w-11 h-11 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
                   <Icone name="local_parking" className="text-primary" />
@@ -1860,7 +1913,7 @@ function FormVaga({ inicial, apartamentos, onSalvar, onCancelar, erro }) {
         <button
           type="button"
           onClick={onCancelar}
-          className="flex-1 py-4 rounded-full border border-outline-variant/30 text-on-surface-variant hover:bg-white/5 font-semibold transition-all cursor-pointer"
+          className="flex-1 py-4 rounded-full border border-outline-variant/30 text-on-surface-variant hover:bg-veu/5 font-semibold transition-all cursor-pointer"
         >
           Cancelar
         </button>
