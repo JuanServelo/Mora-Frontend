@@ -7,6 +7,8 @@ import { useModules } from "../../contexts/ModulesContext";
 import { PERFIS, isUsuarioRestrito, podeAcessarAdmin } from "../../utils/perfis";
 import { linksFiltradosPorModulo } from "../../utils/menuAdmin";
 import { linkLiberado } from "../../utils/modulosPlano";
+import { SinoNotificacoes } from "../notificacoes/SinoNotificacoes";
+import { useNotificacoes } from "../../contexts/NotificacoesContext";
 // import moraLogo from "../../assets/Mora.png";
 // import moraLogo2 from "../../assets/Mora2.png";
 import moraLogo3 from "../../assets/Mora3.png";
@@ -23,10 +25,17 @@ const NAV_LINKS_PORTEIRO = [
   { label: "Entradas e Saídas", to: "/entradas-e-saidas", modulo: "portaria" },
   { label: "Entregas", to: "/entregas", modulo: "entregas" },
   { label: "Chaves", to: "/chaves", modulo: "chaves" },
+  { label: "Mensagens", to: "/mensagens", badge: "mensagens" },
 ];
 
 const NAV_LINKS_RIGHT = [
+  { label: "Mensagens", to: "/mensagens", badge: "mensagens" },
   { label: "Perfil", to: "/perfil" },
+];
+
+/** No mobile o sino não cabe na pílula: vira um item do menu deslizante. */
+const NAV_LINKS_MOBILE_EXTRA = [
+  { label: "Notificações", to: "/notificacoes", badge: "notificacoes" },
 ];
 
 
@@ -71,14 +80,14 @@ function AdminLink({ link, onNavigate }) {
   );
 }
 
-function NavLink({ to, children }) {
+function NavLink({ to, children, badge }) {
   const { pathname } = useLocation();
   const active = pathname === to;
 
   return (
     <Link
       to={to}
-      className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-200 whitespace-nowrap
+      className={`relative px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-200 whitespace-nowrap
         ${
           active
             ? "text-primary bg-primary/10"
@@ -86,6 +95,11 @@ function NavLink({ to, children }) {
         }`}
     >
       {children}
+      {badge > 0 && (
+        <span className="ml-1.5 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-error text-on-error text-[10px] font-bold align-middle">
+          {badge > 99 ? "99+" : badge}
+        </span>
+      )}
     </Link>
   );
 }
@@ -148,6 +162,7 @@ function AdminMenu({ usuario, activeModules }) {
 /** Painel deslizante do mobile — abre abaixo da pilula da navbar. */
 function MobileMenu({ open, onClose, links, admLinks }) {
   const { pathname } = useLocation();
+  const { naoLidas, mensagensNaoLidas } = useNotificacoes();
 
   // Trava o scroll do body enquanto o menu esta aberto
   useEffect(() => {
@@ -171,7 +186,7 @@ function MobileMenu({ open, onClose, links, admLinks }) {
 
   if (!open) return null;
 
-  const todosLinks = [...links, ...NAV_LINKS_RIGHT];
+  const todosLinks = [...links, ...NAV_LINKS_MOBILE_EXTRA, ...NAV_LINKS_RIGHT];
 
   return (
     <>
@@ -190,18 +205,28 @@ function MobileMenu({ open, onClose, links, admLinks }) {
           <div className="p-2 space-y-0.5">
             {todosLinks.map((l) => {
               const active = pathname === l.to;
+              const contador = l.badge === "notificacoes"
+                ? naoLidas
+                : l.badge === "mensagens"
+                  ? mensagensNaoLidas
+                  : 0;
               return (
                 <Link
                   key={l.to}
                   to={l.to}
                   onClick={onClose}
-                  className={`block px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-200
+                  className={`flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-200
                     ${active
                       ? "bg-primary/10 text-primary"
                       : "text-on-surface-variant hover:bg-white/5 hover:text-on-surface"
                     }`}
                 >
                   {l.label}
+                  {contador > 0 && (
+                    <span className="ml-auto min-w-[20px] h-5 px-1.5 rounded-full bg-error text-on-error text-[11px] font-bold flex items-center justify-center">
+                      {contador > 99 ? "99+" : contador}
+                    </span>
+                  )}
                 </Link>
               );
             })}
@@ -234,6 +259,7 @@ export function Navbar() {
   const [rotaAnterior, setRotaAnterior] = useState(pathname);
   const { usuario } = useAuth();
   const { activeModules } = useModules();
+  const { mensagensNaoLidas } = useNotificacoes();
   const isRestrictedUser = isUsuarioRestrito(usuario);
   const showAdminMenu = podeAcessarAdmin(usuario?.perfil);
   const isDoorman = usuario?.perfil === PERFIS.PORTEIRO;
@@ -276,7 +302,11 @@ export function Navbar() {
 
           <div className="hidden lg:flex items-center gap-0.5">
             {visibleLeftLinks.map((l) => (
-              <NavLink key={l.to} to={l.to}>
+              <NavLink
+                key={l.to}
+                to={l.to}
+                badge={l.badge === "mensagens" ? mensagensNaoLidas : undefined}
+              >
                 {l.label}
               </NavLink>
             ))}
@@ -296,11 +326,17 @@ export function Navbar() {
         <div className="flex-1 flex items-center gap-0.5 justify-end min-w-0">
           <div className="hidden lg:flex items-center gap-0.5">
             {NAV_LINKS_RIGHT.map((l) => (
-              <NavLink key={l.to} to={l.to}>
+              <NavLink
+                key={l.to}
+                to={l.to}
+                badge={l.badge === "mensagens" ? mensagensNaoLidas : undefined}
+              >
                 {l.label}
               </NavLink>
             ))}
           </div>
+
+          {!isRestrictedUser && <SinoNotificacoes />}
 
           {/* Toggle Dark/Light */}
           <button

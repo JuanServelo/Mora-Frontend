@@ -5,6 +5,8 @@ import { useAuth } from "../../contexts/AuthContext";
 import { useModules } from "../../contexts/ModulesContext";
 import { condominiosApi } from "../../services/condominiosApi";
 import { avisoApi } from "../../services/comunicacaoApi";
+import { useToast } from "../../contexts/ToastContext";
+import { useNotificacoes } from "../../contexts/NotificacoesContext";
 import { Icone } from "../../components/icones/Icone";
 import { PERFIS, perfilTemAcessoSistema } from "../../utils/perfis";
 import { linkLiberado } from "../../utils/modulosPlano";
@@ -43,6 +45,8 @@ const ACESSO_RAPIDO = [
 export function Inicio() {
   const { usuario } = useAuth();
   const { activeModules } = useModules();
+  const toast = useToast();
+  const { recarregar } = useNotificacoes();
 
   const primeiroNome = usuario?.nome?.split(" ")[0] || "Morador";
   const [nomeCondominio, setNomeCondominio] = useState(null);
@@ -53,10 +57,28 @@ export function Inicio() {
     condominiosApi.buscar(usuario.condominioId)
       .then((res) => setNomeCondominio(res.data.condominio?.nome ?? null))
       .catch(() => {});
-    avisoApi.listarAtivos(usuario.condominioId)
+    avisoApi.listarAtivos()
       .then((res) => setAvisos(res.data || []))
       .catch(() => {});
   }, [usuario?.condominioId]);
+
+  /**
+   * Registra a ciência do morador.
+   *
+   * É o que permite ao síndico comprovar que a regra foi comunicada. O estado
+   * local muda antes da resposta para o botão não "piscar"; se a chamada
+   * falhar, ele volta e o morador pode tentar de novo.
+   */
+  async function marcarLido(aviso) {
+    setAvisos((prev) => prev.map((a) => (a.id === aviso.id ? { ...a, lido: true } : a)));
+    try {
+      await avisoApi.marcarLido(aviso.id);
+      recarregar();
+    } catch {
+      setAvisos((prev) => prev.map((a) => (a.id === aviso.id ? { ...a, lido: false } : a)));
+      toast.error("Não foi possível registrar a leitura. Tente novamente.");
+    }
+  }
 
   if (usuario?.perfil === PERFIS.PORTEIRO) {
     return <InicioDoorman />;
@@ -108,18 +130,45 @@ export function Inicio() {
             </div>
             <div className="space-y-3">
               {avisos.map((a) => (
-                <div key={a.id} className="glass-panel rounded-2xl p-5 border border-primary/15">
+                <div
+                  key={a.id}
+                  className={`glass-panel rounded-2xl p-5 border ${a.lido ? "border-white/5" : "border-primary/25"}`}
+                >
                   <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 shrink-0 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                    <div className="w-10 h-10 shrink-0 rounded-xl bg-primary/10 flex items-center justify-center">
                       <Icone name="campaign" className="text-primary" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-on-surface">{a.titulo}</p>
+                      <div className="flex items-start gap-2 flex-wrap">
+                        <p className="font-semibold text-on-surface">{a.titulo}</p>
+                        {!a.lido && (
+                          <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-primary/15 text-primary">
+                            Novo
+                          </span>
+                        )}
+                      </div>
                       <p className="text-sm text-on-surface-variant whitespace-pre-wrap mt-1">{a.mensagem}</p>
                       <p className="text-xs text-on-surface-variant/70 mt-2">
                         Até {new Date(a.dataFim).toLocaleDateString("pt-BR")}
                         {a.autor ? ` · ${a.autor}` : ""}
                       </p>
+
+                      <div className="mt-3">
+                        {a.lido ? (
+                          <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary">
+                            <Icone name="check_circle" className="text-base" />
+                            Leitura confirmada
+                          </span>
+                        ) : (
+                          <button
+                            onClick={() => marcarLido(a)}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 text-primary text-xs font-semibold hover:bg-primary/20 transition-all cursor-pointer"
+                          >
+                            <Icone name="check" className="text-sm" />
+                            Marcar como lido
+                          </button>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>

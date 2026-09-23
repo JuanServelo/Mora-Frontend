@@ -7,10 +7,21 @@ import { useModules } from "../../contexts/ModulesContext";
 import { PERFIS } from "../../utils/perfis";
 import { linksFiltradosPorModulo } from "../../utils/menuAdmin";
 import { linkLiberado } from "../../utils/modulosPlano";
+import { useNotificacoes } from "../../contexts/NotificacoesContext";
 import moraLogo3 from "../../assets/Mora3.png";
 
 
 // Telas do porteiro (mesmo layout de Sidebar dos admins).
+/**
+ * Comunicação vale para quem opera o condomínio tanto quanto para o morador:
+ * o síndico recebe as mensagens, e o porteiro precisa ver as notificações da
+ * portaria. Por isso estes dois links entram em todos os menus da sidebar.
+ */
+const COMUNICACAO_LINKS = [
+  { to: "/notificacoes", label: "Notificações", icon: "notifications", badge: "notificacoes" },
+  { to: "/mensagens", label: "Mensagens", icon: "chat", badge: "mensagens" },
+];
+
 const PORTEIRO_LINKS = [
   { to: "/inicio", label: "Início", icon: "home" },
   { to: "/atendimento", label: "Cadastros", icon: "waving_hand", modulo: "portaria" },
@@ -23,6 +34,7 @@ const PORTEIRO_LINKS = [
 export function Sidebar() {
   const { pathname } = useLocation();
   const { usuario, logout } = useAuth();
+  const { naoLidas, mensagensNaoLidas } = useNotificacoes();
   const navigate = useNavigate();
   const [aberta, setAberta] = useState(false);
   const [rotaAnterior, setRotaAnterior] = useState(pathname);
@@ -59,9 +71,12 @@ export function Sidebar() {
 
   // Porteiro tem o conjunto dele; os admins veem o que o próprio perfil permite.
   // Ambos são filtrados pelos módulos contratados.
-  const links = isDoorman
-    ? PORTEIRO_LINKS.filter((l) => linkLiberado(activeModules, l))
-    : linksFiltradosPorModulo(perfil, activeModules);
+  const links = [
+    ...(isDoorman
+      ? PORTEIRO_LINKS.filter((l) => linkLiberado(activeModules, l))
+      : linksFiltradosPorModulo(perfil, activeModules)),
+    ...COMUNICACAO_LINKS,
+  ];
 
   const subtitulo = isDoorman
     ? "Portaria"
@@ -133,6 +148,11 @@ export function Sidebar() {
       <nav className="flex-1 px-2 py-3 space-y-0.5 overflow-y-auto">
         {links.map((link) => {
           const active = pathname.startsWith(link.to);
+          const contador = link.badge === "notificacoes"
+            ? naoLidas
+            : link.badge === "mensagens"
+              ? mensagensNaoLidas
+              : 0;
           return (
             <Link
               key={link.to}
@@ -148,7 +168,14 @@ export function Sidebar() {
                 <Icone name={link.icon} className={`text-base ${active ? "text-primary" : "group-hover:text-primary"}`} />
               </div>
               <span className="text-sm font-semibold leading-tight">{link.label}</span>
-              {active && <Icone name="arrow_forward_ios" className="text-xs text-primary ml-auto shrink-0" />}
+              {contador > 0 && (
+                <span className="ml-auto min-w-[20px] h-5 px-1.5 rounded-full bg-error text-on-error text-[11px] font-bold flex items-center justify-center shrink-0">
+                  {contador > 99 ? "99+" : contador}
+                </span>
+              )}
+              {active && contador === 0 && (
+                <Icone name="arrow_forward_ios" className="text-xs text-primary ml-auto shrink-0" />
+              )}
             </Link>
           );
         })}

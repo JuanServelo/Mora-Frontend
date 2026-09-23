@@ -22,6 +22,8 @@ import { GerenciarFinanceiro } from "../pages/adm/GerenciarFinanceiro";
 import { GerenciarVeiculos } from "../pages/adm/GerenciarVeiculos";
 import { AtendimentoPortaria } from "../pages/porteiro/AtendimentoPortaria";
 import { FAQ } from "../pages/usuario/FAQ";
+import { Notificacoes } from "../pages/usuario/Notificacoes";
+import { Mensagens } from "../pages/usuario/Mensagens";
 import { MinhasReservas } from "../pages/usuario/MinhasReservas";
 import { MinhasReclamacoes } from "../pages/usuario/MinhasReclamacoes";
 import { MinhasEntregas } from "../pages/usuario/MinhasEntregas";
@@ -85,6 +87,8 @@ export const router = createBrowserRouter([
       { path: "/servicos", element: <Servicos /> },
       { path: "/comodidades", element: <Comodidades /> },
       { path: "/faq", element: <FAQ /> },
+      { path: "/notificacoes", element: <Notificacoes /> },
+      { path: "/mensagens", element: <Mensagens /> },
       { path: "/perfil", element: <Perfil /> },
       { path: "/acesso-pendente", element: <AcessoPendente /> },
       { path: "/espacos", element: <MinhasReservas /> },

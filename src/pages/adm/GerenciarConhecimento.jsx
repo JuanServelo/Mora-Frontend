@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import { conhecimentoApi, avisoApi } from "../../services/comunicacaoApi";
 import { useAuth } from "../../contexts/AuthContext";
 import { useConfirm } from "../../contexts/ConfirmContext";
+import { useToast } from "../../contexts/ToastContext";
+import { labelPerfil } from "../../utils/perfis";
 import { Icone } from "../../components/icones/Icone";
 import { Campo } from "../../components/campos/Campo";
 import { Botao } from "../../components/botoes/Botao";
@@ -182,12 +184,16 @@ function AbaConhecimento() {
     setExpandido(null);
   };
 
+  /**
+   * Publicar e despublicar têm endpoint próprio.
+   * Antes isto ia por PUT com o campo `publicado` no corpo, que o backend
+   * descartava — o botão respondia 200 sem mudar nada.
+   */
   const alternarPublicado = async (artigo) => {
     try {
-      const res = await conhecimentoApi.atualizar(artigo.id, {
-        ...artigo,
-        publicado: !artigo.publicado,
-      });
+      const res = artigo.publicado
+        ? await conhecimentoApi.despublicar(artigo.id)
+        : await conhecimentoApi.publicar(artigo.id);
       setArtigos((prev) => prev.map((a) => (a.id === artigo.id ? res.data : a)));
     } catch (err) {
       console.error("Erro ao alterar publicação:", err);
@@ -359,6 +365,7 @@ function vigente(aviso) {
 function AbaAvisos() {
   const { usuario } = useAuth();
   const confirm = useConfirm();
+  const toast = useToast();
   const condominioId = usuario?.condominioId;
   const [avisos, setAvisos] = useState([]);
   const [carregando, setCarregando] = useState(true);
@@ -370,12 +377,11 @@ function AbaAvisos() {
 
   useEffect(() => {
     carregarAvisos();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [condominioId]);
 
   const carregarAvisos = async () => {
     try {
-      const res = await avisoApi.listar(condominioId);
+      const res = await avisoApi.listar();
       setAvisos(res.data || []);
     } catch (err) {
       console.error("Erro ao carregar avisos:", err);
@@ -452,6 +458,19 @@ function AbaAvisos() {
       setAvisos((prev) => prev.map((a) => (a.id === aviso.id ? res.data : a)));
     } catch (err) {
       console.error("Erro ao encerrar aviso:", err);
+    }
+  };
+
+  /** Publicar dispara notificação aos destinatários; despublicar apenas oculta. */
+  const alternarPublicado = async (aviso) => {
+    try {
+      const res = aviso.publicado
+        ? await avisoApi.despublicar(aviso.id)
+        : await avisoApi.publicar(aviso.id);
+      setAvisos((prev) => prev.map((a) => (a.id === aviso.id ? res.data : a)));
+      toast.success(aviso.publicado ? "Aviso despublicado." : "Aviso publicado e notificado.");
+    } catch (err) {
+      toast.error(err.response?.data?.erro ?? "Não foi possível alterar a publicação.");
     }
   };
 
@@ -548,6 +567,12 @@ function AbaAvisos() {
                 </div>
               </div>
               <div className="flex items-center justify-between sm:justify-end gap-3 shrink-0">
+                {aviso.totalLeituras > 0 && (
+                  <span className="text-xs font-semibold px-3 py-1 rounded-full bg-tertiary/10 text-tertiary flex items-center gap-1">
+                    <Icone name="visibility" className="text-sm" />
+                    {aviso.totalLeituras}
+                  </span>
+                )}
                 <span
                   className={`text-xs font-semibold px-3 py-1 rounded-full ${vigente(aviso) ? "bg-primary/10 text-primary" : "bg-error/10 text-error"}`}>{vigente(aviso) ? "Vigente" : aviso.publicado ? "Fora do período" : "Rascunho"}</span>
                 <Icone name={expandido === aviso.id ? "expand_less" : "expand_more"} className="text-on-surface-variant text-xl" />
@@ -559,7 +584,15 @@ function AbaAvisos() {
                   <p className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant mb-2">Mensagem</p>
                   <p className="text-sm text-on-surface leading-relaxed whitespace-pre-wrap">{aviso.mensagem}</p>
                 </div>
+                {aviso.publicado && <PainelLeitura avisoId={aviso.id} />}
+
                 <div className="flex flex-wrap gap-2 pt-1">
+                  <button
+                    onClick={() => alternarPublicado(aviso)}
+                    className={`text-xs font-semibold px-3 py-1.5 rounded-lg border transition-all cursor-pointer ${aviso.publicado ? "bg-error/10 text-error border-error/20 hover:bg-error/20" : "bg-primary/10 text-primary border-primary/20 hover:bg-primary/20"}`}
+                  >
+                    {aviso.publicado ? "Despublicar" : "Publicar"}
+                  </button>
                   {aviso.publicado && (
                     <button onClick={() => encerrar(aviso)} className="text-xs font-semibold px-3 py-1.5 rounded-lg border bg-error/10 text-error border-error/20 hover:bg-error/20 transition-all cursor-pointer">Encerrar</button>
                   )}
@@ -582,6 +615,141 @@ function AbaAvisos() {
           </div>
         )}
       </div>
+    </div>
+  );
+}
+
+// ════════════════════════════════════════════
+// PAINEL DE LEITURA DE UM AVISO
+//
+// O registro de leitura é o que permite ao síndico comprovar ciência de uma
+// regra. Carrega sob demanda: são duas consultas por aviso (leitores no
+// comunicacao-service, destinatários no auth-api) e a lista de avisos não
+// pode pagar isso em cada linha.
+// ════════════════════════════════════════════
+function PainelLeitura({ avisoId }) {
+  const [dados, setDados] = useState(null);
+  const [carregando, setCarregando] = useState(true);
+  const [erro, setErro] = useState(null);
+  const [verPendentes, setVerPendentes] = useState(false);
+
+  useEffect(() => {
+    let ativo = true;
+    avisoApi
+      .leituras(avisoId)
+      .then((res) => ativo && setDados(res.data))
+      .catch(() => ativo && setErro("Não foi possível carregar o indicador de leitura."))
+      .finally(() => ativo && setCarregando(false));
+    return () => {
+      ativo = false;
+    };
+  }, [avisoId]);
+
+  if (carregando) {
+    return (
+      <div className="bg-surface-container-highest/30 rounded-xl p-4 flex items-center gap-3 text-on-surface-variant">
+        <div className="w-4 h-4 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+        <p className="text-xs">Carregando leituras...</p>
+      </div>
+    );
+  }
+
+  if (erro) {
+    return (
+      <div className="bg-surface-container-highest/30 rounded-xl p-4">
+        <p className="text-xs text-on-surface-variant">{erro}</p>
+      </div>
+    );
+  }
+
+  const lista = verPendentes ? dados.pendentes : dados.leitores;
+
+  return (
+    <div className="bg-surface-container-highest/30 rounded-xl p-4 space-y-4">
+      <div className="flex items-center justify-between gap-3 flex-wrap">
+        <p className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant">
+          Confirmação de leitura
+        </p>
+        {dados.percentual !== null && dados.percentual !== undefined && (
+          <p className="text-sm font-bold text-on-surface">
+            {dados.percentual}%{" "}
+            <span className="font-normal text-on-surface-variant">
+              ({dados.totalLeituras} de {dados.totalDestinatarios})
+            </span>
+          </p>
+        )}
+      </div>
+
+      {dados.percentual !== null && dados.percentual !== undefined ? (
+        <div
+          className="h-2 w-full rounded-full bg-surface-container-highest overflow-hidden"
+          role="progressbar"
+          aria-valuenow={dados.percentual}
+          aria-valuemin={0}
+          aria-valuemax={100}
+        >
+          <div
+            className="h-full rounded-full bg-gradient-to-r from-primary to-tertiary transition-all duration-500"
+            style={{ width: `${Math.min(100, dados.percentual)}%` }}
+          />
+        </div>
+      ) : (
+        <p className="text-xs text-on-surface-variant">
+          {dados.totalLeituras} leitura(s) registrada(s). O percentual precisa da lista de
+          destinatários, que não pôde ser consultada agora.
+        </p>
+      )}
+
+      <div className="flex gap-1.5">
+        {[
+          { id: false, label: `Leram (${dados.leitores.length})` },
+          { id: true, label: `Faltam (${dados.pendentes.length})` },
+        ].map((tab) => (
+          <button
+            key={String(tab.id)}
+            onClick={() => setVerPendentes(tab.id)}
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+              verPendentes === tab.id
+                ? "bg-primary/15 text-primary"
+                : "text-on-surface-variant hover:bg-white/5"
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {lista.length === 0 ? (
+        <p className="text-xs text-on-surface-variant py-2">
+          {verPendentes ? "Todos os destinatários já leram." : "Ninguém leu este aviso ainda."}
+        </p>
+      ) : (
+        <ul className="space-y-1.5 max-h-56 overflow-y-auto">
+          {lista.map((u) => (
+            <li
+              key={u.usuarioId ?? u.id}
+              className="flex items-center justify-between gap-3 text-xs py-1.5 px-2 rounded-lg hover:bg-white/5"
+            >
+              <span className="text-on-surface truncate">
+                {u.nome ?? `Usuário ${u.usuarioId ?? u.id}`}
+                {u.perfil && (
+                  <span className="text-on-surface-variant"> · {labelPerfil(u.perfil)}</span>
+                )}
+              </span>
+              <span className="text-on-surface-variant shrink-0">
+                {verPendentes
+                  ? (u.unidade ?? [u.bloco, u.apartamento].filter(Boolean).join(" ") ?? "—")
+                  : new Date(u.lidoEm).toLocaleString("pt-BR", {
+                      day: "2-digit",
+                      month: "2-digit",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }
