@@ -138,17 +138,21 @@ export const ADM_LINKS = [
  *
  * @param {string} perfil       — perfil do usuário logado
  * @param {string[]|null} modulosAtivos — slugs dos módulos habilitados no plano.
- *   Se `null` ou `undefined`, nenhuma restrição de módulo é aplicada (caso do
- *   Admin Geral, que não tem plano associado).
+ *   Para o ADMIN_GERAL (que não tem plano associado), `null` significa
+ *   "sem restrição" e tudo fica visível. Para os demais perfis, `null` ou `[]`
+ *   significa carregando ou sem plano — itens com `modulo` ficam ocultos.
  */
 export function linksDoPerfil(perfil, modulosAtivos) {
-  const set = modulosAtivos ? new Set(modulosAtivos) : null;
+  const isGeral = perfil === PERFIS.ADMIN_GERAL;
+  const set = modulosAtivos && modulosAtivos.length > 0 ? new Set(modulosAtivos) : null;
   return ADM_LINKS.filter((l) => {
     if (!l.perfis.includes(perfil)) return false;
     // Sem campo `modulo` → infraestrutura, sempre visível.
     if (!l.modulo) return true;
-    // Sem restrição de módulos (Admin Geral, por exemplo) → tudo visível.
-    if (!set) return true;
+    // Admin Geral não tem plano → tudo visível.
+    if (isGeral) return true;
+    // Sem módulos ativos (carregando ou sem plano) → ocultar.
+    if (!set) return false;
     return set.has(l.modulo);
   });
 }
@@ -168,6 +172,9 @@ export function podeAcessarRotaAdmin(perfil, pathname, modulosAtivos) {
   if (!link) return false;
   if (!link.perfis.includes(perfil)) return false;
   if (!link.modulo) return true;
-  if (!modulosAtivos) return true;
+  // Admin Geral não tem plano → sempre pode.
+  if (perfil === PERFIS.ADMIN_GERAL) return true;
+  // Sem módulos ativos (carregando ou sem plano) → bloquear.
+  if (!modulosAtivos || modulosAtivos.length === 0) return false;
   return modulosAtivos.includes(link.modulo);
 }
