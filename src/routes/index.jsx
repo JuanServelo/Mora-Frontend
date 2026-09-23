@@ -38,6 +38,7 @@ import { Notificacoes } from "../pages/usuario/Notificacoes";
 import { Conversas } from "../pages/usuario/Conversas";
 import { Avisos } from "../pages/usuario/Avisos";
 import { GerenciarComunicados } from "../pages/adm/GerenciarComunicados";
+import { GerenciarFuncionarios } from "../pages/adm/GerenciarFuncionarios";
 import { AppLayout } from "../layouts/AppLayout";
 import { ProtectedRoute } from "./ProtectedRoute";
 import { DoormanRoute } from "./DoormanRoute";
@@ -142,6 +143,7 @@ export const router = createBrowserRouter([
       { path: "/adm/meu-plano", element: <AdminRoute><MeuPlano /></AdminRoute> },
       { path: "/adm/financeiro", element: <AdminRoute><GerenciarFinanceiro /></AdminRoute> },
       { path: "/adm/comunicados", element: <AdminRoute><GerenciarComunicados /></AdminRoute> },
+      { path: "/adm/funcionarios", element: <AdminRoute><GerenciarFuncionarios /></AdminRoute> },
       { path: "/adm/reunioes", element: <AdminRoute><GerenciarReunioes /></AdminRoute> },
       { path: "/adm/reclamacoes", element: <AdminRoute><GerenciarReclamacoes /></AdminRoute> },
       { path: "/adm/conhecimento", element: <AdminRoute><GerenciarConhecimento /></AdminRoute> },

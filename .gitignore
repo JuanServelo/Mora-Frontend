@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Anotacoes locais da sessao — nao fazem parte do produto.
+.claude/

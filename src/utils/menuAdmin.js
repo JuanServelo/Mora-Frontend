@@ -77,6 +77,13 @@ export const ADM_LINKS = [
     perfis: CONDOMINIO,
   },
   {
+    to: "/adm/funcionarios",
+    label: "Funcionários",
+    icon: "badge",
+    description: "Situação funcional, turnos e liberações",
+    perfis: CONDOMINIO,
+  },
+  {
     to: "/adm/reunioes",
     label: "Reuniões",
     icon: "groups",

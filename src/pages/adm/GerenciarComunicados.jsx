@@ -1,13 +1,15 @@
 // src/pages/adm/GerenciarComunicados.jsx
 // Página ADMIN — Avisos do condomínio: publicar e acompanhar quem leu.
 //
-// As duas metades moravam em lugares diferentes: publicar era uma aba dentro de
-// Conhecimento, e a confirmação de leitura ficava aqui. São a mesma tarefa —
-// quem publica um comunicado quer saber se ele chegou —, e o síndico não tinha
-// como adivinhar que o botão de criar estava no outro item do menu.
+// Publicar um aviso é possível em dois lugares, de propósito: aqui e na aba de
+// avisos dentro de Conhecimento. O que existe só aqui é a outra metade — quem
+// confirmou a leitura —, e é ela que justifica a tela própria: publicar sem
+// saber se chegou não é comunicar.
+//
+// As duas escrevem pelo mesmo cliente (`avisoApi`, em comunicacaoApi), então
+// não há dois caminhos para o mesmo dado, só duas portas para a mesma tarefa.
 import { useCallback, useEffect, useRef, useState } from "react";
-import { avisoApi } from "../../services/portariaApi";
-import { comunicacaoApi, urlDaImagem } from "../../services/comunicacaoApi";
+import { avisoApi, comunicacaoApi, urlDaImagem } from "../../services/comunicacaoApi";
 import { useAuth } from "../../contexts/AuthContext";
 import { useConfirm } from "../../contexts/ConfirmContext";
 import { Icone } from "../../components/icones/Icone";

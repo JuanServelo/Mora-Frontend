@@ -1,7 +1,7 @@
 // src/pages/usuario/FAQ.jsx
 import { useState, useEffect } from "react";
 import { Icone } from "../../components/icones/Icone";
-import { conhecimentoApi } from "../../services/portariaApi";
+import { conhecimentoApi } from "../../services/comunicacaoApi";
 
 const CATEGORIA_LABEL = {
   GERAL: "Geral",

@@ -66,8 +66,14 @@ export const funcionarioApi = {
 // VAGAS DE ESTACIONAMENTO
 // ─────────────────────────────────────────────
 export const vagaApi = {
-  listar: () => portariaApi.get("/vagas"),
-  listarTodas: () => portariaApi.get("/vagas/todas"),
+  listar: (condominioId) =>
+    portariaApi.get("/vagas", { params: condominioId ? { condominioId } : {} }),
+  /**
+   * O condominioId e encaminhado de proposito: o VagaController ja o aceita, e
+   * sem ele o Admin Geral recebia as vagas de todos os clientes numa lista so.
+   */
+  listarTodas: (condominioId) =>
+    portariaApi.get("/vagas/todas", { params: condominioId ? { condominioId } : {} }),
   buscar: (id) => portariaApi.get(`/vagas/${id}`),
   listarPorApartamento: (apartamentoId) =>
     portariaApi.get(`/vagas/apartamento/${apartamentoId}`),
@@ -245,46 +251,4 @@ export const chaveApi = {
   devolver: (id) => portariaApi.post(`/chaves/${id}/devolver`),
   deletar: (id) => portariaApi.delete(`/chaves/${id}`),
   historico: (id, params) => portariaApi.get(`/chaves/${id}/historico`, { params }),
-};
-
-// ─────────────────────────────────────────────
-// Abaixo: clientes que a integracao com feat/ajus havia removido daqui.
-//
-// Na branch dele estes dois assuntos passaram a ser servidos pelo
-// comunicacao-service, e o cliente foi para `comunicacaoApi`. Como o frontend
-// voltou ao estado anterior, `GerenciarConhecimento` e `FAQ` seguem importando
-// daqui — sem estes blocos o build quebra na importacao.
-// ─────────────────────────────────────────────
-
-// ─────────────────────────────────────────────
-// BASE DE CONHECIMENTO / FAQ
-// ─────────────────────────────────────────────
-export const conhecimentoApi = {
-  listarTodos: () => portariaApi.get("/conhecimento"),
-  listarPublicados: () => portariaApi.get("/conhecimento/publicados"),
-  listarPorCategoria: (categoria) =>
-    portariaApi.get(`/conhecimento/categoria/${categoria}`),
-  listarPublicadosPorCategoria: (categoria) =>
-    portariaApi.get(`/conhecimento/categoria/${categoria}/publicados`),
-  buscarPorTitulo: (titulo) =>
-    portariaApi.get("/conhecimento/buscar", { params: { titulo } }),
-  buscar: (id) => portariaApi.get(`/conhecimento/${id}`),
-  criar: (data) => portariaApi.post("/conhecimento", data),
-  atualizar: (id, data) => portariaApi.put(`/conhecimento/${id}`, data),
-  excluir: (id) => portariaApi.delete(`/conhecimento/${id}`),
-};
-
-// ─────────────────────────────────────────────
-// AVISOS E COMUNICADOS (por condomínio)
-// ─────────────────────────────────────────────
-export const avisoApi = {
-  listar: (condominioId) =>
-    portariaApi.get("/avisos", { params: condominioId ? { condominioId } : {} }),
-  listarAtivos: (condominioId) =>
-    portariaApi.get("/avisos/ativos", { params: { condominioId } }),
-  buscar: (id) => portariaApi.get(`/avisos/${id}`),
-  criar: (data) => portariaApi.post("/avisos", data),
-  atualizar: (id, data) => portariaApi.put(`/avisos/${id}`, data),
-  encerrar: (id) => portariaApi.patch(`/avisos/${id}/encerrar`),
-  excluir: (id) => portariaApi.delete(`/avisos/${id}`),
 };

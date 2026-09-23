@@ -5,6 +5,11 @@ export const condominiosApi = {
     return api.get('/api/condominios');
   },
 
+  /** Só os clientes em operação — quem monta estrutura não escolhe cliente inativo. */
+  listarAtivos() {
+    return api.get('/api/condominios', { params: { status: 'active' } });
+  },
+
   buscar(id) {
     return api.get(`/api/condominios/${id}`);
   },
