@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Icone } from "../icones/Icone";
 import { FotoUsuario } from "../avatar/FotoUsuario";
 import { useAuth } from "../../contexts/AuthContext";
+import { usePlano } from "../../contexts/PlanoContext";
 import { useNotificacoes } from "../../contexts/NotificacoesContext";
 import { PERFIS } from "../../utils/perfis";
 import { linksDoPerfil } from "../../utils/menuAdmin";
@@ -13,9 +14,9 @@ import moraLogo3 from "../../assets/Mora3.png";
 const PORTEIRO_LINKS = [
   { to: "/inicio", label: "Início", icon: "home" },
   { to: "/atendimento", label: "Cadastros", icon: "waving_hand" },
-  { to: "/entradas-e-saidas", label: "Entradas e Saídas", icon: "swap_horiz" },
-  { to: "/portaria/entregas", label: "Entregas", icon: "inventory_2" },
-  { to: "/chaves", label: "Chaves", icon: "vpn_key" },
+  { to: "/entradas-e-saidas", label: "Entradas e Saídas", icon: "swap_horiz", modulo: "portaria" },
+  { to: "/portaria/entregas", label: "Entregas", icon: "inventory_2", modulo: "entregas" },
+  { to: "/chaves", label: "Chaves", icon: "vpn_key", modulo: "chaves" },
   { to: "/usuarios", label: "Usuários do Condomínio", icon: "groups" },
   { to: "/conversas", label: "Conversas", icon: "forum" },
   // O porteiro é destinatário dos avisos de público FUNCIONARIOS. Sem esta
@@ -27,6 +28,7 @@ const PORTEIRO_LINKS = [
 export function Sidebar({ aberta = false, aoFechar }) {
   const { pathname } = useLocation();
   const { usuario, logout } = useAuth();
+  const { modulosAtivos, hasModulo } = usePlano();
   const navigate = useNavigate();
   const { naoLidas, conversasNaoLidas } = useNotificacoes();
 
@@ -34,7 +36,9 @@ export function Sidebar({ aberta = false, aoFechar }) {
   const isDoorman = perfil === PERFIS.PORTEIRO;
 
   // Porteiro tem o conjunto dele; os admins veem o que o próprio perfil permite.
-  const links = isDoorman ? PORTEIRO_LINKS : linksDoPerfil(perfil);
+  const links = isDoorman
+    ? PORTEIRO_LINKS.filter((l) => !l.modulo || hasModulo(l.modulo))
+    : linksDoPerfil(perfil, modulosAtivos);
 
   const subtitulo = isDoorman
     ? "Portaria"

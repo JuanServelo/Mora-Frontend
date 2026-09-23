@@ -5,6 +5,7 @@ import "./i18n.js";
 import "./index.css";
 import { TemaProvider } from "./contexts/TemaContext.jsx";
 import { AuthProvider } from "./contexts/AuthContext.jsx";
+import { PlanoProvider } from "./contexts/PlanoContext.jsx";
 import { ToastProvider } from "./contexts/ToastContext.jsx";
 import { ConfirmProvider } from "./contexts/ConfirmContext.jsx";
 import { NotificacoesProvider } from "./contexts/NotificacoesContext.jsx";
@@ -16,12 +17,15 @@ createRoot(document.getElementById("root")).render(
       <ToastProvider>
         <ConfirmProvider>
           <AuthProvider>
-            <NotificacoesProvider>
-              <App />
-            </NotificacoesProvider>
+            <PlanoProvider>
+              <NotificacoesProvider>
+                <App />
+              </NotificacoesProvider>
+            </PlanoProvider>
           </AuthProvider>
         </ConfirmProvider>
       </ToastProvider>
     </TemaProvider>
   </StrictMode>,
 );
+
