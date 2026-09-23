@@ -32,6 +32,7 @@ import { Chaves } from "../pages/porteiro/Chaves";
 import { AtendimentoPortaria } from "../pages/porteiro/AtendimentoPortaria";
 import { UsuariosCondominio } from "../pages/porteiro/UsuariosCondominio";
 import { MeusConvidados } from "../pages/usuario/MeusConvidados";
+import { MeusVeiculos } from "../pages/usuario/MeusVeiculos";
 import { MinhasCobrancas } from "../pages/usuario/MinhasCobrancas";
 import { Notificacoes } from "../pages/usuario/Notificacoes";
 import { Conversas } from "../pages/usuario/Conversas";
@@ -121,6 +122,7 @@ export const router = createBrowserRouter([
         ),
       },
       { path: "/meus-convidados", element: <MeusConvidados /> },
+      { path: "/meus-veiculos", element: <MeusVeiculos /> },
       { path: "/financeiro", element: <MinhasCobrancas /> },
       { path: "/notificacoes", element: <Notificacoes /> },
       { path: "/avisos", element: <Avisos /> },

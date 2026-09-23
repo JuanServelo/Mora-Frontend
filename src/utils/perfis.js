@@ -21,6 +21,19 @@ export const PERFIS = {
  */
 export const PERFIS_FUNCIONARIO = [PERFIS.PORTEIRO, PERFIS.ADMIN_SINDICO];
 
+/**
+ * Perfis que decidem sobre reservas pendentes.
+ *
+ * Espelha PERFIS_APROVAM de ReservaService.java: o porteiro registra reservas
+ * mas não aprova as dos outros, senão a exigência de aprovação do espaço
+ * deixaria de significar alguma coisa.
+ */
+export const PERFIS_APROVAM_RESERVA = [PERFIS.ADMIN_SINDICO, PERFIS.ADMIN_GERAL];
+
+export function podeAprovarReserva(perfil) {
+  return PERFIS_APROVAM_RESERVA.includes(perfil);
+}
+
 export const TODOS_PERFIS = [
   { value: PERFIS.ADMIN_GERAL, label: 'Admin Geral' },
   { value: PERFIS.ADMIN_SINDICO, label: 'Admin Síndico' },

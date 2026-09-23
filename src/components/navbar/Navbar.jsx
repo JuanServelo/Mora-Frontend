@@ -17,6 +17,7 @@ const NAV_LINKS_LEFT = [
   { label: "Espaços", to: "/espacos" },
   { label: "Avisos", to: "/avisos" },
   { label: "Conversas", to: "/conversas" },
+  { label: "Meus Veículos", to: "/meus-veiculos" },
   { label: "Reclamações", to: "/reclamacoes" },
   { label: "Cobranças", to: "/financeiro" },
 ];
