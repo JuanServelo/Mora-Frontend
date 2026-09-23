@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Icone } from "../icones/Icone";
 import { FotoUsuario } from "../avatar/FotoUsuario";
 import { useAuth } from "../../contexts/AuthContext";
+import { usePlano } from "../../contexts/PlanoContext";
 import { useNotificacoes } from "../../contexts/NotificacoesContext";
 import { PERFIS } from "../../utils/perfis";
 import { linksDoPerfil } from "../../utils/menuAdmin";
@@ -27,6 +28,7 @@ const PORTEIRO_LINKS = [
 export function Sidebar({ aberta = false, aoFechar }) {
   const { pathname } = useLocation();
   const { usuario, logout } = useAuth();
+  const { modulosAtivos } = usePlano();
   const navigate = useNavigate();
   const { naoLidas, conversasNaoLidas } = useNotificacoes();
 
@@ -34,7 +36,7 @@ export function Sidebar({ aberta = false, aoFechar }) {
   const isDoorman = perfil === PERFIS.PORTEIRO;
 
   // Porteiro tem o conjunto dele; os admins veem o que o próprio perfil permite.
-  const links = isDoorman ? PORTEIRO_LINKS : linksDoPerfil(perfil);
+  const links = isDoorman ? PORTEIRO_LINKS : linksDoPerfil(perfil, modulosAtivos);
 
   const subtitulo = isDoorman
     ? "Portaria"

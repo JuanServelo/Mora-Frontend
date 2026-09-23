@@ -1,8 +1,8 @@
-// src/components/navbar/Navbar.jsx
 import { useState, useRef, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Icone } from "../icones/Icone";
 import { useAuth } from "../../contexts/AuthContext";
+import { usePlano } from "../../contexts/PlanoContext";
 import { useNotificacoes } from "../../contexts/NotificacoesContext";
 import { PERFIS, isUsuarioRestrito, podeAcessarAdmin } from "../../utils/perfis";
 import { linksDoPerfil } from "../../utils/menuAdmin";
@@ -13,20 +13,20 @@ import moraLogo3 from "../../assets/Mora3.png";
 
 const NAV_LINKS_LEFT = [
   { label: "Início", to: "/inicio" },
-  { label: "Serviços", to: "/servicos" },
-  { label: "Espaços", to: "/espacos" },
+  { label: "Serviços", to: "/servicos", modulo: "conhecimento" },
+  { label: "Espaços", to: "/espacos", modulo: "areas-comuns" },
   { label: "Avisos", to: "/avisos" },
   { label: "Conversas", to: "/conversas" },
-  { label: "Meus Veículos", to: "/meus-veiculos" },
-  { label: "Reclamações", to: "/reclamacoes" },
+  { label: "Meus Veículos", to: "/meus-veiculos", modulo: "veiculos" },
+  { label: "Reclamações", to: "/reclamacoes", modulo: "reclamacoes" },
   { label: "Cobranças", to: "/financeiro" },
 ];
 
 const NAV_LINKS_PORTEIRO = [
   { label: "Início", to: "/inicio" },
-  { label: "Entradas e Saídas", to: "/entradas-e-saidas" },
-  { label: "Entregas", to: "/portaria/entregas" },
-  { label: "Chaves", to: "/chaves" },
+  { label: "Entradas e Saídas", to: "/entradas-e-saidas", modulo: "portaria" },
+  { label: "Entregas", to: "/portaria/entregas", modulo: "entregas" },
+  { label: "Chaves", to: "/chaves", modulo: "chaves" },
   { label: "Conversas", to: "/conversas" },
 ];
 
@@ -58,8 +58,9 @@ function AdminMenu({ usuario }) {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
   const { pathname } = useLocation();
+  const { modulosAtivos } = usePlano();
 
-  const admLinks = linksDoPerfil(usuario?.perfil);
+  const admLinks = linksDoPerfil(usuario?.perfil, modulosAtivos);
 
   const admActive = admLinks.some((l) => pathname === l.to);
 
@@ -271,13 +272,15 @@ export function Navbar() {
   const showAdminMenu = podeAcessarAdmin(usuario?.perfil);
   const isDoorman = usuario?.perfil === PERFIS.PORTEIRO;
 
+  const { hasModulo } = usePlano();
+
   let visibleLeftLinks;
   if (isRestrictedUser) {
     visibleLeftLinks = [];
   } else if (isDoorman) {
-    visibleLeftLinks = NAV_LINKS_PORTEIRO;
+    visibleLeftLinks = NAV_LINKS_PORTEIRO.filter((l) => !l.modulo || hasModulo(l.modulo));
   } else {
-    visibleLeftLinks = NAV_LINKS_LEFT;
+    visibleLeftLinks = NAV_LINKS_LEFT.filter((l) => !l.modulo || hasModulo(l.modulo));
   }
 
   // 67.2rem são os 56rem do `max-w-4xl` mais 20%. Valor exato em vez do passo
