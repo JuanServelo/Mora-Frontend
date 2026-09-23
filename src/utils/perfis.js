@@ -11,6 +11,16 @@ export const PERFIS = {
   CONVIDADO: 'CONVIDADO',
 };
 
+/**
+ * Perfis que atuam como "funcionário responsável".
+ *
+ * Fonte única: vale para a aba Funcionários do registro de entrada e saída e
+ * para o responsável da reserva de evento do condomínio. Espelha
+ * PERFIS_FUNCIONARIO de services/auth-api/constants/perfis.js — duas listas
+ * paralelas divergiriam na primeira inclusão ou remoção de perfil.
+ */
+export const PERFIS_FUNCIONARIO = [PERFIS.PORTEIRO, PERFIS.ADMIN_SINDICO];
+
 export const TODOS_PERFIS = [
   { value: PERFIS.ADMIN_GERAL, label: 'Admin Geral' },
   { value: PERFIS.ADMIN_SINDICO, label: 'Admin Síndico' },

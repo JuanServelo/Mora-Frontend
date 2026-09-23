@@ -6,6 +6,15 @@ import { Icone } from "../../components/icones/Icone";
 
 const CARDS_PORTEIRO = [
   {
+    // Tela trazida da branch feat/ajus: cadastro de visitante e prestador no
+    // momento da chegada, sem depender de pre-autorizacao do morador.
+    to: "/atendimento",
+    label: "Cadastros",
+    desc: "Registrar entrada de visitantes e prestadores de serviço",
+    icon: "waving_hand",
+    color: "primary",
+  },
+  {
     to: "/entradas-e-saidas",
     label: "Controle de Acesso",
     desc: "Registrar entradas e saídas de moradores e visitantes",

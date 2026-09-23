@@ -15,4 +15,5 @@ export const acessoApi = {
   listarMeusGuests: () => api.get("/api/portaria/meus-guests"),
   alterarPermissao: (guestId, permitir) =>
     api.patch(`/api/portaria/guests/${guestId}/permissao`, { permitir }),
+  listarHistoricoAcesso: (params) => api.get('/api/portaria/historico-acesso', { params }),
 };

@@ -29,6 +29,7 @@ import { Servicos } from "../pages/servicos/Servicos";
 import { Comodidades } from "../pages/comodidades/Comodidades";
 import { Portaria } from "../pages/portaria/Portaria";
 import { Chaves } from "../pages/porteiro/Chaves";
+import { AtendimentoPortaria } from "../pages/porteiro/AtendimentoPortaria";
 import { UsuariosCondominio } from "../pages/porteiro/UsuariosCondominio";
 import { MeusConvidados } from "../pages/usuario/MeusConvidados";
 import { MinhasCobrancas } from "../pages/usuario/MinhasCobrancas";
@@ -108,6 +109,7 @@ export const router = createBrowserRouter([
       },
       { path: "/portaria", element: <Portaria /> },
       { path: "/entradas-e-saidas", element: <Portaria /> },
+      { path: "/atendimento", element: <AtendimentoPortaria /> },
       { path: "/chaves", element: <Chaves /> },
       { path: "/veiculos", element: <GerenciarVeiculos /> },
       {
