@@ -14,8 +14,10 @@ estruturasApi.interceptors.request.use((config) => {
 });
 
 export const blocoApi = {
-  listar: () => estruturasApi.get("/blocos"),
-  listarTodos: () => estruturasApi.get("/blocos/todos"),
+  listar: (condominioId) =>
+    estruturasApi.get("/blocos", { params: condominioId ? { condominioId } : {} }),
+  listarTodos: (condominioId) =>
+    estruturasApi.get("/blocos/todos", { params: condominioId ? { condominioId } : {} }),
   buscar: (id) => estruturasApi.get(`/blocos/${id}`),
   cadastrar: (data) => estruturasApi.post("/blocos/cadastrar", data),
   atualizar: (id, data) => estruturasApi.put(`/blocos/${id}`, data),
@@ -25,8 +27,10 @@ export const blocoApi = {
 };
 
 export const apartamentoApi = {
-  listar: () => estruturasApi.get("/apartamentos"),
-  listarTodos: () => estruturasApi.get("/apartamentos/todos"),
+  listar: (condominioId) =>
+    estruturasApi.get("/apartamentos", { params: condominioId ? { condominioId } : {} }),
+  listarTodos: (condominioId) =>
+    estruturasApi.get("/apartamentos/todos", { params: condominioId ? { condominioId } : {} }),
   buscar: (id) => estruturasApi.get(`/apartamentos/${id}`),
   listarPorBloco: (blocoId) => estruturasApi.get(`/apartamentos/bloco/${blocoId}`),
   listarPorBlocoAtivos: (blocoId) => estruturasApi.get(`/apartamentos/bloco/${blocoId}/ativos`),
@@ -40,8 +44,10 @@ export const apartamentoApi = {
 };
 
 export const areaComunApi = {
-  listar: () => estruturasApi.get("/areas-comuns"),
-  listarTodas: () => estruturasApi.get("/areas-comuns/todas"),
+  listar: (condominioId) =>
+    estruturasApi.get("/areas-comuns", { params: condominioId ? { condominioId } : {} }),
+  listarTodas: (condominioId) =>
+    estruturasApi.get("/areas-comuns/todas", { params: condominioId ? { condominioId } : {} }),
   buscar: (id) => estruturasApi.get(`/areas-comuns/${id}`),
   listarPorTipo: (tipo) => estruturasApi.get(`/areas-comuns/tipo/${tipo}`),
   cadastrar: (data) => estruturasApi.post("/areas-comuns/cadastrar", data),

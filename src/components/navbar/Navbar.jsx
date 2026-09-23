@@ -1,9 +1,12 @@
 // src/components/navbar/Navbar.jsx
 import { useState, useRef, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Icone } from "../icones/Icone";
 import { useAuth } from "../../contexts/AuthContext";
-import { isUsuarioRestrito, podeAcessarAdmin } from "../../utils/perfis";
+import { useNotificacoes } from "../../contexts/NotificacoesContext";
+import { PERFIS, isUsuarioRestrito, podeAcessarAdmin } from "../../utils/perfis";
+import { linksDoPerfil } from "../../utils/menuAdmin";
+import { configDaNotificacao } from "../../utils/notificacoes";
 // import moraLogo from "../../assets/Mora.png";
 // import moraLogo2 from "../../assets/Mora2.png";
 import moraLogo3 from "../../assets/Mora3.png";
@@ -11,25 +14,26 @@ import moraLogo3 from "../../assets/Mora3.png";
 const NAV_LINKS_LEFT = [
   { label: "Início", to: "/inicio" },
   { label: "Serviços", to: "/servicos" },
-  { label: "Comodidades", to: "/comodidades" },
   { label: "Espaços", to: "/espacos" },
+  { label: "Avisos", to: "/avisos" },
+  { label: "Conversas", to: "/conversas" },
+  { label: "Meus Veículos", to: "/meus-veiculos" },
   { label: "Reclamações", to: "/reclamacoes" },
+  { label: "Cobranças", to: "/financeiro" },
+];
+
+const NAV_LINKS_PORTEIRO = [
+  { label: "Início", to: "/inicio" },
+  { label: "Entradas e Saídas", to: "/entradas-e-saidas" },
+  { label: "Entregas", to: "/portaria/entregas" },
+  { label: "Chaves", to: "/chaves" },
+  { label: "Conversas", to: "/conversas" },
 ];
 
 const NAV_LINKS_RIGHT = [
   { label: "Perfil", to: "/perfil" },
 ];
 
-const ADM_LINKS = [
-  { label: "Usuários", to: "/adm/usuarios", icon: "manage_accounts", description: "Gerenciar moradores" },
-  { label: "Estruturas", to: "/adm/estruturas", icon: "apartment", description: "Blocos e apartamentos" },
-  { label: "Reuniões", to: "/adm/reunioes", icon: "groups", description: "Reuniões e votações" },
-  { label: "Espaços", to: "/adm/espacos", icon: "deck", description: "Gerenciar áreas comuns" },
-  { label: "Reclamações", to: "/adm/reclamacoes", icon: "report", description: "Gestão de reclamações" },
-  { label: "Entregas", to: "/adm/entregas", icon: "inventory_2", description: "Gestão de entregas" },
-  { label: "Vagas", to: "/adm/vagas", icon: "local_parking", description: "Vagas de garagem" },
-  { label: "Conhecimento", to: "/adm/conhecimento", icon: "library_books", description: "Base de conhecimento e FAQ" },
-];
 
 function NavLink({ to, children }) {
   const { pathname } = useLocation();
@@ -42,7 +46,7 @@ function NavLink({ to, children }) {
         ${
           active
             ? "text-primary bg-primary/10"
-            : "text-on-surface-variant hover:text-on-surface hover:bg-white/5"
+            : "text-on-surface-variant hover:text-on-surface hover:bg-veu/5"
         }`}
     >
       {children}
@@ -50,11 +54,14 @@ function NavLink({ to, children }) {
   );
 }
 
-function AdminMenu() {
+function AdminMenu({ usuario }) {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
   const { pathname } = useLocation();
-  const admActive = ADM_LINKS.some((l) => pathname === l.to);
+
+  const admLinks = linksDoPerfil(usuario?.perfil);
+
+  const admActive = admLinks.some((l) => pathname === l.to);
 
   useEffect(() => {
     function handleClick(e) {
@@ -71,7 +78,7 @@ function AdminMenu() {
         className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-200 cursor-pointer
           ${admActive || open
             ? "text-primary bg-primary/10"
-            : "text-on-surface-variant hover:text-on-surface hover:bg-white/5"
+            : "text-on-surface-variant hover:text-on-surface hover:bg-veu/5"
           }`}
       >
         <Icone name="admin_panel_settings" className="text-base" />
@@ -85,7 +92,7 @@ function AdminMenu() {
       {open && (
         <div className="absolute top-[calc(100%+10px)] left-1/2 -translate-x-1/2 w-72 rounded-2xl overflow-hidden z-50 shadow-[0_16px_48px_rgba(0,0,0,0.6)]" style={{ background: "rgba(18,18,24,0.97)", backdropFilter: "blur(24px)", border: "1px solid rgba(255,255,255,0.08)" }}>
           {/* Header do painel */}
-          <div className="px-4 py-3 border-b border-white/5">
+          <div className="px-4 py-3 border-b border-veu/5">
             <p className="text-xs font-semibold uppercase tracking-widest text-on-surface-variant">
               Painel Administrativo
             </p>
@@ -93,7 +100,7 @@ function AdminMenu() {
 
           {/* Links */}
           <div className="p-2 space-y-0.5">
-            {ADM_LINKS.map((link) => {
+            {admLinks.map((link) => {
               const active = pathname === link.to;
               return (
                 <Link
@@ -103,7 +110,7 @@ function AdminMenu() {
                   className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group
                     ${active
                       ? "bg-primary/10 text-primary"
-                      : "text-on-surface-variant hover:bg-white/5 hover:text-on-surface"
+                      : "text-on-surface-variant hover:bg-veu/5 hover:text-on-surface"
                     }`}
                 >
                   <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all
@@ -127,15 +134,157 @@ function AdminMenu() {
   );
 }
 
+function SinoNotificacoes() {
+  const { notificacoes, naoLidas, conversasNaoLidas, totalPendente, marcarLida, marcarTodasLidas } =
+    useNotificacoes();
+  const navigate = useNavigate();
+  const [aberto, setAberto] = useState(false);
+  const ref = useRef(null);
+
+  useEffect(() => {
+    function handler(e) {
+      if (ref.current && !ref.current.contains(e.target)) setAberto(false);
+    }
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  function aoClicar(n) {
+    marcarLida(n.id);
+    setAberto(false);
+    // O destino sai de utils/notificacoes.js, que é a mesma fonte usada pela
+    // tela de Notificações. Antes a lista de tipos vivia aqui, e um tipo novo
+    // publicado por outro serviço não levava a lugar nenhum.
+    const { destino } = configDaNotificacao(n);
+    if (destino) navigate(destino);
+  }
+
+  const recentes = notificacoes.slice(0, 8);
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        onClick={() => setAberto((o) => !o)}
+        className="relative ml-1 w-9 h-9 rounded-full flex items-center justify-center text-on-surface-variant hover:text-primary hover:bg-primary/10 transition-all duration-200 cursor-pointer"
+        title="Notificações"
+      >
+        <Icone name="notifications" className="text-xl" />
+        {totalPendente > 0 && (
+          <span className="absolute top-1 right-1 w-4 h-4 rounded-full bg-error text-white text-[10px] font-bold flex items-center justify-center">
+            {totalPendente > 9 ? "9+" : totalPendente}
+          </span>
+        )}
+      </button>
+
+      {aberto && (
+        <div className="absolute top-[calc(100%+10px)] right-0 w-80 rounded-2xl overflow-hidden z-50 shadow-[0_16px_48px_rgba(0,0,0,0.6)]"
+          style={{ background: "rgba(18,18,24,0.97)", backdropFilter: "blur(24px)", border: "1px solid rgba(255,255,255,0.08)" }}
+        >
+          <div className="flex items-center justify-between px-4 py-3 border-b border-veu/5">
+            <p className="text-xs font-semibold uppercase tracking-widest text-on-surface-variant">
+              Notificações
+            </p>
+            {naoLidas > 0 && (
+              <button
+                onClick={marcarTodasLidas}
+                className="text-xs text-primary hover:underline cursor-pointer"
+              >
+                Marcar todas como lidas
+              </button>
+            )}
+          </div>
+
+          {/* A conversa com a administração ainda sem resposta nao gera
+              notificacao — nao ha participante da gestao a quem endereca-la.
+              Sem esta linha, o sino acenderia e o painel nao explicaria por que. */}
+          {conversasNaoLidas > 0 && (
+            <Link
+              to="/conversas"
+              onClick={() => setAberto(false)}
+              className="flex items-center gap-3 px-4 py-3 border-b border-veu/5 hover:bg-veu/5 transition"
+            >
+              <div className="p-1.5 rounded-lg bg-tertiary/15 text-tertiary shrink-0">
+                <Icone name="forum" className="text-sm" />
+              </div>
+              <p className="text-sm text-on-surface flex-1">
+                {conversasNaoLidas} conversa{conversasNaoLidas > 1 ? "s" : ""} com mensagem nova
+              </p>
+              <Icone name="chevron_right" className="text-base text-on-surface-variant/40" />
+            </Link>
+          )}
+
+          {recentes.length === 0 ? (
+            conversasNaoLidas === 0 && (
+              <div className="py-8 text-center text-on-surface-variant text-sm">
+                <Icone name="notifications_none" className="text-3xl opacity-30 block mb-2 mx-auto" />
+                Sem notificações
+              </div>
+            )
+          ) : (
+            <div className="max-h-72 overflow-y-auto divide-y divide-veu/5">
+              {recentes.map((n) => (
+                <button
+                  key={n.id}
+                  onClick={() => aoClicar(n)}
+                  className={`w-full text-left flex items-start gap-3 px-4 py-3 hover:bg-veu/5 transition cursor-pointer ${!n.lida ? "bg-primary/5" : ""}`}
+                >
+                  <div className={`mt-0.5 p-1.5 rounded-lg shrink-0 ${configDaNotificacao(n).cor}`}>
+                    <Icone name={configDaNotificacao(n).icone} className="text-sm" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className={`text-sm font-medium leading-snug ${n.lida ? "text-on-surface-variant" : "text-on-surface"}`}>
+                      {n.titulo}
+                    </p>
+                    {n.mensagem && (
+                      <p className="text-xs text-on-surface-variant mt-0.5 line-clamp-2">{n.mensagem}</p>
+                    )}
+                    <p className="text-[10px] text-on-surface-variant/50 mt-1">
+                      {new Date(n.criadoEm).toLocaleString("pt-BR")}
+                    </p>
+                  </div>
+                  {!n.lida && <div className="mt-2 shrink-0 w-2 h-2 rounded-full bg-primary" />}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* Rodapé — Ver todas */}
+          <div className="px-4 py-3 border-t border-veu/5">
+            <Link
+              to="/notificacoes"
+              onClick={() => setAberto(false)}
+              className="flex items-center justify-center gap-1.5 w-full text-xs font-semibold text-on-surface-variant hover:text-primary transition"
+            >
+              Ver todas as notificações
+              <Icone name="arrow_forward" className="text-sm" />
+            </Link>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function Navbar() {
-  const [darkMode, setDarkMode] = useState(true);
   const { usuario } = useAuth();
   const isRestrictedUser = isUsuarioRestrito(usuario);
   const showAdminMenu = podeAcessarAdmin(usuario?.perfil);
-  const visibleLeftLinks = isRestrictedUser ? [] : NAV_LINKS_LEFT;
+  const isDoorman = usuario?.perfil === PERFIS.PORTEIRO;
 
+  let visibleLeftLinks;
+  if (isRestrictedUser) {
+    visibleLeftLinks = [];
+  } else if (isDoorman) {
+    visibleLeftLinks = NAV_LINKS_PORTEIRO;
+  } else {
+    visibleLeftLinks = NAV_LINKS_LEFT;
+  }
+
+  // 67.2rem são os 56rem do `max-w-4xl` mais 20%. Valor exato em vez do passo
+  // seguinte da escala: `max-w-5xl` daria 14% e a barra continuaria apertada,
+  // `max-w-6xl` daria 29% e sobraria vão no meio.
   return (
-    <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-[94%] max-w-4xl px-1">
+    <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-[94%] max-w-[67.2rem] px-1">
       <nav className="glass-panel rounded-full px-4 py-2.5 flex items-center shadow-[0_8px_32px_rgba(0,0,0,0.3)]">
         {/* Esquerda */}
         <div className="flex-1 flex items-center gap-0.5">
@@ -144,7 +293,7 @@ export function Navbar() {
               {l.label}
             </NavLink>
           ))}
-          {!isRestrictedUser && showAdminMenu && <AdminMenu />}
+          {!isRestrictedUser && !isDoorman && showAdminMenu && <AdminMenu usuario={usuario} />}
         </div>
 
         {/* Centro — Logo */}
@@ -163,17 +312,8 @@ export function Navbar() {
             </NavLink>
           ))}
 
-          {/* Toggle Dark/Light */}
-          <button
-            onClick={() => setDarkMode((d) => !d)}
-            className="ml-1 w-9 h-9 rounded-full flex items-center justify-center text-on-surface-variant hover:text-primary hover:bg-primary/10 transition-all duration-200 cursor-pointer"
-            title={darkMode ? "Modo Claro" : "Modo Escuro"}
-          >
-            <Icone
-              name={darkMode ? "dark_mode" : "light_mode"}
-              className="text-xl"
-            />
-          </button>
+          <SinoNotificacoes />
+
         </div>
       </nav>
     </div>

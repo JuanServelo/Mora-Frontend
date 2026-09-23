@@ -52,9 +52,13 @@ export function AuthProvider({ children }) {
     return res.data;
   }
 
-  const completarOAuth = useCallback(async (token) => {
-    localStorage.setItem("token", token);
-    const res = await api.get("/api/auth/me");
+  /**
+   * Troca o código de uso único recebido no redirect do Google pelo JWT.
+   * O token não vem mais na URL — ela vaza para histórico, logs e Referer.
+   */
+  const completarOAuth = useCallback(async (code) => {
+    const res = await api.post("/api/auth/oauth/exchange", { code });
+    localStorage.setItem("token", res.data.token);
     setUsuario(res.data.usuario);
     return res.data.usuario;
   }, []);
@@ -80,7 +84,14 @@ export function AuthProvider({ children }) {
     return res.data;
   }
 
-  function logout() {
+  async function logout() {
+    // Revoga o token no servidor: limpar só o navegador deixaria um token
+    // roubado válido até expirar. A sessão local cai mesmo se a chamada falhar.
+    try {
+      await api.post("/api/auth/logout");
+    } catch {
+      // Token já inválido ou API fora — seguir com a limpeza local.
+    }
     localStorage.removeItem("token");
     setUsuario(null);
   }

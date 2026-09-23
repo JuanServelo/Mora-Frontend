@@ -85,7 +85,7 @@ export function Comodidades() {
           </div>
         )}
 
-        <section className="glass-panel rounded-[2rem] p-8 md:p-10 border border-white/5">
+        <section className="glass-panel rounded-[2rem] p-8 md:p-10 border border-veu/5">
           <div className="flex flex-col md:flex-row gap-8 md:items-center">
             <div className="flex-1 space-y-3">
               <h3 className="font-headline text-xl font-bold text-on-surface">

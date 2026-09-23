@@ -2,16 +2,32 @@
 import { useState, useEffect } from "react";
 import api from "../../services/api";
 import { blocoApi, apartamentoApi, vagaApi } from "../../services/estruturasApi";
+import { userManagementApi } from "../../services/userManagementApi";
+import { condominiosApi } from "../../services/condominiosApi";
 import { Icone } from "../../components/icones/Icone";
 import { Campo } from "../../components/campos/Campo";
 import { Botao } from "../../components/botoes/Botao";
 import {
-  PERFIS_CADASTRO_CONDOMINIO,
-  PERFIS_CADASTRO_UNIDADE,
+  PERFIS,
+  TODOS_PERFIS,
   labelPerfil,
+  perfisCadastroDisponiveis,
 } from "../../utils/perfis";
+import { mascararCpf, validarCpf } from "../../utils/masks";
+
+const PERFIS_EXIGEM_UNIDADE_FORM = new Set([
+  PERFIS.MORADOR,
+  PERFIS.DONO_ALUGUEL,
+  PERFIS.CONVIDADO,
+]);
+
+const PERFIS_EXIGEM_PRECADASTRO = new Set([
+  PERFIS.MORADOR,
+  PERFIS.CONVIDADO,
+]);
 import { useToast } from "../../contexts/ToastContext";
 import { useConfirm } from "../../contexts/ConfirmContext";
+import { useAuth } from "../../contexts/AuthContext";
 
 const STATUS_STYLE = {
   ativo: "bg-primary/10 text-primary",
@@ -24,9 +40,11 @@ const STATUS_STYLE = {
 export function GerenciarUsuarios() {
   const toast = useToast();
   const confirm = useConfirm();
+  const { usuario: usuarioLogado } = useAuth();
   const [usuarios, setUsuarios] = useState([]);
   const [blocos, setBlocos] = useState([]);
   const [apartamentos, setApartamentos] = useState([]);
+  const [condominios, setCondominios] = useState([]);
   const [carregando, setCarregando] = useState(true);
   const [busca, setBusca] = useState("");
 
@@ -35,8 +53,10 @@ export function GerenciarUsuarios() {
       api.get("/api/user-management/users").catch(() => api.get("/api/users")),
       blocoApi.listar(),
       apartamentoApi.listar(),
+      condominiosApi.listar().catch(() => ({ data: { condominios: [] } })),
     ])
-      .then(([usersRes, blocosRes, aptsRes]) => {
+      .then(([usersRes, blocosRes, aptsRes, condsRes]) => {
+        setCondominios((condsRes.data.condominios || []).filter((c) => c.status === "active"));
         const mapStatus = (s) => {
           if (s === "active") return "ativo";
           if (s === "inactive") return "inativo";
@@ -54,6 +74,7 @@ export function GerenciarUsuarios() {
           apartamento: u.apartamento ?? "",
           vaga: u.vaga ?? null,
           unidadeId: u.unidadeId,
+          responsavelFinanceiro: u.responsavelFinanceiro ?? false,
           logins: [u.email],
           status: mapStatus(u.status),
           createdAt: u.createdAt,
@@ -99,19 +120,19 @@ export function GerenciarUsuarios() {
   }
 
  async function salvarEdicao(id, dados) {
-  const { status: _st, logins: _lg, ...payload } = dados;
+  const { status: _st, logins: _lg, unidadeId, ...payload } = dados;
 
   try {
-    console.log("PAYLOAD ENVIADO:", payload);
-
     const res = await api.put(`/api/users/${id}`, payload);
-
-    console.log("RESPOSTA API:", res.data);
-
     const u = res.data.usuario;
+    if (!u) throw new Error("Resposta da API inválida");
 
-    if (!u) {
-      throw new Error("Resposta da API inválida");
+    // Sincroniza unidadeId com o novo endpoint
+    const usuarioAtual = usuarios.find((usr) => usr.id === id);
+    if (unidadeId && unidadeId !== usuarioAtual?.unidadeId) {
+      await userManagementApi.vincularUnidade(id, unidadeId);
+    } else if (!unidadeId && usuarioAtual?.unidadeId) {
+      await userManagementApi.desvincularUnidade(id).catch(() => {});
     }
 
     setUsuarios((us) =>
@@ -125,13 +146,14 @@ export function GerenciarUsuarios() {
               bloco: u.bloco ?? "",
               apartamento: u.apartamento ?? "",
               vaga: u.vaga ?? null,
+              unidadeId: unidadeId ?? null,
             }
-          : usr
-      )
+          : usr,
+      ),
     );
 
     setEditando(null);
-
+    toast.success("Usuário atualizado.");
   } catch (err) {
     console.error("Erro ao salvar edição:", err);
     throw err;
@@ -143,6 +165,7 @@ export function GerenciarUsuarios() {
       const res = await api.post("/api/user-management/invites", {
         email: dados.email,
         perfil: dados.perfil,
+        condominioId: dados.condominioId || undefined,
         unidadeId: dados.unidadeId || undefined,
         nomePrecadastro: dados.nomePrecadastro || undefined,
         cpfPrecadastro: dados.cpfPrecadastro || undefined,
@@ -308,7 +331,7 @@ export function GerenciarUsuarios() {
               className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 cursor-pointer ${
                 aba === tab.id
                   ? "bg-primary/15 text-primary"
-                  : "text-on-surface-variant hover:text-on-surface hover:bg-white/5"
+                  : "text-on-surface-variant hover:text-on-surface hover:bg-veu/5"
               }`}
             >
               <Icone name={tab.icon} className="text-lg" />
@@ -333,6 +356,9 @@ export function GerenciarUsuarios() {
                 <FormNovoUsuario
                   blocos={blocos}
                   apartamentos={apartamentos}
+                  condominios={condominios}
+                  perfilAtor={usuarioLogado?.perfil}
+                  condominioIdAtor={usuarioLogado?.condominioId}
                   onSalvar={criarUsuario}
                   onCancelar={() => setCriando(false)}
                 />
@@ -368,7 +394,7 @@ export function GerenciarUsuarios() {
                   {/* Linha principal */}
                   <button
                     onClick={() => toggleExpandir(usuario.id)}
-                    className="w-full flex items-center gap-4 p-5 text-left group hover:bg-white/5 transition-all cursor-pointer"
+                    className="w-full flex items-center gap-4 p-5 text-left group hover:bg-veu/5 transition-all cursor-pointer"
                   >
                     <div className="w-11 h-11 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
                       <Icone name="person" className="text-primary" />
@@ -405,6 +431,12 @@ export function GerenciarUsuarios() {
                     >
                       {usuario.status}
                     </span>
+
+                    {usuario.responsavelFinanceiro && usuario.tipo === "usuario" && (
+                      <span className="shrink-0 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider bg-secondary/10 text-secondary">
+                        Financeiro
+                      </span>
+                    )}
 
                     <Icone
                       name="expand_more"
@@ -476,6 +508,11 @@ function DetalhesUsuario({ usuario, onEditar, onReenviar, onDesativar }) {
       {usuario.perfil && (
         <p className="text-sm text-on-surface-variant">
           Perfil: <strong className="text-on-surface">{labelPerfil(usuario.perfil)}</strong>
+          {usuario.responsavelFinanceiro && (
+            <span className="ml-2 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-secondary/10 text-secondary">
+              Responsável financeiro
+            </span>
+          )}
         </p>
       )}
       <div>
@@ -512,10 +549,19 @@ function DetalhesUsuario({ usuario, onEditar, onReenviar, onDesativar }) {
             icon: "local_parking",
           },
           { label: "Status", value: usuario.status, icon: "verified_user" },
+          ...(usuario.unidadeId
+            ? [{
+                label: "Unidade ID",
+                value: `${usuario.unidadeId.slice(0, 8)}…`,
+                icon: "fingerprint",
+                title: usuario.unidadeId,
+              }]
+            : []),
         ].map((item) => (
           <div
             key={item.label}
             className="bg-surface-container-highest/30 rounded-2xl p-4"
+            title={item.title}
           >
             <Icone name={item.icon} className="text-primary text-xl mb-2" />
             <p className="text-on-surface-variant text-xs uppercase tracking-wider">
@@ -662,6 +708,7 @@ function FormEdicao({ usuario, blocos, apartamentos, onSalvar, onCancelar }) {
     const novoBloco = blocoSel?.nome ?? "";
     const novoApt = aptSel?.numero ?? "";
     const novaVaga = vagaSel?.numero ?? null;
+    const novaUnidadeId = aptSel?.id ?? null;
 
     const houveMudanca =
       usuario.bloco !== novoBloco ||
@@ -673,16 +720,11 @@ function FormEdicao({ usuario, blocos, apartamentos, onSalvar, onCancelar }) {
       return;
     }
 
-    console.log("ENVIANDO:", {
-      bloco: novoBloco,
-      apartamento: novoApt,
-      vaga: novaVaga,
-    });
-
     await onSalvar({
       bloco: novoBloco,
       apartamento: novoApt,
       vaga: novaVaga,
+      unidadeId: novaUnidadeId,
       status: form.status,
       logins: form.logins,
     });
@@ -856,36 +898,76 @@ function FormEdicao({ usuario, blocos, apartamentos, onSalvar, onCancelar }) {
 }
 
 // ─────────────────────────────────────────────
-function FormNovoUsuario({ blocos, apartamentos, onSalvar, onCancelar }) {
+function FormNovoUsuario({ blocos, apartamentos, condominios, perfilAtor, condominioIdAtor, onSalvar, onCancelar }) {
+  const perfisOpcoes = perfisCadastroDisponiveis(perfilAtor).filter(
+    (p) => p.value !== PERFIS.CONVIDADO,
+  );
+
+  // O Admin Geral não tem condomínio próprio: sempre escolhe o de destino.
+  const precisaSelecionarCondominio = !condominioIdAtor || perfilAtor === PERFIS.ADMIN_GERAL;
+
   const [form, setForm] = useState({
     email: "",
-    perfil: PERFIS_CADASTRO_CONDOMINIO[0].value,
+    perfil: perfisOpcoes[0]?.value ?? PERFIS.ADMIN_SINDICO,
     nomePrecadastro: "",
     cpfPrecadastro: "",
   });
+  const [erroCpf, setErroCpf] = useState("");
+  const [condominioId, setCondominioId] = useState(() => condominioIdAtor || "");
   const [blocoId, setBlocoId] = useState("");
   const [aptId, setAptId] = useState("");
 
+  // Sincroniza o perfil inicial quando perfisOpcoes mudar (ex: perfilAtor carregou depois)
   useEffect(() => {
-    if (!blocoId && blocos.length > 0) setBlocoId(blocos[0].id);
-  }, [blocos]);
+    if (perfisOpcoes.length > 0 && !perfisOpcoes.some((p) => p.value === form.perfil)) {
+      setForm((f) => ({ ...f, perfil: perfisOpcoes[0].value }));
+    }
+  }, [perfilAtor]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Pré-seleciona primeiro condomínio disponível para admins sem condomínio próprio
+  useEffect(() => {
+    if (precisaSelecionarCondominio && !condominioId && condominios.length > 0) {
+      setCondominioId(condominios[0].id);
+    }
+  }, [condominios]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Blocos filtrados pelo condomínio selecionado
+  const blocosFiltrados = condominioId
+    ? blocos.filter((b) => b.condominioId === condominioId)
+    : blocos;
 
   const aptsFiltrados = blocoId ? apartamentos.filter((a) => a.blocoId === blocoId) : apartamentos;
-  const perfilUnidade = PERFIS_CADASTRO_UNIDADE.some((p) => p.value === form.perfil);
-  const exigeUnidade = form.perfil === "RESIDENT_OWNER" || perfilUnidade;
+
+  // Condomínio do ator para exibição readonly
+  const condominioDoAtor = condominios.find((c) => c.id === condominioIdAtor);
+  const perfilUnidade = PERFIS_EXIGEM_PRECADASTRO.has(form.perfil);
+  const exigeUnidade = PERFIS_EXIGEM_UNIDADE_FORM.has(form.perfil);
 
   function set(field, value) {
     setForm((f) => ({ ...f, [field]: value }));
   }
 
+  function handleCpfChange(e) {
+    const masked = mascararCpf(e.target.value);
+    setForm((f) => ({ ...f, cpfPrecadastro: masked }));
+    setErroCpf("");
+  }
+
   function handleSubmit(e) {
     e.preventDefault();
     if (!form.email.trim() || !form.perfil) return;
+    if (precisaSelecionarCondominio && !condominioId) return;
     if (exigeUnidade && !aptId) return;
+
+    if (perfilUnidade && !validarCpf(form.cpfPrecadastro)) {
+      setErroCpf("CPF inválido. Verifique o número informado.");
+      return;
+    }
 
     onSalvar({
       email: form.email.trim(),
       perfil: form.perfil,
+      condominioId: condominioId || undefined,
       unidadeId: aptId || undefined,
       nomePrecadastro: perfilUnidade ? form.nomePrecadastro.trim() : undefined,
       cpfPrecadastro: perfilUnidade ? form.cpfPrecadastro.trim() : undefined,
@@ -894,10 +976,40 @@ function FormNovoUsuario({ blocos, apartamentos, onSalvar, onCancelar }) {
 
   const selectCls = "w-full bg-surface-container-highest/40 border-none rounded-xl py-4 px-4 text-on-surface focus:ring-2 focus:ring-primary/50 focus:outline-none backdrop-blur-sm transition-all disabled:opacity-40";
   const labelCls = "text-xs font-semibold uppercase tracking-wider text-on-surface-variant ml-1";
-  const perfisOpcoes = [...PERFIS_CADASTRO_CONDOMINIO, ...PERFIS_CADASTRO_UNIDADE];
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
+      <p className="text-xs text-on-surface-variant">
+        Convidados (Guest) devem ser cadastrados no perfil da unidade — sem convite por e-mail.
+      </p>
+
+      {precisaSelecionarCondominio ? (
+        <div className="space-y-2">
+          <label className={labelCls}>Condomínio *</label>
+          <select
+            value={condominioId}
+            onChange={(e) => { setCondominioId(e.target.value); setBlocoId(""); setAptId(""); }}
+            required
+            className={selectCls}
+          >
+            <option value="">— Selecione o condomínio —</option>
+            {condominios.map((c) => (
+              <option key={c.id} value={c.id}>{c.nome}</option>
+            ))}
+          </select>
+        </div>
+      ) : (
+        <div className="flex items-center gap-2 px-4 py-3 rounded-xl bg-surface-container-highest/30">
+          <Icone name="domain" className="text-primary text-base shrink-0" />
+          <span className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant mr-1">
+            Condomínio:
+          </span>
+          <span className="text-sm font-semibold text-on-surface">
+            {condominioDoAtor?.nome ?? condominioIdAtor}
+          </span>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <Campo
           id="novo-email"
@@ -938,9 +1050,11 @@ function FormNovoUsuario({ blocos, apartamentos, onSalvar, onCancelar }) {
             label="CPF *"
             placeholder="000.000.000-00"
             icon="badge"
+            inputMode="numeric"
             value={form.cpfPrecadastro}
-            onChange={(e) => set("cpfPrecadastro", e.target.value)}
+            onChange={handleCpfChange}
           />
+          {erroCpf && <p className="text-error text-sm ml-1">{erroCpf}</p>}
         </div>
       )}
 
@@ -950,10 +1064,13 @@ function FormNovoUsuario({ blocos, apartamentos, onSalvar, onCancelar }) {
             <label className={labelCls}>Bloco *</label>
             <select value={blocoId} onChange={(e) => { setBlocoId(e.target.value); setAptId(""); }} required className={selectCls}>
               <option value="">— Selecione —</option>
-              {blocos.map((b) => (
+              {blocosFiltrados.map((b) => (
                 <option key={b.id} value={b.id}>{b.nome}</option>
               ))}
             </select>
+            {condominioId && blocosFiltrados.length === 0 && (
+              <p className="text-xs text-on-surface-variant ml-1">Nenhum bloco cadastrado para este condomínio</p>
+            )}
           </div>
           <div className="space-y-2">
             <label className={labelCls}>Apartamento *</label>

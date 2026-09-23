@@ -181,7 +181,7 @@ export function GerenciarReclamacoes() {
             <div key={rec.id} className="glass-panel rounded-2xl overflow-hidden">
               {/* Cabeçalho */}
               <button
-                className="w-full flex items-center justify-between px-6 py-4 text-left cursor-pointer hover:bg-white/5 transition-all"
+                className="w-full flex items-center justify-between px-6 py-4 text-left cursor-pointer hover:bg-veu/5 transition-all"
                 onClick={() =>
                   setExpandido(expandido === rec.id ? null : rec.id)
                 }
@@ -211,7 +211,7 @@ export function GerenciarReclamacoes() {
 
               {/* Detalhes expandidos */}
               {expandido === rec.id && (
-                <div className="px-6 pb-5 border-t border-white/5 pt-4 space-y-5">
+                <div className="px-6 pb-5 border-t border-veu/5 pt-4 space-y-5">
                   {/* Info */}
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                     <div className="bg-surface-container-highest/30 rounded-xl p-3">
@@ -293,7 +293,7 @@ export function GerenciarReclamacoes() {
                                 [rec.id]: { ...prev[rec.id], status: e.target.value },
                               }))
                             }
-                            className="appearance-none bg-surface-container-highest/50 border border-white/10 rounded-xl py-2.5 pl-4 pr-10 text-on-surface text-sm focus:ring-2 focus:ring-primary/50 focus:outline-none transition-all cursor-pointer"
+                            className="appearance-none bg-surface-container-highest/50 border border-veu/10 rounded-xl py-2.5 pl-4 pr-10 text-on-surface text-sm focus:ring-2 focus:ring-primary/50 focus:outline-none transition-all cursor-pointer"
                           >
                             <option value="EM_ANALISE">Em Análise</option>
                             <option value="RESOLVIDO">Resolvido</option>

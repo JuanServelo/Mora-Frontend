@@ -4,14 +4,7 @@ import { useAuth } from "../../../contexts/AuthContext";
 import { Campo } from "../../../components/campos/Campo";
 import { Botao } from "../../../components/botoes/Botao";
 import { Icone } from "../../../components/icones/Icone";
-
-const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:3001";
-
-function fotoUrlCompleta(fotoUrl) {
-  if (!fotoUrl) return null;
-  if (fotoUrl.startsWith("http")) return fotoUrl;
-  return `${API_BASE}${fotoUrl}`;
-}
+import { FotoUsuario } from "../../../components/avatar/FotoUsuario";
 
 export function DetalhesContaView() {
   const { usuario, atualizarPerfil, atualizarFoto } = useAuth();
@@ -74,20 +67,15 @@ export function DetalhesContaView() {
     }
   }
 
-  const foto = fotoUrlCompleta(usuario?.fotoUrl);
   const campoErro = (campo) => (erros[campo] ? "ring-2 ring-error/60" : "");
 
   return (
     <form className="space-y-5" onSubmit={handleSalvar}>
       <div className="flex items-center gap-4 p-4 bg-surface-container-highest/30 rounded-2xl">
-        <div className="w-16 h-16 rounded-full p-[2px] bg-gradient-to-tr from-primary via-secondary to-tertiary shrink-0 overflow-hidden">
-          {foto ? (
-            <img src={foto} alt="Avatar" className="w-full h-full rounded-full object-cover" />
-          ) : (
-            <div className="w-full h-full rounded-full bg-surface-container-highest flex items-center justify-center">
-              <Icone name="person" className="text-primary text-3xl" />
-            </div>
-          )}
+        <div className="w-16 h-16 rounded-full p-[2px] bg-gradient-to-tr from-primary via-secondary to-tertiary shrink-0">
+          <div className="w-full h-full rounded-full overflow-hidden bg-surface-container-highest flex items-center justify-center">
+            <FotoUsuario usuario={usuario} classeIcone="text-primary text-3xl" />
+          </div>
         </div>
         <div>
           <p className="text-on-surface font-semibold text-sm">Foto de Perfil</p>
@@ -144,6 +132,19 @@ export function DetalhesContaView() {
           icon="phone"
           defaultValue={usuario?.telefone || ""}
         />
+        {usuario?.dataNascimento && (
+          <div className="flex flex-col gap-1">
+            <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant ml-1">
+              Data de Nascimento
+            </label>
+            <div className="flex items-center gap-2 bg-surface-container-highest/40 rounded-xl py-3 px-4 text-on-surface">
+              <Icone name="cake" className="text-outline-variant text-lg" />
+              <span>
+                {new Date(usuario.dataNascimento).toLocaleDateString("pt-BR", { timeZone: "UTC" })}
+              </span>
+            </div>
+          </div>
+        )}
       </div>
 
       {erro && <p className="text-error text-sm font-medium">{erro}</p>}

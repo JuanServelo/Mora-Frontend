@@ -5,6 +5,7 @@ import { Campo } from "../campos/Campo";
 import { Botao } from "../botoes/Botao";
 import { Icone } from "../icones/Icone";
 import { validarSenha } from "../../utils/passwordValidation";
+import { mascararCpf, mascararTelefone, validarCpf, validarTelefone } from "../../utils/masks";
 
 export function AtivacaoContaForm({ tituloPasso1, subtituloPasso1, subtituloPasso2 }) {
   const { validarConvite, ativarConta, getRedirectPath } = useAuth();
@@ -18,11 +19,28 @@ export function AtivacaoContaForm({ tituloPasso1, subtituloPasso1, subtituloPass
   const [erros, setErros] = useState({});
   const [errosSenha, setErrosSenha] = useState([]);
   const [carregando, setCarregando] = useState(false);
+  const [telefone, setTelefone] = useState("");
+  const [cpf, setCpf] = useState("");
+  const [dataNascimento, setDataNascimento] = useState("");
 
   useEffect(() => {
     const c = searchParams.get("codigo");
     if (c) setCodigo(c);
   }, [searchParams]);
+
+  useEffect(() => {
+    if (convite?.cpfPrecadastro) {
+      setCpf(mascararCpf(convite.cpfPrecadastro));
+    }
+  }, [convite]);
+
+  function handleTelefoneChange(e) {
+    setTelefone(mascararTelefone(e.target.value));
+  }
+
+  function handleCpfChange(e) {
+    setCpf(mascararCpf(e.target.value));
+  }
 
   async function handleValidarCodigo(e) {
     e.preventDefault();
@@ -39,6 +57,7 @@ export function AtivacaoContaForm({ tituloPasso1, subtituloPasso1, subtituloPass
     try {
       const res = await validarConvite(codigo.trim());
       setConvite(res.convite);
+      setCodigo(codigo.trim());
       setPasso(2);
     } catch (err) {
       setErro(err.response?.data?.mensagem || "Erro ao validar código.");
@@ -58,17 +77,34 @@ export function AtivacaoContaForm({ tituloPasso1, subtituloPasso1, subtituloPass
       codigo: codigo.trim(),
       nome: form.get("nome")?.trim(),
       email: form.get("email")?.trim(),
-      telefone: form.get("telefone")?.trim(),
-      cpf: form.get("cpf")?.trim(),
+      telefone: telefone,
+      cpf: cpf,
+      dataNascimento: dataNascimento,
       senha: form.get("senha"),
       confirmacaoSenha: form.get("confirmacaoSenha"),
     };
 
-    const camposObrigatorios = ["nome", "email", "telefone", "cpf", "senha", "confirmacaoSenha"];
     const novosErros = {};
+    const camposObrigatorios = ["nome", "email", "telefone", "cpf", "dataNascimento", "senha", "confirmacaoSenha"];
     for (const c of camposObrigatorios) {
       if (!dados[c]) novosErros[c] = "Este campo é obrigatório.";
     }
+
+    if (!novosErros.cpf && !validarCpf(dados.cpf)) {
+      novosErros.cpf = "CPF inválido.";
+    }
+
+    if (!novosErros.dataNascimento) {
+      const d = new Date(dados.dataNascimento);
+      if (isNaN(d.getTime()) || d >= new Date()) {
+        novosErros.dataNascimento = "Data de nascimento inválida.";
+      }
+    }
+
+    if (!novosErros.telefone && !validarTelefone(dados.telefone)) {
+      novosErros.telefone = "Telefone inválido. Informe DDD + número (10 ou 11 dígitos).";
+    }
+
     if (Object.keys(novosErros).length > 0) {
       setErros(novosErros);
       return;
@@ -164,6 +200,9 @@ export function AtivacaoContaForm({ tituloPasso1, subtituloPasso1, subtituloPass
             label="Telefone"
             placeholder="(11) 99999-9999"
             icon="phone"
+            inputMode="numeric"
+            value={telefone}
+            onChange={handleTelefoneChange}
             className={campoErro("telefone")}
           />
           {erros.telefone && <p className="text-error text-sm">{erros.telefone}</p>}
@@ -174,10 +213,25 @@ export function AtivacaoContaForm({ tituloPasso1, subtituloPasso1, subtituloPass
             label="CPF"
             placeholder="000.000.000-00"
             icon="badge"
-            defaultValue={convite?.cpfPrecadastro || ""}
+            inputMode="numeric"
+            value={cpf}
+            onChange={handleCpfChange}
             className={campoErro("cpf")}
           />
           {erros.cpf && <p className="text-error text-sm">{erros.cpf}</p>}
+
+          <Campo
+            id="dataNascimento"
+            name="dataNascimento"
+            label="Data de nascimento"
+            type="date"
+            icon="cake"
+            value={dataNascimento}
+            onChange={(e) => setDataNascimento(e.target.value)}
+            max={new Date().toISOString().split("T")[0]}
+            className={campoErro("dataNascimento")}
+          />
+          {erros.dataNascimento && <p className="text-error text-sm">{erros.dataNascimento}</p>}
 
           <Campo
             id="senha"

@@ -1,10 +1,12 @@
 // src/pages/servicos/Servicos.jsx
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Icone } from "../../components/icones/Icone";
 
 export function Servicos() {
   const [itens, setItens] = useState([]);
   const [erro, setErro] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     let ok = true;
@@ -65,15 +67,28 @@ export function Servicos() {
                   <p className="text-on-surface-variant text-sm mt-2 leading-relaxed">{s.descricao}</p>
                 </div>
               </div>
-              <div className="flex flex-wrap gap-2 mt-auto pt-4 border-t border-outline-variant/10">
-                {(s.tags || []).map((t) => (
-                  <span
-                    key={t}
-                    className="text-xs font-semibold uppercase tracking-wide px-3 py-1 rounded-full bg-surface-container-highest/60 text-on-surface-variant"
+
+              <div className="flex flex-wrap gap-2 mt-auto pt-4 border-t border-outline-variant/10 items-center justify-between">
+                <div className="flex flex-wrap gap-2">
+                  {(s.tags || []).map((t) => (
+                    <span
+                      key={t}
+                      className="text-xs font-semibold uppercase tracking-wide px-3 py-1 rounded-full bg-surface-container-highest/60 text-on-surface-variant"
+                    >
+                      {t}
+                    </span>
+                  ))}
+                </div>
+
+                {s.rota && (
+                  <button
+                    onClick={() => navigate(s.rota)}
+                    className="flex items-center gap-1.5 px-4 py-2 rounded-xl border border-primary/30 text-primary hover:bg-primary/10 text-xs font-semibold transition-all cursor-pointer shrink-0"
                   >
-                    {t}
-                  </span>
-                ))}
+                    <Icone name="arrow_forward" className="text-base" />
+                    Acessar
+                  </button>
+                )}
               </div>
             </article>
           ))}
