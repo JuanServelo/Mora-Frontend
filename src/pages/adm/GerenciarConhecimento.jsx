@@ -1,7 +1,8 @@
 // src/pages/adm/GerenciarConhecimento.jsx
 // Página ADMIN — Base de Conhecimento (FAQ, global) + Avisos e Comunicados (por condomínio)
-import { useState, useEffect } from "react";
-import { conhecimentoApi, avisoApi } from "../../services/comunicacaoApi";
+import { useState, useEffect, useCallback } from "react";
+import { conhecimentoApi, avisoApi, perguntasFaqApi, mensagemDeErro } from "../../services/comunicacaoApi";
+import { useToast } from "../../contexts/ToastContext";
 import { useAuth } from "../../contexts/AuthContext";
 import { useConfirm } from "../../contexts/ConfirmContext";
 import { Icone } from "../../components/icones/Icone";
@@ -29,6 +30,18 @@ function TextArea({ label, ...props }) {
 // ════════════════════════════════════════════
 export function GerenciarConhecimento() {
   const [aba, setAba] = useState("conhecimento");
+  const [pendentes, setPendentes] = useState(0);
+
+  // O número na aba é o que diz ao síndico que há morador esperando resposta,
+  // sem ele precisar abrir a aba para descobrir.
+  const contarPendentes = useCallback(() => {
+    perguntasFaqApi
+      .listar("PENDENTE")
+      .then(({ data }) => setPendentes((data ?? []).length))
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => { contarPendentes(); }, [contarPendentes]);
 
   return (
     <div className="min-h-screen w-full pt-4 pb-20 px-4 sm:px-6">
@@ -53,6 +66,7 @@ export function GerenciarConhecimento() {
         <div className="glass-panel rounded-2xl p-1.5 flex flex-wrap gap-1 w-full sm:w-fit">
           {[
             { id: "conhecimento", label: "Base de Conhecimento", icon: "library_books" },
+            { id: "perguntas", label: "Perguntas dos moradores", icon: "contact_support", total: pendentes },
             { id: "avisos", label: "Avisos", icon: "campaign" },
           ].map((tab) => (
             <button
@@ -66,11 +80,18 @@ export function GerenciarConhecimento() {
             >
               <Icone name={tab.icon} className="text-lg" />
               {tab.label}
+              {tab.total > 0 && (
+                <span className="min-w-[18px] h-[18px] px-1.5 rounded-full bg-primary text-on-primary text-[10px] font-bold flex items-center justify-center">
+                  {tab.total}
+                </span>
+              )}
             </button>
           ))}
         </div>
 
-        {aba === "conhecimento" ? <AbaConhecimento /> : <AbaAvisos />}
+        {aba === "conhecimento" && <AbaConhecimento />}
+        {aba === "perguntas" && <AbaPerguntas aoMudar={contarPendentes} />}
+        {aba === "avisos" && <AbaAvisos />}
       </div>
     </div>
   );
@@ -116,6 +137,29 @@ const ARTIGO_INICIAL = {
   publicado: false,
 };
 
+/**
+ * Mais "não ajudou" que "ajudou", com um mínimo de votos para um voto isolado
+ * não marcar o artigo.
+ */
+function precisaRevisao(avaliacao) {
+  if (!avaliacao) return false;
+  return avaliacao.naoUteis >= 2 && avaliacao.naoUteis > avaliacao.uteis;
+}
+
+function Votos({ avaliacao }) {
+  if (!avaliacao || avaliacao.uteis + avaliacao.naoUteis === 0) return null;
+  const alerta = precisaRevisao(avaliacao);
+  return (
+    <span
+      title={alerta ? "Mais moradores disseram que não ajudou: vale revisar o texto" : "Avaliação dos moradores"}
+      className={`flex items-center gap-2 text-xs font-semibold px-2.5 py-1 rounded-full ${alerta ? "bg-error/10 text-error" : "bg-veu/5 text-on-surface-variant"}`}
+    >
+      <span className="flex items-center gap-0.5"><Icone name="thumb_up" className="text-sm" />{avaliacao.uteis}</span>
+      <span className="flex items-center gap-0.5"><Icone name="thumb_down" className="text-sm" />{avaliacao.naoUteis}</span>
+    </span>
+  );
+}
+
 function AbaConhecimento() {
   const [artigos, setArtigos] = useState([]);
   const [carregando, setCarregando] = useState(true);
@@ -125,9 +169,14 @@ function AbaConhecimento() {
   const [form, setForm] = useState(ARTIGO_INICIAL);
   const [busca, setBusca] = useState("");
   const [filtroCategoria, setFiltroCategoria] = useState("TODAS");
+  const [avaliacoes, setAvaliacoes] = useState({});
 
   useEffect(() => {
     carregarArtigos();
+    conhecimentoApi
+      .avaliacoes()
+      .then(({ data }) => setAvaliacoes(Object.fromEntries((data ?? []).map((a) => [a.artigoId, a]))))
+      .catch(() => {});
   }, []);
 
   const carregarArtigos = async () => {
@@ -243,11 +292,12 @@ function AbaConhecimento() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {[
           { label: "Total de artigos", valor: artigos.length, icon: "library_books", color: "primary" },
           { label: "Publicados", valor: artigos.filter((a) => a.publicado).length, icon: "check_circle", color: "primary" },
           { label: "Rascunhos", valor: artigos.filter((a) => !a.publicado).length, icon: "edit_note", color: "error" },
+          { label: "Precisam de revisão", valor: artigos.filter((a) => precisaRevisao(avaliacoes[a.id])).length, icon: "thumb_down", color: "error" },
         ].map((c) => (
           <div key={c.label} className="glass-panel rounded-2xl p-5 flex items-center gap-4">
             <div className={`w-12 h-12 rounded-xl bg-${c.color}/10 flex items-center justify-center`}>
@@ -290,6 +340,7 @@ function AbaConhecimento() {
                 </div>
               </div>
               <div className="flex items-center justify-between sm:justify-end gap-3 shrink-0">
+                <Votos avaliacao={avaliacoes[artigo.id]} />
                 <span
                   className={`text-xs font-semibold px-3 py-1 rounded-full ${categoriaColor(artigo.categoria)}`}>{CATEGORIA_LABEL[artigo.categoria] ?? artigo.categoria}</span>
                 <span className={`text-xs font-semibold px-3 py-1 rounded-full ${artigo.publicado ? "bg-primary/10 text-primary" : "bg-error/10 text-error"}`}>{artigo.publicado ? "Publicado" : "Rascunho"}</span>
@@ -327,6 +378,206 @@ function AbaConhecimento() {
         )}
       </div>
     </div>
+  );
+}
+
+// ════════════════════════════════════════════
+// ABA: PERGUNTAS DOS MORADORES
+// ════════════════════════════════════════════
+function AbaPerguntas({ aoMudar }) {
+  const toast = useToast();
+  const confirm = useConfirm();
+  const [perguntas, setPerguntas] = useState([]);
+  const [carregando, setCarregando] = useState(true);
+  const [filtro, setFiltro] = useState("PENDENTE");
+  const [respondendo, setRespondendo] = useState(null);
+
+  const carregar = useCallback(async () => {
+    setCarregando(true);
+    try {
+      const { data } = await perguntasFaqApi.listar(filtro === "TODAS" ? null : filtro);
+      setPerguntas(data ?? []);
+    } catch (err) {
+      toast.error(mensagemDeErro(err, "Não foi possível carregar as perguntas."));
+    } finally {
+      setCarregando(false);
+    }
+  }, [filtro, toast]);
+
+  useEffect(() => { carregar(); }, [carregar]);
+
+  const aoResponder = () => {
+    setRespondendo(null);
+    carregar();
+    aoMudar();
+  };
+
+  const descartar = async (pergunta) => {
+    const ok = await confirm({
+      titulo: "Descartar pergunta",
+      mensagem: "A pergunta será excluída e o morador não receberá resposta. Deseja continuar?",
+      confirmarTexto: "Sim, descartar",
+      cancelarTexto: "Cancelar",
+      variante: "danger",
+    });
+    if (!ok) return;
+    try {
+      await perguntasFaqApi.excluir(pergunta.id);
+      setPerguntas((prev) => prev.filter((p) => p.id !== pergunta.id));
+      aoMudar();
+    } catch (err) {
+      toast.error(mensagemDeErro(err, "Não foi possível descartar a pergunta."));
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-wrap gap-2">
+        {[
+          { v: "PENDENTE", r: "Aguardando resposta" },
+          { v: "RESPONDIDA", r: "Respondidas" },
+          { v: "TODAS", r: "Todas" },
+        ].map((o) => (
+          <button
+            key={o.v}
+            onClick={() => setFiltro(o.v)}
+            className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all cursor-pointer ${
+              filtro === o.v ? "bg-primary text-on-primary" : "bg-surface-container-highest/40 text-on-surface-variant hover:bg-veu/10"
+            }`}
+          >
+            {o.r}
+          </button>
+        ))}
+      </div>
+
+      <div className="space-y-3">
+        {!carregando && perguntas.map((p) => (
+          <div key={p.id} className="glass-panel rounded-2xl p-4 sm:p-6 space-y-3">
+            <div className="flex flex-col sm:flex-row sm:items-start gap-3">
+              <div className="w-10 h-10 shrink-0 rounded-xl bg-primary/10 flex items-center justify-center">
+                <Icone name="contact_support" className="text-primary text-xl" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold text-on-surface whitespace-pre-wrap break-words">{p.texto}</p>
+                <p className="text-xs text-on-surface-variant mt-1">
+                  {p.autorNome ?? "Morador"} · {new Date(p.criadoEm).toLocaleDateString("pt-BR")}
+                  {p.categoria && ` · ${CATEGORIA_LABEL[p.categoria] ?? p.categoria}`}
+                </p>
+              </div>
+              <span className={`self-start shrink-0 text-xs font-semibold px-3 py-1 rounded-full ${
+                p.status === "RESPONDIDA" ? "bg-primary/10 text-primary" : "bg-tertiary/10 text-tertiary"
+              }`}>
+                {p.status === "RESPONDIDA" ? "Respondida" : "Aguardando"}
+              </span>
+            </div>
+
+            {p.status === "RESPONDIDA" ? (
+              <div className="bg-surface-container-highest/30 rounded-xl p-4 space-y-2">
+                <p className="text-sm text-on-surface leading-relaxed whitespace-pre-wrap">{p.resposta}</p>
+                <p className="text-xs text-on-surface-variant">
+                  {p.respondidaPor ? `${p.respondidaPor} · ` : ""}
+                  {p.respondidaEm && new Date(p.respondidaEm).toLocaleDateString("pt-BR")}
+                  {p.artigoId && (
+                    <span className="inline-flex items-center gap-1 ml-2 text-primary font-semibold">
+                      <Icone name="public" className="text-sm" /> Publicada na FAQ
+                    </span>
+                  )}
+                </p>
+              </div>
+            ) : respondendo === p.id ? (
+              <FormResposta pergunta={p} aoCancelar={() => setRespondendo(null)} aoResponder={aoResponder} />
+            ) : (
+              <div className="flex flex-wrap gap-2 justify-end">
+                <button onClick={() => descartar(p)} className="flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-lg text-on-surface-variant hover:text-error hover:bg-error/10 transition-all cursor-pointer">
+                  <Icone name="delete" className="text-sm" /> Descartar
+                </button>
+                <button onClick={() => setRespondendo(p.id)} className="flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-lg bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 transition-all cursor-pointer">
+                  <Icone name="reply" className="text-sm" /> Responder
+                </button>
+              </div>
+            )}
+          </div>
+        ))}
+
+        {perguntas.length === 0 && !carregando && (
+          <div className="glass-panel rounded-2xl py-12 sm:py-16 px-4 text-center flex flex-col items-center gap-3 text-on-surface-variant">
+            <Icone name="contact_support" className="text-5xl opacity-30" />
+            <p className="text-sm">
+              {filtro === "PENDENTE" ? "Nenhuma pergunta aguardando resposta." : "Nenhuma pergunta encontrada."}
+            </p>
+          </div>
+        )}
+        {carregando && (
+          <div className="glass-panel rounded-2xl py-12 sm:py-16 px-4 text-center text-on-surface-variant">
+            <p className="text-sm">Carregando perguntas...</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Resposta a uma pergunta. "Publicar na FAQ" já vem marcado: quase sempre a
+ * dúvida de um morador é a de outros, e publicada ela deixa de ser perguntada.
+ */
+function FormResposta({ pergunta, aoCancelar, aoResponder }) {
+  const toast = useToast();
+  const [resposta, setResposta] = useState("");
+  const [publicar, setPublicar] = useState(true);
+  const [titulo, setTitulo] = useState(pergunta.texto.slice(0, 200));
+  const [categoria, setCategoria] = useState(pergunta.categoria ?? "FAQ");
+  const [erro, setErro] = useState("");
+  const [enviando, setEnviando] = useState(false);
+
+  const enviar = async (e) => {
+    e.preventDefault();
+    setEnviando(true);
+    setErro("");
+    try {
+      await perguntasFaqApi.responder(pergunta.id, {
+        resposta: resposta.trim(),
+        publicar,
+        ...(publicar ? { titulo: titulo.trim(), categoria } : {}),
+      });
+      toast.success(publicar ? "Resposta enviada e publicada na FAQ." : "Resposta enviada ao morador.");
+      aoResponder();
+    } catch (err) {
+      setErro(mensagemDeErro(err, "Não foi possível enviar a resposta."));
+      setEnviando(false);
+    }
+  };
+
+  return (
+    <form onSubmit={enviar} className="space-y-4 border-t border-veu/5 pt-4">
+      <TextArea label="Resposta" value={resposta} onChange={(e) => setResposta(e.target.value)} rows={5} maxLength={5000} placeholder="Escreva a resposta para o morador..." required autoFocus />
+
+      <div className="flex items-center gap-3">
+        <input type="checkbox" id={`publicar-${pergunta.id}`} checked={publicar} onChange={(e) => setPublicar(e.target.checked)} className="w-4 h-4 accent-primary rounded" />
+        <label htmlFor={`publicar-${pergunta.id}`} className="text-sm text-on-surface-variant">
+          Publicar também na FAQ (visível para todos os moradores)
+        </label>
+      </div>
+
+      {publicar && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Campo label="Título do artigo" value={titulo} onChange={(e) => setTitulo(e.target.value)} maxLength={200} required />
+          <div className="space-y-2">
+            <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant ml-1">Categoria</label>
+            <select value={categoria} onChange={(e) => setCategoria(e.target.value)} className="w-full bg-surface-container-highest/40 border-none rounded-xl py-3 px-4 text-on-surface focus:ring-2 focus:ring-primary/50 focus:outline-none backdrop-blur-sm transition-all">
+              {CATEGORIAS.map((c) => (<option key={c.value} value={c.value}>{c.label}</option>))}
+            </select>
+          </div>
+        </div>
+      )}
+
+      {erro && <p className="text-sm text-error bg-error/10 rounded-xl px-4 py-2">{erro}</p>}
+
+      <div className="flex gap-3 justify-end">
+        <button type="button" onClick={aoCancelar} className="px-5 py-2.5 rounded-xl text-sm font-semibold text-on-surface-variant hover:bg-veu/5 transition-all cursor-pointer">Cancelar</button>
+        <Botao type="submit" disabled={enviando || !resposta.trim()} className="sm:w-auto px-8">{enviando ? "Enviando..." : "Enviar resposta"}</Botao>
+      </div>
+    </form>
   );
 }
 
