@@ -35,14 +35,28 @@ export function Sidebar({ aberta = false, aoFechar }) {
   const perfil = usuario?.perfil;
   const isDoorman = perfil === PERFIS.PORTEIRO;
 
+  const isGeral = perfil === PERFIS.ADMIN_GERAL;
+
   // Porteiro tem o conjunto dele; os admins veem o que o próprio perfil permite.
+  //
+  // O síndico ganha "Início" na frente: a tela inicial dele é /inicio (avisos e
+  // atalhos do condomínio), mas `menuAdmin` só lista telas de gestão, e ele não
+  // tinha como voltar depois de abrir uma. Fica aqui, e não no `menuAdmin`,
+  // porque aquela lista também é o guarda das rotas /adm. O Admin Geral não
+  // precisa: o "Painel Geral" já é a tela inicial dele.
   const links = isDoorman
     ? PORTEIRO_LINKS.filter((l) => !l.modulo || hasModulo(l.modulo))
-    : linksDoPerfil(perfil, modulosAtivos);
+    : [
+        ...(isGeral ? [] : [{ to: "/inicio", label: "Início", icon: "home" }]),
+        ...linksDoPerfil(perfil, modulosAtivos),
+      ];
+
+  // O logo leva à tela inicial, como na navbar dos moradores.
+  const telaInicial = isGeral ? "/adm/geral" : "/inicio";
 
   const subtitulo = isDoorman
     ? "Portaria"
-    : perfil === PERFIS.ADMIN_GERAL
+    : isGeral
       ? "Plataforma"
       : "Administrativo";
 
@@ -74,11 +88,17 @@ export function Sidebar({ aberta = false, aoFechar }) {
         >
           <Icone name="close" />
         </button>
-        <img src={moraLogo3} alt="Mora" className="h-7 w-auto" />
-        <div>
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-on-surface-variant">Painel</p>
-          <p className="text-sm font-bold text-on-surface leading-tight">{subtitulo}</p>
-        </div>
+        <Link
+          to={telaInicial}
+          onClick={aoFechar}
+          className="flex items-center gap-3 hover:opacity-80 transition-opacity"
+        >
+          <img src={moraLogo3} alt="Mora" className="h-7 w-auto" />
+          <div>
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-on-surface-variant">Painel</p>
+            <p className="text-sm font-bold text-on-surface leading-tight">{subtitulo}</p>
+          </div>
+        </Link>
       </div>
 
       {/* Links */}

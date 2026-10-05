@@ -25,7 +25,6 @@ import { MinhasReservas } from "../pages/usuario/MinhasReservas";
 import { MinhasReclamacoes } from "../pages/usuario/MinhasReclamacoes";
 import { MinhasEntregas } from "../pages/usuario/MinhasEntregas";
 import { Inicio } from "../pages/inicio/Inicio";
-import { Servicos } from "../pages/servicos/Servicos";
 import { Comodidades } from "../pages/comodidades/Comodidades";
 import { Portaria } from "../pages/portaria/Portaria";
 import { Chaves } from "../pages/porteiro/Chaves";
@@ -89,7 +88,9 @@ export const router = createBrowserRouter([
     ),
     children: [
       { path: "/inicio", element: <Inicio /> },
-      { path: "/servicos", element: <Servicos /> },
+      // Serviços virou uma seção da tela inicial. A rota fica como atalho para
+      // quem tiver o endereço salvo, em vez de um 404.
+      { path: "/servicos", element: <Navigate to="/inicio" replace /> },
       { path: "/comodidades", element: <Comodidades /> },
       { path: "/faq", element: <FAQ /> },
       { path: "/perfil", element: <Perfil /> },

@@ -11,14 +11,21 @@ import { configDaNotificacao } from "../../utils/notificacoes";
 // import moraLogo2 from "../../assets/Mora2.png";
 import moraLogo3 from "../../assets/Mora3.png";
 
+/**
+ * Só o que o morador usa toda semana.
+ *
+ * O resto — avisos, veículos, reclamações, entregas, convidados — está nos
+ * atalhos da tela inicial, que é para onde o logo e "Início" levam. Repetir
+ * tudo aqui deixava a barra com sete itens disputando espaço com o logo, e o
+ * menu deixava de ajudar a achar alguma coisa. Os avisos não lidos já chegam
+ * pelo topo do Início e pelo sino.
+ */
 const NAV_LINKS_LEFT = [
   { label: "Início", to: "/inicio" },
-  { label: "Serviços", to: "/servicos", modulo: "conhecimento" },
-  { label: "Espaços", to: "/espacos", modulo: "areas-comuns" },
-  { label: "Avisos", to: "/avisos" },
+  // `areas_comuns`, com sublinhado: é o slug que o plan-service grava
+  // (PlanModule). Com hífen o item nunca casava e sumia em todo plano.
+  { label: "Espaços", to: "/espacos", modulo: "areas_comuns" },
   { label: "Conversas", to: "/conversas" },
-  { label: "Meus Veículos", to: "/meus-veiculos", modulo: "veiculos" },
-  { label: "Reclamações", to: "/reclamacoes", modulo: "reclamacoes" },
   { label: "Cobranças", to: "/financeiro" },
 ];
 
@@ -283,11 +290,10 @@ export function Navbar() {
     visibleLeftLinks = NAV_LINKS_LEFT.filter((l) => !l.modulo || hasModulo(l.modulo));
   }
 
-  // 67.2rem são os 56rem do `max-w-4xl` mais 20%. Valor exato em vez do passo
-  // seguinte da escala: `max-w-5xl` daria 14% e a barra continuaria apertada,
-  // `max-w-6xl` daria 29% e sobraria vão no meio.
+  // Voltou ao `max-w-4xl`: a barra tinha sido alargada 20% para caber sete
+  // itens; com quatro, a largura extra só abria vão em volta do logo.
   return (
-    <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-[94%] max-w-[67.2rem] px-1">
+    <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-[94%] max-w-4xl px-1">
       <nav className="glass-panel rounded-full px-4 py-2.5 flex items-center shadow-[0_8px_32px_rgba(0,0,0,0.3)]">
         {/* Esquerda */}
         <div className="flex-1 flex items-center gap-0.5">

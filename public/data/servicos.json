@@ -35,6 +35,6 @@
     "titulo": "Cadastro de veículos",
     "descricao": "Cadastre e gerencie veículos vinculados às unidades do condomínio, incluindo veículos de serviço.",
     "tags": ["Garagem", "Controle"],
-    "rota": "/veiculos"
+    "rota": "/meus-veiculos"
   }
 ]
