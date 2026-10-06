@@ -67,6 +67,15 @@ export const ADM_LINKS = [
   },
 
   // ── Operação do condomínio: não é trabalho de quem opera a plataforma
+  // Sem `modulo`: o painel junta vários módulos, e cada bloco já vem vazio
+  // quando o dele não está disponível.
+  {
+    to: "/adm/painel",
+    label: "Painel",
+    icon: "monitoring",
+    description: "Indicadores operacionais e estratégicos",
+    perfis: CONDOMINIO,
+  },
   // Sem `modulo` — o síndico precisa sempre ver seu plano.
   {
     to: "/adm/meu-plano",

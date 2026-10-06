@@ -39,6 +39,16 @@ export const gestaoApi = {
   resumoCondominio(id) {
     return gestao.get(`/api/gestao/condominios/${id}/resumo`);
   },
+
+  /** Painel operacional do síndico: o que pede ação agora. */
+  painelOperacional() {
+    return gestao.get("/api/gestao/painel/operacional");
+  },
+
+  /** Painel estratégico do síndico: séries mensais (3, 6 ou 12 meses). */
+  painelEstrategico(meses = 6) {
+    return gestao.get("/api/gestao/painel/estrategico", { params: { meses } });
+  },
 };
 
 export default gestaoApi;

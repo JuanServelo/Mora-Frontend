@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
+import { usePlano } from "../../contexts/PlanoContext";
 import { condominiosApi } from "../../services/condominiosApi";
 import { comunicacaoApi, urlDaImagem } from "../../services/comunicacaoApi";
 import { useNotificacoes } from "../../contexts/NotificacoesContext";
@@ -10,6 +11,14 @@ import { PERFIS, isUsuarioRestrito } from "../../utils/perfis";
 import { formatarData } from "../../utils/datas";
 import { InicioDoorman } from "../porteiro/InicioDoorman";
 
+/**
+ * Tudo o que o morador alcança no app.
+ *
+ * `modulo` é o slug do plan-service (`PlanModule`), e segue a mesma regra da
+ * navbar: sem `modulo`, sempre aparece; com, só se o plano do condomínio o
+ * inclui. Os atalhos não podem oferecer o que o menu esconde — seria a mesma
+ * funcionalidade não contratada, só que por outra porta.
+ */
 const ACESSO_RAPIDO = [
   {
     to: "/avisos",
@@ -24,6 +33,12 @@ const ACESSO_RAPIDO = [
     icon: "forum",
   },
   {
+    to: "/notificacoes",
+    label: "Notificações",
+    desc: "Cobranças, entregas e avisos recebidos",
+    icon: "notifications",
+  },
+  {
     to: "/financeiro",
     label: "Cobranças",
     desc: "Faturas, boleto e PIX",
@@ -34,38 +49,135 @@ const ACESSO_RAPIDO = [
     label: "Espaços",
     desc: "Reservar áreas comuns",
     icon: "event_available",
+    modulo: "areas_comuns",
   },
   {
     to: "/entregas",
     label: "Entregas",
     desc: "Encomendas na portaria",
     icon: "inventory_2",
+    modulo: "entregas",
   },
   {
     to: "/meus-convidados",
     label: "Convidados",
     desc: "Autorizar a entrada de visitantes",
     icon: "group_add",
+    modulo: "portaria",
   },
   {
-    to: "/veiculos",
-    label: "Veículos",
+    // `/meus-veiculos`, e não `/veiculos`: aquela é a gestão da portaria, com
+    // os veículos do prédio inteiro. O morador cuida só dos da unidade dele.
+    to: "/meus-veiculos",
+    label: "Meus veículos",
     desc: "Carros e vagas da sua unidade",
     icon: "directions_car",
+    modulo: "veiculos",
   },
   {
     to: "/reclamacoes",
     label: "Reclamações",
     desc: "Abrir ou acompanhar chamados",
     icon: "report",
+    modulo: "reclamacoes",
   },
   {
-    to: "/servicos",
-    label: "Serviços",
-    desc: "Portaria, manutenção e mais",
-    icon: "room_service",
+    to: "/comodidades",
+    label: "Comodidades",
+    desc: "Lazer e bem-estar do condomínio",
+    icon: "spa",
   },
 ];
+
+/**
+ * Se o botão "Acessar" de um serviço pode aparecer.
+ *
+ * O `servicos.json` é editável sem tocar no código e pode apontar para
+ * qualquer rota. Só liberar as que estão entre os atalhos visíveis impede que
+ * o arquivo reabra o que o plano fecha, ou leve o morador a uma tela que não é
+ * dele.
+ */
+function rotaLiberada(rota, atalhosVisiveis) {
+  return atalhosVisiveis.some((a) => a.to === rota);
+}
+
+/**
+ * Serviços do prédio — antes uma tela própria em /servicos.
+ *
+ * Separado, o morador precisava de dois cliques para descobrir o que o
+ * condomínio oferece. Falhar ao carregar esconde a seção em vez de mostrar
+ * erro: é conteúdo institucional, e a tela inicial tem coisa mais urgente.
+ */
+function ServicosDoPredio({ atalhosVisiveis }) {
+  const [itens, setItens] = useState([]);
+
+  useEffect(() => {
+    let ativo = true;
+    fetch("/data/servicos.json")
+      .then((r) => (r.ok ? r.json() : []))
+      .then((data) => {
+        if (ativo) setItens(Array.isArray(data) ? data : []);
+      })
+      .catch(() => {});
+    return () => {
+      ativo = false;
+    };
+  }, []);
+
+  if (itens.length === 0) return null;
+
+  return (
+    <section className="space-y-5">
+      <div>
+        <h2 className="font-headline text-2xl font-bold text-on-surface">Serviços do prédio</h2>
+        <p className="text-on-surface-variant text-sm mt-1">
+          O que o condomínio oferece. Detalhes oficiais com a administração e no regimento.
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {itens.map((s) => (
+          <article
+            key={s.titulo}
+            className="glass-panel rounded-3xl p-5 border border-outline-variant/10 flex flex-col"
+          >
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 rounded-xl bg-secondary/10 flex items-center justify-center shrink-0">
+                <Icone name={s.icon} className="text-secondary text-xl" />
+              </div>
+              <div className="min-w-0">
+                <h3 className="font-headline font-bold text-on-surface">{s.titulo}</h3>
+                <p className="text-on-surface-variant text-sm mt-1 leading-snug">{s.descricao}</p>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap gap-2 mt-auto pt-4 items-center justify-between">
+              <div className="flex flex-wrap gap-1.5">
+                {(s.tags || []).map((t) => (
+                  <span
+                    key={t}
+                    className="text-[11px] font-semibold uppercase tracking-wide px-2.5 py-0.5 rounded-full bg-surface-container-highest/60 text-on-surface-variant"
+                  >
+                    {t}
+                  </span>
+                ))}
+              </div>
+              {s.rota && rotaLiberada(s.rota, atalhosVisiveis) && (
+                <Link
+                  to={s.rota}
+                  className="inline-flex items-center gap-1 text-primary text-sm font-semibold hover:underline shrink-0"
+                >
+                  Acessar
+                  <Icone name="chevron_right" className="text-lg" />
+                </Link>
+              )}
+            </div>
+          </article>
+        ))}
+      </div>
+    </section>
+  );
+}
 
 /**
  * O comunicado aberto.
@@ -224,8 +336,10 @@ export function Inicio() {
 
   // Sem vínculo com unidade, a navbar já esconde todos os links. Os atalhos
   // precisavam seguir a mesma regra: ofereciam por outro caminho exatamente o
-  // que ela esconde — e agora são nove, não três.
+  // que ela esconde.
   const restrito = isUsuarioRestrito(usuario);
+  const { hasModulo } = usePlano();
+  const atalhosVisiveis = ACESSO_RAPIDO.filter((a) => !a.modulo || hasModulo(a.modulo));
 
   if (usuario?.perfil === PERFIS.PORTEIRO) {
     return <InicioDoorman />;
@@ -320,7 +434,7 @@ export function Inicio() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {ACESSO_RAPIDO.map((item) => (
+            {atalhosVisiveis.map((item) => (
               <Link
                 key={item.to}
                 to={item.to}
@@ -341,6 +455,8 @@ export function Inicio() {
         </section>
         )}
 
+        {!restrito && <ServicosDoPredio atalhosVisiveis={atalhosVisiveis} />}
+
         <div className="glass-panel rounded-[2rem] p-8 md:p-10 relative overflow-hidden border border-primary/10">
           <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-tertiary/5 pointer-events-none" />
           <div className="relative flex flex-col md:flex-row md:items-center gap-6 justify-between">
@@ -353,7 +469,7 @@ export function Inicio() {
                   Precisa de ajuda da administração?
                 </h3>
                 <p className="text-on-surface-variant text-sm max-w-xl">
-                  Use reclamações para chamados ou consulte serviços do condomínio. Os avisos oficiais aparecem no topo desta página.
+                  Use reclamações para chamados ou converse direto com a administração. Os avisos oficiais aparecem no topo desta página.
                 </p>
               </div>
             </div>

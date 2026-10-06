@@ -25,7 +25,6 @@ import { MinhasReservas } from "../pages/usuario/MinhasReservas";
 import { MinhasReclamacoes } from "../pages/usuario/MinhasReclamacoes";
 import { MinhasEntregas } from "../pages/usuario/MinhasEntregas";
 import { Inicio } from "../pages/inicio/Inicio";
-import { Servicos } from "../pages/servicos/Servicos";
 import { Comodidades } from "../pages/comodidades/Comodidades";
 import { Portaria } from "../pages/portaria/Portaria";
 import { Chaves } from "../pages/porteiro/Chaves";
@@ -39,6 +38,7 @@ import { Conversas } from "../pages/usuario/Conversas";
 import { Avisos } from "../pages/usuario/Avisos";
 import { GerenciarComunicados } from "../pages/adm/GerenciarComunicados";
 import { GerenciarFuncionarios } from "../pages/adm/GerenciarFuncionarios";
+import { PainelCondominio } from "../pages/adm/PainelCondominio";
 import { AppLayout } from "../layouts/AppLayout";
 import { ProtectedRoute } from "./ProtectedRoute";
 import { DoormanRoute } from "./DoormanRoute";
@@ -89,7 +89,9 @@ export const router = createBrowserRouter([
     ),
     children: [
       { path: "/inicio", element: <Inicio /> },
-      { path: "/servicos", element: <Servicos /> },
+      // Serviços virou uma seção da tela inicial. A rota fica como atalho para
+      // quem tiver o endereço salvo, em vez de um 404.
+      { path: "/servicos", element: <Navigate to="/inicio" replace /> },
       { path: "/comodidades", element: <Comodidades /> },
       { path: "/faq", element: <FAQ /> },
       { path: "/perfil", element: <Perfil /> },
@@ -140,6 +142,7 @@ export const router = createBrowserRouter([
       { path: "/adm/usuarios", element: <AdminRoute><GerenciarUsuarios /></AdminRoute> },
       { path: "/adm/estruturas", element: <AdminRoute><GerenciarEstruturas /></AdminRoute> },
       { path: "/adm/perfis", element: <AdminRoute><GerenciarPerfis /></AdminRoute> },
+      { path: "/adm/painel", element: <AdminRoute><PainelCondominio /></AdminRoute> },
       { path: "/adm/meu-plano", element: <AdminRoute><MeuPlano /></AdminRoute> },
       { path: "/adm/financeiro", element: <AdminRoute><GerenciarFinanceiro /></AdminRoute> },
       { path: "/adm/comunicados", element: <AdminRoute><GerenciarComunicados /></AdminRoute> },

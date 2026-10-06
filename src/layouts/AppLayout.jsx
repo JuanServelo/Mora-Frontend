@@ -70,6 +70,8 @@ export function AppLayout() {
 /** Nome curto da seção, para a barra do celular não ficar sem referência. */
 function tituloDaRota(pathname) {
   const mapa = {
+    "/inicio": "Início",
+    "/adm/painel": "Painel",
     "/adm/geral": "Visão Geral",
     "/adm/condominios": "Clientes",
     "/adm/planos": "Planos",

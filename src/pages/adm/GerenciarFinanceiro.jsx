@@ -7,6 +7,9 @@ import { PainelFracoes } from "../../components/adm/financeiro/PainelFracoes";
 import { PainelGateway } from "../../components/adm/financeiro/PainelGateway";
 import { PainelContas } from "../../components/adm/financeiro/PainelContas";
 import { PainelFaturas } from "../../components/adm/financeiro/PainelFaturas";
+import { PainelMultas } from "../../components/adm/financeiro/PainelMultas";
+import { PainelContratos } from "../../components/adm/financeiro/PainelContratos";
+import { PainelPrestacao } from "../../components/adm/financeiro/PainelPrestacao";
 
 /**
  * Configuração financeira do condomínio.
@@ -50,6 +53,24 @@ const ABAS = [
     label: "Faturas",
     icone: "receipt_long",
     descricao: "Faturas emitidas para as unidades — acompanhamento e baixa manual",
+  },
+  {
+    id: "multas",
+    label: "Multas",
+    icone: "gavel",
+    descricao: "Aplicação, recurso do morador e cobrança na fatura",
+  },
+  {
+    id: "contratos",
+    label: "Contratos",
+    icone: "contract",
+    descricao: "Contratos de locação entre proprietário e inquilino",
+  },
+  {
+    id: "prestacao",
+    label: "Prestação de contas",
+    icone: "account_balance",
+    descricao: "Receitas e despesas do mês, publicadas para os moradores",
   },
   {
     id: "gateway",
@@ -131,6 +152,9 @@ export function GerenciarFinanceiro() {
           {aba === "gateway" && <PainelGateway />}
           {aba === "contas" && <PainelContas />}
           {aba === "faturas" && <PainelFaturas />}
+          {aba === "multas" && <PainelMultas />}
+          {aba === "contratos" && <PainelContratos />}
+          {aba === "prestacao" && <PainelPrestacao />}
         </div>
       </div>
     </div>

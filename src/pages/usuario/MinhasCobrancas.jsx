@@ -11,6 +11,11 @@ import { financeiroApi } from "../../services/financeiroApi";
 import { formatarBRL } from "../../utils/dinheiro";
 import { formatarData, formatarDataHora } from "../../utils/datas";
 import { CORES, PALETA, TOOLTIP_STYLE, EIXO_STYLE, rotuloMes } from "../../utils/chartTheme";
+import { useAuth } from "../../contexts/AuthContext";
+import { PERFIS } from "../../utils/perfis";
+import { AbaMinhasMultas } from "../../components/financeiro/AbaMinhasMultas";
+import { AbaPrestacaoMorador } from "../../components/financeiro/AbaPrestacaoMorador";
+import { AbaContrato } from "../../components/financeiro/AbaContrato";
 
 const MESES = ["jan", "fev", "mar", "abr", "mai", "jun",
   "jul", "ago", "set", "out", "nov", "dez"];
@@ -711,12 +716,28 @@ function AbaFaturas({ onVerDetalhe }) {
 
 /* ─── Página principal ─────────────────────────────────────────────────── */
 export function MinhasCobrancas() {
+  const { usuario } = useAuth();
   const [aba, setAba] = useState("faturas");
   const [detalhe, setDetalhe] = useState(null);
 
+  // Contrato aparece sempre para o dono, que é quem cadastra. Para o morador,
+  // só quando a unidade tem contrato — o inquilino precisa ver o combinado, mas
+  // para quem mora no próprio apartamento a aba seria sempre vazia.
+  const ehDono = usuario?.perfil === PERFIS.DONO_ALUGUEL;
+  const [temContrato, setTemContrato] = useState(false);
+  useEffect(() => {
+    if (ehDono) return;
+    financeiroApi.meusContratos()
+      .then(({ data }) => setTemContrato((data.contratos ?? []).length > 0))
+      .catch(() => setTemContrato(false));
+  }, [ehDono]);
+
   const ABAS = [
-    { id: "faturas", label: "Faturas",  icone: "receipt_long" },
-    { id: "gastos",  label: "Gastos",   icone: "bar_chart" },
+    { id: "faturas",   label: "Faturas",  icone: "receipt_long" },
+    { id: "gastos",    label: "Gastos",   icone: "bar_chart" },
+    { id: "multas",    label: "Multas",   icone: "gavel" },
+    { id: "prestacao", label: "Prestação de contas", icone: "account_balance" },
+    ...(ehDono || temContrato ? [{ id: "contrato", label: "Contrato", icone: "contract" }] : []),
   ];
 
   return (
@@ -726,16 +747,16 @@ export function MinhasCobrancas() {
         {/* Título */}
         <div className="pt-2">
           <h1 className="font-headline text-3xl font-bold text-on-surface">Financeiro</h1>
-          <p className="text-on-surface-variant text-sm mt-1">Faturas e análise de gastos</p>
+          <p className="text-on-surface-variant text-sm mt-1">Faturas, gastos, multas e a prestação de contas do condomínio</p>
         </div>
 
         {/* Abas */}
-        <div className="flex gap-1 glass-panel rounded-2xl p-1">
+        <div className="flex flex-wrap gap-1 glass-panel rounded-2xl p-1">
           {ABAS.map(a => (
             <button
               key={a.id}
               onClick={() => setAba(a.id)}
-              className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition cursor-pointer ${
+              className={`flex-1 min-w-max flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-sm font-semibold transition cursor-pointer ${
                 aba === a.id
                   ? "bg-primary/20 text-primary"
                   : "text-on-surface-variant hover:text-on-surface hover:bg-veu/5"
@@ -748,10 +769,11 @@ export function MinhasCobrancas() {
         </div>
 
         {/* Conteúdo da aba */}
-        {aba === "faturas"
-          ? <AbaFaturas onVerDetalhe={setDetalhe} />
-          : <AbaGastos />
-        }
+        {aba === "faturas" && <AbaFaturas onVerDetalhe={setDetalhe} />}
+        {aba === "gastos" && <AbaGastos />}
+        {aba === "multas" && <AbaMinhasMultas />}
+        {aba === "prestacao" && <AbaPrestacaoMorador />}
+        {aba === "contrato" && <AbaContrato />}
       </div>
 
       {detalhe && <DetalhesFatura faturaId={detalhe} onFechar={() => setDetalhe(null)} />}
