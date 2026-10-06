@@ -71,6 +71,7 @@ export function AppLayout() {
 function tituloDaRota(pathname) {
   const mapa = {
     "/inicio": "Início",
+    "/adm/painel": "Painel",
     "/adm/geral": "Visão Geral",
     "/adm/condominios": "Clientes",
     "/adm/planos": "Planos",
