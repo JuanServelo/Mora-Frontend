@@ -231,6 +231,19 @@ export function PainelContas() {
             <p className="text-xs text-on-surface-variant uppercase tracking-wider mb-1">Contas pendentes</p>
             <p className="font-bold text-on-surface text-lg">{previewData.contasDeConsumo}</p>
           </div>
+          {/* Multas com o prazo de recurso vencido entram neste fechamento; as
+              canceladas depois de cobradas voltam como estorno. */}
+          {(previewData.multasACobrar > 0 || previewData.estornosDeMulta > 0) && (
+            <div>
+              <p className="text-xs text-on-surface-variant uppercase tracking-wider mb-1">Multas</p>
+              <p className="font-bold text-on-surface text-lg">
+                {previewData.multasACobrar}
+                {previewData.estornosDeMulta > 0 && (
+                  <span className="text-sm font-semibold text-on-surface-variant"> · {previewData.estornosDeMulta} estorno(s)</span>
+                )}
+              </p>
+            </div>
+          )}
           <div className="ml-auto flex items-center">
             <button
               onClick={fecharCompetencia}

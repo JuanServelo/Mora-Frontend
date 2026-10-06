@@ -7,6 +7,16 @@ export const userManagementApi = {
     return api.get(`${base(unidadeId)}/occupants`);
   },
 
+  /** Usuários do condomínio de quem pede — a gestão vê todos. */
+  listarUsuarios() {
+    return api.get("/api/user-management/users");
+  },
+
+  /** Moradores ativos da unidade. A gestão vê qualquer unidade; o morador, a dele. */
+  listarResidentes(unidadeId) {
+    return api.get(`${base(unidadeId)}/residents`);
+  },
+
   verificarElegibilidadeTransferencia(unidadeId) {
     return api.get(`${base(unidadeId)}/transfer-eligibility`);
   },
