@@ -85,6 +85,18 @@ export const ADM_LINKS = [
     perfis: CONDOMINIO,
   },
   {
+    // Fora de /adm porque é a mesma tela do morador, com as abas de operação
+    // a mais. Sem esta entrada o síndico não tem como chegar à fila de
+    // aprovação: a barra lateral dele troca os links de morador pelos
+    // administrativos.
+    to: "/espacos",
+    label: "Reservas",
+    icon: "event_available",
+    description: "Agenda dos espaços e aprovações",
+    perfis: CONDOMINIO,
+    modulo: "areas_comuns",
+  },
+  {
     to: "/adm/financeiro",
     label: "Financeiro",
     icon: "payments",

@@ -115,7 +115,6 @@ export const router = createBrowserRouter([
       { path: "/entradas-e-saidas", element: <Portaria /> },
       { path: "/atendimento", element: <AtendimentoPortaria /> },
       { path: "/chaves", element: <Chaves /> },
-      { path: "/veiculos", element: <GerenciarVeiculos /> },
       {
         path: "/usuarios",
         element: (

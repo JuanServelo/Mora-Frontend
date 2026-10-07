@@ -7,7 +7,8 @@ import { condominiosApi } from "../../services/condominiosApi";
 import { comunicacaoApi, urlDaImagem } from "../../services/comunicacaoApi";
 import { useNotificacoes } from "../../contexts/NotificacoesContext";
 import { Icone } from "../../components/icones/Icone";
-import { PERFIS, isUsuarioRestrito } from "../../utils/perfis";
+import { PERFIS, isUsuarioRestrito, podeAcessarAdmin } from "../../utils/perfis";
+import { linksDoPerfil } from "../../utils/menuAdmin";
 import { formatarData } from "../../utils/datas";
 import { InicioDoorman } from "../porteiro/InicioDoorman";
 
@@ -338,8 +339,22 @@ export function Inicio() {
   // precisavam seguir a mesma regra: ofereciam por outro caminho exatamente o
   // que ela esconde.
   const restrito = isUsuarioRestrito(usuario);
-  const { hasModulo } = usePlano();
-  const atalhosVisiveis = ACESSO_RAPIDO.filter((a) => !a.modulo || hasModulo(a.modulo));
+  const { hasModulo, modulosAtivos } = usePlano();
+
+  // O síndico opera o condomínio, não mora nele: convidados, encomendas e
+  // veículos da unidade não existem no perfil dele. Em vez de uma segunda
+  // lista para manter em sincronia, os atalhos dele saem do MESMO ADM_LINKS
+  // que monta a barra lateral — inclusive o /adm/reclamacoes, que é a visão
+  // de quem recebe o chamado, não a de quem abre.
+  const ehAdmin = podeAcessarAdmin(usuario?.perfil);
+  const atalhosVisiveis = ehAdmin
+    ? linksDoPerfil(usuario?.perfil, modulosAtivos).map((l) => ({
+        to: l.to,
+        label: l.label,
+        icon: l.icon,
+        desc: l.description,
+      }))
+    : ACESSO_RAPIDO.filter((a) => !a.modulo || hasModulo(a.modulo));
 
   if (usuario?.perfil === PERFIS.PORTEIRO) {
     return <InicioDoorman />;
@@ -421,7 +436,9 @@ export function Inicio() {
             <div>
               <h2 className="font-headline text-2xl font-bold text-on-surface">Acesso rápido</h2>
               <p className="text-on-surface-variant text-sm mt-1">
-                Atalhos para as áreas mais usadas do app
+                {ehAdmin
+                  ? "Atalhos para as áreas administrativas do condomínio"
+                  : "Atalhos para as áreas mais usadas do app"}
               </p>
             </div>
             <Link
@@ -455,8 +472,11 @@ export function Inicio() {
         </section>
         )}
 
-        {!restrito && <ServicosDoPredio atalhosVisiveis={atalhosVisiveis} />}
+        {!restrito && !ehAdmin && <ServicosDoPredio atalhosVisiveis={atalhosVisiveis} />}
 
+        {/* Convite para abrir chamado com a administração: quem É a
+            administração não tem a quem recorrer por aqui. */}
+        {!ehAdmin && (
         <div className="glass-panel rounded-[2rem] p-8 md:p-10 relative overflow-hidden border border-primary/10">
           <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-tertiary/5 pointer-events-none" />
           <div className="relative flex flex-col md:flex-row md:items-center gap-6 justify-between">
@@ -482,6 +502,7 @@ export function Inicio() {
             </Link>
           </div>
         </div>
+        )}
       </div>
 
       <Link

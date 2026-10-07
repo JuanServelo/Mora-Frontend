@@ -1,14 +1,18 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
+import { usePlano } from "../../contexts/PlanoContext";
 import { condominiosApi } from "../../services/condominiosApi";
 import { Icone } from "../../components/icones/Icone";
 
+// `modulo` espelha os slugs do plano contratado; sem o campo, o card e
+// infraestrutura e aparece sempre (caso de Usuarios do Condominio).
 const CARDS_PORTEIRO = [
   {
     // Tela trazida da branch feat/ajus: cadastro de visitante e prestador no
     // momento da chegada, sem depender de pre-autorizacao do morador.
     to: "/atendimento",
+    modulo: "portaria",
     label: "Cadastros",
     desc: "Registrar entrada de visitantes e prestadores de serviço",
     icon: "waving_hand",
@@ -16,6 +20,7 @@ const CARDS_PORTEIRO = [
   },
   {
     to: "/entradas-e-saidas",
+    modulo: "portaria",
     label: "Controle de Acesso",
     desc: "Registrar entradas e saídas de moradores e visitantes",
     icon: "sensor_door",
@@ -23,6 +28,7 @@ const CARDS_PORTEIRO = [
   },
   {
     to: "/portaria/entregas",
+    modulo: "entregas",
     label: "Controle de Entregas",
     desc: "Receber e registrar encomendas e pacotes",
     icon: "inventory_2",
@@ -30,6 +36,7 @@ const CARDS_PORTEIRO = [
   },
   {
     to: "/chaves",
+    modulo: "chaves",
     label: "Controle de Chaves",
     desc: "Gerenciar chaves e acessos do condomínio",
     icon: "key",
@@ -37,17 +44,11 @@ const CARDS_PORTEIRO = [
   },
   {
     to: "/espacos",
+    modulo: "areas_comuns",
     label: "Espaços",
     desc: "Visualizar e acompanhar áreas comuns",
     icon: "deck",
     color: "primary",
-  },
-  {
-    to: "/veiculos",
-    label: "Veículos de Serviço",
-    desc: "Cadastrar e gerenciar veículos de serviço",
-    icon: "local_shipping",
-    color: "secondary",
   },
   {
     to: "/usuarios",
@@ -81,7 +82,11 @@ const COLOR_MAP = {
 
 export function InicioDoorman() {
   const { usuario } = useAuth();
+  const { hasModulo } = usePlano();
   const primeiroNome = usuario?.nome?.split(" ")[0] || "Porteiro";
+  // Mesma regra da barra lateral: oferecer aqui o que o plano não inclui
+  // levaria a uma tela que o condomínio não contratou.
+  const cardsVisiveis = CARDS_PORTEIRO.filter((c) => !c.modulo || hasModulo(c.modulo));
   const [nomeCondominio, setNomeCondominio] = useState(null);
 
   useEffect(() => {
@@ -113,7 +118,7 @@ export function InicioDoorman() {
 
         <section>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {CARDS_PORTEIRO.map((item) => {
+            {cardsVisiveis.map((item) => {
               const c = COLOR_MAP[item.color];
               return (
                 <Link
