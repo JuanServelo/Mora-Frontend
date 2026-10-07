@@ -21,7 +21,6 @@ const MORADOR_LINKS = [
   { label: "Conhecimento", to: "/faq", icon: "library_books", modulo: "conhecimento" },
   { label: "Votações", to: "/votacoes", icon: "how_to_vote", modulo: "votacoes" },
   { label: "Veículos", to: "/meus-veiculos", icon: "directions_car", modulo: "veiculos" },
-  { label: "Vagas", to: "/vagas", icon: "local_parking", modulo: "vagas" },
 ];
 
 // Telas do porteiro (mesmo layout de Sidebar dos admins).
