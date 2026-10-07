@@ -117,7 +117,7 @@ export function GerenciarEstruturas() {
           {[
             { id: "blocos", label: "Blocos & Apartamentos", icon: "apartment" },
             { id: "areas-comuns", label: "Áreas Comuns", icon: "pool" },
-            ...(modulosCondominio.includes("VAGAS") ? [{ id: "vagas", label: "Vagas", icon: "local_parking" }] : []),
+            ...(modulosCondominio.includes("vagas") ? [{ id: "vagas", label: "Vagas", icon: "local_parking" }] : []),
           ].map((tab) => (
             <button
               key={tab.id}

@@ -394,6 +394,12 @@ function AbaReunioes({ irParaVotacao }) {
     }
   }
 
+  useEffect(() => {
+    if (usuario?.id) {
+      buscarReunioesPorDia();
+    }
+  }, [usuario?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+
   async function cancelar(id) {
     const ok = await confirm({
       titulo: "Cancelar reunião",
@@ -482,181 +488,6 @@ function AbaReunioes({ irParaVotacao }) {
         </div>
       )}
 
-
-      {/* Minhas Reuniões da Semana */}
-      <div className="glass-panel rounded-3xl p-6 space-y-4 border border-veu/5">
-        <div className="flex items-center justify-between gap-3 border-b border-veu/5 pb-3">
-          <div className="flex items-center gap-2">
-            <span className="p-2 rounded-xl bg-primary/10 text-primary">
-              <Icone name="date_range" className="text-xl" />
-            </span>
-            <div>
-              <h2 className="font-headline text-lg font-bold text-on-surface">Minhas Reuniões da Semana</h2>
-              <p className="text-[10px] text-on-surface-variant uppercase tracking-wider font-semibold">
-                Período: {fmt(getWeekRange().start).split(" ")[0]} a {fmt(getWeekRange().end).split(" ")[0]}
-              </p>
-            </div>
-          </div>
-          <button
-            onClick={carregarReunioesSemana}
-            disabled={carregandoSemana}
-            className="p-2 rounded-xl hover:bg-veu/5 text-on-surface-variant hover:text-on-surface transition cursor-pointer"
-            title="Atualizar reuniões"
-          >
-            <Icone name="refresh" className={`text-lg ${carregandoSemana ? "animate-spin" : ""}`} />
-          </button>
-        </div>
-
-        {carregandoSemana ? (
-          <div className="text-center py-8 text-on-surface-variant text-xs flex flex-col items-center justify-center gap-2">
-            <Icone name="sync" className="text-lg animate-spin text-primary" />
-            Carregando reuniões...
-          </div>
-        ) : reunioesSemana.length === 0 ? (
-          <div className="text-center py-10 text-on-surface-variant text-sm flex flex-col items-center justify-center gap-2 bg-veu/2 rounded-2xl border border-veu/5">
-            <Icone name="event_busy" className="text-3xl text-primary/40" />
-            <p className="font-medium text-xs">Você não tem reuniões agendadas para esta semana.</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {reunioesSemana.map((reuniao) => {
-              const isOrganizador = reuniao.idOrganizador === usuario?.id;
-              const meuConvidado = reuniao.convidados?.find((c) => c.usuarioId === usuario?.id);
-              const meuStatusPresenca = meuConvidado?.status || "PENDENTE";
-
-              return (
-                <div key={reuniao.id} className="relative bg-surface-container-highest/20 hover:bg-surface-container-highest/30 rounded-2xl border border-veu/5 p-4 flex flex-col justify-between gap-4 transition-all duration-300 hover:scale-[1.01] hover:shadow-lg">
-                  <div className="space-y-2">
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="space-y-0.5 min-w-0">
-                        <span className="font-semibold text-sm text-on-surface truncate block" title={reuniao.titulo}>
-                          {reuniao.titulo}
-                        </span>
-                        <span className="text-[10px] text-on-surface-variant/80 block">
-                          ID: #{reuniao.id}
-                        </span>
-                      </div>
-                      <div className="flex gap-1.5 shrink-0">
-                        {isOrganizador && (
-                          <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-tertiary/15 text-tertiary uppercase tracking-wider">
-                            Organizador
-                          </span>
-                        )}
-                        <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider ${STATUS_MEETING[reuniao.status]?.cls ?? "bg-veu/10 text-white"}`}>
-                          {STATUS_MEETING[reuniao.status]?.label ?? reuniao.status}
-                        </span>
-                      </div>
-                    </div>
-
-                    {reuniao.descricao && (
-                      <p className="text-on-surface-variant text-xs line-clamp-2" title={reuniao.descricao}>
-                        {reuniao.descricao}
-                      </p>
-                    )}
-
-                    <div className="space-y-1 pt-1 border-t border-veu/5">
-                      <p className="flex items-center gap-1.5 text-[11px] text-on-surface-variant">
-                        <Icone name="schedule" className="text-xs text-primary" />
-                        Início: {fmt(reuniao.dataHoraInicio)}
-                      </p>
-                      <p className="flex items-center gap-1.5 text-[11px] text-on-surface-variant">
-                        <Icone name="event_available" className="text-xs text-primary" />
-                        Fim: {fmt(reuniao.dataHoraFim)}
-                      </p>
-                    </div>
-
-                    {reuniao.googleMeetLink && (
-                      <div className="pt-1">
-                        <a
-                          href={reuniao.googleMeetLink}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-primary hover:underline"
-                        >
-                          <Icone name="videocam" className="text-sm shrink-0" />
-                          Entrar no Google Meet
-                        </a>
-                      </div>
-                    )}
-                  </div>
-
-                  {!isOrganizador && reuniao.status === "AGENDADA" && (
-                    <div className="flex items-center justify-between gap-2 bg-veu/5 p-2 rounded-xl border border-veu/5">
-                      <div className="flex flex-col">
-                        <span className="text-[9px] text-on-surface-variant font-semibold uppercase tracking-wider">Sua Presença</span>
-                        <span className={`text-[10px] font-bold ${
-                          meuStatusPresenca === 'CONFIRMADO' ? 'text-primary' : meuStatusPresenca === 'RECUSADO' ? 'text-error' : 'text-secondary'
-                        }`}>
-                          {ATTENDANCE_LABEL[meuStatusPresenca] || meuStatusPresenca}
-                        </span>
-                      </div>
-                      <div className="flex gap-1">
-                        <button
-                          type="button"
-                          onClick={() => responderPresenca(reuniao.id, 'CONFIRMADO')}
-                          className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[10px] font-semibold transition cursor-pointer ${
-                            meuStatusPresenca === 'CONFIRMADO' 
-                              ? 'bg-primary/20 text-primary border border-primary/30' 
-                              : 'bg-veu/5 text-on-surface-variant hover:bg-primary/10 hover:text-primary'
-                          }`}
-                        >
-                          <Icone name="check" className="text-xs" />
-                          Confirmar
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => responderPresenca(reuniao.id, 'RECUSADO')}
-                          className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[10px] font-semibold transition cursor-pointer ${
-                            meuStatusPresenca === 'RECUSADO' 
-                              ? 'bg-error/20 text-error border border-error/30' 
-                              : 'bg-veu/5 text-on-surface-variant hover:bg-error/10 hover:text-error'
-                          }`}
-                        >
-                          <Icone name="close" className="text-xs" />
-                          Recusar
-                        </button>
-                      </div>
-                    </div>
-                  )}
-
-                  <div className="flex justify-end pt-1 gap-3">
-                    {isOrganizador && reuniao.status === "AGENDADA" && (
-                      <button
-                        type="button"
-                        onClick={() => iniciarEdicao(reuniao)}
-                        className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary hover:underline cursor-pointer"
-                      >
-                        <Icone name="edit" className="text-xs" />
-                        Editar
-                      </button>
-                    )}
-                    <button
-                      type="button"
-                      onClick={async () => {
-                        try {
-                          const res = await meetingApi.buscar(reuniao.id);
-                          setDetalhe(res.data);
-                          carregarAtaReuniao(reuniao.id);
-                          setTimeout(() => {
-                            const el = document.getElementById("meeting-detalhe-container");
-                            if (el) el.scrollIntoView({ behavior: 'smooth' });
-                          }, 100);
-                        } catch {
-                          mostrarNotificacao("Erro ao carregar detalhes da reunião.", "erro");
-                        }
-                      }}
-                      className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary hover:underline cursor-pointer"
-                    >
-                      Ver detalhes
-                      <Icone name="arrow_forward" className="text-xs" />
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
 
       {/* Toolbar */}
       <div className="glass-panel rounded-3xl p-6 space-y-4">
@@ -1407,6 +1238,182 @@ function AbaReunioes({ irParaVotacao }) {
           </div>
         </div>
       )}
+
+      {/* Minhas Reuniões da Semana */}
+      <div className="glass-panel rounded-3xl p-6 space-y-4 border border-veu/5">
+        <div className="flex items-center justify-between gap-3 border-b border-veu/5 pb-3">
+          <div className="flex items-center gap-2">
+            <span className="p-2 rounded-xl bg-primary/10 text-primary">
+              <Icone name="date_range" className="text-xl" />
+            </span>
+            <div>
+              <h2 className="font-headline text-lg font-bold text-on-surface">Minhas Reuniões da Semana</h2>
+              <p className="text-[10px] text-on-surface-variant uppercase tracking-wider font-semibold">
+                Período: {fmt(getWeekRange().start).split(" ")[0]} a {fmt(getWeekRange().end).split(" ")[0]}
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={carregarReunioesSemana}
+            disabled={carregandoSemana}
+            className="p-2 rounded-xl hover:bg-veu/5 text-on-surface-variant hover:text-on-surface transition cursor-pointer"
+            title="Atualizar reuniões"
+          >
+            <Icone name="refresh" className={`text-lg ${carregandoSemana ? "animate-spin" : ""}`} />
+          </button>
+        </div>
+
+        {carregandoSemana ? (
+          <div className="text-center py-8 text-on-surface-variant text-xs flex flex-col items-center justify-center gap-2">
+            <Icone name="sync" className="text-lg animate-spin text-primary" />
+            Carregando reuniões...
+          </div>
+        ) : reunioesSemana.length === 0 ? (
+          <div className="text-center py-10 text-on-surface-variant text-sm flex flex-col items-center justify-center gap-2 bg-veu/2 rounded-2xl border border-veu/5">
+            <Icone name="event_busy" className="text-3xl text-primary/40" />
+            <p className="font-medium text-xs">Você não tem reuniões agendadas para esta semana.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {reunioesSemana.map((reuniao) => {
+              const isOrganizador = reuniao.idOrganizador === usuario?.id;
+              const meuConvidado = reuniao.convidados?.find((c) => c.usuarioId === usuario?.id);
+              const meuStatusPresenca = meuConvidado?.status || "PENDENTE";
+
+              return (
+                <div key={reuniao.id} className="relative bg-surface-container-highest/20 hover:bg-surface-container-highest/30 rounded-2xl border border-veu/5 p-4 flex flex-col justify-between gap-4 transition-all duration-300 hover:scale-[1.01] hover:shadow-lg">
+                  <div className="space-y-2">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="space-y-0.5 min-w-0">
+                        <span className="font-semibold text-sm text-on-surface truncate block" title={reuniao.titulo}>
+                          {reuniao.titulo}
+                        </span>
+                        <span className="text-[10px] text-on-surface-variant/80 block">
+                          ID: #{reuniao.id}
+                        </span>
+                      </div>
+                      <div className="flex gap-1.5 shrink-0">
+                        {isOrganizador && (
+                          <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-tertiary/15 text-tertiary uppercase tracking-wider">
+                            Organizador
+                          </span>
+                        )}
+                        <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider ${STATUS_MEETING[reuniao.status]?.cls ?? "bg-veu/10 text-white"}`}>
+                          {STATUS_MEETING[reuniao.status]?.label ?? reuniao.status}
+                        </span>
+                      </div>
+                    </div>
+
+                    {reuniao.descricao && (
+                      <p className="text-on-surface-variant text-xs line-clamp-2" title={reuniao.descricao}>
+                        {reuniao.descricao}
+                      </p>
+                    )}
+
+                    <div className="space-y-1 pt-1 border-t border-veu/5">
+                      <p className="flex items-center gap-1.5 text-[11px] text-on-surface-variant">
+                        <Icone name="schedule" className="text-xs text-primary" />
+                        Início: {fmt(reuniao.dataHoraInicio)}
+                      </p>
+                      <p className="flex items-center gap-1.5 text-[11px] text-on-surface-variant">
+                        <Icone name="event_available" className="text-xs text-primary" />
+                        Fim: {fmt(reuniao.dataHoraFim)}
+                      </p>
+                    </div>
+
+                    {reuniao.googleMeetLink && (
+                      <div className="pt-1">
+                        <a
+                          href={reuniao.googleMeetLink}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-primary hover:underline"
+                        >
+                          <Icone name="videocam" className="text-sm shrink-0" />
+                          Entrar no Google Meet
+                        </a>
+                      </div>
+                    )}
+                  </div>
+
+                  {!isOrganizador && reuniao.status === "AGENDADA" && (
+                    <div className="flex items-center justify-between gap-2 bg-veu/5 p-2 rounded-xl border border-veu/5">
+                      <div className="flex flex-col">
+                        <span className="text-[9px] text-on-surface-variant font-semibold uppercase tracking-wider">Sua Presença</span>
+                        <span className={`text-[10px] font-bold ${
+                          meuStatusPresenca === 'CONFIRMADO' ? 'text-primary' : meuStatusPresenca === 'RECUSADO' ? 'text-error' : 'text-secondary'
+                        }`}>
+                          {ATTENDANCE_LABEL[meuStatusPresenca] || meuStatusPresenca}
+                        </span>
+                      </div>
+                      <div className="flex gap-1">
+                        <button
+                          type="button"
+                          onClick={() => responderPresenca(reuniao.id, 'CONFIRMADO')}
+                          className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[10px] font-semibold transition cursor-pointer ${
+                            meuStatusPresenca === 'CONFIRMADO' 
+                              ? 'bg-primary/20 text-primary border border-primary/30' 
+                              : 'bg-veu/5 text-on-surface-variant hover:bg-primary/10 hover:text-primary'
+                          }`}
+                        >
+                          <Icone name="check" className="text-xs" />
+                          Confirmar
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => responderPresenca(reuniao.id, 'RECUSADO')}
+                          className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[10px] font-semibold transition cursor-pointer ${
+                            meuStatusPresenca === 'RECUSADO' 
+                              ? 'bg-error/20 text-error border border-error/30' 
+                              : 'bg-veu/5 text-on-surface-variant hover:bg-error/10 hover:text-error'
+                          }`}
+                        >
+                          <Icone name="close" className="text-xs" />
+                          Recusar
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="flex justify-end pt-1 gap-3">
+                    {isOrganizador && reuniao.status === "AGENDADA" && (
+                      <button
+                        type="button"
+                        onClick={() => iniciarEdicao(reuniao)}
+                        className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary hover:underline cursor-pointer"
+                      >
+                        <Icone name="edit" className="text-xs" />
+                        Editar
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        try {
+                          const res = await meetingApi.buscar(reuniao.id);
+                          setDetalhe(res.data);
+                          carregarAtaReuniao(reuniao.id);
+                          setTimeout(() => {
+                            const el = document.getElementById("meeting-detalhe-container");
+                            if (el) el.scrollIntoView({ behavior: 'smooth' });
+                          }, 100);
+                        } catch {
+                          mostrarNotificacao("Erro ao carregar detalhes da reunião.", "erro");
+                        }
+                      }}
+                      className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary hover:underline cursor-pointer"
+                    >
+                      Ver detalhes
+                      <Icone name="arrow_forward" className="text-xs" />
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
     </div>
   );
 }
