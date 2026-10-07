@@ -25,7 +25,7 @@ const formatarPreco = (valor) =>
  * condomínio — o backend aceitava desde sempre, e ninguém chamava. Por isso os
  * clientes nasciam sem assinatura e o indicador "sem plano" não tinha saída.
  */
-export function PainelPlanoCliente({ condominioId, aoMudar }) {
+export function PainelPlanoCliente({ condominioId, aoMudar, qtdUsuarios = 0 }) {
   const toast = useToast();
   const confirmar = useConfirm();
 
@@ -72,6 +72,10 @@ export function PainelPlanoCliente({ condominioId, aoMudar }) {
   async function contratar() {
     if (!escolhido) {
       toast.warning("Escolha um plano.");
+      return;
+    }
+    if (plano && qtdUsuarios > plano.maxUsersPerCondominium) {
+      toast.warning(`O plano suporta no máximo ${plano.maxUsersPerCondominium} usuários, mas o condomínio possui ${qtdUsuarios}.`);
       return;
     }
     if (!vigencia.inicio) {
@@ -200,14 +204,18 @@ export function PainelPlanoCliente({ condominioId, aoMudar }) {
           {planos.map((p) => {
             const ativo = String(p.id) === escolhido;
             const atual = String(assinatura?.planId) === String(p.id);
+            const excedeu = p.maxUsersPerCondominium != null && qtdUsuarios > p.maxUsersPerCondominium;
             return (
               <button
                 key={p.id}
+                disabled={excedeu}
                 onClick={() => setEscolhido(String(p.id))}
-                className={`text-left p-4 rounded-2xl border transition cursor-pointer ${
-                  ativo
-                    ? "border-primary/60 bg-primary/10"
-                    : "border-veu/10 hover:border-veu/25 bg-surface-container-highest/20"
+                className={`text-left p-4 rounded-2xl border transition ${
+                  excedeu
+                    ? "opacity-50 cursor-not-allowed border-error/20 bg-surface-container-highest/10"
+                    : ativo
+                    ? "border-primary/60 bg-primary/10 cursor-pointer"
+                    : "border-veu/10 hover:border-veu/25 bg-surface-container-highest/20 cursor-pointer"
                 }`}
               >
                 <div className="flex items-center gap-2">

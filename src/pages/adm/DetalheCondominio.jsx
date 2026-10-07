@@ -246,7 +246,7 @@ export function DetalheCondominio() {
         )}
 
         {aba === "plano" && (
-          <PainelPlanoCliente condominioId={id} aoMudar={carregar} />
+          <PainelPlanoCliente condominioId={id} aoMudar={carregar} qtdUsuarios={resumo?.usuarios?.total || 0} />
         )}
 
         {aba === "usuarios" && (
