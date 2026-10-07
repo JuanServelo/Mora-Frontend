@@ -403,6 +403,8 @@ function AbaReunioes({ irParaVotacao }) {
     try {
       await meetingApi.cancelar(id);
       setDetalhe((p) => (p ? { ...p, status: "CANCELADA" } : p));
+      setResultadosBusca((prev) => prev.map((r) => r.id === id ? { ...r, status: "CANCELADA" } : r));
+      setReunioesSemana((prev) => prev.map((r) => r.id === id ? { ...r, status: "CANCELADA" } : r));
     } catch {
       toast.error("Erro ao cancelar reunião.");
     }
@@ -418,6 +420,8 @@ function AbaReunioes({ irParaVotacao }) {
     try {
       await meetingApi.finalizar(id);
       setDetalhe((p) => (p ? { ...p, status: "FINALIZADA" } : p));
+      setResultadosBusca((prev) => prev.map((r) => r.id === id ? { ...r, status: "FINALIZADA" } : r));
+      setReunioesSemana((prev) => prev.map((r) => r.id === id ? { ...r, status: "FINALIZADA" } : r));
     } catch {
       toast.error("Erro ao finalizar reunião.");
     }
@@ -814,16 +818,6 @@ function AbaReunioes({ irParaVotacao }) {
                         >
                           <Icone name="description" className="text-xs" />
                           Criar Ata
-                        </button>
-                      )}
-                      {isOrganizador && reuniao.status === "AGENDADA" && (
-                        <button
-                          type="button"
-                          onClick={() => finalizar(reuniao.id)}
-                          className="inline-flex items-center gap-1 text-[11px] font-semibold text-secondary hover:underline cursor-pointer"
-                        >
-                          <Icone name="check_circle" className="text-xs" />
-                          Finalizar
                         </button>
                       )}
                       <button
@@ -1336,16 +1330,6 @@ function AbaReunioes({ irParaVotacao }) {
                       >
                         <Icone name="description" className="text-xs" />
                         Criar Ata
-                      </button>
-                    )}
-                    {isOrganizador && reuniao.status === "AGENDADA" && (
-                      <button
-                        type="button"
-                        onClick={() => finalizar(reuniao.id)}
-                        className="inline-flex items-center gap-1 text-[11px] font-semibold text-secondary hover:underline cursor-pointer"
-                      >
-                        <Icone name="check_circle" className="text-xs" />
-                        Finalizar
                       </button>
                     )}
                     <button
