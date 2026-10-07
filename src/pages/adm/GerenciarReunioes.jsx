@@ -816,6 +816,16 @@ function AbaReunioes({ irParaVotacao }) {
                           Criar Ata
                         </button>
                       )}
+                      {isOrganizador && reuniao.status === "AGENDADA" && (
+                        <button
+                          type="button"
+                          onClick={() => finalizar(reuniao.id)}
+                          className="inline-flex items-center gap-1 text-[11px] font-semibold text-secondary hover:underline cursor-pointer"
+                        >
+                          <Icone name="check_circle" className="text-xs" />
+                          Finalizar
+                        </button>
+                      )}
                       <button
                         type="button"
                         onClick={async () => {
@@ -898,6 +908,12 @@ function AbaReunioes({ irParaVotacao }) {
                     </button>
                   </>
                 )}
+                <button
+                  onClick={() => setDetalhe(null)}
+                  className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-surface-container-highest/50 text-on-surface-variant hover:bg-surface-container-highest hover:text-on-surface transition text-xs font-semibold cursor-pointer border border-veu/5"
+                >
+                  <Icone name="close" className="text-sm font-bold" /> Fechar
+                </button>
               </div>
             </div>
 
@@ -940,26 +956,7 @@ function AbaReunioes({ irParaVotacao }) {
                           </span>
                         </div>
 
-                        {/* Avaliação (se houver nota/comentário) */}
-                        {convidado.nota !== null && convidado.nota !== undefined && (
-                          <div className="mt-1 pt-2 border-t border-veu/5 space-y-1">
-                            <div className="flex items-center gap-1 text-[10px] text-tertiary">
-                              <span className="font-semibold uppercase tracking-wider text-[8px] text-on-surface-variant mr-1">Avaliação:</span>
-                              {Array.from({ length: 5 }).map((_, idx) => (
-                                <Icone 
-                                  key={idx} 
-                                  name="star" 
-                                  className={`text-xs ${idx < convidado.nota ? "text-amber-400" : "text-veu/10"}`} 
-                                />
-                              ))}
-                            </div>
-                            {convidado.comentario && (
-                              <p className="text-[11px] text-on-surface-variant italic bg-veu/2 p-2 rounded-xl border border-veu/2 mt-1">
-                                "{convidado.comentario}"
-                              </p>
-                            )}
-                          </div>
-                        )}
+
                       </div>
                     );
                   })}
@@ -967,44 +964,7 @@ function AbaReunioes({ irParaVotacao }) {
               )}
             </div>
 
-            {/* Avaliação (só para FINALIZADA) */}
-            {detalhe.status === "FINALIZADA" && (
-              <div className="p-4 space-y-4 border-t border-veu/5">
-                <p className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider flex items-center gap-2">
-                  <Icone name="rate_review" className="text-base text-primary" />
-                  Registrar Avaliação
-                </p>
-                <form onSubmit={salvarAvaliacao} className="space-y-3">
-                  <div className="space-y-2">
-                    <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant ml-1">
-                      Convidado Avaliador
-                    </label>
-                    <select
-                      value={avalUsuarioId}
-                      onChange={(e) => setAvalUsuarioId(e.target.value)}
-                      required
-                      className="w-full bg-surface-container-highest/40 border border-veu/5 rounded-xl py-3 px-4 text-on-surface focus:ring-2 focus:ring-primary/50 focus:outline-none backdrop-blur-sm transition-all"
-                    >
-                      <option value="" className="bg-surface-container-highest text-on-surface">Selecione um convidado...</option>
-                      {detalhe.convidados?.filter(c => c.status === "CONFIRMADO").map((c) => {
-                        const usr = todosUsuarios.find((u) => u.id === c.usuarioId);
-                        if (!usr) return null;
-                        return (
-                          <option key={c.usuarioId} value={c.usuarioId} className="bg-surface-container-highest text-on-surface">
-                            {usr.nome} (Apt {usr.apartamento || "—"})
-                          </option>
-                        );
-                      })}
-                    </select>
-                  </div>
-                  <Campo label="Nota (1 a 5)" type="number" min={1} max={5} value={avalForm.nota} onChange={(e) => setAvalForm((p) => ({ ...p, nota: e.target.value }))} placeholder="1 a 5" required />
-                  <TextArea label="Comentário (opcional)" value={avalForm.comentario} rows={2} onChange={(e) => setAvalForm((p) => ({ ...p, comentario: e.target.value }))} placeholder="Comentário opcional" />
-                  <Botao type="submit" disabled={salvandoAval}>
-                    {salvandoAval ? "Enviando..." : "Enviar Avaliação"}
-                  </Botao>
-                </form>
-              </div>
-            )}
+
 
             {/* Seção da Ata da Reunião integrada */}
             {carregandoAta ? (
@@ -1376,6 +1336,16 @@ function AbaReunioes({ irParaVotacao }) {
                       >
                         <Icone name="description" className="text-xs" />
                         Criar Ata
+                      </button>
+                    )}
+                    {isOrganizador && reuniao.status === "AGENDADA" && (
+                      <button
+                        type="button"
+                        onClick={() => finalizar(reuniao.id)}
+                        className="inline-flex items-center gap-1 text-[11px] font-semibold text-secondary hover:underline cursor-pointer"
+                      >
+                        <Icone name="check_circle" className="text-xs" />
+                        Finalizar
                       </button>
                     )}
                     <button
