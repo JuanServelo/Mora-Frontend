@@ -162,11 +162,11 @@ export function MinhasReunioes() {
                       </p>
                     </div>
                   )}
-                  {detalhe.link && (
+                  {detalhe.googleMeetLink && (
                     <div className="col-span-1 md:col-span-2">
                       <p className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-1">Link da Reunião</p>
-                      <a href={detalhe.link} target="_blank" rel="noreferrer" className="text-sm text-primary hover:underline flex items-center gap-1.5">
-                        <Icone name="link" className="text-base" /> {detalhe.link}
+                      <a href={detalhe.googleMeetLink} target="_blank" rel="noreferrer" className="text-sm text-primary hover:underline flex items-center gap-1.5">
+                        <Icone name="link" className="text-base" /> {detalhe.googleMeetLink}
                       </a>
                     </div>
                   )}
