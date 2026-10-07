@@ -22,19 +22,25 @@ import moraLogo3 from "../../assets/Mora3.png";
  */
 const NAV_LINKS_LEFT = [
   { label: "Início", to: "/inicio" },
-  // `areas_comuns`, com sublinhado: é o slug que o plan-service grava
-  // (PlanModule). Com hífen o item nunca casava e sumia em todo plano.
-  { label: "Espaços", to: "/espacos", modulo: "areas_comuns" },
   { label: "Conversas", to: "/conversas" },
   { label: "Cobranças", to: "/financeiro" },
+  { label: "Espaços", to: "/espacos", modulo: "areas_comuns" },
+  { label: "Entregas", to: "/entregas", modulo: "entregas" },
+  { label: "Reuniões", to: "/reunioes", modulo: "reunioes" },
+  { label: "Reclamações", to: "/reclamacoes", modulo: "reclamacoes" },
+  { label: "Comunicados", to: "/avisos", modulo: "comunicados" },
+  { label: "Conhecimento", to: "/faq", modulo: "conhecimento" },
+  { label: "Votações", to: "/votacoes", modulo: "votacoes" },
+  { label: "Veículos", to: "/meus-veiculos", modulo: "veiculos" },
+  { label: "Vagas", to: "/vagas", modulo: "vagas" },
 ];
 
 const NAV_LINKS_PORTEIRO = [
   { label: "Início", to: "/inicio" },
+  { label: "Conversas", to: "/conversas" },
   { label: "Entradas e Saídas", to: "/entradas-e-saidas", modulo: "portaria" },
   { label: "Entregas", to: "/portaria/entregas", modulo: "entregas" },
   { label: "Chaves", to: "/chaves", modulo: "chaves" },
-  { label: "Conversas", to: "/conversas" },
 ];
 
 const NAV_LINKS_RIGHT = [
