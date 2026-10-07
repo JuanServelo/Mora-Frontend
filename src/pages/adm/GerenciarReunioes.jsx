@@ -394,11 +394,7 @@ function AbaReunioes({ irParaVotacao }) {
     }
   }
 
-  useEffect(() => {
-    if (usuario?.id) {
-      buscarReunioesPorDia();
-    }
-  }, [usuario?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+
 
   async function cancelar(id) {
     const ok = await confirm({
@@ -801,6 +797,29 @@ function AbaReunioes({ irParaVotacao }) {
                           Editar
                         </button>
                       )}
+                      {isOrganizador && (
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            try {
+                              const res = await meetingApi.buscar(reuniao.id);
+                              setDetalhe(res.data);
+                              await carregarAtaReuniao(reuniao.id);
+                              setEscrevendoAta(true);
+                              setTimeout(() => {
+                                const el = document.getElementById("meeting-detalhe-container");
+                                if (el) el.scrollIntoView({ behavior: 'smooth' });
+                              }, 100);
+                            } catch {
+                              mostrarNotificacao("Erro ao abrir ata.", "erro");
+                            }
+                          }}
+                          className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary hover:underline cursor-pointer"
+                        >
+                          <Icone name="description" className="text-xs" />
+                          Criar Ata
+                        </button>
+                      )}
                       <button
                         type="button"
                         onClick={async () => {
@@ -990,40 +1009,6 @@ function AbaReunioes({ irParaVotacao }) {
                 </form>
               </div>
             )}
-
-            {/* Seção de Votações da Reunião */}
-            <div className="p-5 space-y-4 border-t border-veu/5">
-              <div className="flex items-center justify-between">
-                <h4 className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider flex items-center gap-2">
-                  <Icone name="how_to_vote" className="text-base text-primary" />
-                  Votações da Reunião
-                </h4>
-                {detalhe.idOrganizador === usuario?.id && (
-                  <button
-                    onClick={() => irParaVotacao(detalhe.id)}
-                    className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-primary text-on-primary hover:bg-primary-hover shadow-lg shadow-primary/20 hover:shadow-primary/30 transition text-xs font-semibold cursor-pointer"
-                  >
-                    <Icone name="add" className="text-sm font-bold" /> Criar Votação
-                  </button>
-                )}
-              </div>
-              
-              {votacoesReuniao.length > 0 ? (
-                <div className="grid gap-2 mt-2">
-                  {votacoesReuniao.map((poll) => (
-                    <div key={poll.id} className="flex items-center justify-between p-3 rounded-xl bg-veu/5 border border-veu/10 hover:bg-veu/10 transition cursor-pointer" onClick={() => irParaVotacao(detalhe.id)}>
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs font-medium text-on-surface">{poll.titulo}</span>
-                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${poll.status === 'ABERTA' ? 'bg-primary/20 text-primary' : 'bg-surface-container text-on-surface-variant'}`}>{poll.status}</span>
-                      </div>
-                      <Icone name="chevron_right" className="text-sm text-on-surface-variant" />
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-xs text-on-surface-variant italic">Nenhuma votação registrada para esta reunião.</p>
-              )}
-            </div>
 
             {/* Seção da Ata da Reunião integrada */}
             {carregandoAta ? (
@@ -1384,6 +1369,29 @@ function AbaReunioes({ irParaVotacao }) {
                       >
                         <Icone name="edit" className="text-xs" />
                         Editar
+                      </button>
+                    )}
+                    {isOrganizador && (
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          try {
+                            const res = await meetingApi.buscar(reuniao.id);
+                            setDetalhe(res.data);
+                            await carregarAtaReuniao(reuniao.id);
+                            setEscrevendoAta(true);
+                            setTimeout(() => {
+                              const el = document.getElementById("meeting-detalhe-container");
+                              if (el) el.scrollIntoView({ behavior: 'smooth' });
+                            }, 100);
+                          } catch {
+                            mostrarNotificacao("Erro ao abrir ata.", "erro");
+                          }
+                        }}
+                        className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary hover:underline cursor-pointer"
+                      >
+                        <Icone name="description" className="text-xs" />
+                        Criar Ata
                       </button>
                     )}
                     <button
