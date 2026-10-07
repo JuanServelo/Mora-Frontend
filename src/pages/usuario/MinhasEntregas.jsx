@@ -3,6 +3,7 @@ import { useState, useEffect, useMemo, useCallback } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import { entregaApi } from "../../services/entregasApi";
 import { acessoApi } from "../../services/acessoApi";
+import { apartamentoApi } from "../../services/estruturasApi";
 import { Icone } from "../../components/icones/Icone";
 import { Botao } from "../../components/botoes/Botao";
 import { Campo } from "../../components/campos/Campo";
@@ -50,6 +51,7 @@ export function MinhasEntregas() {
     .includes(usuario?.perfil);
   const [registrando, setRegistrando] = useState(false);
   const [usuariosCondo, setUsuariosCondo] = useState([]);
+  const [apartamentos, setApartamentos] = useState([]);
 
   // Devolve a promise e não mexe em `carregando`: quem chama decide se isso
   // é a carga inicial (com spinner) ou um refresh silencioso após registrar.
@@ -67,10 +69,24 @@ export function MinhasEntregas() {
   // Destinatários possíveis; só o operador precisa da lista.
   useEffect(() => {
     if (!ehOperador) return;
-    acessoApi.listarUsuariosCondominio()
-      .then((res) => setUsuariosCondo(res.data?.usuarios || []))
-      .catch(() => setUsuariosCondo([]));
+    Promise.all([acessoApi.listarUsuariosCondominio(), apartamentoApi.listar()])
+      .then(([resUsuarios, resApartamentos]) => {
+        setUsuariosCondo(resUsuarios.data?.usuarios || []);
+        setApartamentos(resApartamentos.data || []);
+      })
+      .catch(() => { setUsuariosCondo([]); setApartamentos([]); });
   }, [ehOperador]);
+
+  // auth-api só devolve `unidadeId` — bloco/apartamento vêm do apartamento
+  // correspondente no portaria-service.
+  const usuariosCondoComUnidade = useMemo(
+    () =>
+      usuariosCondo.map((u) => {
+        const apt = apartamentos.find((a) => a.id === u.unidadeId);
+        return { ...u, bloco: apt?.blocoNome || "", apartamento: apt?.numero || "" };
+      }),
+    [usuariosCondo, apartamentos],
+  );
 
   // Morador vê o que é dele; operador vê o condomínio inteiro.
   const minhasEntregas = useMemo(() => {
@@ -375,7 +391,7 @@ export function MinhasEntregas() {
 
       {registrando && (
         <ModalRegistrarEntrega
-          usuarios={usuariosCondo}
+          usuarios={usuariosCondoComUnidade}
           onFechar={() => setRegistrando(false)}
           onSalvo={() => { setRegistrando(false); carregar(); }}
         />

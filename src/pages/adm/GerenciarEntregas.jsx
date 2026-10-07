@@ -2,6 +2,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { acessoApi } from "../../services/acessoApi";
 import { entregaApi } from "../../services/entregasApi";
+import { apartamentoApi } from "../../services/estruturasApi";
 import { Icone } from "../../components/icones/Icone";
 import { Campo } from "../../components/campos/Campo";
 import { Botao } from "../../components/botoes/Botao";
@@ -32,6 +33,7 @@ const selectCls =
 export function GerenciarEntregas() {
   const [entregas, setEntregas] = useState([]);
   const [usuarios, setUsuarios] = useState([]);
+  const [apartamentos, setApartamentos] = useState([]);
   const [carregando, setCarregando] = useState(true);
   const [criando, setCriando] = useState(false);
   const [expandido, setExpandido] = useState(null);
@@ -54,14 +56,32 @@ export function GerenciarEntregas() {
     // `/api/users` recusa o porteiro — ele nao esta em PERFIS_GESTAO_USUARIOS.
     // `/api/portaria/usuarios-condominio` responde para porteiro e gestao, ja
     // filtrado pelo condominio do token, que e o recorte certo de qualquer jeito.
-    Promise.all([entregaApi.listarTodas(), acessoApi.listarUsuariosCondominio()])
-      .then(([resEntregas, resUsuarios]) => {
+    // O usuario do auth-api so traz `unidadeId` (bloco/apartamento viraram
+    // colunas do apartamento no portaria-service) — por isso cruzamos aqui.
+    Promise.all([
+      entregaApi.listarTodas(),
+      acessoApi.listarUsuariosCondominio(),
+      apartamentoApi.listar(),
+    ])
+      .then(([resEntregas, resUsuarios, resApartamentos]) => {
         setEntregas(resEntregas.data || []);
         setUsuarios(resUsuarios.data?.usuarios || []);
+        setApartamentos(resApartamentos.data || []);
       })
       .catch((err) => console.error("Erro ao carregar dados:", err))
       .finally(() => setCarregando(false));
   }, []);
+
+  // Resolve bloco/apartamento do usuario a partir do unidadeId, ja que o
+  // auth-api nao devolve mais esses campos diretamente.
+  const usuariosComUnidade = useMemo(
+    () =>
+      usuarios.map((u) => {
+        const apt = apartamentos.find((a) => a.id === u.unidadeId);
+        return { ...u, bloco: apt?.blocoNome || "", apartamento: apt?.numero || "" };
+      }),
+    [usuarios, apartamentos],
+  );
 
   const blocosUnicos = useMemo(
     () => [...new Set(entregas.map((e) => e.bloco).filter(Boolean))].sort(),
@@ -209,7 +229,7 @@ export function GerenciarEntregas() {
               <h2 className="font-headline text-xl font-bold text-on-surface">Nova Entrega</h2>
             </div>
             <FormEntrega
-              usuarios={usuarios}
+              usuarios={usuariosComUnidade}
               onSalvar={handleCriar}
               onCancelar={() => { setCriando(false); setErroCriar(""); }}
               erro={erroCriar}
@@ -358,7 +378,7 @@ export function GerenciarEntregas() {
                       {editando === entrega.id ? (
                         <FormEntrega
                           inicial={entrega}
-                          usuarios={usuarios}
+                          usuarios={usuariosComUnidade}
                           onSalvar={(dados) => handleAtualizar(entrega.id, dados)}
                           onCancelar={() => { setEditando(null); setErroEditar(""); }}
                           erro={erroEditar}
@@ -383,7 +403,7 @@ export function GerenciarEntregas() {
       {modalRetirada && (
         <PopupRetirada
           entrega={modalRetirada}
-          usuarios={usuarios}
+          usuarios={usuariosComUnidade}
           onConfirmar={(recebedorNome, dataRetirada) =>
             handleConfirmarRetirada(modalRetirada, recebedorNome, dataRetirada)
           }
