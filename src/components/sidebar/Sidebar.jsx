@@ -5,10 +5,24 @@ import { FotoUsuario } from "../avatar/FotoUsuario";
 import { useAuth } from "../../contexts/AuthContext";
 import { usePlano } from "../../contexts/PlanoContext";
 import { useNotificacoes } from "../../contexts/NotificacoesContext";
-import { PERFIS } from "../../utils/perfis";
+import { PERFIS, isUsuarioRestrito, podeAcessarAdmin } from "../../utils/perfis";
 import { linksDoPerfil } from "../../utils/menuAdmin";
 import moraLogo3 from "../../assets/Mora3.png";
 
+const MORADOR_LINKS = [
+  { to: "/inicio", label: "Início", icon: "home" },
+  { to: "/conversas", label: "Conversas", icon: "forum" },
+  { label: "Cobranças", to: "/financeiro", icon: "payments" },
+  { label: "Espaços", to: "/espacos", icon: "apartment", modulo: "areas_comuns" },
+  { label: "Entregas", to: "/entregas", icon: "inventory_2", modulo: "entregas" },
+  { label: "Reuniões", to: "/reunioes", icon: "groups", modulo: "reunioes" },
+  { label: "Reclamações", to: "/reclamacoes", icon: "report", modulo: "reclamacoes" },
+  { label: "Comunicados", to: "/avisos", icon: "campaign", modulo: "comunicados" },
+  { label: "Conhecimento", to: "/faq", icon: "library_books", modulo: "conhecimento" },
+  { label: "Votações", to: "/votacoes", icon: "how_to_vote", modulo: "votacoes" },
+  { label: "Veículos", to: "/meus-veiculos", icon: "directions_car", modulo: "veiculos" },
+  { label: "Vagas", to: "/vagas", icon: "local_parking", modulo: "vagas" },
+];
 
 // Telas do porteiro (mesmo layout de Sidebar dos admins).
 const PORTEIRO_LINKS = [
@@ -34,22 +48,25 @@ export function Sidebar({ aberta = false, aoFechar }) {
 
   const perfil = usuario?.perfil;
   const isDoorman = perfil === PERFIS.PORTEIRO;
-
   const isGeral = perfil === PERFIS.ADMIN_GERAL;
+  const isAdmin = podeAcessarAdmin(perfil);
+  const isRestrito = isUsuarioRestrito(usuario);
 
-  // Porteiro tem o conjunto dele; os admins veem o que o próprio perfil permite.
-  //
-  // O síndico ganha "Início" na frente: a tela inicial dele é /inicio (avisos e
-  // atalhos do condomínio), mas `menuAdmin` só lista telas de gestão, e ele não
-  // tinha como voltar depois de abrir uma. Fica aqui, e não no `menuAdmin`,
-  // porque aquela lista também é o guarda das rotas /adm. O Admin Geral não
-  // precisa: o "Painel Geral" já é a tela inicial dele.
-  const links = isDoorman
-    ? PORTEIRO_LINKS.filter((l) => !l.modulo || hasModulo(l.modulo))
-    : [
-        ...(isGeral ? [] : [{ to: "/inicio", label: "Início", icon: "home" }]),
-        ...linksDoPerfil(perfil, modulosAtivos),
-      ];
+  let links = [];
+  if (isDoorman) {
+    links = PORTEIRO_LINKS.filter((l) => !l.modulo || hasModulo(l.modulo));
+  } else if (isAdmin) {
+    links = [
+      ...(isGeral ? [] : [{ to: "/inicio", label: "Início", icon: "home" }]),
+      ...linksDoPerfil(perfil, modulosAtivos),
+    ];
+  } else {
+    if (isRestrito) {
+      links = [{ to: "/inicio", label: "Início", icon: "home" }];
+    } else {
+      links = MORADOR_LINKS.filter((l) => !l.modulo || hasModulo(l.modulo));
+    }
+  }
 
   // O logo leva à tela inicial, como na navbar dos moradores.
   const telaInicial = isGeral ? "/adm/geral" : "/inicio";
@@ -58,7 +75,9 @@ export function Sidebar({ aberta = false, aoFechar }) {
     ? "Portaria"
     : isGeral
       ? "Plataforma"
-      : "Administrativo";
+      : isAdmin
+        ? "Administrativo"
+        : "Condomínio";
 
   async function handleLogout() {
     await logout();
