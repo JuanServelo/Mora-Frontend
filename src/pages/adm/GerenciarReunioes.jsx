@@ -403,8 +403,8 @@ function AbaReunioes({ irParaVotacao }) {
     try {
       await meetingApi.cancelar(id);
       setDetalhe((p) => (p ? { ...p, status: "CANCELADA" } : p));
-      setResultadosBusca((prev) => prev.map((r) => r.id === id ? { ...r, status: "CANCELADA" } : r));
-      setReunioesSemana((prev) => prev.map((r) => r.id === id ? { ...r, status: "CANCELADA" } : r));
+      setResultadosBusca((prev) => prev ? prev.map((r) => r.id === id ? { ...r, status: "CANCELADA" } : r) : prev);
+      setReunioesSemana((prev) => prev ? prev.map((r) => r.id === id ? { ...r, status: "CANCELADA" } : r) : prev);
     } catch {
       toast.error("Erro ao cancelar reunião.");
     }
@@ -420,8 +420,8 @@ function AbaReunioes({ irParaVotacao }) {
     try {
       await meetingApi.finalizar(id);
       setDetalhe((p) => (p ? { ...p, status: "FINALIZADA" } : p));
-      setResultadosBusca((prev) => prev.map((r) => r.id === id ? { ...r, status: "FINALIZADA" } : r));
-      setReunioesSemana((prev) => prev.map((r) => r.id === id ? { ...r, status: "FINALIZADA" } : r));
+      setResultadosBusca((prev) => prev ? prev.map((r) => r.id === id ? { ...r, status: "FINALIZADA" } : r) : prev);
+      setReunioesSemana((prev) => prev ? prev.map((r) => r.id === id ? { ...r, status: "FINALIZADA" } : r) : prev);
     } catch {
       toast.error("Erro ao finalizar reunião.");
     }
