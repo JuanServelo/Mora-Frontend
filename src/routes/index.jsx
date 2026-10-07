@@ -24,6 +24,9 @@ import { FAQ } from "../pages/usuario/FAQ";
 import { MinhasReservas } from "../pages/usuario/MinhasReservas";
 import { MinhasReclamacoes } from "../pages/usuario/MinhasReclamacoes";
 import { MinhasEntregas } from "../pages/usuario/MinhasEntregas";
+import { MinhasReunioes } from "../pages/usuario/MinhasReunioes";
+import { MinhasVotacoes } from "../pages/usuario/MinhasVotacoes";
+import { GerenciarVotacoes } from "../pages/adm/GerenciarVotacoes";
 import { Inicio } from "../pages/inicio/Inicio";
 import { Comodidades } from "../pages/comodidades/Comodidades";
 import { Portaria } from "../pages/portaria/Portaria";
@@ -98,6 +101,8 @@ export const router = createBrowserRouter([
       { path: "/acesso-pendente", element: <AcessoPendente /> },
       { path: "/espacos", element: <MinhasReservas /> },
       { path: "/reclamacoes", element: <MinhasReclamacoes /> },
+      { path: "/reunioes", element: <MinhasReunioes /> },
+      { path: "/votacoes", element: <MinhasVotacoes /> },
       // Duas telas, dois papeis: o morador ve as encomendas dele; o porteiro
       // cadastra e da baixa nas do predio inteiro. Antes a gestao de entregas
       // ficava em /adm, onde o porteiro nao entra — quem recebe a encomenda
@@ -148,6 +153,7 @@ export const router = createBrowserRouter([
       { path: "/adm/comunicados", element: <AdminRoute><GerenciarComunicados /></AdminRoute> },
       { path: "/adm/funcionarios", element: <AdminRoute><GerenciarFuncionarios /></AdminRoute> },
       { path: "/adm/reunioes", element: <AdminRoute><GerenciarReunioes /></AdminRoute> },
+      { path: "/adm/votacoes", element: <AdminRoute><GerenciarVotacoes /></AdminRoute> },
       { path: "/adm/reclamacoes", element: <AdminRoute><GerenciarReclamacoes /></AdminRoute> },
       { path: "/adm/conhecimento", element: <AdminRoute><GerenciarConhecimento /></AdminRoute> },
       { path: "/adm/veiculos", element: <GerenciarVeiculos /> },
