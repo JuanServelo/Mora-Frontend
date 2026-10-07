@@ -13,10 +13,15 @@ import moraLogo3 from "../../assets/Mora3.png";
 // Telas do porteiro (mesmo layout de Sidebar dos admins).
 const PORTEIRO_LINKS = [
   { to: "/inicio", label: "Início", icon: "home" },
-  { to: "/atendimento", label: "Cadastros", icon: "waving_hand" },
+  // Cadastro de visitante na chegada é tela de portaria, como Entradas e
+  // Saídas: sem o módulo, as duas somem juntas.
+  { to: "/atendimento", label: "Cadastros", icon: "waving_hand", modulo: "portaria" },
   { to: "/entradas-e-saidas", label: "Entradas e Saídas", icon: "swap_horiz", modulo: "portaria" },
   { to: "/portaria/entregas", label: "Entregas", icon: "inventory_2", modulo: "entregas" },
   { to: "/chaves", label: "Chaves", icon: "vpn_key", modulo: "chaves" },
+  // O porteiro consulta a agenda e registra reserva no balcão; a tela já traz
+  // as abas de operação para o perfil dele.
+  { to: "/espacos", label: "Espaços", icon: "deck", modulo: "areas_comuns" },
   { to: "/usuarios", label: "Usuários do Condomínio", icon: "groups" },
   { to: "/conversas", label: "Conversas", icon: "forum" },
   // O porteiro é destinatário dos avisos de público FUNCIONARIOS. Sem esta
