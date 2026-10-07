@@ -163,11 +163,37 @@ export function MinhasReunioes() {
                     </div>
                   )}
                   {detalhe.googleMeetLink && (
-                    <div className="col-span-1 md:col-span-2">
-                      <p className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-1">Link da Reunião</p>
-                      <a href={detalhe.googleMeetLink} target="_blank" rel="noreferrer" className="text-sm text-primary hover:underline flex items-center gap-1.5">
-                        <Icone name="link" className="text-base" /> {detalhe.googleMeetLink}
-                      </a>
+                    <div className="col-span-1 md:col-span-2 mt-2">
+                      <p className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-2">Acesso à Reunião</p>
+                      {(() => {
+                        const inicio = new Date(detalhe.dataHoraInicio).getTime();
+                        const agora = new Date().getTime();
+                        const liberado = agora >= (inicio - 15 * 60 * 1000);
+
+                        if (liberado) {
+                          return (
+                            <button
+                              onClick={async () => {
+                                try {
+                                  await meetingApi.responderPresenca(detalhe.id, "CONFIRMADO");
+                                } catch (e) {
+                                  console.error("Erro ao confirmar presença", e);
+                                }
+                                window.open(detalhe.googleMeetLink, "_blank");
+                              }}
+                              className="px-4 py-2 bg-primary text-on-primary rounded-xl text-sm font-semibold hover:bg-primary-hover shadow-lg shadow-primary/20 transition flex items-center w-fit gap-2"
+                            >
+                              <Icone name="videocam" className="text-base" /> Entrar no Google Meet
+                            </button>
+                          );
+                        } else {
+                          return (
+                            <div className="px-4 py-2 bg-surface-container-highest text-on-surface-variant rounded-xl text-sm font-semibold flex items-center w-fit gap-2 opacity-70 cursor-not-allowed">
+                              <Icone name="videocam" className="text-base" /> Disponível 15 minutos antes do início
+                            </div>
+                          );
+                        }
+                      })()}
                     </div>
                   )}
                 </div>

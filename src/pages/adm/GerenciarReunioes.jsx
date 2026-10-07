@@ -348,11 +348,7 @@ function AbaReunioes({ irParaVotacao }) {
       const payload = {
         topicosDiscutidos: ataForm.topicosDiscutidos,
         decisoesTomadas: ataForm.decisoesTomadas,
-        idPresentes: ataForm.idPresentes
-          .split(",")
-          .map((s) => s.trim())
-          .filter(Boolean)
-          .map(Number),
+        idPresentes: detalhe.convidados?.filter(c => c.status === "CONFIRMADO").map(c => c.usuarioId) || [],
       };
       
       let res;
@@ -1053,13 +1049,7 @@ function AbaReunioes({ irParaVotacao }) {
                       rows={3}
                       required
                     />
-                    <Campo
-                      label="IDs dos Presentes (separados por vírgula)"
-                      value={ataForm.idPresentes}
-                      onChange={(e) => setAtaForm((p) => ({ ...p, idPresentes: e.target.value }))}
-                      placeholder="ex: 1, 2, 3"
-                      required
-                    />
+
                     <div className="flex justify-end gap-2">
                       <button
                         type="button"
@@ -1155,13 +1145,7 @@ function AbaReunioes({ irParaVotacao }) {
                         rows={3}
                         required
                       />
-                      <Campo
-                        label="IDs dos Presentes (separados por vírgula)"
-                        value={ataForm.idPresentes}
-                        onChange={(e) => setAtaForm((p) => ({ ...p, idPresentes: e.target.value }))}
-                        placeholder="ex: 1, 2, 3"
-                        required
-                      />
+
                       <div className="flex justify-end gap-2">
                         <button
                           type="button"
@@ -1476,11 +1460,7 @@ function AbaAtas() {
       const payload = {
         topicosDiscutidos: form.topicosDiscutidos,
         decisoesTomadas: form.decisoesTomadas,
-        idPresentes: form.idPresentes
-          .split(",")
-          .map((s) => s.trim())
-          .filter(Boolean)
-          .map(Number),
+        idPresentes: [],
       };
       let res;
       if (modo === "criar") {
@@ -1586,7 +1566,7 @@ function AbaAtas() {
             {erro && <p className="text-error text-xs">{erro}</p>}
             <TextArea label="Tópicos Discutidos" name="topicosDiscutidos" value={form.topicosDiscutidos} onChange={handleForm} rows={3} placeholder="Liste os tópicos discutidos" required />
             <TextArea label="Decisões Tomadas" name="decisoesTomadas" value={form.decisoesTomadas} onChange={handleForm} rows={3} placeholder="Liste as decisões tomadas" required />
-            <Campo label="IDs dos Presentes (separados por vírgula)" name="idPresentes" value={form.idPresentes} onChange={handleForm} placeholder="ex: 1, 2, 3" required />
+
             <Botao type="submit" disabled={salvando}>
               {salvando ? "Salvando..." : modo === "criar" ? "Registrar Ata" : "Salvar Alterações"}
             </Botao>
