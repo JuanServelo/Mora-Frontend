@@ -3,6 +3,7 @@ import { useState, useEffect, useMemo } from "react";
 import { blocoApi, apartamentoApi, areaComunApi } from "../../services/estruturasApi";
 import { vagaApi } from "../../services/portariaApi";
 import { condominiosApi } from "../../services/condominiosApi";
+import { planApi } from "../../services/planApi";
 import api from "../../services/api";
 import { Icone } from "../../components/icones/Icone";
 import { Campo } from "../../components/campos/Campo";
@@ -28,6 +29,7 @@ export function GerenciarEstruturas() {
 
   const [condominios, setCondominios] = useState([]);
   const [condominioId, setCondominioId] = useState(null);
+  const [modulosCondominio, setModulosCondominio] = useState([]);
   const [aba, setAba] = useState("blocos");
 
   useEffect(() => {
@@ -42,6 +44,16 @@ export function GerenciarEstruturas() {
       setCondominioId(usuario?.condominioId ?? null);
     }
   }, [isGerente, usuario]);
+
+  useEffect(() => {
+    if (!condominioId) {
+      setModulosCondominio([]);
+      return;
+    }
+    planApi.assinaturaVigente(condominioId)
+      .then(res => setModulosCondominio(res.data?.modulosAtivos || []))
+      .catch(() => setModulosCondominio([]));
+  }, [condominioId]);
 
   const condominioAtual = condominios.find((c) => c.id === condominioId);
 
@@ -105,7 +117,7 @@ export function GerenciarEstruturas() {
           {[
             { id: "blocos", label: "Blocos & Apartamentos", icon: "apartment" },
             { id: "areas-comuns", label: "Áreas Comuns", icon: "pool" },
-            { id: "vagas", label: "Vagas", icon: "local_parking" },
+            ...(modulosCondominio.includes("vagas") ? [{ id: "vagas", label: "Vagas", icon: "local_parking" }] : []),
           ].map((tab) => (
             <button
               key={tab.id}

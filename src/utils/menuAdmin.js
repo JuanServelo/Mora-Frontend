@@ -115,9 +115,17 @@ export const ADM_LINKS = [
     to: "/adm/reunioes",
     label: "Reuniões",
     icon: "groups",
-    description: "Assembleias e votações",
+    description: "Assembleias e atas",
     perfis: CONDOMINIO,
     modulo: "reunioes",
+  },
+  {
+    to: "/adm/votacoes",
+    label: "Votações",
+    icon: "how_to_vote",
+    description: "Votações e enquetes do condomínio",
+    perfis: CONDOMINIO,
+    modulo: "votacoes",
   },
   {
     to: "/adm/reclamacoes",

@@ -6,6 +6,7 @@ import { Icone } from "../../components/icones/Icone";
 import { Campo } from "../../components/campos/Campo";
 import { Botao } from "../../components/botoes/Botao";
 import { useToast } from "../../contexts/ToastContext";
+import { usePlano } from "../../contexts/PlanoContext";
 
 // ── helpers ──────────────────────────────────────────────────────────────────
 
@@ -108,6 +109,7 @@ export function MeusVeiculos() {
 
 function AbaVeiculos() {
   const toast = useToast();
+  const { hasModulo } = usePlano();
   const [dados, setDados] = useState({ veiculos: [], vagas: [] });
   const [pessoas, setPessoas] = useState([]);
   const [carregando, setCarregando] = useState(true);
@@ -204,13 +206,14 @@ function AbaVeiculos() {
       </section>
 
       {/* ── Conjunto 2: vagas da unidade ── */}
-      <section className="space-y-4">
-        <h2 className="font-headline font-bold text-on-surface text-lg">
-          Vagas da minha unidade
-          <span className="ml-2 text-xs font-normal text-on-surface-variant">
-            ({dados.vagas.length})
-          </span>
-        </h2>
+      {hasModulo("vagas") && (
+        <section className="space-y-4">
+          <h2 className="font-headline font-bold text-on-surface text-lg">
+            Vagas da minha unidade
+            <span className="ml-2 text-xs font-normal text-on-surface-variant">
+              ({dados.vagas.length})
+            </span>
+          </h2>
 
         {dados.vagas.length === 0 ? (
           <Vazio icone="local_parking">
@@ -274,6 +277,7 @@ function AbaVeiculos() {
           Veículo de visitante é somente leitura.
         </p>
       </section>
+      )}
 
       {form && (
         <ModalVeiculo
