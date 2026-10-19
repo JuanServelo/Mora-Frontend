@@ -1,5 +1,6 @@
 // src/pages/usuario/MinhasCobrancas.jsx
 import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import {
   PieChart, Pie, Cell,
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
@@ -714,10 +715,18 @@ function AbaFaturas({ onVerDetalhe }) {
   );
 }
 
+/** Abas que um link pode abrir direto (`/financeiro?aba=multas`). A de contrato
+ * fica de fora: ela só existe para quem tem contrato. */
+const ABAS_POR_LINK = ["faturas", "gastos", "multas", "prestacao"];
+
 /* ─── Página principal ─────────────────────────────────────────────────── */
 export function MinhasCobrancas() {
   const { usuario } = useAuth();
-  const [aba, setAba] = useState("faturas");
+  const [params] = useSearchParams();
+  const [aba, setAba] = useState(() => {
+    const pedida = params.get("aba");
+    return ABAS_POR_LINK.includes(pedida) ? pedida : "faturas";
+  });
   const [detalhe, setDetalhe] = useState(null);
 
   // Contrato aparece sempre para o dono, que é quem cadastra. Para o morador,
