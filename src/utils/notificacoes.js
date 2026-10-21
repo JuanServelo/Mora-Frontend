@@ -23,16 +23,28 @@ const TIPOS = {
     cor: "bg-error/15 text-error",
     destino: () => "/financeiro",
   },
+  MULTA_APLICADA: {
+    icone: "gavel",
+    cor: "bg-error/15 text-error",
+    destino: () => "/financeiro?aba=multas",
+  },
+  // A decisão sobre o recurso: deferido ou indeferido, o morador confere na aba.
+  MULTA_JULGADA: {
+    icone: "balance",
+    cor: "bg-primary/15 text-primary",
+    destino: () => "/financeiro?aba=multas",
+  },
 
   // ── comunicacao ─────────────────────────────────────────
-  MENSAGEM_RECEBIDA: {
+  // Os nomes são os do enum `TipoNotificacao` do comunicacao-service.
+  CHAT: {
     icone: "forum",
     cor: "bg-tertiary/15 text-tertiary",
-    // O destino sai de `dados`, não do tipo: a notificação leva de volta à
-    // conversa que a originou.
-    destino: (dados) => (dados?.conversaId ? `/conversas/${dados.conversaId}` : "/conversas"),
+    // O destino sai da notificação, não do tipo: ela leva de volta à conversa
+    // que a originou, cujo id o serviço grava em `referenciaId`.
+    destino: (n) => (n?.referenciaId ? `/conversas/${n.referenciaId}` : "/conversas"),
   },
-  AVISO_PUBLICADO: {
+  AVISO: {
     icone: "campaign",
     cor: "bg-primary/15 text-primary",
     destino: () => "/avisos",
@@ -51,7 +63,7 @@ export function configDaNotificacao(n) {
   return {
     icone: cfg.icone,
     cor: cfg.cor,
-    destino: cfg.destino(n?.dados),
+    destino: cfg.destino(n),
   };
 }
 
