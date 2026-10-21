@@ -130,7 +130,6 @@ export function GerenciarVotacoes() {
     try {
       await pollApi.votar(detalhe.id, {
         pollOptionId: Number(voteForm.pollOptionId),
-        usuarioId: usuario.id,
       });
       setVoteForm({ pollOptionId: "" });
       const res = await pollApi.buscar(detalhe.id);
@@ -256,7 +255,7 @@ export function GerenciarVotacoes() {
                     <div className="flex flex-col gap-2">
                       {(() => {
                         const totalVotos = detalhe.opcoes.reduce((acc, op) => acc + (op.quantidadeVotos || 0), 0);
-                        const mostraResultados = detalhe.status !== "ABERTA" || detalhe.usuariosQueVotaram?.includes(usuario.id);
+                        const mostraResultados = detalhe.status !== "ABERTA" || detalhe.minhaUnidadeVotou || !detalhe.podeVotar;
                         
                         return detalhe.opcoes.map((op) => {
                           const votos = op.quantidadeVotos || 0;
@@ -300,13 +299,14 @@ export function GerenciarVotacoes() {
 
               {detalhe.status === "ABERTA" && (
                 <div className="p-4 space-y-3">
-                  {detalhe.usuariosQueVotaram?.includes(usuario.id) ? (
+                  {detalhe.minhaUnidadeVotou ? (
                     <div className="flex items-center gap-2 p-3 rounded-xl bg-success/10 text-success text-sm font-semibold">
-                      <Icone name="check_circle" className="text-base" /> Você já registrou o seu voto nesta votação!
+                      <Icone name="check_circle" className="text-base" /> Sua unidade já votou nesta votação.
                     </div>
                   ) : (
                     <form onSubmit={registrarVoto} className="space-y-3">
-                      <Botao type="submit" disabled={votando || !voteForm.pollOptionId}>
+                      {!detalhe.podeVotar && <p className="text-sm text-on-surface-variant">Não há voto disponível para sua unidade nesta votação.</p>}
+                      <Botao type="submit" disabled={votando || !voteForm.pollOptionId || !detalhe.podeVotar}>
                         {votando ? "Registrando..." : "Confirmar Voto"}
                       </Botao>
                     </form>

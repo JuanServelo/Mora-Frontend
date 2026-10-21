@@ -25,6 +25,7 @@ import { MinhasReservas } from "../pages/usuario/MinhasReservas";
 import { MinhasReclamacoes } from "../pages/usuario/MinhasReclamacoes";
 import { MinhasEntregas } from "../pages/usuario/MinhasEntregas";
 import { MinhasReunioes } from "../pages/usuario/MinhasReunioes";
+import { MeetingRoute } from "./MeetingRoute";
 import { MinhasVotacoes } from "../pages/usuario/MinhasVotacoes";
 import { GerenciarVotacoes } from "../pages/adm/GerenciarVotacoes";
 import { Inicio } from "../pages/inicio/Inicio";
@@ -101,8 +102,8 @@ export const router = createBrowserRouter([
       { path: "/acesso-pendente", element: <AcessoPendente /> },
       { path: "/espacos", element: <MinhasReservas /> },
       { path: "/reclamacoes", element: <MinhasReclamacoes /> },
-      { path: "/reunioes", element: <MinhasReunioes /> },
-      { path: "/votacoes", element: <MinhasVotacoes /> },
+      { path: "/reunioes", element: <MeetingRoute modulo="reunioes"><MinhasReunioes /></MeetingRoute> },
+      { path: "/votacoes", element: <MeetingRoute modulo="votacoes"><MinhasVotacoes /></MeetingRoute> },
       // Duas telas, dois papeis: o morador ve as encomendas dele; o porteiro
       // cadastra e da baixa nas do predio inteiro. Antes a gestao de entregas
       // ficava em /adm, onde o porteiro nao entra — quem recebe a encomenda

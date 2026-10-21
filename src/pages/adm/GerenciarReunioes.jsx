@@ -285,7 +285,6 @@ function AbaReunioes({ irParaVotacao }) {
         descricao: form.descricao,
         dataHoraInicio: form.dataHoraInicio,
         dataHoraFim: form.dataHoraFim,
-        idOrganizador: Number(usuario?.id || form.idOrganizador),
         idConvidados: form.idConvidados
           .split(",")
           .map((s) => s.trim())
