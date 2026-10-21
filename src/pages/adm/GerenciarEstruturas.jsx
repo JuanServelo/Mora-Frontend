@@ -344,6 +344,20 @@ const MIN_CAPACIDADE = 1;
 const MAX_CAPACIDADE = 500;
 const MIN_AREA_COMUM_M2 = 5;
 const MAX_AREA_COMUM_M2 = 10000;
+/** Um ano. Espelha o CHECK da migração V3 do portaria-service. */
+export const MAX_ANTECEDENCIA_HORAS = 8760;
+
+/** Lê a antecedência em dias quando o número for redondo — "48" vira "2 dias". */
+export function descreverAntecedencia(valor) {
+  const horas = Number(valor || 0);
+  if (!Number.isFinite(horas) || horas <= 0) {
+    return "Sem exigência: o morador pode reservar para qualquer horário futuro.";
+  }
+  const texto = horas % 24 === 0
+    ? `${horas / 24} ${horas / 24 === 1 ? "dia" : "dias"}`
+    : `${horas} ${horas === 1 ? "hora" : "horas"}`;
+  return `O morador precisa pedir com ${texto} de antecedência. Síndico e admin não são barrados.`;
+}
 
 function FormBloco({ inicial, onSalvar, onCancelar }) {
   const [form, setForm] = useState({
@@ -1390,10 +1404,12 @@ function AbaAreasComuns({ condominioId, condominioNome }) {
                     { label: "Área (m²)", value: area.area ?? "—" },
                     { label: "Reservável", value: area.podeReservar ? "Sim" : "Não" },
           ...(area.podeReservar
-            ? [{ label: "Aprovação", value: area.exigeAprovacao ? "Síndico" : "Automática" }]
+            ? [{ label: "Aprovação", value: area.exigeAprovacao ? "Síndico" : "Automática" },
+                         { label: "Antecedência", value: area.antecedenciaMinimaHoras > 0 ? `${area.antecedenciaMinimaHoras}h` : "Nenhuma" }]
             : []),
                     ...(area.podeReservar
-                      ? [{ label: "Aprovação", value: area.exigeAprovacao ? "Síndico" : "Automática" }]
+                      ? [{ label: "Aprovação", value: area.exigeAprovacao ? "Síndico" : "Automática" },
+                         { label: "Antecedência", value: area.antecedenciaMinimaHoras > 0 ? `${area.antecedenciaMinimaHoras}h` : "Nenhuma" }]
                       : []),
                   ].map((col) => (
                     <div key={col.label} className="text-center">
@@ -1462,6 +1478,7 @@ function FormAreaComum({ inicial, onSalvar, onCancelar, condominioNome }) {
     area: inicial?.area?.toString() || "",
     podeReservar: inicial?.podeReservar ?? false,
     exigeAprovacao: inicial?.exigeAprovacao ?? false,
+    antecedenciaMinimaHoras: (inicial?.antecedenciaMinimaHoras ?? 0).toString(),
     observacoes: inicial?.observacoes || "",
   });
   const [erros, setErros] = useState({});
@@ -1480,6 +1497,11 @@ function FormAreaComum({ inicial, onSalvar, onCancelar, condominioNome }) {
       e.capacidadeMaxima = "Capacidade máxima é obrigatória.";
     } else if (!Number.isInteger(capacidade) || capacidade < MIN_CAPACIDADE || capacidade > MAX_CAPACIDADE) {
       e.capacidadeMaxima = `A capacidade máxima deve estar entre ${MIN_CAPACIDADE} e ${MAX_CAPACIDADE} pessoas.`;
+    }
+
+    const antecedencia = Number(form.antecedenciaMinimaHoras || 0);
+    if (!Number.isInteger(antecedencia) || antecedencia < 0 || antecedencia > MAX_ANTECEDENCIA_HORAS) {
+      e.antecedenciaMinimaHoras = `Informe de 0 a ${MAX_ANTECEDENCIA_HORAS} horas (0 = sem exigência).`;
     }
 
     const area = form.area !== "" ? Number(form.area) : null;
@@ -1506,6 +1528,8 @@ function FormAreaComum({ inicial, onSalvar, onCancelar, condominioNome }) {
       ...form,
       capacidadeMaxima: Number(form.capacidadeMaxima),
       area: Number(form.area),
+      // Campo vazio é "sem exigência", não NaN: o backend recusaria o nulo.
+      antecedenciaMinimaHoras: Number(form.antecedenciaMinimaHoras || 0),
     });
   }
 
@@ -1582,6 +1606,29 @@ function FormAreaComum({ inicial, onSalvar, onCancelar, condominioNome }) {
                 se ninguém decidir.
               </span>
             </div>
+          </div>
+        )}
+
+        {/* RF-10. Em horas, e não em dias, porque churrasqueira costuma pedir
+            dois dias e quadra pede duas horas — a mesma unidade cobre os dois. */}
+        {form.podeReservar && (
+          <div className="sm:col-span-2">
+            <Campo
+              id="area-antecedencia"
+              label="Antecedência mínima para reservar (horas)"
+              type="number"
+              min={0}
+              max={MAX_ANTECEDENCIA_HORAS}
+              step="1"
+              placeholder="0"
+              optional
+              value={form.antecedenciaMinimaHoras}
+              onChange={(e) => set("antecedenciaMinimaHoras", e.target.value)}
+              error={erros.antecedenciaMinimaHoras}
+            />
+            <p className="text-xs text-on-surface-variant/80 ml-1 mt-1">
+              {descreverAntecedencia(form.antecedenciaMinimaHoras)}
+            </p>
           </div>
         )}
       </div>

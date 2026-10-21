@@ -1,5 +1,6 @@
 // src/pages/usuario/MinhasReservas.jsx
 import { useState, useEffect, useCallback, useMemo } from "react";
+import { useSearchParams } from "react-router-dom";
 import { areaComunApi } from "../../services/estruturasApi";
 import { reservaApi, funcionamentoApi, apartamentoApi } from "../../services/portariaApi";
 import { acessoApi } from "../../services/acessoApi";
@@ -87,7 +88,11 @@ export function MinhasReservas() {
   const [visualizacao, setVisualizacao] = useState("mes");
   const [referencia, setReferencia] = useState(new Date());
 
-  const [aba, setAba] = useState("agenda");
+  // A notificação de reserva pendente aponta para ?aba=aprovacoes. Sem ler o
+  // parâmetro, o síndico cairia na agenda e teria de achar a fila sozinho.
+  const [searchParams] = useSearchParams();
+  const [aba, setAba] = useState(
+    () => (searchParams.get("aba") === "aprovacoes" ? "aprovacoes" : "agenda"));
   const [novaReserva, setNovaReserva] = useState(false);
   const [detalhe, setDetalhe] = useState(null);
 
