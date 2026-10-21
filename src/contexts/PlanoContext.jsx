@@ -29,14 +29,19 @@ export function PlanoProvider({ children }) {
     }
 
     setCarregando(true);
+    setModulosAtivos(null);
+    let ativo = true;
     planApi
       .assinaturaVigente(usuario.condominioId)
-      .then(({ data }) => setModulosAtivos(data.modulosAtivos ?? []))
+      .then(({ data }) => {
+        if (ativo) setModulosAtivos(data.vigente ? (data.modulosAtivos ?? []) : []);
+      })
       .catch(() => {
         // Sem assinatura ativa → sem módulos habilitados.
-        setModulosAtivos([]);
+        if (ativo) setModulosAtivos([]);
       })
-      .finally(() => setCarregando(false));
+      .finally(() => { if (ativo) setCarregando(false); });
+    return () => { ativo = false; };
   }, [usuario?.condominioId, authLoading]);
 
   /**

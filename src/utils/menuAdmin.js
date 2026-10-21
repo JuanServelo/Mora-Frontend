@@ -99,6 +99,7 @@ export const ADM_LINKS = [
   {
     to: "/adm/financeiro",
     label: "Financeiro",
+    modulo: "financeiro",
     icon: "payments",
     description: "Taxas, rateio e cobranças",
     perfis: CONDOMINIO,
@@ -141,6 +142,7 @@ export const ADM_LINKS = [
     // na barra lateral de quem usa o layout administrativo.
     to: "/conversas",
     label: "Conversas",
+    modulo: "comunicacao",
     icon: "forum",
     description: "Chamados dos moradores",
     perfis: CONDOMINIO,
@@ -148,6 +150,7 @@ export const ADM_LINKS = [
   {
     to: "/adm/comunicados",
     label: "Comunicados",
+    modulo: "comunicacao",
     icon: "campaign",
     description: "Quem confirmou a leitura dos avisos",
     perfis: CONDOMINIO,
