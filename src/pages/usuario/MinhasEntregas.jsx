@@ -121,12 +121,11 @@ export function MinhasEntregas() {
   async function handleConfirmarRetirada(entrega, dataRetirada) {
     setErroRetirada("");
     try {
-      const res = await entregaApi.atualizar(entrega.id, {
-        ...entrega,
-        status: "RETIRADA",
+      const res = await entregaApi.retirar(
+        entrega.id,
+        usuario?.nome ?? entrega.destinatarioNome,
         dataRetirada,
-        recebedorNome: usuario?.nome ?? entrega.destinatarioNome,
-      });
+      );
       setTodasEntregas((prev) =>
         prev.map((e) => (e.id === entrega.id ? res.data : e)),
       );

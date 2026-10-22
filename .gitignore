@@ -25,3 +25,7 @@ dist-ssr
 
 # Anotacoes locais da sessao — nao fazem parte do produto.
 .claude/
+
+# Relatorio de cobertura: gerado por `npm run test:cov`, reproduzivel a
+# qualquer momento. Versionar enche o diff de HTML e gera conflito em todo PR.
+coverage/
