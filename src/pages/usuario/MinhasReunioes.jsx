@@ -1,222 +1,109 @@
-import { useState, useEffect } from "react";
-import { meetingApi, ataApi } from "../../services/meetingApi";
+import { useState, useEffect, useRef } from "react";
+import { meetingApi } from "../../services/meetingApi";
 import { Icone } from "../../components/icones/Icone";
-import { Campo } from "../../components/campos/Campo";
+import { MeetingFilters } from "../../components/meetings/MeetingFilters";
+import { JoinMeetingButton } from "../../components/meetings/JoinMeetingButton";
 import { useToast } from "../../contexts/ToastContext";
 import { useAuth } from "../../contexts/AuthContext";
+import { confirmarPresencaLocal, filtrarReunioes } from "../../utils/meetings";
 
-const STATUS_MEETING = {
-  AGENDADA: { label: "Agendada", cls: "bg-primary/10 text-primary" },
-  CANCELADA: { label: "Cancelada", cls: "bg-error/10 text-error" },
-  FINALIZADA: { label: "Finalizada", cls: "bg-secondary/10 text-secondary" },
-};
-
-function fmt(dt) {
-  if (!dt) return "—";
-  return new Date(dt).toLocaleString("pt-BR", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
+const fmt = (data) => new Date(data).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" });
 
 export function MinhasReunioes() {
   const toast = useToast();
   const { usuario } = useAuth();
-  
   const [reunioes, setReunioes] = useState([]);
   const [buscando, setBuscando] = useState(false);
   const [detalhe, setDetalhe] = useState(null);
-  const [ata, setAta] = useState(null);
-
-  useEffect(() => {
-    if (usuario?.id) {
-      buscarReunioes();
-    }
-  }, [usuario]);
+  const [nome, setNome] = useState("");
+  const [data, setData] = useState("");
+  const [agora, setAgora] = useState(Date.now());
+  const buscaAtual = useRef(0);
+  const visiveis = filtrarReunioes(reunioes, { nome, data, futuras: true, agora });
+  const detalheVisivel = detalhe && filtrarReunioes([detalhe], { futuras: true, agora }).length > 0;
 
   async function buscarReunioes() {
+    if (!usuario?.id) return;
+    const pedido = ++buscaAtual.current;
     setBuscando(true);
     try {
-      const res = await meetingApi.listar(usuario.id);
-      setReunioes(res.data || []);
-    } catch (e) {
-      toast.error("Erro ao carregar suas reuniões.");
-    } finally {
-      setBuscando(false);
-    }
+      const { data: lista } = await meetingApi.listar();
+      if (pedido !== buscaAtual.current) return;
+      setReunioes(lista || []);
+      setDetalhe((anterior) => anterior ? (lista || []).find((r) => r.id === anterior.id) || null : null);
+      setAgora(Date.now());
+    } catch { if (pedido === buscaAtual.current) toast.error("Erro ao carregar suas reuniões."); }
+    finally { if (pedido === buscaAtual.current) setBuscando(false); }
   }
 
-  async function abrirDetalhe(reuniao) {
-    setDetalhe(reuniao);
-    setAta(null);
-    if (reuniao.status === "FINALIZADA") {
-      try {
-        const res = await ataApi.buscar(reuniao.id);
-        setAta(res.data);
-      } catch (e) {
-        // Sem ata ainda
-      }
-    }
+  useEffect(() => {
+    setDetalhe(null);
+    setReunioes([]);
+    buscarReunioes();
+    const timer = window.setInterval(() => setAgora(Date.now()), 30000);
+    window.addEventListener("focus", buscarReunioes);
+    return () => { ++buscaAtual.current; window.clearInterval(timer); window.removeEventListener("focus", buscarReunioes); };
+  }, [usuario?.id, usuario?.condominioId]);
+
+  function presencaAtualizada(id, usuarioId) {
+    setReunioes((lista) => lista.map((r) => r.id === id ? confirmarPresencaLocal(r, usuarioId) : r));
+    setDetalhe((r) => r?.id === id ? confirmarPresencaLocal(r, usuarioId) : r);
   }
+
+  const minhaPresenca = detalhe?.convidados?.find((c) => String(c.usuarioId) === String(usuario?.id))?.status;
 
   return (
     <div className="min-h-screen w-full pt-4 pb-20 px-6">
       <div className="max-w-6xl mx-auto space-y-8">
-        <header className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-          <div>
-            <p className="text-on-surface-variant text-xs font-semibold uppercase tracking-widest mb-1">
-              Condomínio
-            </p>
-            <h1 className="font-headline text-4xl font-extrabold tracking-tight text-on-surface">
-              Minhas{" "}
-              <span className="bg-gradient-to-r from-primary to-tertiary bg-clip-text text-transparent">
-                Reuniões
-              </span>
-            </h1>
-          </div>
+        <header>
+          <p className="text-on-surface-variant text-xs font-semibold uppercase tracking-widest mb-1">Condomínio</p>
+          <h1 className="font-headline text-4xl font-extrabold tracking-tight text-on-surface">Minhas Reuniões</h1>
+          <p className="text-sm text-on-surface-variant mt-2">Acompanhe suas próximas reuniões e as que estão em andamento.</p>
         </header>
-
         <div className="glass-panel rounded-3xl p-6 space-y-4">
-          {!detalhe ? (
-            <div className="space-y-4">
+          {!detalheVisivel ? (
+            <>
               <div className="flex items-center justify-between">
-                <h2 className="font-headline text-xl font-bold text-on-surface">Próximas Reuniões</h2>
-                <button
-                  onClick={buscarReunioes}
-                  className="p-2 rounded-xl text-on-surface-variant hover:bg-veu/5 hover:text-on-surface transition"
-                >
+                <h2 className="font-headline text-xl font-bold text-on-surface">Próximas reuniões</h2>
+                <button type="button" onClick={buscarReunioes} disabled={buscando} aria-label="Atualizar reuniões"
+                  className="p-2 rounded-xl text-on-surface-variant hover:bg-veu/5 cursor-pointer">
                   <Icone name="refresh" className={`text-xl ${buscando ? "animate-spin" : ""}`} />
                 </button>
               </div>
-
-              {reunioes.length === 0 && !buscando ? (
-                <div className="text-center py-12">
-                  <Icone name="groups" className="text-5xl text-on-surface-variant mb-4" />
-                  <p className="text-on-surface-variant">Nenhuma reunião agendada no momento.</p>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {reunioes.map((r) => (
-                    <div
-                      key={r.id}
-                      onClick={() => abrirDetalhe(r)}
-                      className="group bg-surface-container-highest/20 rounded-2xl p-4 border border-veu/10 hover:border-primary/30 hover:bg-surface-container-highest/40 transition-all cursor-pointer relative overflow-hidden"
-                    >
-                      <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-primary to-tertiary opacity-0 group-hover:opacity-100 transition-opacity" />
-                      <div className="flex justify-between items-start mb-2">
-                        <span className="text-xs font-bold text-on-surface-variant uppercase tracking-wider">
-                          ID: {r.id}
-                        </span>
-                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${STATUS_MEETING[r.status]?.cls || ""}`}>
-                          {STATUS_MEETING[r.status]?.label || r.status}
-                        </span>
-                      </div>
-                      <h3 className="font-semibold text-base text-on-surface mb-2">{r.titulo}</h3>
-                      <p className="text-sm text-on-surface-variant flex items-center gap-1.5 mt-2">
-                        <Icone name="event" className="text-base" /> {fmt(r.dataHoraInicio)}
-                      </p>
-                    </div>
-                  ))}
-                </div>
+              <MeetingFilters nome={nome} data={data} onNomeChange={setNome} onDataChange={setData} />
+              {buscando && <p role="status" className="text-sm text-on-surface-variant">Carregando reuniões...</p>}
+              {!buscando && visiveis.length === 0 && (
+                <p className="text-center py-12 text-on-surface-variant">
+                  {nome || data ? "Nenhuma reunião encontrada. Tente outro nome ou limpe a data." : "Nenhuma reunião agendada no momento."}
+                </p>
               )}
-            </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {visiveis.map((r) => (
+                  <button type="button" key={r.id} onClick={() => setDetalhe(r)}
+                    className="text-left bg-surface-container-highest/20 rounded-2xl p-4 border border-veu/10 hover:border-primary/30 transition cursor-pointer">
+                    <span className="text-xs font-semibold text-primary">{new Date(r.dataHoraInicio).getTime() <= agora ? "Em andamento" : "Agendada"}</span>
+                    <h3 className="font-semibold text-base text-on-surface my-2">{r.titulo}</h3>
+                    <p className="text-sm text-on-surface-variant">{fmt(r.dataHoraInicio)}</p>
+                  </button>
+                ))}
+              </div>
+            </>
           ) : (
-            <div className="space-y-4">
-              <div className="flex items-center gap-2 mb-4">
-                <button
-                  onClick={() => setDetalhe(null)}
-                  className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-surface-container-highest/50 text-on-surface hover:bg-surface-container-highest transition text-xs font-semibold cursor-pointer"
-                >
-                  <Icone name="arrow_back" className="text-sm" /> Voltar
-                </button>
-              </div>
-
+            <>
+              <button type="button" onClick={() => setDetalhe(null)} className="flex items-center gap-1 px-3 py-2 rounded-lg bg-surface-container-highest/50 text-sm text-on-surface cursor-pointer">
+                <Icone name="arrow_back" className="text-sm" /> Voltar
+              </button>
               <div className="bg-surface-container-highest/20 rounded-xl border border-veu/10 p-5 space-y-4">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h2 className="text-xl font-bold text-on-surface mb-1">{detalhe.titulo}</h2>
-                    <p className="text-sm text-on-surface-variant">{detalhe.descricao || "Sem descrição."}</p>
-                  </div>
-                  <span className={`px-2 py-1 rounded-full text-xs font-semibold ${STATUS_MEETING[detalhe.status]?.cls || ""}`}>
-                    {STATUS_MEETING[detalhe.status]?.label || detalhe.status}
-                  </span>
+                <h2 className="text-xl font-bold text-on-surface">{detalhe.titulo}</h2>
+                <p className="text-sm text-on-surface-variant">{detalhe.descricao || "Sem descrição."}</p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-on-surface">
+                  <p>Início: {fmt(detalhe.dataHoraInicio)}</p>
+                  <p>Fim estimado: {fmt(detalhe.dataHoraFim)}</p>
                 </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-veu/10">
-                  <div>
-                    <p className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-1">Início</p>
-                    <p className="text-sm text-on-surface flex items-center gap-1.5">
-                      <Icone name="event" className="text-base text-primary" />
-                      {fmt(detalhe.dataHoraInicio)}
-                    </p>
-                  </div>
-                  {detalhe.dataHoraFim && (
-                    <div>
-                      <p className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-1">Fim Estimado</p>
-                      <p className="text-sm text-on-surface flex items-center gap-1.5">
-                        <Icone name="event" className="text-base text-tertiary" />
-                        {fmt(detalhe.dataHoraFim)}
-                      </p>
-                    </div>
-                  )}
-                  {detalhe.googleMeetLink && (
-                    <div className="col-span-1 md:col-span-2 mt-2">
-                      <p className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-2">Acesso à Reunião</p>
-                      {(() => {
-                        const inicio = new Date(detalhe.dataHoraInicio).getTime();
-                        const agora = new Date().getTime();
-                        const liberado = agora >= (inicio - 15 * 60 * 1000);
-
-                        if (liberado) {
-                          return (
-                            <button
-                              onClick={async () => {
-                                try {
-                                  await meetingApi.responderPresenca(detalhe.id, "CONFIRMADO");
-                                } catch (e) {
-                                  console.error("Erro ao confirmar presença", e);
-                                }
-                                window.open(detalhe.googleMeetLink, "_blank");
-                              }}
-                              className="px-4 py-2 bg-primary text-on-primary rounded-xl text-sm font-semibold hover:bg-primary-hover shadow-lg shadow-primary/20 transition flex items-center w-fit gap-2"
-                            >
-                              <Icone name="videocam" className="text-base" /> Entrar no Google Meet
-                            </button>
-                          );
-                        } else {
-                          return (
-                            <div className="px-4 py-2 bg-surface-container-highest text-on-surface-variant rounded-xl text-sm font-semibold flex items-center w-fit gap-2 opacity-70 cursor-not-allowed">
-                              <Icone name="videocam" className="text-base" /> Disponível 15 minutos antes do início
-                            </div>
-                          );
-                        }
-                      })()}
-                    </div>
-                  )}
-                </div>
+                <p className="text-sm text-on-surface-variant">Sua presença: {minhaPresenca === "CONFIRMADO" ? "Confirmada" : minhaPresenca === "RECUSADO" ? "Recusada" : "Pendente"}</p>
+                <JoinMeetingButton reuniao={detalhe} usuarioId={usuario?.id} onPresencaAtualizada={presencaAtualizada} />
               </div>
-
-              {ata && (
-                <div className="bg-surface-container-highest/20 rounded-xl border border-veu/10 p-5 space-y-4 mt-4">
-                  <h3 className="text-lg font-bold text-on-surface flex items-center gap-2">
-                    <Icone name="description" className="text-primary" /> Ata da Reunião
-                  </h3>
-                  <div className="space-y-4">
-                    <div>
-                      <p className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-1">Tópicos Discutidos</p>
-                      <p className="text-sm text-on-surface whitespace-pre-wrap">{ata.topicosDiscutidos}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-1">Decisões Tomadas</p>
-                      <p className="text-sm text-on-surface whitespace-pre-wrap">{ata.decisoesTomadas}</p>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
+            </>
           )}
         </div>
       </div>

@@ -17,7 +17,7 @@ const MORADOR_LINKS = [
   { label: "Entregas", to: "/entregas", icon: "inventory_2", modulo: "entregas" },
   { label: "Reuniões", to: "/reunioes", icon: "groups", modulo: "reunioes" },
   { label: "Reclamações", to: "/reclamacoes", icon: "report", modulo: "reclamacoes" },
-  { label: "Comunicados", to: "/avisos", icon: "campaign", modulo: "comunicados" },
+  { label: "Comunicados", to: "/avisos", icon: "campaign", modulo: "comunicacao" },
   { label: "Conhecimento", to: "/faq", icon: "library_books", modulo: "conhecimento" },
   { label: "Votações", to: "/votacoes", icon: "how_to_vote", modulo: "votacoes" },
   { label: "Veículos", to: "/meus-veiculos", icon: "directions_car", modulo: "veiculos" },
@@ -40,7 +40,7 @@ const PORTEIRO_LINKS = [
   // O porteiro é destinatário dos avisos de público FUNCIONARIOS. Sem esta
   // entrada ele recebia comunicado que não tinha como abrir — a rota existe,
   // mas só a navbar dos moradores levava até ela.
-  { to: "/avisos", label: "Avisos", icon: "campaign" },
+  { to: "/avisos", label: "Avisos", icon: "campaign", modulo: "comunicacao" },
 ];
 
 export function Sidebar({ aberta = false, aoFechar }) {

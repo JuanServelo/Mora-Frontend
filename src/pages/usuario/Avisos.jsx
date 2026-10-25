@@ -4,6 +4,8 @@ import { Icone } from "../../components/icones/Icone";
 import { comunicacaoApi, urlDaImagem } from "../../services/comunicacaoApi";
 import { useNotificacoes } from "../../contexts/NotificacoesContext";
 import { formatarData } from "../../utils/datas";
+import { useAuth } from "../../contexts/AuthContext";
+import { usePlano } from "../../contexts/PlanoContext";
 
 const FILTROS = [
   { id: "novos", rotulo: "Novos" },
@@ -23,6 +25,9 @@ const FILTROS = [
  * que ainda exige atenção, não o histórico inteiro.
  */
 export function Avisos() {
+  const { usuario } = useAuth();
+  const { hasModulo, carregando: planoCarregando } = usePlano();
+  const podeLerAvisos = usuario?.perfil === "ADMIN_GERAL" || hasModulo("comunicacao");
   const { buscar: recarregarSino } = useNotificacoes();
 
   const [avisos, setAvisos] = useState([]);
@@ -32,6 +37,7 @@ export function Avisos() {
   const [aberto, setAberto] = useState(null);
 
   const carregar = useCallback(async () => {
+    if (!podeLerAvisos) return;
     try {
       const { data } = await comunicacaoApi.listarAvisos();
       setAvisos(data.avisos ?? []);
@@ -41,7 +47,7 @@ export function Avisos() {
     } finally {
       setCarregando(false);
     }
-  }, []);
+  }, [podeLerAvisos, usuario?.id, usuario?.condominioId]);
 
   useEffect(() => { carregar(); }, [carregar]);
 
@@ -68,6 +74,7 @@ export function Avisos() {
    * clicar é desorientador. Ele sai quando o usuário fecha ou abre outro.
    */
   async function alternar(aviso) {
+    if (!podeLerAvisos) return;
     if (aberto === aviso.id) {
       // Fechar basta: a lista local já sabe que o aviso virou lido, e o filtro
       // volta a valer sozinho. Recarregar do servidor aqui só piscaria a tela.
@@ -89,6 +96,11 @@ export function Avisos() {
     } catch (e) {
       setErro(e.response?.data?.mensagem ?? "Não foi possível registrar a leitura.");
     }
+  }
+
+  if (planoCarregando) return <p className="p-6">Carregando...</p>;
+  if (!podeLerAvisos) {
+    return <p className="p-6">O plano do seu condomínio não inclui o módulo de comunicação.</p>;
   }
 
   return (
