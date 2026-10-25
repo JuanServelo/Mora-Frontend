@@ -49,6 +49,33 @@ const TIPOS = {
     cor: "bg-primary/15 text-primary",
     destino: () => "/avisos",
   },
+
+  // ── portaria ────────────────────────────────────────────
+  // Publicadas pelo portaria-service. Sem entrada aqui elas caem no PADRÃO,
+  // que não leva a lugar nenhum — a pessoa é avisada e fica sem o que fazer.
+  ENTREGA: {
+    icone: "inventory_2",
+    cor: "bg-secondary/15 text-secondary",
+    destino: () => "/entregas",
+  },
+  RESERVA: {
+    icone: "event_available",
+    cor: "bg-primary/15 text-primary",
+    // O síndico recebe com `acao: "aprovar"` e precisa cair na fila de
+    // decisão; o morador cai na agenda, que é onde a reserva dele aparece.
+    destino: (n) =>
+      n?.dados?.acao === "aprovar" ? "/espacos?aba=aprovacoes" : "/espacos",
+  },
+  PRE_AUTORIZACAO: {
+    icone: "how_to_reg",
+    cor: "bg-tertiary/15 text-tertiary",
+    destino: () => "/meus-convidados",
+  },
+  ALUGUEL_VAGA: {
+    icone: "local_parking",
+    cor: "bg-secondary/15 text-secondary",
+    destino: () => "/meus-veiculos",
+  },
 };
 
 const PADRAO = {

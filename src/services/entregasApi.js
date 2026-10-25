@@ -16,5 +16,17 @@ export const entregaApi = {
   buscar: (id) => portariaBase.get(`/entregas/${id}`),
   cadastrar: (data) => portariaBase.post("/entregas/cadastrar", data),
   atualizar: (id, data) => portariaBase.put(`/entregas/${id}`, data),
+  /**
+   * Dá baixa na encomenda.
+   *
+   * Endpoint de ação, não o PUT genérico: o morador pode retirar a própria
+   * encomenda, mas não pode reescrever os campos dela — e o PUT exige perfil
+   * de portaria justamente por isso.
+   */
+  retirar: (id, recebedorNome, dataRetirada) =>
+    portariaBase.post(`/entregas/${id}/retirar`, recebedorNome, {
+      headers: { "Content-Type": "text/plain" },
+      params: dataRetirada ? { dataRetirada } : {},
+    }),
   excluir: (id) => portariaBase.delete(`/entregas/${id}`),
 };
