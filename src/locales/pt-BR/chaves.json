@@ -1,0 +1,131 @@
+{
+  "pagina": {
+    "secao": "Portaria",
+    "titulo": "Controle de Chaves",
+    "carregando": "Carregando…",
+    "erroCarregar": "Não foi possível carregar as chaves.",
+    "stats": {
+      "total": "Total",
+      "disponiveis": "Disponíveis",
+      "retiradas": "Retiradas"
+    },
+    "abas": {
+      "cadastro": "Cadastro de Chaves",
+      "historico": "Histórico"
+    }
+  },
+  "tipos": {
+    "MORADOR": "Morador",
+    "FUNCIONARIO": "Funcionário",
+    "TERCEIRO": "Terceiro"
+  },
+  "retirar": {
+    "titulo": "Registrar Retirada",
+    "chave": "Chave:",
+    "tipoResponsavel": "Tipo de responsável",
+    "carregando": {
+      "MORADOR": "Carregando moradores…",
+      "FUNCIONARIO": "Carregando funcionários…",
+      "TERCEIRO": "Carregando terceiros…"
+    },
+    "vazio": {
+      "MORADOR": "Nenhum morador cadastrado.",
+      "FUNCIONARIO": "Nenhum funcionário cadastrado.",
+      "TERCEIRO": "Nenhum terceiro cadastrado."
+    },
+    "selecione": "Selecione…",
+    "registrando": "Registrando…",
+    "confirmar": "Confirmar Retirada",
+    "erros": {
+      "carregarLista": "Não foi possível carregar a lista.",
+      "selecioneResponsavel": "Selecione o responsável.",
+      "responsavelInvalido": "Responsável inválido. Selecione novamente.",
+      "registrar": "Não foi possível registrar a retirada."
+    },
+    "toastRegistrada": "Retirada de \"{{nome}}\" registrada."
+  },
+  "cadastro": {
+    "titulo": "Nova Chave",
+    "local": "Local",
+    "selecioneLocal": "Selecione o local…",
+    "blocos": "Blocos",
+    "areasComuns": "Áreas Comuns",
+    "nome": "Nome da chave",
+    "nomePlaceholder": "Ex: Original, Cópia 1, Reserva…",
+    "descricao": "Descrição (opcional)",
+    "descricaoPlaceholder": "Observações adicionais…",
+    "cadastrando": "Cadastrando…",
+    "cadastrar": "Cadastrar Chave",
+    "erros": {
+      "selecioneLocal": "Selecione o local.",
+      "informeNome": "Informe o nome da chave.",
+      "cadastrar": "Não foi possível cadastrar a chave.",
+      "excluir": "Não foi possível excluir a chave.",
+      "devolucao": "Erro ao registrar devolução."
+    },
+    "toast": {
+      "cadastrada": "Chave cadastrada.",
+      "excluida": "Chave excluída.",
+      "devolucao": "Devolução de \"{{nome}}\" registrada."
+    },
+    "confirmarExclusao": "Excluir a chave \"{{nome}}\"?"
+  },
+  "lista": {
+    "titulo": "Chaves do Condomínio",
+    "vazio": "Nenhuma chave cadastrada.",
+    "tipoLocal": {
+      "bloco": "Bloco",
+      "areaComum": "Área Comum"
+    },
+    "status": {
+      "disponivel": "Disponível",
+      "retirada": "Retirada"
+    },
+    "com": "Com:",
+    "desde": "Desde:",
+    "retirar": "Retirar",
+    "excluir": "Excluir",
+    "registrando": "Registrando…",
+    "registrarDevolucao": "Registrar Devolução"
+  },
+  "historico": {
+    "selecionarChave": "Selecionar Chave",
+    "selecioneUmaChave": "Selecione uma chave…",
+    "semChave": {
+      "titulo": "Selecione uma chave acima",
+      "descricao": "O status atual e as movimentações serão exibidos aqui."
+    },
+    "disponivel": "Disponível",
+    "emPosse": "Em posse de {{nome}} ({{perfil}}) desde {{data}}",
+    "filtros": "Filtros",
+    "limparFiltros": "Limpar filtros",
+    "dataInicial": "Data inicial (opcional)",
+    "dataFinal": "Data final",
+    "quemRetirou": "Quem retirou",
+    "buscaParcial": "Busca parcial…",
+    "perfil": "Perfil",
+    "status": "Status",
+    "todos": "Todos",
+    "statusMov": {
+      "EM_ABERTO": "Em aberto",
+      "DEVOLVIDA": "Devolvida"
+    },
+    "aplicar": "Aplicar",
+    "carregando": "Carregando…",
+    "vazio": "Nenhuma movimentação encontrada para os filtros selecionados.",
+    "colunas": {
+      "quemRetirou": "Quem retirou",
+      "perfil": "Perfil",
+      "dataRetirada": "Data retirada",
+      "horaRetirada": "Hora ret.",
+      "dataDevolucao": "Data devolução",
+      "horaDevolucao": "Hora dev.",
+      "status": "Status",
+      "registradoPor": "Registrado por"
+    },
+    "devolver": "Devolver",
+    "erroCarregar": "Não foi possível carregar o histórico.",
+    "toastDevolucao": "Devolução registrada.",
+    "erroDevolucao": "Erro ao registrar devolução."
+  }
+}

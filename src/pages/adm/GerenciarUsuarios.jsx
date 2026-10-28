@@ -1,6 +1,6 @@
 // src/pages/adm/GerenciarUsuarios.jsx
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import api from "../../services/api";
 import { blocoApi, apartamentoApi, vagaApi } from "../../services/estruturasApi";
 import { userManagementApi } from "../../services/userManagementApi";
@@ -15,7 +15,6 @@ import {
   perfisCadastroDisponiveis,
 } from "../../utils/perfis";
 import { mascararCpf, validarCpf } from "../../utils/masks";
-import { SeletorCondominio } from "../../components/adm/SeletorCondominio";
 
 const PERFIS_EXIGEM_UNIDADE_FORM = new Set([
   PERFIS.MORADOR,
@@ -40,6 +39,7 @@ const STATUS_STYLE = {
 
 // ─────────────────────────────────────────────
 export function GerenciarUsuarios() {
+  const { t } = useTranslation("usuarios");
   const toast = useToast();
   const confirm = useConfirm();
   const { usuario: usuarioLogado } = useAuth();
@@ -53,12 +53,12 @@ export function GerenciarUsuarios() {
   useEffect(() => {
     Promise.all([
       api.get("/api/user-management/users").catch(() => api.get("/api/users")),
-      blocoApi.listar().catch(() => ({ data: [] })),
-      apartamentoApi.listar().catch(() => ({ data: [] })),
-      condominiosApi.listarAtivos().catch(() => ({ data: { condominios: [] } })),
+      blocoApi.listar(),
+      apartamentoApi.listar(),
+      condominiosApi.listar().catch(() => ({ data: { condominios: [] } })),
     ])
       .then(([usersRes, blocosRes, aptsRes, condsRes]) => {
-        setCondominios(condsRes.data.condominios || []);
+        setCondominios((condsRes.data.condominios || []).filter((c) => c.status === "active"));
         const mapStatus = (s) => {
           if (s === "active") return "ativo";
           if (s === "inactive") return "inativo";
@@ -127,7 +127,7 @@ export function GerenciarUsuarios() {
   try {
     const res = await api.put(`/api/users/${id}`, payload);
     const u = res.data.usuario;
-    if (!u) throw new Error("Resposta da API inválida");
+    if (!u) throw new Error(t("gerenciar.erros.respostaInvalida"));
 
     // Sincroniza unidadeId com o novo endpoint
     const usuarioAtual = usuarios.find((usr) => usr.id === id);
@@ -155,7 +155,7 @@ export function GerenciarUsuarios() {
     );
 
     setEditando(null);
-    toast.success("Usuário atualizado.");
+    toast.success(t("gerenciar.toast.atualizado"));
   } catch (err) {
     console.error("Erro ao salvar edição:", err);
     throw err;
@@ -192,14 +192,14 @@ export function GerenciarUsuarios() {
       setCriando(false);
       if (res.data.emailEnviado === false) {
         toast.warning(
-          res.data.avisoEmail || res.data.mensagem || "Convite criado, mas o e-mail não pôde ser enviado.",
-          { detalhe: `Código do convite: ${c.codigo}` },
+          res.data.avisoEmail || res.data.mensagem || t("gerenciar.toast.conviteCriadoSemEmail"),
+          { detalhe: t("gerenciar.toast.codigoConvite", { codigo: c.codigo }) },
         );
       } else {
-        toast.success(res.data.mensagem || "Convite enviado com sucesso.");
+        toast.success(res.data.mensagem || t("gerenciar.toast.conviteEnviado"));
       }
     } catch (err) {
-      toast.error(err.response?.data?.mensagem || "Erro ao enviar convite.");
+      toast.error(err.response?.data?.mensagem || t("gerenciar.toast.erroEnviarConvite"));
     }
   }
 
@@ -215,22 +215,22 @@ export function GerenciarUsuarios() {
       );
       if (res.data.emailEnviado === false) {
         toast.warning(
-          res.data.avisoEmail || res.data.mensagem || "Convite reenviado, mas o e-mail não pôde ser enviado.",
-          { detalhe: `Código do convite: ${res.data.convite?.codigo || "—"}` },
+          res.data.avisoEmail || res.data.mensagem || t("gerenciar.toast.conviteReenviadoSemEmail"),
+          { detalhe: t("gerenciar.toast.codigoConvite", { codigo: res.data.convite?.codigo || "—" }) },
         );
       } else {
-        toast.success(res.data.mensagem || "Convite reenviado com sucesso.");
+        toast.success(res.data.mensagem || t("gerenciar.toast.conviteReenviado"));
       }
     } catch (err) {
-      toast.error(err.response?.data?.mensagem || "Erro ao reenviar convite.");
+      toast.error(err.response?.data?.mensagem || t("gerenciar.toast.erroReenviarConvite"));
     }
   }
 
   async function desativarUsuario(userId) {
     const ok = await confirm({
-      titulo: "Desativar usuário",
-      mensagem: "Esta ação revoga o acesso imediatamente. Deseja continuar?",
-      confirmarTexto: "Desativar",
+      titulo: t("gerenciar.confirmarDesativar.titulo"),
+      mensagem: t("gerenciar.confirmarDesativar.mensagem"),
+      confirmarTexto: t("gerenciar.acoes.desativar"),
       variante: "danger",
     });
     if (!ok) return;
@@ -239,31 +239,31 @@ export function GerenciarUsuarios() {
       setUsuarios((us) =>
         us.map((u) => (u.id === userId ? { ...u, status: "inativo" } : u)),
       );
-      toast.success(res.data.mensagem || "Usuário desativado.");
+      toast.success(res.data.mensagem || t("gerenciar.toast.desativado"));
     } catch (err) {
-      toast.error(err.response?.data?.mensagem || "Erro ao desativar usuário.");
+      toast.error(err.response?.data?.mensagem || t("gerenciar.toast.erroDesativar"));
     }
   }
 
   return (
-    <div className="min-h-screen w-full pt-4 pb-20 px-4 sm:px-6">
+    <div className="min-h-screen w-full pt-4 pb-20 px-6">
       <div className="max-w-6xl mx-auto space-y-8">
         {/* Header */}
         <header className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
             <p className="text-on-surface-variant text-xs font-semibold uppercase tracking-widest mb-1">
-              Painel Administrativo
+              {t("gerenciar.cabecalho.painel")}
             </p>
-            <h1 className="font-headline text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-on-surface">
-              Gerenciar{" "}
+            <h1 className="font-headline text-4xl font-extrabold tracking-tight text-on-surface">
+              {t("gerenciar.cabecalho.gerenciar")}{" "}
               <span className="bg-gradient-to-r from-primary to-tertiary bg-clip-text text-transparent">
-                Usuários
+                {t("gerenciar.cabecalho.usuarios")}
               </span>
             </h1>
           </div>
 
           {/* Botão + Stats */}
-          <div className="flex flex-wrap items-center gap-4 w-full md:w-auto md:shrink-0">
+          <div className="flex items-center gap-4 shrink-0 flex-wrap">
             {aba === "gerenciamento" && (
               <button
                 onClick={() => {
@@ -281,33 +281,33 @@ export function GerenciarUsuarios() {
                   name={criando ? "close" : "person_add"}
                   className="text-xl"
                 />
-                {criando ? "Cancelar" : "Novo Usuário"}
+                {criando ? t("comum:acoes.cancelar") : t("gerenciar.novoUsuario")}
               </button>
             )}
 
             <div className="flex gap-3">
-              <div className="glass-panel rounded-2xl px-4 sm:px-5 py-3 text-center flex-1 sm:flex-none min-w-[92px]">
+              <div className="glass-panel rounded-2xl px-5 py-3 text-center">
                 <p className="text-2xl font-headline font-bold text-on-surface">
                   {usuarios.length}
                 </p>
                 <p className="text-on-surface-variant text-xs uppercase tracking-wider">
-                  Total
+                  {t("gerenciar.resumo.total")}
                 </p>
               </div>
-              <div className="glass-panel rounded-2xl px-4 sm:px-5 py-3 text-center flex-1 sm:flex-none min-w-[92px]">
+              <div className="glass-panel rounded-2xl px-5 py-3 text-center">
                 <p className="text-2xl font-headline font-bold text-primary">
                   {usuarios.filter((u) => u.status === "ativo").length}
                 </p>
                 <p className="text-on-surface-variant text-xs uppercase tracking-wider">
-                  Ativos
+                  {t("gerenciar.resumo.ativos")}
                 </p>
               </div>
-              <div className="glass-panel rounded-2xl px-4 sm:px-5 py-3 text-center flex-1 sm:flex-none min-w-[92px]">
+              <div className="glass-panel rounded-2xl px-5 py-3 text-center">
                 <p className="text-2xl font-headline font-bold text-secondary">
                   {usuarios.filter((u) => u.status === "pendente").length}
                 </p>
                 <p className="text-on-surface-variant text-xs uppercase tracking-wider">
-                  Pendentes
+                  {t("gerenciar.resumo.pendentes")}
                 </p>
               </div>
             </div>
@@ -315,14 +315,14 @@ export function GerenciarUsuarios() {
         </header>
 
         {/* Sub-navbar de abas */}
-        <div className="glass-panel rounded-2xl p-1.5 flex flex-wrap gap-1 w-full sm:w-fit">
+        <div className="glass-panel rounded-2xl p-1.5 flex gap-1 w-fit">
           {[
             {
               id: "gerenciamento",
-              label: "Gerenciamento",
+              rotuloKey: "gerenciar.abas.gerenciamento",
               icon: "manage_accounts",
             },
-            { id: "financeiro", label: "Financeiro", icon: "payments" },
+            { id: "financeiro", rotuloKey: "gerenciar.abas.financeiro", icon: "payments" },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -330,14 +330,14 @@ export function GerenciarUsuarios() {
                 setAba(tab.id);
                 setCriando(false);
               }}
-              className={`flex items-center gap-2 px-3 sm:px-5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 cursor-pointer ${
+              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 cursor-pointer ${
                 aba === tab.id
                   ? "bg-primary/15 text-primary"
                   : "text-on-surface-variant hover:text-on-surface hover:bg-veu/5"
               }`}
             >
               <Icone name={tab.icon} className="text-lg" />
-              {tab.label}
+              {t(tab.rotuloKey)}
             </button>
           ))}
         </div>
@@ -346,13 +346,13 @@ export function GerenciarUsuarios() {
         {aba === "gerenciamento" && (
           <>
             {criando && (
-              <div className="glass-panel rounded-3xl p-4 sm:p-6 lg:p-8 border border-primary/15">
+              <div className="glass-panel rounded-3xl p-6 lg:p-8 border border-primary/15">
                 <div className="flex items-center gap-3 mb-6">
-                  <div className="w-10 h-10 shrink-0 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
                     <Icone name="person_add" className="text-primary" />
                   </div>
                   <h2 className="font-headline text-xl font-bold text-on-surface">
-                    Novo Usuário
+                    {t("gerenciar.novoUsuario")}
                   </h2>
                 </div>
                 <FormNovoUsuario
@@ -373,7 +373,7 @@ export function GerenciarUsuarios() {
             <div className="max-w-md">
               <Campo
                 id="busca"
-                placeholder="Buscar por nome, e-mail, bloco ou apt..."
+                placeholder={t("gerenciar.buscaPlaceholder")}
                 icon="search"
                 value={busca}
                 onChange={(e) => setBusca(e.target.value)}
@@ -383,8 +383,8 @@ export function GerenciarUsuarios() {
             {/* Lista de usuários */}
             <div className="space-y-3">
               {filtrados.length === 0 && (
-                <div className="glass-panel rounded-3xl p-6 sm:p-10 text-center text-on-surface-variant">
-                  Nenhum usuário encontrado.
+                <div className="glass-panel rounded-3xl p-10 text-center text-on-surface-variant">
+                  {t("gerenciar.vazio")}
                 </div>
               )}
 
@@ -396,7 +396,7 @@ export function GerenciarUsuarios() {
                   {/* Linha principal */}
                   <button
                     onClick={() => toggleExpandir(usuario.id)}
-                    className="w-full flex items-center gap-3 sm:gap-4 p-4 sm:p-5 text-left group hover:bg-veu/5 transition-all cursor-pointer"
+                    className="w-full flex items-center gap-4 p-5 text-left group hover:bg-veu/5 transition-all cursor-pointer"
                   >
                     <div className="w-11 h-11 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
                       <Icone name="person" className="text-primary" />
@@ -413,9 +413,9 @@ export function GerenciarUsuarios() {
 
                     <div className="hidden sm:flex gap-6 text-sm shrink-0">
                       {[
-                        { label: "Bloco", value: usuario.bloco || "—" },
-                        { label: "Apt", value: usuario.apartamento || "—" },
-                        { label: "Vaga", value: usuario.vaga ?? "—" },
+                        { label: t("gerenciar.colunas.bloco"), value: usuario.bloco || "—" },
+                        { label: t("gerenciar.colunas.apt"), value: usuario.apartamento || "—" },
+                        { label: t("gerenciar.colunas.vaga"), value: usuario.vaga ?? "—" },
                       ].map((col) => (
                         <div key={col.label} className="text-center">
                           <p className="text-on-surface-variant text-xs uppercase tracking-wider">
@@ -431,12 +431,12 @@ export function GerenciarUsuarios() {
                     <span
                       className={`shrink-0 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider ${STATUS_STYLE[usuario.status]}`}
                     >
-                      {usuario.status}
+                      {t(`gerenciar.status.${usuario.status}`, { defaultValue: usuario.status })}
                     </span>
 
                     {usuario.responsavelFinanceiro && usuario.tipo === "usuario" && (
                       <span className="shrink-0 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider bg-secondary/10 text-secondary">
-                        Financeiro
+                        {t("gerenciar.badgeFinanceiro")}
                       </span>
                     )}
 
@@ -448,7 +448,7 @@ export function GerenciarUsuarios() {
 
                   {/* Painel expandido */}
                   {expandido === usuario.id && (
-                    <div className="border-t border-outline-variant/15 px-4 sm:px-5 pb-6 pt-5">
+                    <div className="border-t border-outline-variant/15 px-5 pb-6 pt-5">
                       {editando === usuario.id ? (
                         <FormEdicao
                           usuario={usuario}
@@ -490,14 +490,15 @@ export function GerenciarUsuarios() {
 
 // ─────────────────────────────────────────────
 function SecaoCondominio() {
+  const { t } = useTranslation("usuarios");
   return (
-    <div className="glass-panel rounded-3xl p-6 sm:p-8 lg:p-10 text-center max-w-2xl mx-auto">
+    <div className="glass-panel rounded-3xl p-8 lg:p-10 text-center max-w-2xl mx-auto">
       <div className="w-14 h-14 rounded-2xl bg-secondary/10 flex items-center justify-center mx-auto mb-4">
         <Icone name="payments" className="text-secondary text-3xl" />
       </div>
-      <h2 className="font-headline text-lg font-bold text-on-surface mb-2">Financeiro</h2>
+      <h2 className="font-headline text-lg font-bold text-on-surface mb-2">{t("gerenciar.financeiro.titulo")}</h2>
       <p className="text-on-surface-variant text-sm leading-relaxed">
-        Valores de condomínio e status de pagamento serão carregados aqui após integração com o módulo de cobranças. Esta sprint não utiliza valores financeiros fictícios no código do frontend.
+        {t("gerenciar.financeiro.descricao")}
       </p>
     </div>
   );
@@ -505,21 +506,22 @@ function SecaoCondominio() {
 
 // ─────────────────────────────────────────────
 function DetalhesUsuario({ usuario, onEditar, onReenviar, onDesativar }) {
+  const { t } = useTranslation("usuarios");
   return (
     <div className="space-y-5">
       {usuario.perfil && (
         <p className="text-sm text-on-surface-variant">
-          Perfil: <strong className="text-on-surface">{labelPerfil(usuario.perfil)}</strong>
+          {t("gerenciar.detalhes.perfil")} <strong className="text-on-surface">{labelPerfil(usuario.perfil)}</strong>
           {usuario.responsavelFinanceiro && (
             <span className="ml-2 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-secondary/10 text-secondary">
-              Responsável financeiro
+              {t("gerenciar.detalhes.responsavelFinanceiro")}
             </span>
           )}
         </p>
       )}
       <div>
         <p className="text-xs font-semibold uppercase tracking-widest text-on-surface-variant mb-3">
-          Logins vinculados ao apartamento
+          {t("gerenciar.detalhes.loginsApartamento")}
         </p>
         <div className="flex flex-wrap gap-2">
           {usuario.logins.map((login) => (
@@ -537,23 +539,23 @@ function DetalhesUsuario({ usuario, onEditar, onReenviar, onDesativar }) {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
-          { label: "Bloco", value: usuario.bloco || "—", icon: "domain" },
+          { label: t("gerenciar.detalhes.bloco"), value: usuario.bloco || "—", icon: "domain" },
           {
-            label: "Apartamento",
+            label: t("gerenciar.detalhes.apartamento"),
             value: usuario.apartamento || "—",
             icon: "meeting_room",
           },
           {
-            label: "Vaga",
-            value: usuario.vaga ?? "Não vinculada",
+            label: t("gerenciar.detalhes.vaga"),
+            value: usuario.vaga ?? t("gerenciar.detalhes.vagaNaoVinculada"),
             icon: "local_parking",
           },
-          { label: "Status", value: usuario.status, icon: "verified_user" },
+          { label: t("gerenciar.detalhes.status"), value: t(`gerenciar.status.${usuario.status}`, { defaultValue: usuario.status }), icon: "verified_user" },
           ...(usuario.unidadeId
             ? [{
-                label: "Unidade ID",
+                label: t("gerenciar.detalhes.unidadeId"),
                 value: `${usuario.unidadeId.slice(0, 8)}…`,
                 icon: "fingerprint",
                 title: usuario.unidadeId,
@@ -584,7 +586,7 @@ function DetalhesUsuario({ usuario, onEditar, onReenviar, onDesativar }) {
             className="flex items-center gap-2 text-sm font-semibold text-secondary hover:underline cursor-pointer"
           >
             <Icone name="send" className="text-base" />
-            Reenviar convite
+            {t("gerenciar.acoes.reenviarConvite")}
           </button>
         )}
         {onDesativar && (
@@ -594,7 +596,7 @@ function DetalhesUsuario({ usuario, onEditar, onReenviar, onDesativar }) {
             className="flex items-center gap-2 text-sm font-semibold text-error hover:underline cursor-pointer"
           >
             <Icone name="person_off" className="text-base" />
-            Desativar
+            {t("gerenciar.acoes.desativar")}
           </button>
         )}
         {usuario.tipo !== "convite" && (
@@ -604,7 +606,7 @@ function DetalhesUsuario({ usuario, onEditar, onReenviar, onDesativar }) {
             className="flex items-center gap-2 text-sm font-semibold text-primary hover:underline cursor-pointer transition-colors"
           >
             <Icone name="edit" className="text-base" />
-            Editar vinculações
+            {t("gerenciar.acoes.editarVinculacoes")}
           </button>
         )}
       </div>
@@ -614,6 +616,7 @@ function DetalhesUsuario({ usuario, onEditar, onReenviar, onDesativar }) {
 
 // ─────────────────────────────────────────────
 function FormEdicao({ usuario, blocos, apartamentos, onSalvar, onCancelar }) {
+  const { t } = useTranslation("usuarios");
   const blocoInicial = blocos.find((b) => b.nome === usuario.bloco);
   const [blocoId, setBlocoId] = useState(blocoInicial?.id ?? "");
   const [aptId, setAptId] = useState(() => {
@@ -718,7 +721,7 @@ function FormEdicao({ usuario, blocos, apartamentos, onSalvar, onCancelar }) {
       usuario.vaga !== novaVaga;
 
     if (!houveMudanca) {
-      setErro("Nenhuma alteração foi realizada.");
+      setErro(t("gerenciar.edicao.semAlteracoes"));
       return;
     }
 
@@ -734,15 +737,15 @@ function FormEdicao({ usuario, blocos, apartamentos, onSalvar, onCancelar }) {
   } catch (err) {
     console.error("ERRO AO SALVAR:", err);
 
-    let mensagem = "Erro ao salvar.";
+    let mensagem = t("gerenciar.edicao.erroSalvar");
 
     if (err.response) {
       mensagem =
         err.response.data?.mensagem ||
         err.response.data?.message ||
-        `Erro ${err.response.status}`;
+        t("gerenciar.edicao.erroStatus", { status: err.response.status });
     } else if (err.request) {
-      mensagem = "Servidor não respondeu.";
+      mensagem = t("gerenciar.edicao.semResposta");
     } else {
       mensagem = err.message;
     }
@@ -761,55 +764,55 @@ function FormEdicao({ usuario, blocos, apartamentos, onSalvar, onCancelar }) {
     <div className="space-y-5">
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="space-y-2">
-          <label className={labelCls}>Bloco</label>
+          <label className={labelCls}>{t("gerenciar.edicao.bloco")}</label>
           <select value={blocoId} onChange={(e) => handleBlocoChange(e.target.value)} className={selectCls}>
-            <option value="">— Sem vínculo —</option>
+            <option value="">{t("gerenciar.edicao.semVinculo")}</option>
             {blocos.map((b) => (
               <option key={b.id} value={b.id}>{b.nome}</option>
             ))}
           </select>
         </div>
         <div className="space-y-2">
-          <label className={labelCls}>Apartamento</label>
+          <label className={labelCls}>{t("gerenciar.edicao.apartamento")}</label>
           <select
             value={aptId}
             onChange={(e) => handleAptChange(e.target.value)}
             disabled={aptsFiltrados.length === 0}
             className={selectCls}
           >
-            <option value="">— Selecione —</option>
+            <option value="">{t("gerenciar.selecione")}</option>
             {aptsFiltrados.map((a) => (
-              <option key={a.id} value={a.id}>Apto {a.numero}{a.andar != null ? ` · ${a.andar}º andar` : ""}</option>
+              <option key={a.id} value={a.id}>{t("gerenciar.edicao.apto", { numero: a.numero })}{a.andar != null ? ` · ${t("gerenciar.edicao.andar", { andar: a.andar })}` : ""}</option>
             ))}
           </select>
           {blocoId && aptsFiltrados.length === 0 && (
-            <p className="text-xs text-error ml-1">Nenhum apartamento neste bloco</p>
+            <p className="text-xs text-error ml-1">{t("gerenciar.edicao.semApartamentos")}</p>
           )}
         </div>
         <div className="space-y-2">
-          <label className={labelCls}>Vaga</label>
+          <label className={labelCls}>{t("gerenciar.edicao.vaga")}</label>
           <select
             value={vagaId}
             onChange={(e) => setVagaId(e.target.value)}
             disabled={!aptId || vagas.length === 0}
             className={selectCls}
           >
-            <option value="">— Sem vaga —</option>
+            <option value="">{t("gerenciar.edicao.semVaga")}</option>
             {vagas.filter((v) => v.ativa || v.id === vagaId).map((v) => (
               <option key={v.id} value={v.id}>
-                Vaga {v.numero}{v.localizacao ? ` · ${v.localizacao}` : ""}
+                {t("gerenciar.edicao.vagaNumero", { numero: v.numero })}{v.localizacao ? ` · ${v.localizacao}` : ""}
               </option>
             ))}
           </select>
           {aptId && vagas.length === 0 && (
-            <p className="text-xs text-on-surface-variant ml-1">Nenhuma vaga neste apartamento</p>
+            <p className="text-xs text-on-surface-variant ml-1">{t("gerenciar.edicao.semVagas")}</p>
           )}
         </div>
       </div>
 
       <div className="space-y-2">
         <p className="text-xs font-semibold uppercase tracking-widest text-on-surface-variant ml-1">
-          Status do usuário
+          {t("gerenciar.edicao.statusUsuario")}
         </p>
         <div className="flex gap-2 flex-wrap">
           {["ativo", "pendente", "inativo"].map((s) => (
@@ -822,7 +825,7 @@ function FormEdicao({ usuario, blocos, apartamentos, onSalvar, onCancelar }) {
                   : "border-outline-variant/20 text-on-surface-variant hover:border-primary/30"
               }`}
             >
-              {s}
+              {t(`gerenciar.status.${s}`)}
             </button>
           ))}
         </div>
@@ -830,7 +833,7 @@ function FormEdicao({ usuario, blocos, apartamentos, onSalvar, onCancelar }) {
 
       <div className="space-y-3">
         <p className="text-xs font-semibold uppercase tracking-widest text-on-surface-variant ml-1">
-          Logins vinculados
+          {t("gerenciar.edicao.loginsVinculados")}
         </p>
         <div className="flex flex-wrap gap-2 mb-2">
           {form.logins.map((login) => (
@@ -857,7 +860,7 @@ function FormEdicao({ usuario, blocos, apartamentos, onSalvar, onCancelar }) {
           <div className="flex-1">
             <Campo
               id="novo-login"
-              placeholder="adicionar@email.com"
+              placeholder={t("gerenciar.edicao.novoLoginPlaceholder")}
               icon="add"
               value={form.novoLogin}
               onChange={(e) => set("novoLogin", e.target.value)}
@@ -870,7 +873,7 @@ function FormEdicao({ usuario, blocos, apartamentos, onSalvar, onCancelar }) {
             onClick={adicionarLogin}
             className="shrink-0 px-4 rounded-xl border border-primary/30 text-primary hover:bg-primary/10 transition-all text-sm font-semibold cursor-pointer"
           >
-            Adicionar
+            {t("comum:acoes.adicionar")}
           </button>
         </div>
       </div>
@@ -885,14 +888,14 @@ function FormEdicao({ usuario, blocos, apartamentos, onSalvar, onCancelar }) {
           onClick={handleSalvar}
           disabled={salvando}
         >
-          {salvando ? "Salvando…" : "Salvar Alterações"}
+          {salvando ? t("comum:acoes.salvando") : t("gerenciar.edicao.salvarAlteracoes")}
           <Icone name="check" className="text-xl" />
         </Botao>
         <button
           onClick={onCancelar}
           className="flex-1 py-3 rounded-xl border border-outline-variant/30 text-on-surface-variant hover:text-on-surface transition-colors text-sm font-medium cursor-pointer"
         >
-          Cancelar
+          {t("comum:acoes.cancelar")}
         </button>
       </div>
     </div>
@@ -901,6 +904,7 @@ function FormEdicao({ usuario, blocos, apartamentos, onSalvar, onCancelar }) {
 
 // ─────────────────────────────────────────────
 function FormNovoUsuario({ blocos, apartamentos, condominios, perfilAtor, condominioIdAtor, onSalvar, onCancelar }) {
+  const { t } = useTranslation("usuarios");
   const perfisOpcoes = perfisCadastroDisponiveis(perfilAtor).filter(
     (p) => p.value !== PERFIS.CONVIDADO,
   );
@@ -915,11 +919,7 @@ function FormNovoUsuario({ blocos, apartamentos, condominios, perfilAtor, condom
     cpfPrecadastro: "",
   });
   const [erroCpf, setErroCpf] = useState("");
-  // Quando precisaSelecionarCondominio, o condominioId do ator não restringe a seleção —
-  // deixamos vazio e o useEffect abaixo preenche conforme a quantidade de condomínios ativos.
-  const [condominioId, setCondominioId] = useState(() =>
-    precisaSelecionarCondominio ? "" : (condominioIdAtor || ""),
-  );
+  const [condominioId, setCondominioId] = useState(() => condominioIdAtor || "");
   const [blocoId, setBlocoId] = useState("");
   const [aptId, setAptId] = useState("");
 
@@ -930,13 +930,11 @@ function FormNovoUsuario({ blocos, apartamentos, condominios, perfilAtor, condom
     }
   }, [perfilAtor]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Pré-seleciona automaticamente quando há exatamente 1 condomínio ativo;
-  // com 0 ou ≥2, limpa a seleção (RN-03).
+  // Pré-seleciona primeiro condomínio disponível para admins sem condomínio próprio
   useEffect(() => {
-    if (!precisaSelecionarCondominio) return;
-    setCondominioId(condominios.length === 1 ? condominios[0].id : "");
-    setBlocoId("");
-    setAptId("");
+    if (precisaSelecionarCondominio && !condominioId && condominios.length > 0) {
+      setCondominioId(condominios[0].id);
+    }
   }, [condominios]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Blocos filtrados pelo condomínio selecionado
@@ -968,7 +966,7 @@ function FormNovoUsuario({ blocos, apartamentos, condominios, perfilAtor, condom
     if (exigeUnidade && !aptId) return;
 
     if (perfilUnidade && !validarCpf(form.cpfPrecadastro)) {
-      setErroCpf("CPF inválido. Verifique o número informado.");
+      setErroCpf(t("gerenciar.novo.cpfInvalido"));
       return;
     }
 
@@ -988,44 +986,29 @@ function FormNovoUsuario({ blocos, apartamentos, condominios, perfilAtor, condom
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
       <p className="text-xs text-on-surface-variant">
-        Convidados (Guest) devem ser cadastrados no perfil da unidade — sem convite por e-mail.
+        {t("gerenciar.novo.avisoConvidados")}
       </p>
 
       {precisaSelecionarCondominio ? (
-        condominios.length === 0 ? (
-          /* RN-04: nenhum condomínio ativo disponível */
-          <div className="flex flex-col gap-3 px-4 py-4 rounded-xl bg-error/5 border border-error/20">
-            <div className="flex items-start gap-2">
-              <Icone name="error" className="text-error text-base shrink-0 mt-0.5" />
-              <p className="text-sm text-error font-medium">
-                Não há condomínios ativos disponíveis. Ative ou cadastre um condomínio antes de criar usuários.
-              </p>
-            </div>
-            {perfilAtor === PERFIS.ADMIN_GERAL && (
-              <Link
-                to="/adm/condominios"
-                className="self-start text-xs font-semibold text-primary hover:underline"
-              >
-                Gerenciar condomínios →
-              </Link>
-            )}
-          </div>
-        ) : (
-          <div className="space-y-2">
-            <label className={labelCls}>Condomínio *</label>
-            <SeletorCondominio
-              condominios={condominios}
-              value={condominioId}
-              onChange={(id) => { setCondominioId(id); setBlocoId(""); setAptId(""); }}
-              selectClassName={selectCls}
-            />
-          </div>
-        )
+        <div className="space-y-2">
+          <label className={labelCls}>{t("gerenciar.novo.condominio")}</label>
+          <select
+            value={condominioId}
+            onChange={(e) => { setCondominioId(e.target.value); setBlocoId(""); setAptId(""); }}
+            required
+            className={selectCls}
+          >
+            <option value="">{t("gerenciar.novo.selecioneCondominio")}</option>
+            {condominios.map((c) => (
+              <option key={c.id} value={c.id}>{c.nome}</option>
+            ))}
+          </select>
+        </div>
       ) : (
         <div className="flex items-center gap-2 px-4 py-3 rounded-xl bg-surface-container-highest/30">
           <Icone name="domain" className="text-primary text-base shrink-0" />
           <span className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant mr-1">
-            Condomínio:
+            {t("gerenciar.novo.condominioRotulo")}
           </span>
           <span className="text-sm font-semibold text-on-surface">
             {condominioDoAtor?.nome ?? condominioIdAtor}
@@ -1036,15 +1019,15 @@ function FormNovoUsuario({ blocos, apartamentos, condominios, perfilAtor, condom
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <Campo
           id="novo-email"
-          label="E-mail *"
+          label={t("gerenciar.novo.email")}
           type="email"
-          placeholder="usuario@mora.com"
+          placeholder={t("gerenciar.novo.emailPlaceholder")}
           icon="mail"
           value={form.email}
           onChange={(e) => set("email", e.target.value)}
         />
         <div className="space-y-2">
-          <label className={labelCls}>Perfil *</label>
+          <label className={labelCls}>{t("gerenciar.novo.perfil")}</label>
           <select
             value={form.perfil}
             onChange={(e) => set("perfil", e.target.value)}
@@ -1062,15 +1045,15 @@ function FormNovoUsuario({ blocos, apartamentos, condominios, perfilAtor, condom
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Campo
             id="novo-nome-precad"
-            label="Nome completo *"
-            placeholder="Nome do convidado"
+            label={t("gerenciar.novo.nomeCompleto")}
+            placeholder={t("gerenciar.novo.nomePlaceholder")}
             icon="person"
             value={form.nomePrecadastro}
             onChange={(e) => set("nomePrecadastro", e.target.value)}
           />
           <Campo
             id="novo-cpf-precad"
-            label="CPF *"
+            label={t("gerenciar.novo.cpf")}
             placeholder="000.000.000-00"
             icon="badge"
             inputMode="numeric"
@@ -1084,23 +1067,23 @@ function FormNovoUsuario({ blocos, apartamentos, condominios, perfilAtor, condom
       {exigeUnidade && (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <label className={labelCls}>Bloco *</label>
+            <label className={labelCls}>{t("gerenciar.novo.bloco")}</label>
             <select value={blocoId} onChange={(e) => { setBlocoId(e.target.value); setAptId(""); }} required className={selectCls}>
-              <option value="">— Selecione —</option>
+              <option value="">{t("gerenciar.selecione")}</option>
               {blocosFiltrados.map((b) => (
                 <option key={b.id} value={b.id}>{b.nome}</option>
               ))}
             </select>
             {condominioId && blocosFiltrados.length === 0 && (
-              <p className="text-xs text-on-surface-variant ml-1">Nenhum bloco cadastrado para este condomínio</p>
+              <p className="text-xs text-on-surface-variant ml-1">{t("gerenciar.novo.semBlocos")}</p>
             )}
           </div>
           <div className="space-y-2">
-            <label className={labelCls}>Apartamento *</label>
+            <label className={labelCls}>{t("gerenciar.novo.apartamento")}</label>
             <select value={aptId} onChange={(e) => setAptId(e.target.value)} required disabled={aptsFiltrados.length === 0} className={selectCls}>
-              <option value="">— Selecione —</option>
+              <option value="">{t("gerenciar.selecione")}</option>
               {aptsFiltrados.map((a) => (
-                <option key={a.id} value={a.id}>Apto {a.numero}</option>
+                <option key={a.id} value={a.id}>{t("gerenciar.edicao.apto", { numero: a.numero })}</option>
               ))}
             </select>
           </div>
@@ -1110,13 +1093,13 @@ function FormNovoUsuario({ blocos, apartamentos, condominios, perfilAtor, condom
       <div className="flex items-start gap-2 px-4 py-3 rounded-xl bg-surface-container-highest/30 text-on-surface-variant text-xs">
         <Icone name="info" className="text-primary text-base shrink-0 mt-0.5" />
         <span>
-          Um código de convite será enviado por e-mail (validade 48h). O usuário ativa a conta informando o código.
+          {t("gerenciar.novo.infoConvite")}
         </span>
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-3 pt-1">
-        <Botao type="submit" disabled={precisaSelecionarCondominio && condominios.length === 0}>
-          Enviar convite
+      <div className="flex gap-3 pt-1">
+        <Botao type="submit">
+          {t("gerenciar.novo.enviarConvite")}
           <Icone name="send" className="text-xl" />
         </Botao>
         <button
@@ -1124,7 +1107,7 @@ function FormNovoUsuario({ blocos, apartamentos, condominios, perfilAtor, condom
           onClick={onCancelar}
           className="flex-1 py-3 rounded-xl border border-outline-variant/30 text-on-surface-variant hover:text-on-surface transition-colors text-sm font-medium cursor-pointer"
         >
-          Cancelar
+          {t("comum:acoes.cancelar")}
         </button>
       </div>
     </form>

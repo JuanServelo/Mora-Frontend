@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Icone } from "../icones/Icone";
 
 /**
@@ -7,6 +8,7 @@ import { Icone } from "../icones/Icone";
  * e sem altura explícita o gráfico renderiza com altura zero.
  */
 export function CartaoGrafico({ titulo, descricao, vazio, mensagemVazio, altura = 300, children }) {
+  const { t } = useTranslation("paineis");
   return (
     <div className="glass-panel rounded-3xl p-6">
       <div className="mb-4">
@@ -20,7 +22,7 @@ export function CartaoGrafico({ titulo, descricao, vazio, mensagemVazio, altura 
           style={{ height: altura }}
         >
           <Icone name="bar_chart" className="text-3xl opacity-40" />
-          <p className="text-sm">{mensagemVazio ?? "Sem dados suficientes ainda."}</p>
+          <p className="text-sm">{mensagemVazio ?? t("grafico.semDados")}</p>
         </div>
       ) : (
         <div style={{ height: altura }}>{children}</div>

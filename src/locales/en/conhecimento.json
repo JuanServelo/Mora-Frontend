@@ -1,0 +1,140 @@
+{
+  "cabecalho": {
+    "painelAdministrativo": "Admin Panel",
+    "baseDe": "Knowledge",
+    "conhecimento": "Base",
+    "subtitulo": "Manage the knowledge base (FAQ) and the condominium announcements."
+  },
+  "abas": {
+    "conhecimento": "Knowledge Base",
+    "avisos": "Announcements",
+    "perguntas": "Residents' questions"
+  },
+  "categorias": {
+    "regra": "Rule",
+    "manual": "Manual",
+    "tutorial": "Tutorial",
+    "orientacaoConvivencia": "Community Guidelines",
+    "faq": "FAQ"
+  },
+  "artigos": {
+    "novo": "New Article",
+    "editar": "Edit Article",
+    "confirmarExclusao": "Are you sure you want to delete this article?",
+    "form": {
+      "titulo": "Title",
+      "tituloPlaceholder": "e.g. Pool usage rules",
+      "categoria": "Category",
+      "autor": "Author",
+      "autorPlaceholder": "Author name (optional)",
+      "conteudo": "Content",
+      "conteudoPlaceholder": "Write the article content...",
+      "publicar": "Publish article (visible to all residents)",
+      "salvarAlteracoes": "Save changes",
+      "criar": "Create article"
+    },
+    "resumo": {
+      "total": "Total articles",
+      "publicados": "Published",
+      "rascunhos": "Drafts",
+      "revisao": "Need review"
+    },
+    "buscarPlaceholder": "Search by title or author...",
+    "todasCategorias": "All categories",
+    "por": "By {{autor}} · ",
+    "status": {
+      "publicado": "Published",
+      "rascunho": "Draft"
+    },
+    "conteudo": "Content",
+    "ultimaAtualizacao": "Last updated: {{data}}",
+    "publicar": "Publish",
+    "despublicar": "Unpublish",
+    "vazio": "No articles found.",
+    "carregando": "Loading articles...",
+    "votos": {
+      "alerta": "More residents said it didn't help: worth revising the text",
+      "titulo": "Residents' ratings"
+    }
+  },
+  "faq": {
+    "titulo": "Frequently Asked Questions",
+    "subtitulo": "Find answers to the most common questions about the condominium.",
+    "buscarPlaceholder": "Search questions...",
+    "todas": "All",
+    "erroCarregar": "Could not load the articles.",
+    "semResultadoBusca": "No results for your search.",
+    "vazio": "No articles published yet.",
+    "enviarPergunta": "Send question",
+    "perguntarAdministracao": "Ask the management",
+    "naoEncontrou": "Didn't find what you were looking for? Send your question to the management.",
+    "abas": {
+      "faq": "Frequently asked questions",
+      "minhas": "My questions"
+    },
+    "avaliacao": {
+      "pergunta": "Was this answer helpful?",
+      "obrigado": "Thanks for the feedback!",
+      "quePena": "Sorry about that. Tell the management what was missing.",
+      "enviarDuvida": "Send my question",
+      "prefixo": "About \"{{titulo}}\": ",
+      "erroRegistrar": "Could not save your rating."
+    },
+    "modal": {
+      "descricao": "Your question goes to the condominium management. The answer will show up in <strong>My questions</strong>.",
+      "suaDuvida": "Your question",
+      "placeholder": "e.g. Can I use the barbecue area on weekdays?",
+      "assunto": "Subject (optional)",
+      "naoSei": "Not sure / other",
+      "erroMinimo": "Write your question with at least 10 characters.",
+      "erroEnviar": "Could not send the question."
+    },
+    "minhas": {
+      "vazio": "You haven't sent any questions yet.",
+      "enviadaEm": "Sent on {{data}}",
+      "aguardando": "Awaiting answer",
+      "enviada": "Question sent! The answer will show up in My questions."
+    },
+    "excluir": {
+      "titulo": "Delete question",
+      "mensagem": "This question hasn't been answered yet. Do you really want to delete it?",
+      "confirmar": "Yes, delete",
+      "erro": "Could not delete the question."
+    }
+  },
+  "perguntas": {
+    "erroCarregar": "Could not load the questions.",
+    "filtros": {
+      "pendente": "Awaiting answer",
+      "respondidas": "Answered"
+    },
+    "morador": "Resident",
+    "status": {
+      "respondida": "Answered",
+      "aguardando": "Pending"
+    },
+    "publicadaNaFaq": "Published in the FAQ",
+    "responder": "Reply",
+    "vazioPendentes": "No questions awaiting an answer.",
+    "vazio": "No questions found.",
+    "carregando": "Loading questions...",
+    "descartar": {
+      "botao": "Discard",
+      "titulo": "Discard question",
+      "mensagem": "The question will be deleted and the resident will not get an answer. Do you want to continue?",
+      "confirmar": "Yes, discard",
+      "erro": "Could not discard the question."
+    },
+    "resposta": {
+      "label": "Answer",
+      "placeholder": "Write the answer for the resident...",
+      "publicar": "Also publish in the FAQ (visible to all residents)",
+      "tituloArtigo": "Article title",
+      "enviando": "Sending...",
+      "enviar": "Send answer",
+      "sucessoPublicada": "Answer sent and published in the FAQ.",
+      "sucesso": "Answer sent to the resident.",
+      "erro": "Could not send the answer."
+    }
+  }
+}

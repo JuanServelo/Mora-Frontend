@@ -1,0 +1,13 @@
+{
+  "tema": {
+    "titulo": "Tema",
+    "descricao": "A escolha vale só neste aparelho e neste navegador — não viaja com a sua conta.",
+    "agora": "agora: {{tema}}",
+    "nomes": { "claro": "claro", "escuro": "escuro" },
+    "opcoes": {
+      "claro": { "titulo": "Claro", "descricao": "Fundo claro, para ambientes bem iluminados" },
+      "escuro": { "titulo": "Escuro", "descricao": "Fundo escuro, mais confortável à noite" },
+      "sistema": { "titulo": "Seguir o sistema", "descricao": "Acompanha a configuração do seu aparelho, e muda junto" }
+    }
+  }
+}

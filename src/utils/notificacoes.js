@@ -1,3 +1,5 @@
+import i18n, { idiomaAtual } from "../i18n";
+
 /**
  * Aparência e destino de cada tipo de notificação.
  *
@@ -23,30 +25,36 @@ const TIPOS = {
     cor: "bg-error/15 text-error",
     destino: () => "/financeiro",
   },
+  MULTA_APLICADA: {
+    icone: "gavel",
+    cor: "bg-error/15 text-error",
+    destino: () => "/financeiro?aba=multas",
+  },
+  // A decisão sobre o recurso: deferido ou indeferido, o morador confere na aba.
+  MULTA_JULGADA: {
+    icone: "balance",
+    cor: "bg-primary/15 text-primary",
+    destino: () => "/financeiro?aba=multas",
+  },
 
   // ── comunicacao ─────────────────────────────────────────
-  MENSAGEM_RECEBIDA: {
+  // Os nomes são os do enum `TipoNotificacao` do comunicacao-service.
+  CHAT: {
     icone: "forum",
     cor: "bg-tertiary/15 text-tertiary",
-    // O destino sai de `dados`, não do tipo: a notificação leva de volta à
-    // conversa que a originou.
-    destino: (dados) => (dados?.conversaId ? `/conversas/${dados.conversaId}` : "/conversas"),
+    // O destino sai da notificação, não do tipo: ela leva de volta à conversa
+    // que a originou, cujo id o serviço grava em `referenciaId`.
+    destino: (n) => (n?.referenciaId ? `/conversas/${n.referenciaId}` : "/conversas"),
   },
-  AVISO_PUBLICADO: {
-    icone: "campaign",
-    cor: "bg-primary/15 text-primary",
-    destino: () => "/avisos",
-  },
-
-  // ── tipos do enum do serviço ────────────────────────────
-  // `TipoNotificacao` no comunicacao-service. Sem eles a notificação cai no
-  // padrão e vira um "info" cinza sem destino — o usuário vê que chegou algo
-  // e não tem para onde clicar.
   AVISO: {
     icone: "campaign",
     cor: "bg-primary/15 text-primary",
     destino: () => "/avisos",
   },
+
+  // ── portaria ────────────────────────────────────────────
+  // Publicadas pelo portaria-service. Sem entrada aqui elas caem no PADRÃO,
+  // que não leva a lugar nenhum — a pessoa é avisada e fica sem o que fazer.
   ENTREGA: {
     icone: "inventory_2",
     cor: "bg-secondary/15 text-secondary",
@@ -54,28 +62,40 @@ const TIPOS = {
   },
   RESERVA: {
     icone: "event_available",
-    cor: "bg-tertiary/15 text-tertiary",
-    destino: () => "/espacos",
-  },
-  ALUGUEL_VAGA: {
-    icone: "directions_car",
-    cor: "bg-secondary/15 text-secondary",
-    destino: () => "/meus-veiculos",
+    cor: "bg-primary/15 text-primary",
+    // O síndico recebe com `acao: "aprovar"` e precisa cair na fila de
+    // decisão; o morador cai na agenda, que é onde a reserva dele aparece.
+    destino: (n) =>
+      n?.dados?.acao === "aprovar" ? "/espacos?aba=aprovacoes" : "/espacos",
   },
   PRE_AUTORIZACAO: {
-    icone: "group_add",
+    icone: "how_to_reg",
     cor: "bg-tertiary/15 text-tertiary",
     destino: () => "/meus-convidados",
   },
-  CHAT: {
-    icone: "forum",
-    cor: "bg-tertiary/15 text-tertiary",
-    destino: (dados) => (dados?.conversaId ? `/conversas/${dados.conversaId}` : "/conversas"),
+  ALUGUEL_VAGA: {
+    icone: "local_parking",
+    cor: "bg-secondary/15 text-secondary",
+    destino: () => "/meus-veiculos",
   },
-  SISTEMA: {
-    icone: "info",
-    cor: "bg-veu/10 text-on-surface-variant",
-    destino: () => null,
+
+  // ── ocorrencias ─────────────────────────────────────────
+  // Chegam pela fila: o ocorrencias-service publica, o comunicacao grava.
+  OCORRENCIA_RESPONDIDA: {
+    icone: "report",
+    cor: "bg-primary/15 text-primary",
+    destino: () => "/reclamacoes",
+  },
+  ORDEM_SERVICO_ABERTA: {
+    icone: "construction",
+    cor: "bg-tertiary/15 text-tertiary",
+    destino: () => "/reclamacoes",
+  },
+  // Esta vai para o síndico que abriu a OS.
+  ORDEM_SERVICO_ATRASADA: {
+    icone: "alarm",
+    cor: "bg-error/15 text-error",
+    destino: (n) => (n?.referenciaId ? `/adm/ordens-servico?os=${n.referenciaId}` : "/adm/ordens-servico"),
   },
 };
 
@@ -91,7 +111,7 @@ export function configDaNotificacao(n) {
   return {
     icone: cfg.icone,
     cor: cfg.cor,
-    destino: cfg.destino(n?.dados),
+    destino: cfg.destino(n),
   };
 }
 
@@ -100,20 +120,23 @@ export function tempoRelativo(iso) {
   if (!iso) return "";
   const diff = Date.now() - new Date(iso).getTime();
   const min = Math.floor(diff / 60000);
-  if (min < 1) return "agora mesmo";
-  if (min < 60) return `${min} min atrás`;
+  if (min < 1) return i18n.t("comum:tempo.agora");
+  if (min < 60) return i18n.t("comum:tempo.minutosAtras", { n: min });
   const h = Math.floor(min / 60);
-  if (h < 24) return `${h}h atrás`;
+  if (h < 24) return i18n.t("comum:tempo.horasAtras", { n: h });
   const d = Math.floor(h / 24);
-  if (d < 7) return `${d}d atrás`;
-  return new Date(iso).toLocaleDateString("pt-BR");
+  if (d < 7) return i18n.t("comum:tempo.diasAtras", { n: d });
+  return new Date(iso).toLocaleDateString(idiomaAtual());
 }
 
 /** Rótulo do serviço que publicou, para a tela agrupar ou etiquetar. */
-export const ROTULO_ORIGEM = {
-  financeiro: "Financeiro",
-  comunicacao: "Mensagens",
-  portaria: "Portaria",
-  gestao: "Gestão",
-  plataforma: "Mora",
-};
+export const ROTULO_ORIGEM = Object.defineProperties(
+  {},
+  Object.fromEntries(
+    ["financeiro", "comunicacao", "portaria", "gestao", "ocorrencias", "plataforma"].map((origem) => [
+      origem,
+      // Getter: o rótulo sai no idioma em uso na hora da leitura.
+      { enumerable: true, get: () => i18n.t(`layout:origemNotificacao.${origem}`) },
+    ]),
+  ),
+);

@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { condominiosApi } from "../../services/condominiosApi";
 import { gestaoApi } from "../../services/gestaoApi";
-import { planApi } from "../../services/planApi";
 import { FormCondominio } from "../../components/adm/FormCondominio";
 import { CartaoKpi } from "../../components/cards/CartaoKpi";
 import { PainelPlanoCliente } from "../../components/adm/PainelPlanoCliente";
@@ -13,11 +13,10 @@ import { labelPerfil } from "../../utils/perfis";
 import { mascararCnpj, mascararTelefone } from "../../utils/masks";
 
 const ABAS = [
-  { id: "dados", label: "Dados", icon: "badge" },
-  { id: "plano", label: "Plano", icon: "workspace_premium" },
-  { id: "usuarios", label: "Usuários", icon: "group" },
-  { id: "assinatura", label: "Assinatura", icon: "card_membership" },
-  { id: "resumo", label: "Resumo", icon: "analytics" },
+  { id: "dados", rotuloKey: "detalhe.abas.dados", icon: "badge" },
+  { id: "plano", rotuloKey: "detalhe.abas.plano", icon: "workspace_premium" },
+  { id: "usuarios", rotuloKey: "detalhe.abas.usuarios", icon: "group" },
+  { id: "resumo", rotuloKey: "detalhe.abas.resumo", icon: "analytics" },
 ];
 
 const STATUS_STYLE = {
@@ -26,6 +25,7 @@ const STATUS_STYLE = {
 };
 
 export function DetalheCondominio() {
+  const { t } = useTranslation("condominios");
   const { id } = useParams();
   const navigate = useNavigate();
   const toast = useToast();
@@ -34,10 +34,6 @@ export function DetalheCondominio() {
   const [condominio, setCondominio] = useState(null);
   const [resumo, setResumo] = useState(null);
   const [usuarios, setUsuarios] = useState([]);
-  const [assinatura, setAssinatura] = useState(null);
-  const [planos, setPlanos] = useState([]);
-  const [planoSelecionado, setPlanoSelecionado] = useState("");
-  const [carregandoAssinatura, setCarregandoAssinatura] = useState(false);
   const [aba, setAba] = useState("dados");
   const [editando, setEditando] = useState(false);
   const [carregando, setCarregando] = useState(true);
@@ -54,11 +50,11 @@ export function DetalheCondominio() {
       setCondominio(c.condominio ?? c);
       setResumo(r?.resumo ?? null);
     } catch {
-      setErro("Não foi possível carregar este cliente.");
+      setErro(t("detalhe.erros.carregar"));
     } finally {
       setCarregando(false);
     }
-  }, [id]);
+  }, [id, t]);
 
   useEffect(() => {
     carregar();
@@ -69,117 +65,28 @@ export function DetalheCondominio() {
     condominiosApi
       .listarUsuarios(id)
       .then((res) => setUsuarios(res.data.usuarios ?? []))
-      .catch(() => toast.error("Não foi possível carregar os usuários."));
-  }, [aba, id, usuarios.length, toast]);
-
-  useEffect(() => {
-    if (aba !== "assinatura") return;
-    async function carregarDadosAssinatura() {
-      setCarregandoAssinatura(true);
-      try {
-        try {
-          const resAssinatura = await planApi.buscarAssinatura(id);
-          setAssinatura(resAssinatura.data);
-        } catch (e) {
-          if (e.response?.status === 404 || e.response?.status === 204) {
-             setAssinatura(null);
-          } else {
-             console.error(e);
-             toast.error("Erro ao carregar assinatura.");
-          }
-        }
-        const resPlanos = await planApi.listar();
-        setPlanos(resPlanos.data || []);
-      } catch (e) {
-        console.error(e);
-        toast.error("Erro ao carregar planos disponíveis.");
-      } finally {
-        setCarregandoAssinatura(false);
-      }
-    }
-    carregarDadosAssinatura();
-  }, [aba, id, toast]);
-
-  async function ativarAssinatura() {
-    if (!planoSelecionado) {
-      toast.error("Selecione um plano.");
-      return;
-    }
-    const ok = await confirm({
-      titulo: "Ativar Assinatura",
-      mensagem: "Deseja ativar a assinatura deste plano para o condomínio?",
-      confirmarTexto: "Ativar",
-    });
-    if (!ok) return;
-
-    try {
-      const res = await planApi.criarAssinatura({
-        condominioId: id,
-        planId: Number(planoSelecionado),
-        startDate: new Date().toISOString().split('T')[0]
-      });
-      setAssinatura(res.data);
-      toast.success("Assinatura ativada com sucesso!");
-    } catch (e) {
-      toast.error(e.response?.data?.message || "Erro ao ativar assinatura.");
-    }
-  }
-
-  async function gerenciarAssinatura(acao) {
-    let fn, mensagem, toastMsg, confMsg;
-    if (acao === "suspender") {
-      fn = planApi.suspenderAssinatura;
-      mensagem = "Deseja suspender a assinatura? O acesso do condomínio será bloqueado.";
-      toastMsg = "Assinatura suspensa.";
-      confMsg = "Suspender";
-    } else if (acao === "cancelar") {
-      fn = planApi.cancelarAssinatura;
-      mensagem = "Deseja cancelar a assinatura definitivamente?";
-      toastMsg = "Assinatura cancelada.";
-      confMsg = "Cancelar";
-    }
-
-    const ok = await confirm({
-      titulo: `${confMsg} Assinatura`,
-      mensagem,
-      confirmarTexto: confMsg,
-      variante: "danger",
-    });
-    if (!ok) return;
-
-    try {
-      const res = await fn(assinatura.id);
-      if (acao === "cancelar") {
-        setAssinatura(null);
-        setPlanoSelecionado("");
-      } else {
-        setAssinatura(res.data);
-      }
-      toast.success(toastMsg);
-    } catch (e) {
-      toast.error(e.response?.data?.message || `Erro ao ${acao} assinatura.`);
-    }
-  }
+      .catch(() => toast.error(t("detalhe.erros.carregarUsuarios")));
+  }, [aba, id, usuarios.length, toast, t]);
 
   async function salvar(dados) {
     try {
       const res = await condominiosApi.atualizar(id, dados);
       setCondominio(res.data.condominio ?? { ...condominio, ...dados });
       setEditando(false);
-      toast.success("Cliente atualizado.");
+      toast.success(t("detalhe.toast.atualizado"));
     } catch (e) {
-      toast.error(e.response?.data?.mensagem ?? "Erro ao salvar.");
+      toast.error(e.response?.data?.mensagem ?? t("detalhe.toast.erroSalvar"));
     }
   }
 
   async function alternarStatus() {
     const desativando = condominio.status === "active";
     const ok = await confirm({
-      titulo: desativando ? "Desativar cliente" : "Reativar cliente",
+      titulo: desativando ? t("detalhe.confirmar.desativarTitulo") : t("detalhe.confirmar.reativarTitulo"),
       mensagem: desativando
-        ? `Desativar "${condominio.nome}"? Os dados são preservados e o acesso é suspenso.`
-        : `Reativar "${condominio.nome}"?`,
-      confirmarTexto: desativando ? "Desativar" : "Reativar",
+        ? t("detalhe.confirmar.desativarMensagem", { nome: condominio.nome })
+        : t("detalhe.confirmar.reativarMensagem", { nome: condominio.nome }),
+      confirmarTexto: desativando ? t("detalhe.acoes.desativar") : t("detalhe.acoes.reativar"),
       variante: desativando ? "danger" : "default",
     });
     if (!ok) return;
@@ -188,9 +95,9 @@ export function DetalheCondominio() {
       const fn = desativando ? condominiosApi.desativar : condominiosApi.ativar;
       await fn(id);
       setCondominio({ ...condominio, status: desativando ? "inactive" : "active" });
-      toast.success(desativando ? "Cliente desativado." : "Cliente reativado.");
+      toast.success(desativando ? t("detalhe.toast.desativado") : t("detalhe.toast.reativado"));
     } catch {
-      toast.error("Não foi possível alterar o status.");
+      toast.error(t("detalhe.erros.alterarStatus"));
     }
   }
 
@@ -210,13 +117,13 @@ export function DetalheCondominio() {
       <div className="min-h-screen w-full pt-4 pb-20 px-6">
         <div className="max-w-6xl mx-auto glass-panel rounded-3xl p-8 text-center space-y-4">
           <Icone name="error" className="text-error text-3xl" />
-          <p className="text-error font-medium">{erro || "Cliente não encontrado."}</p>
+          <p className="text-error font-medium">{erro || t("detalhe.erros.naoEncontrado")}</p>
           <button
             type="button"
             onClick={() => navigate("/adm/condominios")}
             className="text-primary font-semibold hover:underline"
           >
-            Voltar para a lista
+            {t("detalhe.voltarLista")}
           </button>
         </div>
       </div>
@@ -232,13 +139,13 @@ export function DetalheCondominio() {
           className="flex items-center gap-1 text-on-surface-variant hover:text-on-surface text-sm transition"
         >
           <Icone name="arrow_back" className="text-base" />
-          Clientes
+          {t("lista.cabecalho.clientes")}
         </button>
 
         <header className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
             <p className="text-on-surface-variant text-xs font-semibold uppercase tracking-widest mb-1">
-              Painel Administrativo
+              {t("lista.cabecalho.painel")}
             </p>
             <div className="flex items-center gap-3 flex-wrap">
               <h1 className="font-headline text-4xl font-extrabold tracking-tight text-on-surface">
@@ -249,7 +156,7 @@ export function DetalheCondominio() {
                   STATUS_STYLE[condominio.status] ?? ""
                 }`}
               >
-                {condominio.status === "active" ? "ATIVO" : "INATIVO"}
+                {condominio.status === "active" ? t("detalhe.status.ativo") : t("detalhe.status.inativo")}
               </span>
             </div>
             <p className="text-on-surface-variant text-sm mt-1 font-mono">{condominio.id}</p>
@@ -265,7 +172,7 @@ export function DetalheCondominio() {
               className="px-5 py-3 rounded-2xl border border-primary/30 text-primary hover:bg-primary/10 transition flex items-center gap-2 font-medium"
             >
               <Icone name={editando ? "close" : "edit"} />
-              {editando ? "Cancelar" : "Editar"}
+              {editando ? t("comum:acoes.cancelar") : t("comum:acoes.editar")}
             </button>
             <button
               type="button"
@@ -277,17 +184,17 @@ export function DetalheCondominio() {
               }`}
             >
               <Icone name={condominio.status === "active" ? "block" : "check_circle"} />
-              {condominio.status === "active" ? "Desativar" : "Reativar"}
+              {condominio.status === "active" ? t("detalhe.acoes.desativar") : t("detalhe.acoes.reativar")}
             </button>
           </div>
         </header>
 
         {resumo && (
           <section className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <CartaoKpi valor={resumo.usuarios.total} label="Usuários" tom="primary" icone="group" />
-            <CartaoKpi valor={resumo.usuarios.ativos} label="Ativos" tom="tertiary" icone="check_circle" />
-            <CartaoKpi valor={resumo.convitesPendentes} label="Convites pendentes" tom="secondary" icone="mail" />
-            <CartaoKpi valor={resumo.ocorrencias} label="Ocorrências" tom="neutro" icone="report" />
+            <CartaoKpi valor={resumo.usuarios.total} label={t("detalhe.kpi.usuarios")} tom="primary" icone="group" />
+            <CartaoKpi valor={resumo.usuarios.ativos} label={t("detalhe.kpi.ativos")} tom="tertiary" icone="check_circle" />
+            <CartaoKpi valor={resumo.convitesPendentes} label={t("detalhe.kpi.convitesPendentes")} tom="secondary" icone="mail" />
+            <CartaoKpi valor={resumo.ocorrencias ?? "—"} label={t("detalhe.kpi.ocorrencias")} tom="neutro" icone="report" />
           </section>
         )}
 
@@ -304,7 +211,7 @@ export function DetalheCondominio() {
               }`}
             >
               <Icone name={a.icon} className="text-base" />
-              {a.label}
+              {t(a.rotuloKey)}
             </button>
           ))}
         </nav>
@@ -321,12 +228,12 @@ export function DetalheCondominio() {
             ) : (
               <dl className="grid sm:grid-cols-2 gap-x-8 gap-y-5">
                 {[
-                  ["Nome", condominio.nome],
-                  ["Identificador", condominio.id],
-                  ["CNPJ", condominio.cnpj ? mascararCnpj(condominio.cnpj) : "—"],
-                  ["E-mail", condominio.email || "—"],
-                  ["Telefone", condominio.telefone ? mascararTelefone(condominio.telefone) : "—"],
-                  ["Endereço", condominio.endereco || "—"],
+                  [t("detalhe.dados.nome"), condominio.nome],
+                  [t("detalhe.dados.identificador"), condominio.id],
+                  [t("detalhe.dados.cnpj"), condominio.cnpj ? mascararCnpj(condominio.cnpj) : "—"],
+                  [t("detalhe.dados.email"), condominio.email || "—"],
+                  [t("detalhe.dados.telefone"), condominio.telefone ? mascararTelefone(condominio.telefone) : "—"],
+                  [t("detalhe.dados.endereco"), condominio.endereco || "—"],
                 ].map(([rotulo, valor]) => (
                   <div key={rotulo}>
                     <dt className="text-on-surface-variant text-xs uppercase tracking-wider mb-1">
@@ -341,14 +248,14 @@ export function DetalheCondominio() {
         )}
 
         {aba === "plano" && (
-          <PainelPlanoCliente condominioId={id} aoMudar={carregar} />
+          <PainelPlanoCliente condominioId={id} aoMudar={carregar} qtdUsuarios={resumo?.usuarios?.total || 0} />
         )}
 
         {aba === "usuarios" && (
           <section className="glass-panel rounded-3xl p-6">
             {usuarios.length === 0 ? (
               <p className="text-on-surface-variant text-center py-8">
-                Nenhum usuário vinculado a este cliente.
+                {t("detalhe.usuarios.vazio")}
               </p>
             ) : (
               <ul className="divide-y divide-outline-variant/10">
@@ -379,93 +286,12 @@ export function DetalheCondominio() {
           </section>
         )}
 
-        {aba === "assinatura" && (
-          <section className="glass-panel rounded-3xl p-6">
-            {carregandoAssinatura ? (
-              <p className="text-on-surface-variant text-center py-8 animate-pulse">Carregando dados da assinatura...</p>
-            ) : assinatura ? (
-              <div className="space-y-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="text-on-surface font-semibold text-xl">{assinatura.planName || "Plano"}</h3>
-                    <p className="text-on-surface-variant mt-1 text-sm">
-                      Início: {new Date(assinatura.startDate).toLocaleDateString()}
-                    </p>
-                  </div>
-                  <span
-                    className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                      assinatura.status === "ACTIVE"
-                        ? "bg-primary/10 text-primary"
-                        : assinatura.status === "SUSPENDED"
-                        ? "bg-secondary/10 text-secondary"
-                        : "bg-error/10 text-error"
-                    }`}
-                  >
-                    {assinatura.status === "ACTIVE" ? "ATIVA" : assinatura.status === "SUSPENDED" ? "SUSPENSA" : "CANCELADA"}
-                  </span>
-                </div>
-
-                <div className="flex gap-3 pt-4 border-t border-outline-variant/20">
-                  {assinatura.status === "ACTIVE" && (
-                    <button
-                      type="button"
-                      onClick={() => gerenciarAssinatura("suspender")}
-                      className="px-4 py-2 rounded-xl text-sm font-medium bg-secondary/10 text-secondary hover:bg-secondary/20 transition"
-                    >
-                      Suspender
-                    </button>
-                  )}
-                  {(assinatura.status === "ACTIVE" || assinatura.status === "SUSPENDED") && (
-                    <button
-                      type="button"
-                      onClick={() => gerenciarAssinatura("cancelar")}
-                      className="px-4 py-2 rounded-xl text-sm font-medium bg-error/10 text-error hover:bg-error/20 transition"
-                    >
-                      Cancelar
-                    </button>
-                  )}
-                  {assinatura.status === "CANCELED" && (
-                    <p className="text-error text-sm font-medium">Esta assinatura está cancelada.</p>
-                  )}
-                </div>
-              </div>
-            ) : (
-              <div className="space-y-4 max-w-md">
-                <div>
-                  <h3 className="text-on-surface font-semibold mb-2">Vincular Plano</h3>
-                  <p className="text-on-surface-variant text-sm mb-4">
-                    Este cliente ainda não possui uma assinatura ativa. Escolha um plano abaixo para ativá-lo.
-                  </p>
-                  <select
-                    value={planoSelecionado}
-                    onChange={(e) => setPlanoSelecionado(e.target.value)}
-                    className="w-full bg-surface text-on-surface border border-outline-variant rounded-xl px-4 py-3 outline-none focus:border-primary focus:ring-1 focus:ring-primary transition appearance-none"
-                  >
-                    <option value="" disabled>Selecione um plano...</option>
-                    {planos.filter(p => p.isActive).map(p => (
-                      <option key={p.id} value={p.id}>{p.name} - R$ {p.monthlyPrice}</option>
-                    ))}
-                  </select>
-                </div>
-                <button
-                  type="button"
-                  onClick={ativarAssinatura}
-                  disabled={!planoSelecionado}
-                  className="w-full bg-primary text-on-primary py-3 rounded-xl font-semibold hover:bg-primary/90 transition disabled:opacity-50"
-                >
-                  Ativar Assinatura
-                </button>
-              </div>
-            )}
-          </section>
-        )}
-
         {aba === "resumo" && (
           <section className="glass-panel rounded-3xl p-6">
             {resumo ? (
               <div className="space-y-6">
                 <div>
-                  <h3 className="text-on-surface font-semibold mb-3">Usuários por perfil</h3>
+                  <h3 className="text-on-surface font-semibold mb-3">{t("detalhe.resumo.porPerfil")}</h3>
                   <div className="flex flex-wrap gap-2">
                     {Object.entries(resumo.usuarios.porPerfil).map(([perfil, total]) => (
                       <span
@@ -478,7 +304,7 @@ export function DetalheCondominio() {
                   </div>
                 </div>
                 <div>
-                  <h3 className="text-on-surface font-semibold mb-3">Usuários por situação</h3>
+                  <h3 className="text-on-surface font-semibold mb-3">{t("detalhe.resumo.porSituacao")}</h3>
                   <div className="flex flex-wrap gap-2">
                     {Object.entries(resumo.usuarios.porStatus).map(([status, total]) => (
                       <span
@@ -493,7 +319,7 @@ export function DetalheCondominio() {
               </div>
             ) : (
               <p className="text-on-surface-variant text-center py-8">
-                Resumo indisponível no momento.
+                {t("detalhe.resumo.indisponivel")}
               </p>
             )}
           </section>

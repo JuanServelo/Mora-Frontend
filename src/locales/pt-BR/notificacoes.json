@@ -1,0 +1,11 @@
+{
+  "titulo": "Notificações",
+  "naoLidas_one": "{{count}} não lida",
+  "naoLidas_other": "{{count}} não lidas",
+  "emDia": "Tudo em dia",
+  "marcarTodas": "Marcar todas como lidas",
+  "vazio": {
+    "titulo": "Sem notificações",
+    "descricao": "Faturas, respostas da administração e comunicados aparecem aqui."
+  }
+}

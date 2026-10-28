@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "../../contexts/AuthContext";
 import { Campo } from "../../components/campos/Campo";
 import { Botao } from "../../components/botoes/Botao";
@@ -7,6 +8,7 @@ import { Icone } from "../../components/icones/Icone";
 import { validarSenha } from "../../utils/passwordValidation";
 
 export function ResetPassword() {
+  const { t } = useTranslation("auth");
   const { redefinirSenha } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -23,7 +25,7 @@ export function ResetPassword() {
     setErrosSenha([]);
 
     if (!token) {
-      setErro("Link inválido ou expirado.");
+      setErro(t("reset.erros.linkInvalido"));
       return;
     }
 
@@ -32,12 +34,12 @@ export function ResetPassword() {
     const confirmacao = form.get("confirmacao");
 
     if (!senha || !confirmacao) {
-      setErro("Preencha todos os campos.");
+      setErro(t("geral.camposVazios"));
       return;
     }
 
     if (senha !== confirmacao) {
-      setErro("As senhas não coincidem.");
+      setErro(t("geral.senhasDiferentes"));
       return;
     }
 
@@ -53,7 +55,7 @@ export function ResetPassword() {
       setSucesso(true);
       setTimeout(() => navigate("/login"), 2500);
     } catch (err) {
-      setErro(err.response?.data?.mensagem || "Erro ao redefinir senha.");
+      setErro(err.response?.data?.mensagem || t("reset.erros.falha"));
     } finally {
       setCarregando(false);
     }
@@ -62,14 +64,14 @@ export function ResetPassword() {
   if (!token) {
     return (
       <div className="min-h-screen flex items-center justify-center px-4">
-        <div className="glass-panel max-w-sm w-full rounded-[2rem] p-6 sm:p-8 text-center">
+        <div className="glass-panel max-w-sm w-full rounded-[2rem] p-8 text-center">
           <Icone name="error" className="text-error text-4xl mb-4" />
-          <p className="text-on-surface font-semibold mb-2">Link inválido</p>
+          <p className="text-on-surface font-semibold mb-2">{t("reset.invalido.titulo")}</p>
           <p className="text-on-surface-variant text-sm mb-6">
-            Solicite um novo link em esqueci minha senha.
+            {t("reset.invalido.texto")}
           </p>
           <Link to="/esqueceu-senha" className="text-primary font-bold hover:underline">
-            Recuperar senha
+            {t("reset.invalido.recuperar")}
           </Link>
         </div>
       </div>
@@ -78,31 +80,31 @@ export function ResetPassword() {
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 py-8">
-      <div className="glass-panel w-full max-w-sm rounded-[2rem] p-6 sm:p-8 shadow-2xl">
+      <div className="glass-panel w-full max-w-sm rounded-[2rem] p-8 shadow-2xl">
         <div className="mb-6">
-          <div className="w-12 h-12 shrink-0 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
+          <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
             <Icone name="lock_reset" className="text-primary text-2xl" />
           </div>
-          <h1 className="text-2xl font-headline font-bold text-on-surface">Nova senha</h1>
+          <h1 className="text-2xl font-headline font-bold text-on-surface">{t("reset.titulo")}</h1>
           <p className="text-on-surface-variant text-sm mt-1">
-            Defina uma nova senha para sua conta.
+            {t("reset.subtitulo")}
           </p>
         </div>
 
         {sucesso ? (
           <div className="text-center space-y-3 py-4">
             <Icone name="check_circle" className="text-primary text-4xl" />
-            <p className="text-on-surface font-semibold">Senha redefinida!</p>
-            <p className="text-on-surface-variant text-sm">Redirecionando para o login...</p>
+            <p className="text-on-surface font-semibold">{t("reset.sucesso.titulo")}</p>
+            <p className="text-on-surface-variant text-sm">{t("reset.sucesso.texto")}</p>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
             <Campo
               id="senha"
               name="senha"
-              label="Nova senha"
+              label={t("reset.novaSenha")}
               type="password"
-              placeholder="Mín. 8 caracteres"
+              placeholder={t("geral.senhaPlaceholder")}
               icon="lock"
             />
             {errosSenha.map((msg) => (
@@ -111,14 +113,14 @@ export function ResetPassword() {
             <Campo
               id="confirmacao"
               name="confirmacao"
-              label="Confirmar senha"
+              label={t("geral.confirmarSenha")}
               type="password"
-              placeholder="Repita a senha"
+              placeholder={t("geral.repitaSenha")}
               icon="lock_reset"
             />
             {erro && <p className="text-error text-sm font-medium">{erro}</p>}
             <Botao type="submit" disabled={carregando}>
-              {carregando ? "Salvando..." : "Redefinir senha"}
+              {carregando ? t("reset.salvando") : t("reset.submit")}
               {!carregando && <Icone name="check" className="text-xl" />}
             </Botao>
           </form>
@@ -126,7 +128,7 @@ export function ResetPassword() {
 
         <div className="mt-6 text-center">
           <Link to="/login" className="text-sm text-on-surface-variant hover:text-primary">
-            Voltar ao login
+            {t("geral.voltarLogin")}
           </Link>
         </div>
       </div>

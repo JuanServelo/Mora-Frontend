@@ -1,5 +1,6 @@
 // src/components/adm/financeiro/PainelContas.jsx
 import { useState, useEffect, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { Icone } from "../../icones/Icone";
 import { useToast } from "../../../contexts/ToastContext";
 import { formatarData, paraCampoData } from "../../../utils/datas";
@@ -7,19 +8,19 @@ import { useConfirm } from "../../../contexts/ConfirmContext";
 import { useAuth } from "../../../contexts/AuthContext";
 import { financeiroApi } from "../../../services/financeiroApi";
 import { planApi } from "../../../services/planApi";
-import { formatarBRL, centavosParaCampo } from "../../../utils/dinheiro";
+import { formatarBRL, formatarReais, centavosParaCampo } from "../../../utils/dinheiro";
 
 const TIPOS = [
-  { value: "AGUA", label: "Água", icone: "water_drop" },
-  { value: "LUZ", label: "Luz/Energia", icone: "bolt" },
-  { value: "GAS", label: "Gás", icone: "local_fire_department" },
-  { value: "INTERNET", label: "Internet", icone: "wifi" },
-  { value: "OUTRO", label: "Outro", icone: "receipt" },
+  { value: "AGUA", label: "contas.tipos.AGUA", icone: "water_drop" },
+  { value: "LUZ", label: "contas.tipos.LUZ", icone: "bolt" },
+  { value: "GAS", label: "contas.tipos.GAS", icone: "local_fire_department" },
+  { value: "INTERNET", label: "contas.tipos.INTERNET", icone: "wifi" },
+  { value: "OUTRO", label: "contas.tipos.OUTRO", icone: "receipt" },
 ];
 
 const MODOS = [
-  { value: "FRACAO_IDEAL", label: "Fração Ideal (proporcional à unidade)" },
-  { value: "FIXO_POR_UNIDADE", label: "Fixo por Unidade (igual para todas)" },
+  { value: "FRACAO_IDEAL", label: "contas.modos.FRACAO_IDEAL" },
+  { value: "FIXO_POR_UNIDADE", label: "contas.modos.FIXO_POR_UNIDADE" },
 ];
 
 const STATUS_BADGE = {
@@ -43,6 +44,8 @@ const VAZIO = {
 };
 
 export function PainelContas() {
+  // `t` já é o tipo de conta nos laços abaixo; a tradução fica em `tr`.
+  const { t: tr } = useTranslation("financeiro");
   const toast = useToast();
   const confirm = useConfirm();
   const { usuario } = useAuth();
@@ -71,11 +74,11 @@ export function PainelContas() {
       const { data } = await financeiroApi.listarContasConsumo(competencia);
       setContas(data.itens ?? []);
     } catch {
-      toast.error("Não foi possível carregar as contas.");
+      toast.error(tr("contas.toast.erroCarregar"));
     } finally {
       setCarregando(false);
     }
-  }, [competencia]);
+  }, [competencia, tr]);
 
   useEffect(() => { carregar(); }, [carregar]);
 
@@ -109,7 +112,7 @@ export function PainelContas() {
 
   async function salvar() {
     if (!form.valor || !form.vencimento) {
-      toast.warning("Preencha valor e vencimento.");
+      toast.warning(tr("contas.toast.preencha"));
       return;
     }
     setSalvando(true);
@@ -124,15 +127,15 @@ export function PainelContas() {
       };
       if (editando) {
         await financeiroApi.atualizarContaConsumo(editando, payload);
-        toast.success("Conta atualizada.");
+        toast.success(tr("contas.toast.atualizada"));
       } else {
         await financeiroApi.criarContaConsumo(payload);
-        toast.success("Conta criada.");
+        toast.success(tr("contas.toast.criada"));
       }
       setModalAberto(false);
       carregar();
     } catch (err) {
-      toast.error(err.response?.data?.mensagem || "Erro ao salvar conta.");
+      toast.error(err.response?.data?.mensagem || tr("contas.toast.erroSalvar"));
     } finally {
       setSalvando(false);
     }
@@ -140,51 +143,51 @@ export function PainelContas() {
 
   async function cancelarConta(id) {
     const ok = await confirm({
-      titulo: "Cancelar conta",
-      mensagem: "A conta será marcada como cancelada. Esta ação não pode ser desfeita.",
-      confirmarTexto: "Cancelar conta",
+      titulo: tr("contas.cancelar.titulo"),
+      mensagem: tr("contas.cancelar.mensagem"),
+      confirmarTexto: tr("contas.cancelar.titulo"),
       variante: "danger",
     });
     if (!ok) return;
     try {
       await financeiroApi.cancelarContaConsumo(id);
-      toast.success("Conta cancelada.");
+      toast.success(tr("contas.toast.cancelada"));
       carregar();
     } catch (err) {
-      toast.error(err.response?.data?.mensagem || "Erro ao cancelar.");
+      toast.error(err.response?.data?.mensagem || tr("contas.toast.erroCancelar"));
     }
   }
 
   async function ratear(id) {
     const ok = await confirm({
-      titulo: "Ratear conta",
-      mensagem: "O valor será distribuído entre as unidades com fração ideal cadastrada. Continuar?",
-      confirmarTexto: "Ratear",
+      titulo: tr("contas.ratear.titulo"),
+      mensagem: tr("contas.ratear.mensagem"),
+      confirmarTexto: tr("contas.ratear.confirmar"),
     });
     if (!ok) return;
     try {
       const { data } = await financeiroApi.ratearContaConsumo(id);
-      toast.success(`Conta rateada em ${data.unidadesRateadas} unidades.`);
+      toast.success(tr("contas.toast.rateada", { unidades: data.unidadesRateadas }));
       carregar();
     } catch (err) {
-      toast.error(err.response?.data?.mensagem || "Erro ao ratear.");
+      toast.error(err.response?.data?.mensagem || tr("contas.toast.erroRatear"));
     }
   }
 
   async function fecharCompetencia() {
     const ok = await confirm({
-      titulo: "Fechar competência",
-      mensagem: `Serão geradas faturas para todas as unidades da competência ${competencia}. Unidades que já têm fatura não serão duplicadas. Continuar?`,
-      confirmarTexto: "Fechar competência",
+      titulo: tr("contas.fechar.titulo"),
+      mensagem: tr("contas.fechar.mensagem", { competencia }),
+      confirmarTexto: tr("contas.fechar.titulo"),
     });
     if (!ok) return;
     setFechando(true);
     try {
       const { data } = await financeiroApi.fecharCompetencia(competencia);
-      toast.success(`Fechamento concluído. ${data.faturasCriadas} fatura(s) criada(s).`);
+      toast.success(tr("contas.toast.fechado", { count: data.faturasCriadas }));
       carregar();
     } catch (err) {
-      toast.error(err.response?.data?.mensagem || "Erro ao fechar competência.");
+      toast.error(err.response?.data?.mensagem || tr("contas.toast.erroFechar"));
     } finally {
       setFechando(false);
     }
@@ -198,7 +201,7 @@ export function PainelContas() {
       <div className="flex flex-wrap items-center gap-3 justify-between">
         <div className="flex items-center gap-2">
           <label className="text-xs font-semibold uppercase tracking-widest text-on-surface-variant">
-            Competência
+            {tr("contas.competencia")}
           </label>
           <input
             type="month"
@@ -212,7 +215,7 @@ export function PainelContas() {
           className="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary/15 text-primary font-semibold text-sm hover:bg-primary/25 transition cursor-pointer"
         >
           <Icone name="add" className="text-lg" />
-          Nova Conta
+          {tr("contas.nova")}
         </button>
       </div>
 
@@ -220,17 +223,30 @@ export function PainelContas() {
       {previewData?.ok && (
         <div className="glass-panel rounded-2xl p-4 flex flex-wrap gap-6 text-sm">
           <div>
-            <p className="text-xs text-on-surface-variant uppercase tracking-wider mb-1">Unidades</p>
+            <p className="text-xs text-on-surface-variant uppercase tracking-wider mb-1">{tr("contas.preview.unidades")}</p>
             <p className="font-bold text-on-surface text-lg">{previewData.unidades}</p>
           </div>
           <div>
-            <p className="text-xs text-on-surface-variant uppercase tracking-wider mb-1">Faturas novas</p>
+            <p className="text-xs text-on-surface-variant uppercase tracking-wider mb-1">{tr("contas.preview.faturasNovas")}</p>
             <p className="font-bold text-primary text-lg">{previewData.faturasNovas}</p>
           </div>
           <div>
-            <p className="text-xs text-on-surface-variant uppercase tracking-wider mb-1">Contas pendentes</p>
+            <p className="text-xs text-on-surface-variant uppercase tracking-wider mb-1">{tr("contas.preview.contasPendentes")}</p>
             <p className="font-bold text-on-surface text-lg">{previewData.contasDeConsumo}</p>
           </div>
+          {/* Multas com o prazo de recurso vencido entram neste fechamento; as
+              canceladas depois de cobradas voltam como estorno. */}
+          {(previewData.multasACobrar > 0 || previewData.estornosDeMulta > 0) && (
+            <div>
+              <p className="text-xs text-on-surface-variant uppercase tracking-wider mb-1">{tr("contas.preview.multas")}</p>
+              <p className="font-bold text-on-surface text-lg">
+                {previewData.multasACobrar}
+                {previewData.estornosDeMulta > 0 && (
+                  <span className="text-sm font-semibold text-on-surface-variant"> · {tr("contas.preview.estornos", { count: previewData.estornosDeMulta })}</span>
+                )}
+              </p>
+            </div>
+          )}
           <div className="ml-auto flex items-center">
             <button
               onClick={fecharCompetencia}
@@ -238,7 +254,7 @@ export function PainelContas() {
               className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-primary to-tertiary text-white font-semibold text-sm hover:opacity-90 transition disabled:opacity-50 cursor-pointer"
             >
               <Icone name={fechando ? "sync" : "play_arrow"} className={`text-lg ${fechando ? "animate-spin" : ""}`} />
-              {fechando ? "Fechando..." : "Fechar Competência"}
+              {fechando ? tr("contas.fechar.fechando") : tr("contas.fechar.botao")}
             </button>
           </div>
         </div>
@@ -253,18 +269,18 @@ export function PainelContas() {
             </span>
             <div className="min-w-0">
               <p className="font-semibold text-sm text-yellow-300">
-                Plataforma Mora — {assinatura.planNome}
+                {tr("contas.plano.titulo", { plano: assinatura.planNome })}
               </p>
               <p className="text-xs text-yellow-500/70">
-                Mensalidade do plano • gerada automaticamente
+                {tr("contas.plano.descricao")}
               </p>
             </div>
           </div>
           <div className="text-right">
             <p className="font-bold text-lg bg-gradient-to-r from-yellow-300 to-amber-400 bg-clip-text text-transparent">
-              {Number(assinatura.mensalidade).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
+              {formatarReais(assinatura.mensalidade)}
             </p>
-            <p className="text-xs text-yellow-500/60">/mês</p>
+            <p className="text-xs text-yellow-500/60">{tr("contas.plano.porMes")}</p>
           </div>
         </div>
       )}
@@ -273,12 +289,12 @@ export function PainelContas() {
       {carregando ? (
         <div className="flex items-center justify-center py-12 text-on-surface-variant">
           <Icone name="sync" className="text-3xl animate-spin mr-3" />
-          <span>Carregando contas...</span>
+          <span>{tr("contas.carregando")}</span>
         </div>
       ) : contas.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-14 gap-3 text-on-surface-variant text-sm">
           <Icone name="receipt_long" className="text-4xl opacity-30" />
-          <p>Nenhuma conta cadastrada para {competencia}.</p>
+          <p>{tr("contas.vazio", { competencia })}</p>
         </div>
       ) : (
         <div className="space-y-3">
@@ -292,10 +308,10 @@ export function PainelContas() {
                   </span>
                   <div className="min-w-0">
                     <p className="font-semibold text-on-surface text-sm truncate">
-                      {info.label}{conta.descricao ? `: ${conta.descricao}` : ""}
+                      {tr(info.label)}{conta.descricao ? `: ${conta.descricao}` : ""}
                     </p>
                     <p className="text-xs text-on-surface-variant">
-                      {conta.modoRateio === "FRACAO_IDEAL" ? "Fração ideal" : "Fixo por unidade"} • Venc. {formatarData(conta.vencimento)}
+                      {conta.modoRateio === "FRACAO_IDEAL" ? tr("contas.lista.fracaoIdeal") : tr("contas.lista.fixoPorUnidade")} • {tr("contas.lista.vencimento", { data: formatarData(conta.vencimento) })}
                     </p>
                   </div>
                 </div>
@@ -303,7 +319,7 @@ export function PainelContas() {
                 <div className="text-right">
                   <p className="font-bold text-on-surface">{formatarBRL(conta.valorTotalCentavos)}</p>
                   <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${STATUS_BADGE[conta.status]}`}>
-                    {conta.status}
+                    {tr(`contas.status.${conta.status}`, { defaultValue: conta.status })}
                   </span>
                 </div>
 
@@ -312,21 +328,21 @@ export function PainelContas() {
                     <>
                       <button
                         onClick={() => ratear(conta.id)}
-                        title="Ratear entre unidades"
+                        title={tr("contas.lista.ratear")}
                         className="w-8 h-8 rounded-lg flex items-center justify-center text-on-surface-variant hover:text-primary hover:bg-primary/10 transition cursor-pointer"
                       >
                         <Icone name="splitscreen" className="text-lg" />
                       </button>
                       <button
                         onClick={() => abrirEdicao(conta)}
-                        title="Editar"
+                        title={tr("comum:acoes.editar")}
                         className="w-8 h-8 rounded-lg flex items-center justify-center text-on-surface-variant hover:text-primary hover:bg-primary/10 transition cursor-pointer"
                       >
                         <Icone name="edit" className="text-lg" />
                       </button>
                       <button
                         onClick={() => cancelarConta(conta.id)}
-                        title="Cancelar"
+                        title={tr("comum:acoes.cancelar")}
                         className="w-8 h-8 rounded-lg flex items-center justify-center text-on-surface-variant hover:text-error hover:bg-error/10 transition cursor-pointer"
                       >
                         <Icone name="delete" className="text-lg" />
@@ -345,7 +361,7 @@ export function PainelContas() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
           <div className="w-full max-w-md rounded-3xl p-6 space-y-5" style={{ background: "rgba(18,18,28,0.98)", backdropFilter: "blur(32px)", border: "1px solid rgba(255,255,255,0.09)", boxShadow: "0 24px 64px rgba(0,0,0,0.7)" }}>
             <h3 className="font-headline text-xl font-bold text-on-surface">
-              {editando ? "Editar Conta" : "Nova Conta de Consumo"}
+              {editando ? tr("contas.form.tituloEditar") : tr("contas.form.tituloNova")}
             </h3>
 
             <div className="grid grid-cols-2 gap-3">
@@ -360,18 +376,18 @@ export function PainelContas() {
                   }`}
                 >
                   <Icone name={t.icone} className="text-lg" />
-                  {t.label}
+                  {tr(t.label)}
                 </button>
               ))}
             </div>
 
             <div>
               <label className="block text-xs font-semibold uppercase tracking-wider text-on-surface-variant mb-1">
-                Descrição (opcional)
+                {tr("contas.form.descricao")}
               </label>
               <input
                 type="text"
-                placeholder="Ex: Conta de novembro"
+                placeholder={tr("contas.form.descricaoPlaceholder")}
                 value={form.descricao}
                 onChange={(e) => setForm((f) => ({ ...f, descricao: e.target.value }))}
                 className="w-full bg-veu/8 border border-veu/15 rounded-xl px-3 py-2 text-sm text-on-surface placeholder:text-on-surface-variant/50 focus:outline-none focus:border-primary/60"
@@ -381,7 +397,7 @@ export function PainelContas() {
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="block text-xs font-semibold uppercase tracking-wider text-on-surface-variant mb-1">
-                  Competência
+                  {tr("contas.competencia")}
                 </label>
                 <input
                   type="month"
@@ -392,7 +408,7 @@ export function PainelContas() {
               </div>
               <div>
                 <label className="block text-xs font-semibold uppercase tracking-wider text-on-surface-variant mb-1">
-                  Vencimento
+                  {tr("contas.form.vencimento")}
                 </label>
                 <input
                   type="date"
@@ -405,7 +421,7 @@ export function PainelContas() {
 
             <div>
               <label className="block text-xs font-semibold uppercase tracking-wider text-on-surface-variant mb-1">
-                Valor Total (R$)
+                {tr("contas.form.valorTotal")}
               </label>
               <input
                 type="text"
@@ -418,7 +434,7 @@ export function PainelContas() {
 
             <div>
               <label className="block text-xs font-semibold uppercase tracking-wider text-on-surface-variant mb-1">
-                Modo de Rateio
+                {tr("contas.form.modoRateio")}
               </label>
               <select
                 value={form.modoRateio}
@@ -426,7 +442,7 @@ export function PainelContas() {
                 className="w-full bg-veu/8 border border-veu/15 rounded-xl px-3 py-2 text-sm text-on-surface focus:outline-none focus:border-primary/60"
               >
                 {MODOS.map((m) => (
-                  <option key={m.value} value={m.value} className="bg-[#1a1825]">{m.label}</option>
+                  <option key={m.value} value={m.value} className="bg-[#1a1825]">{tr(m.label)}</option>
                 ))}
               </select>
             </div>
@@ -436,14 +452,14 @@ export function PainelContas() {
                 onClick={() => setModalAberto(false)}
                 className="flex-1 py-2.5 rounded-xl border border-veu/10 text-on-surface-variant text-sm font-semibold hover:bg-veu/5 transition cursor-pointer"
               >
-                Cancelar
+                {tr("comum:acoes.cancelar")}
               </button>
               <button
                 onClick={salvar}
                 disabled={salvando}
                 className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-primary to-tertiary text-white text-sm font-semibold hover:opacity-90 disabled:opacity-50 transition cursor-pointer"
               >
-                {salvando ? "Salvando..." : "Salvar"}
+                {salvando ? tr("geral.salvando") : tr("comum:acoes.salvar")}
               </button>
             </div>
           </div>

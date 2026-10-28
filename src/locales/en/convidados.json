@@ -1,0 +1,105 @@
+{
+  "header": {
+    "secao": "My Unit",
+    "titulo": "My",
+    "destaque": "Guests"
+  },
+  "abas": {
+    "convidados": "Guests",
+    "preAutorizacoes": "Pre-authorizations"
+  },
+  "semPermissao": "Only the unit's financially responsible resident can manage guest permissions.",
+  "toggle": {
+    "bloquear": "Block entry",
+    "permitir": "Allow entry"
+  },
+  "cartao": {
+    "cpf": "CPF: {{cpf}}",
+    "dentro": "Inside",
+    "fora": "Outside",
+    "permissao": {
+      "titulo": "Entry permission",
+      "permitida": "The front desk can log their entry",
+      "negada": "The front desk can't log their entry"
+    },
+    "ultimoRegistro": "Last entry:"
+  },
+  "lista": {
+    "erroCarregar": "Couldn't load guests.",
+    "erroAlterar": "Couldn't change the permission.",
+    "info": "Turn on entry permission so the front desk can log your guest's access.",
+    "carregando": "Loading guests...",
+    "vazio": {
+      "titulo": "You don't have any registered guests.",
+      "desc": "Ask the administrator to register guests for your unit."
+    },
+    "resumo": {
+      "convidados_one": "{{count}} guest",
+      "convidados_other": "{{count}} guests",
+      "autorizados_one": "{{count}} authorized",
+      "autorizados_other": "{{count}} authorized"
+    }
+  },
+  "pre": {
+    "status": {
+      "aguardando": "Waiting",
+      "utilizada": "Used",
+      "expirada": "Expired",
+      "cancelada": "Canceled"
+    },
+    "erros": {
+      "nome": "Enter the visitor's full name.",
+      "cpf": "Invalid CPF. Check the digits you entered.",
+      "periodo": "Enter the validity period.",
+      "fimAntesInicio": "The end date can't be before the start date.",
+      "passado": "The validity period can't end in the past.",
+      "placa": "Invalid plate. Use the AAA-9999 or AAA9A99 (Mercosur) format."
+    },
+    "toast": {
+      "criada": "Pre-authorization created.",
+      "erroCriar": "Couldn't create the pre-authorization.",
+      "cancelada": "Pre-authorization canceled.",
+      "erroCancelar": "Couldn't cancel the pre-authorization."
+    },
+    "confirmarCancelar": "Cancel the pre-authorization for {{nome}}?",
+    "unidade": {
+      "apto": "Apt {{numero}}",
+      "vinculada": "Linked to your account"
+    },
+    "info": "A pre-authorization lets the front desk admit a specific visitor during the given period without you being there. If they're coming by car, add the vehicle here too — parking is checked on arrival, not reserved.",
+    "nova": "New pre-authorization",
+    "campos": {
+      "nome": "Full name",
+      "nomePlaceholder": "Visitor's name",
+      "cpf": "CPF",
+      "telefone": "Phone",
+      "morador": "Responsible resident",
+      "voce": "You",
+      "unidade": "Unit",
+      "validoDe": "Valid from",
+      "validoAte": "Valid until",
+      "observacoes": "Notes",
+      "opcional": "(optional)",
+      "observacoesPlaceholder": "E.g. doctor's visit, service provider..."
+    },
+    "veiculo": {
+      "viraDeCarro": "Coming by car",
+      "semVaga": "Your unit has no registered parking spaces. The visitor can only enter on foot.",
+      "placa": "Plate",
+      "modelo": "Model",
+      "modeloPlaceholder": "E.g. Civic",
+      "cor": "Color",
+      "corPlaceholder": "E.g. Silver",
+      "avisoVaga": "A pre-authorization doesn't reserve a parking space: availability is checked on arrival."
+    },
+    "criando": "Creating…",
+    "criar": "Create pre-authorization",
+    "vazio": "No pre-authorizations yet. Create one so the front desk can admit your visitor without you being there.",
+    "item": {
+      "cpf": "CPF {{cpf}}",
+      "validade": "Valid from {{inicio}} to {{fim}}"
+    },
+    "cancelando": "Canceling…",
+    "cancelar": "Cancel pre-authorization"
+  }
+}

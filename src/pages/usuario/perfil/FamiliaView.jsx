@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "../../../contexts/AuthContext";
 import { useToast } from "../../../contexts/ToastContext";
 import { useConfirm } from "../../../contexts/ConfirmContext";
@@ -25,6 +26,7 @@ function campoErroClass(erros, campo) {
 }
 
 function FormCadastro({ tipo, onSalvar, onCancelar, salvando, erros }) {
+  const { t } = useTranslation("perfil");
   const [form, setForm] = useState({
     nome: "",
     cpf: "",
@@ -45,9 +47,9 @@ function FormCadastro({ tipo, onSalvar, onCancelar, salvando, erros }) {
   }
 
   const titulos = {
-    lessee: "Cadastrar Locatário (Lessee)",
-    occupant: "Cadastrar Ocupante",
-    guest: "Cadastrar Convidado (Guest)",
+    lessee: t("familia.form.titulos.lessee"),
+    occupant: t("familia.form.titulos.occupant"),
+    guest: t("familia.form.titulos.guest"),
   };
 
   return (
@@ -56,8 +58,8 @@ function FormCadastro({ tipo, onSalvar, onCancelar, salvando, erros }) {
 
       <Campo
         id="cad-nome"
-        label="Nome *"
-        placeholder="Nome completo"
+        label={t("familia.form.campos.nome")}
+        placeholder={t("familia.form.campos.nomePlaceholder")}
         icon="person"
         value={form.nome}
         onChange={(e) => set("nome", e.target.value)}
@@ -67,7 +69,7 @@ function FormCadastro({ tipo, onSalvar, onCancelar, salvando, erros }) {
 
       <Campo
         id="cad-cpf"
-        label="CPF *"
+        label={t("familia.form.campos.cpf")}
         placeholder="000.000.000-00"
         icon="badge"
         value={form.cpf}
@@ -80,9 +82,9 @@ function FormCadastro({ tipo, onSalvar, onCancelar, salvando, erros }) {
         <>
           <Campo
             id="cad-email"
-            label="E-mail *"
+            label={t("familia.form.campos.email")}
             type="email"
-            placeholder="email@exemplo.com"
+            placeholder={t("familia.form.campos.emailPlaceholder")}
             icon="mail"
             value={form.email}
             onChange={(e) => set("email", e.target.value)}
@@ -96,7 +98,7 @@ function FormCadastro({ tipo, onSalvar, onCancelar, salvando, erros }) {
         <>
           <Campo
             id="cad-dob"
-            label={tipo === "guest" ? "Data de nascimento" : "Data de nascimento *"}
+            label={tipo === "guest" ? t("familia.form.campos.dataNascimento") : t("familia.form.campos.dataNascimentoObrigatoria")}
             type="date"
             icon="calendar_today"
             value={form.dataNascimento}
@@ -111,13 +113,13 @@ function FormCadastro({ tipo, onSalvar, onCancelar, salvando, erros }) {
 
       {tipo === "guest" && (
         <p className="text-xs text-on-surface-variant">
-          Guests não possuem acesso ao sistema — cadastro direto, sem convite por e-mail.
+          {t("familia.form.avisoGuest")}
         </p>
       )}
 
-      <div className="flex flex-col sm:flex-row gap-3 pt-1">
+      <div className="flex gap-3 pt-1">
         <Botao type="submit" disabled={salvando}>
-          {salvando ? "Salvando..." : "Cadastrar"}
+          {salvando ? t("familia.form.salvando") : t("familia.form.cadastrar")}
           <Icone name="check" className="text-xl" />
         </Botao>
         <button
@@ -126,7 +128,7 @@ function FormCadastro({ tipo, onSalvar, onCancelar, salvando, erros }) {
           disabled={salvando}
           className="flex-1 py-3 rounded-xl border border-outline-variant/30 text-on-surface-variant hover:text-on-surface transition-colors text-sm font-medium cursor-pointer disabled:opacity-50"
         >
-          Cancelar
+          {t("comum:acoes.cancelar")}
         </button>
       </div>
     </form>
@@ -134,13 +136,14 @@ function FormCadastro({ tipo, onSalvar, onCancelar, salvando, erros }) {
 }
 
 function CardOcupante({ item, podeRemover, onRemover, responsavelFinanceiroId }) {
+  const { t } = useTranslation("perfil");
   const isConvite = item.tipo === "convite";
   const isFinanceiro = !isConvite && item.id === responsavelFinanceiroId;
 
   return (
     <div className="flex items-center justify-between p-4 rounded-2xl bg-surface-container-highest/30 gap-3">
       <div className="flex items-center gap-3 min-w-0">
-        <div className="w-10 h-10 shrink-0 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+        <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
           <Icone
             name={isConvite ? "mail" : PERFIL_ICONE[item.perfil] || "person"}
             className="text-primary"
@@ -152,13 +155,13 @@ function CardOcupante({ item, podeRemover, onRemover, responsavelFinanceiroId })
           </p>
           <p className="text-on-surface-variant text-xs">
             {labelPerfil(item.perfil)}
-            {isConvite && " · Convite pendente"}
-            {!isConvite && item.semAcessoSistema && " · Sem acesso ao sistema"}
+            {isConvite && ` · ${t("familia.card.convitePendente")}`}
+            {!isConvite && item.semAcessoSistema && ` · ${t("familia.card.semAcesso")}`}
           </p>
           <div className="flex flex-wrap gap-1.5 mt-1">
             {isFinanceiro && (
               <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-secondary/10 text-secondary">
-                Responsável financeiro
+                {t("familia.card.responsavelFinanceiro")}
               </span>
             )}
             <span
@@ -166,7 +169,7 @@ function CardOcupante({ item, podeRemover, onRemover, responsavelFinanceiroId })
                 isConvite ? "bg-secondary/10 text-secondary" : "bg-primary/10 text-primary"
               }`}
             >
-              {isConvite ? "pendente" : "ativo"}
+              {isConvite ? t("familia.card.pendente") : t("familia.card.ativo")}
             </span>
           </div>
         </div>
@@ -175,7 +178,7 @@ function CardOcupante({ item, podeRemover, onRemover, responsavelFinanceiroId })
         <button
           onClick={() => onRemover(item)}
           className="text-outline hover:text-error transition-colors p-1 cursor-pointer shrink-0"
-          title="Remover vínculo"
+          title={t("familia.card.removerVinculo")}
         >
           <Icone name="close" className="text-base" />
         </button>
@@ -185,6 +188,7 @@ function CardOcupante({ item, podeRemover, onRemover, responsavelFinanceiroId })
 }
 
 export function FamiliaView() {
+  const { t } = useTranslation("perfil");
   const { usuario } = useAuth();
   const toast = useToast();
   const confirm = useConfirm();
@@ -221,11 +225,11 @@ export function FamiliaView() {
       setMensagemVazio(data.mensagemVazio ?? null);
       if (eligRes?.data) setElegibilidade(eligRes.data);
     } catch (err) {
-      toast.error(err.response?.data?.mensagem || "Erro ao carregar ocupantes.");
+      toast.error(err.response?.data?.mensagem || t("familia.toast.erroCarregar"));
     } finally {
       setCarregando(false);
     }
-  }, [unidadeId, toast]);
+  }, [unidadeId, toast, t]);
 
   useEffect(() => {
     carregar();
@@ -244,14 +248,14 @@ export function FamiliaView() {
       const res = await apiFn(unidadeId, dados);
       toast.success(res.data.mensagem);
       if (res.data.convite?.codigo) {
-        toast.info("Convite enviado", { detalhe: `Código: ${res.data.convite.codigo}` });
+        toast.info(t("familia.toast.conviteEnviado"), { detalhe: t("familia.toast.codigo", { codigo: res.data.convite.codigo }) });
       }
       setFormAtivo(null);
       await carregar();
     } catch (err) {
       const data = err.response?.data;
       if (data?.erros) setErros(data.erros);
-      toast.error(data?.mensagem || "Erro ao cadastrar.");
+      toast.error(data?.mensagem || t("familia.toast.erroCadastrar"));
     } finally {
       setSalvando(false);
     }
@@ -259,10 +263,9 @@ export function FamiliaView() {
 
   async function handleTransferir() {
     const ok = await confirm({
-      titulo: "Transferir responsabilidade financeira",
-      mensagem:
-        "O Lessee ativo passará a ser o responsável financeiro e seu perfil será atualizado para Absent Owner. Ocupantes e convidados cadastrados por você serão desativados. Deseja continuar?",
-      confirmarTexto: "Transferir",
+      titulo: t("familia.transferir.titulo"),
+      mensagem: t("familia.transferir.mensagem"),
+      confirmarTexto: t("familia.transferir.confirmar"),
       variante: "danger",
     });
     if (!ok) return;
@@ -272,15 +275,15 @@ export function FamiliaView() {
       toast.success(res.data.mensagem);
       await carregar();
     } catch (err) {
-      toast.error(err.response?.data?.mensagem || "Erro na transferência.");
+      toast.error(err.response?.data?.mensagem || t("familia.toast.erroTransferir"));
     }
   }
 
   async function handleRemover(item) {
     const ok = await confirm({
-      titulo: "Remover vínculo",
-      mensagem: `Deseja remover ${item.nome} desta unidade?`,
-      confirmarTexto: "Remover",
+      titulo: t("familia.remover.titulo"),
+      mensagem: t("familia.remover.mensagem", { nome: item.nome }),
+      confirmarTexto: t("familia.remover.confirmar"),
       variante: "danger",
     });
     if (!ok) return;
@@ -290,14 +293,14 @@ export function FamiliaView() {
       toast.success(res.data.mensagem);
       await carregar();
     } catch (err) {
-      toast.error(err.response?.data?.mensagem || "Erro ao remover vínculo.");
+      toast.error(err.response?.data?.mensagem || t("familia.toast.erroRemover"));
     }
   }
 
   if (!podeGerenciarOcupantes(perfil)) {
     return (
       <div className="rounded-2xl bg-surface-container-highest/30 py-10 px-4 text-center text-on-surface-variant text-sm">
-        Você não tem permissão para gerenciar ocupantes desta unidade.
+        {t("familia.semPermissao")}
       </div>
     );
   }
@@ -306,10 +309,10 @@ export function FamiliaView() {
     return (
       <div className="rounded-2xl bg-surface-container-highest/30 py-10 px-4 text-center space-y-3">
         <p className="text-on-surface-variant text-sm">
-          Sua conta ainda não está vinculada a uma unidade.
+          {t("familia.semUnidade.titulo")}
         </p>
         <p className="text-on-surface-variant text-xs">
-          Aguarde um administrador vincular seu usuário a um apartamento.
+          {t("familia.semUnidade.desc")}
         </p>
       </div>
     );
@@ -318,7 +321,7 @@ export function FamiliaView() {
   if (carregando) {
     return (
       <div className="py-10 text-center text-on-surface-variant text-sm">
-        Carregando ocupantes...
+        {t("familia.carregando")}
       </div>
     );
   }
@@ -334,14 +337,14 @@ export function FamiliaView() {
       {podeTransferir && (
         <div className="p-4 rounded-2xl border border-secondary/20 bg-secondary/5 space-y-3">
           <p className="text-sm text-on-surface">
-            Você é o responsável financeiro. Pode transferir essa responsabilidade ao Lessee ativo.
+            {t("familia.transferir.aviso")}
           </p>
           <button
             type="button"
             onClick={handleTransferir}
             className="text-sm font-semibold text-secondary hover:underline cursor-pointer"
           >
-            Transferir responsabilidade financeira
+            {t("familia.transferir.titulo")}
           </button>
         </div>
       )}
@@ -352,13 +355,13 @@ export function FamiliaView() {
 
       <p className="text-xs font-semibold uppercase tracking-widest text-on-surface-variant ml-1">
         {itens.length === 0
-          ? mensagemVazio || "Nenhum ocupante vinculado a esta unidade."
-          : `${itens.length} vínculo(s) na unidade`}
+          ? mensagemVazio || t("familia.vazio")
+          : t("familia.contagem", { count: itens.length })}
       </p>
 
       {itens.length === 0 && (
         <div className="rounded-2xl bg-surface-container-highest/30 py-10 px-4 text-center text-on-surface-variant text-sm">
-          {mensagemVazio || "Nenhum ocupante vinculado a esta unidade."}
+          {mensagemVazio || t("familia.vazio")}
         </div>
       )}
 
@@ -396,7 +399,7 @@ export function FamiliaView() {
               className="flex items-center gap-2 px-4 py-3 rounded-xl border border-dashed border-outline-variant/30 text-on-surface-variant hover:text-primary hover:border-primary/30 transition-all text-sm font-semibold cursor-pointer"
             >
               <Icone name="key" className="text-lg" />
-              Cadastrar Lessee
+              {t("familia.botoes.lessee")}
             </button>
           )}
           {podeOccupant && (
@@ -406,7 +409,7 @@ export function FamiliaView() {
               className="flex items-center gap-2 px-4 py-3 rounded-xl border border-dashed border-outline-variant/30 text-on-surface-variant hover:text-primary hover:border-primary/30 transition-all text-sm font-semibold cursor-pointer"
             >
               <Icone name="person_add" className="text-lg" />
-              Cadastrar Occupant
+              {t("familia.botoes.occupant")}
             </button>
           )}
           {podeGuest && (
@@ -417,7 +420,7 @@ export function FamiliaView() {
                 className="flex items-center gap-2 px-4 py-3 rounded-xl border border-dashed border-outline-variant/30 text-on-surface-variant hover:text-primary hover:border-primary/30 transition-all text-sm font-semibold cursor-pointer"
               >
                 <Icone name="group_add" className="text-lg" />
-                Cadastrar Guest
+                {t("familia.botoes.guest")}
               </button>
               <button
                 type="button"
@@ -425,7 +428,7 @@ export function FamiliaView() {
                 className="flex items-center gap-2 px-4 py-3 rounded-xl border border-solid border-secondary/30 text-secondary hover:bg-secondary/10 transition-all text-sm font-semibold cursor-pointer"
               >
                 <Icone name="manage_accounts" className="text-lg" />
-                Gerenciar Acessos
+                {t("familia.botoes.gerenciarAcessos")}
               </button>
             </>
           )}

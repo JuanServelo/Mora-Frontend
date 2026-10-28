@@ -1,0 +1,33 @@
+{
+  "cabecalho": {
+    "painel": "Painel Administrativo",
+    "gerenciar": "Gerenciar",
+    "perfis": "Perfis",
+    "descricao": "Visualize as permissões e responsabilidades de cada perfil de usuário."
+  },
+  "categorias": {
+    "plataforma": "Nível Plataforma",
+    "condominio": "Nível Condomínio",
+    "unidade": "Nível Unidade"
+  },
+  "lista": {
+    "vazio": "Nenhum perfil encontrado nesta categoria."
+  },
+  "card": {
+    "semAcesso": "Sem acesso ao sistema",
+    "permissoes": "O que pode fazer",
+    "podeCadastrar": "Pode cadastrar",
+    "abasLiberadas": "Abas administrativas liberadas"
+  },
+  "matriz": {
+    "botao": "Matriz de Acesso",
+    "titulo": "Matriz de Acesso ao Admin",
+    "descricao": "Quais perfis acessam cada aba administrativa",
+    "colunaAba": "Aba",
+    "perfis": {
+      "adminGeral": "Admin Geral",
+      "adminSindico": "Admin Síndico"
+    },
+    "perfisUnidade": "Perfis de nível Unidade (sem acesso ao painel admin)"
+  }
+}

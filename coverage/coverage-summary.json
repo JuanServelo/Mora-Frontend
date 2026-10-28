@@ -1,0 +1,3 @@
+{"total": {"lines":{"total":671,"covered":250,"skipped":0,"pct":37.25},"statements":{"total":671,"covered":250,"skipped":0,"pct":37.25},"functions":{"total":27,"covered":2,"skipped":0,"pct":7.4},"branches":{"total":63,"covered":29,"skipped":0,"pct":46.03},"branchesTrue":{"total":0,"covered":0,"skipped":0,"pct":"Unknown"}}
+,"C:\\Users\\juans\\Documents\\GitHub\\Mora\\Mora-Frontend\\src\\pages\\adm\\GerenciarEntregas.jsx": {"lines":{"total":671,"covered":250,"skipped":0,"pct":37.25},"functions":{"total":27,"covered":2,"skipped":0,"pct":7.4},"statements":{"total":671,"covered":250,"skipped":0,"pct":37.25},"branches":{"total":63,"covered":29,"skipped":0,"pct":46.03}}
+}

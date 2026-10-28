@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Icone } from "../icones/Icone";
 import { Campo } from "../campos/Campo";
 import { Botao } from "../botoes/Botao";
@@ -11,6 +12,7 @@ import { mascararCnpj, mascararTelefone, validarCnpj, validarTelefone } from "..
  * pode ser editável depois.
  */
 export function FormCondominio({ inicial, onSalvar, onCancelar, isNovo }) {
+  const { t } = useTranslation("condominios");
   const [form, setForm] = useState({
     id: inicial?.id ?? "",
     nome: inicial?.nome ?? "",
@@ -29,15 +31,15 @@ export function FormCondominio({ inicial, onSalvar, onCancelar, isNovo }) {
 
   function validar() {
     const novosErros = {};
-    if (isNovo && !form.id.trim()) novosErros.id = "ID é obrigatório.";
-    if (!form.nome.trim()) novosErros.nome = "Nome é obrigatório.";
+    if (isNovo && !form.id.trim()) novosErros.id = t("form.erros.idObrigatorio");
+    if (!form.nome.trim()) novosErros.nome = t("form.erros.nomeObrigatorio");
     if (form.cnpj.trim()) {
       const digits = form.cnpj.replace(/\D/g, "");
-      if (digits.length !== 14) novosErros.cnpj = "CNPJ incompleto (14 dígitos).";
-      else if (!validarCnpj(form.cnpj)) novosErros.cnpj = "CNPJ inválido.";
+      if (digits.length !== 14) novosErros.cnpj = t("form.erros.cnpjIncompleto");
+      else if (!validarCnpj(form.cnpj)) novosErros.cnpj = t("form.erros.cnpjInvalido");
     }
     if (form.telefone.trim() && !validarTelefone(form.telefone)) {
-      novosErros.telefone = "Telefone inválido (10 ou 11 dígitos).";
+      novosErros.telefone = t("form.erros.telefoneInvalido");
     }
     return novosErros;
   }
@@ -73,8 +75,8 @@ export function FormCondominio({ inicial, onSalvar, onCancelar, isNovo }) {
         {isNovo && (
           <Campo
             id="cond-id"
-            label="ID / Slug *"
-            placeholder="ex: cond-jardim-europa"
+            label={t("form.campos.id")}
+            placeholder={t("form.placeholders.id")}
             icon="tag"
             value={form.id}
             error={erros.id}
@@ -83,8 +85,8 @@ export function FormCondominio({ inicial, onSalvar, onCancelar, isNovo }) {
         )}
         <Campo
           id="cond-nome"
-          label="Nome do Cliente *"
-          placeholder="Condomínio Jardim Europa"
+          label={t("form.campos.nome")}
+          placeholder={t("form.placeholders.nome")}
           icon="domain"
           value={form.nome}
           error={erros.nome}
@@ -102,16 +104,16 @@ export function FormCondominio({ inicial, onSalvar, onCancelar, isNovo }) {
         />
         <Campo
           id="cond-email"
-          label="E-mail"
+          label={t("form.campos.email")}
           type="email"
-          placeholder="contato@condominio.com"
+          placeholder={t("form.placeholders.email")}
           icon="mail"
           value={form.email}
           onChange={(e) => set("email", e.target.value)}
         />
         <Campo
           id="cond-telefone"
-          label="Telefone"
+          label={t("form.campos.telefone")}
           placeholder="(11) 99999-9999"
           icon="call"
           value={form.telefone}
@@ -122,8 +124,8 @@ export function FormCondominio({ inicial, onSalvar, onCancelar, isNovo }) {
       </div>
       <Campo
         id="cond-endereco"
-        label="Endereço"
-        placeholder="Rua das Flores, 100 — São Paulo, SP"
+        label={t("form.campos.endereco")}
+        placeholder={t("form.placeholders.endereco")}
         icon="location_on"
         value={form.endereco}
         onChange={(e) => set("endereco", e.target.value)}
@@ -131,7 +133,7 @@ export function FormCondominio({ inicial, onSalvar, onCancelar, isNovo }) {
 
       <div className="flex gap-3 pt-1">
         <Botao type="submit" disabled={salvando}>
-          {salvando ? "Salvando…" : isNovo ? "Criar Cliente" : "Salvar Alterações"}
+          {salvando ? t("comum:acoes.salvando") : isNovo ? t("form.botoes.criar") : t("form.botoes.salvarAlteracoes")}
           <Icone name={isNovo ? "add_business" : "check"} className="text-xl" />
         </Botao>
         <button
@@ -139,7 +141,7 @@ export function FormCondominio({ inicial, onSalvar, onCancelar, isNovo }) {
           onClick={onCancelar}
           className="flex-1 py-3 rounded-xl border border-outline-variant/30 text-on-surface-variant hover:text-on-surface transition-colors text-sm font-medium cursor-pointer"
         >
-          Cancelar
+          {t("comum:acoes.cancelar")}
         </button>
       </div>
     </form>

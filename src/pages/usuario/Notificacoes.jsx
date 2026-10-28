@@ -3,8 +3,11 @@ import { useNavigate } from "react-router-dom";
 import { Icone } from "../../components/icones/Icone";
 import { useNotificacoes } from "../../contexts/NotificacoesContext";
 import { ROTULO_ORIGEM, configDaNotificacao, tempoRelativo } from "../../utils/notificacoes";
+import { useTranslation } from "react-i18next";
+import { idiomaAtual } from "../../i18n";
 
 export function Notificacoes() {
+  const { t } = useTranslation("notificacoes");
   const navigate = useNavigate();
   const { notificacoes, naoLidas, marcarLida, marcarTodasLidas } = useNotificacoes();
 
@@ -14,7 +17,7 @@ export function Notificacoes() {
     if (destino) navigate(destino);
   }
 
-  const grupos = agruparPorDia(notificacoes);
+  const grupos = agruparPorDia(notificacoes, t);
 
   return (
     <div className="min-h-screen w-full pt-4 pb-24 px-4 sm:px-6">
@@ -23,9 +26,9 @@ export function Notificacoes() {
         {/* Cabeçalho */}
         <div className="pt-2 flex items-end justify-between gap-4">
           <div>
-            <h1 className="font-headline text-3xl font-bold text-on-surface">Notificações</h1>
+            <h1 className="font-headline text-3xl font-bold text-on-surface">{t("titulo")}</h1>
             <p className="text-on-surface-variant text-sm mt-1">
-              {naoLidas > 0 ? `${naoLidas} não lida${naoLidas > 1 ? "s" : ""}` : "Tudo em dia"}
+              {naoLidas > 0 ? t("naoLidas", { count: naoLidas }) : t("emDia")}
             </p>
           </div>
           {naoLidas > 0 && (
@@ -33,7 +36,7 @@ export function Notificacoes() {
               onClick={marcarTodasLidas}
               className="shrink-0 text-sm font-semibold text-primary hover:text-primary/80 transition cursor-pointer"
             >
-              Marcar todas como lidas
+              {t("marcarTodas")}
             </button>
           )}
         </div>
@@ -45,9 +48,9 @@ export function Notificacoes() {
               <Icone name="notifications_none" className="text-primary text-3xl" />
             </div>
             <div>
-              <p className="font-semibold text-on-surface mb-1">Sem notificações</p>
+              <p className="font-semibold text-on-surface mb-1">{t("vazio.titulo")}</p>
               <p className="text-xs text-on-surface-variant">
-                Faturas, respostas da administração e comunicados aparecem aqui.
+                {t("vazio.descricao")}
               </p>
             </div>
           </div>
@@ -111,7 +114,7 @@ export function Notificacoes() {
 
 /* ── helpers ──────────────────────────────────────────────────────────────── */
 
-function agruparPorDia(notificacoes) {
+function agruparPorDia(notificacoes, t) {
   const hoje = new Date();
   const ontem = new Date(hoje);
   ontem.setDate(hoje.getDate() - 1);
@@ -120,9 +123,9 @@ function agruparPorDia(notificacoes) {
   for (const n of notificacoes) {
     const d = new Date(n.criadoEm);
     let label;
-    if (mesmoDia(d, hoje)) label = "Hoje";
-    else if (mesmoDia(d, ontem)) label = "Ontem";
-    else label = d.toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" });
+    if (mesmoDia(d, hoje)) label = t("comum:tempo.hoje");
+    else if (mesmoDia(d, ontem)) label = t("comum:tempo.ontem");
+    else label = d.toLocaleDateString(idiomaAtual(), { day: "2-digit", month: "long", year: "numeric" });
 
     if (!grupos[label]) grupos[label] = [];
     grupos[label].push(n);

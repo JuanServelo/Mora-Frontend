@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { financeiroApi } from "../../../services/financeiroApi";
 import { Icone } from "../../icones/Icone";
 import { useToast } from "../../../contexts/ToastContext";
@@ -14,6 +15,7 @@ import { useToast } from "../../../contexts/ToastContext";
  * produção um clique aqui mandaria cobrança real para alguém.
  */
 export function PainelGateway() {
+  const { t } = useTranslation("financeiro");
   const toast = useToast();
 
   const [status, setStatus] = useState(null);
@@ -36,9 +38,9 @@ export function PainelGateway() {
       const { data } = await financeiroApi.cobrancaDeTeste(forma, valor);
       setResultado(data);
       if (data.aviso) toast.error(data.aviso);
-      else toast.success("Cobrança de teste criada no sandbox.");
+      else toast.success(t("gateway.toast.criada"));
     } catch (e) {
-      toast.error(e.response?.data?.mensagem || "Erro ao falar com o gateway.");
+      toast.error(e.response?.data?.mensagem || t("gateway.toast.erroGateway"));
     } finally {
       setEmitindo(false);
     }
@@ -48,32 +50,34 @@ export function PainelGateway() {
     try {
       const { data } = await financeiroApi.consultarCobrancaTeste(resultado.cobranca.id);
       toast.success(
-        `Status: ${data.cobranca.status}${data.cobranca.pagoEm ? ` · pago em ${data.cobranca.pagoEm}` : ""}`,
+        data.cobranca.pagoEm
+          ? t("gateway.toast.statusPago", { status: data.cobranca.status, pagoEm: data.cobranca.pagoEm })
+          : t("gateway.toast.status", { status: data.cobranca.status }),
       );
     } catch {
-      toast.error("Não foi possível consultar a cobrança.");
+      toast.error(t("gateway.toast.erroConsultar"));
     }
   }
 
   async function cancelar() {
     try {
       await financeiroApi.cancelarCobrancaTeste(resultado.cobranca.id);
-      toast.success("Cobrança de teste cancelada.");
+      toast.success(t("gateway.toast.cancelada"));
       setResultado(null);
     } catch {
-      toast.error("Não foi possível cancelar a cobrança.");
+      toast.error(t("gateway.toast.erroCancelar"));
     }
   }
 
   function copiar(texto, rotulo) {
     navigator.clipboard
       .writeText(texto)
-      .then(() => toast.success(`${rotulo} copiado.`))
-      .catch(() => toast.error("Não foi possível copiar."));
+      .then(() => toast.success(t("gateway.toast.copiado", { rotulo })))
+      .catch(() => toast.error(t("gateway.toast.erroCopiar")));
   }
 
   if (!status) {
-    return <p className="text-on-surface-variant text-sm">Verificando o gateway…</p>;
+    return <p className="text-on-surface-variant text-sm">{t("gateway.verificando")}</p>;
   }
 
   if (!status.configurado) {
@@ -81,11 +85,12 @@ export function PainelGateway() {
       <div className="text-center py-12 rounded-2xl border border-dashed border-veu/10">
         <Icone name="key_off" className="text-4xl text-outline-variant" />
         <p className="mt-3 text-on-surface-variant text-sm">
-          Nenhuma credencial de gateway configurada.
+          {t("gateway.semCredencial.titulo")}
         </p>
         <p className="text-xs text-outline-variant mt-1 max-w-md mx-auto">
-          Defina <code className="text-on-surface">ASAAS_API_KEY</code> no ambiente
-          do serviço para habilitar as cobranças.
+          {t("gateway.semCredencial.antes")}{" "}
+          <code className="text-on-surface">ASAAS_API_KEY</code>{" "}
+          {t("gateway.semCredencial.depois")}
         </p>
       </div>
     );
@@ -96,15 +101,15 @@ export function PainelGateway() {
       <div className="flex flex-wrap items-center gap-4 p-4 rounded-2xl bg-surface-container-highest/20">
         <Selo
           icone={status.sandbox ? "science" : "warning"}
-          rotulo="Ambiente"
-          valor={status.sandbox ? "Sandbox" : "PRODUÇÃO"}
+          rotulo={t("gateway.ambiente")}
+          valor={status.sandbox ? t("gateway.sandbox") : t("gateway.producao")}
           alerta={!status.sandbox}
         />
-        <Selo icone="key" rotulo="Chave" valor={`…${status.chaveFinal}`} />
+        <Selo icone="key" rotulo={t("gateway.chave")} valor={`…${status.chaveFinal}`} />
         <p className="text-[11px] text-on-surface-variant ml-auto max-w-xs">
           {status.sandbox
-            ? "Cobranças criadas aqui são fictícias e não movimentam dinheiro."
-            : "Fora do sandbox esta tela não emite cobrança."}
+            ? t("gateway.avisoSandbox")
+            : t("gateway.avisoProducao")}
         </p>
       </div>
 
@@ -112,7 +117,7 @@ export function PainelGateway() {
         <div className="grid sm:grid-cols-2 gap-4">
           <div className="space-y-2">
             <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant ml-1">
-              Forma de pagamento
+              {t("gateway.formaPagamento")}
             </label>
             <div className="flex gap-2">
               {["PIX", "BOLETO"].map((f) => (
@@ -125,14 +130,14 @@ export function PainelGateway() {
                       : "bg-surface-container-highest/40 text-on-surface-variant hover:text-on-surface"
                   }`}
                 >
-                  {f === "PIX" ? "PIX" : "Boleto"}
+                  {f === "PIX" ? "PIX" : t("gateway.boleto")}
                 </button>
               ))}
             </div>
           </div>
           <div className="space-y-2">
             <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant ml-1">
-              Valor
+              {t("gateway.valor")}
             </label>
             <input
               value={valor}
@@ -147,7 +152,7 @@ export function PainelGateway() {
           disabled={emitindo || !status.sandbox}
           className="px-6 py-3 rounded-full bg-gradient-to-br from-primary to-primary-container text-on-primary-container font-bold cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed transition whitespace-nowrap"
         >
-          {emitindo ? "Emitindo…" : "Gerar cobrança"}
+          {emitindo ? t("gateway.emitindo") : t("gateway.gerar")}
         </button>
       </div>
 
@@ -162,7 +167,7 @@ export function PainelGateway() {
                 {resultado.cobranca.valorFormatado}
               </p>
               <p className="text-[11px] text-on-surface-variant uppercase tracking-wider font-semibold">
-                {resultado.cobranca.forma} · vence {resultado.cobranca.vencimento} ·{" "}
+                {resultado.cobranca.forma} · {t("gateway.vence", { data: resultado.cobranca.vencimento })} ·{" "}
                 {resultado.cobranca.status}
               </p>
             </div>
@@ -171,13 +176,13 @@ export function PainelGateway() {
                 onClick={conferir}
                 className="px-4 py-2 rounded-full bg-veu/5 text-on-surface-variant hover:text-on-surface text-sm font-semibold transition cursor-pointer"
               >
-                Conferir status
+                {t("gateway.conferirStatus")}
               </button>
               <button
                 onClick={cancelar}
                 className="px-4 py-2 rounded-full text-on-surface-variant hover:text-error hover:bg-error/10 text-sm font-semibold transition cursor-pointer"
               >
-                Cancelar
+                {t("comum:acoes.cancelar")}
               </button>
             </div>
           </div>
@@ -194,23 +199,23 @@ export function PainelGateway() {
               {resultado.pix.imagem && (
                 <img
                   src={`data:image/png;base64,${resultado.pix.imagem}`}
-                  alt="QR Code do PIX de teste"
+                  alt={t("gateway.qrAlt")}
                   className="w-40 h-40 rounded-xl bg-white p-2 shrink-0"
                 />
               )}
               <div className="min-w-0 flex-1 space-y-2">
                 <p className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant">
-                  PIX copia e cola
+                  {t("gateway.pixCopiaCola")}
                 </p>
                 <p className="text-xs text-on-surface-variant break-all bg-surface-container-highest/30 rounded-xl p-3 font-mono">
                   {resultado.pix.payload}
                 </p>
                 <button
-                  onClick={() => copiar(resultado.pix.payload, "Código PIX")}
+                  onClick={() => copiar(resultado.pix.payload, t("gateway.codigoPix"))}
                   className="flex items-center gap-1.5 text-sm text-primary font-semibold cursor-pointer hover:underline"
                 >
                   <Icone name="content_copy" className="text-base" />
-                  Copiar código
+                  {t("gateway.copiarCodigo")}
                 </button>
               </div>
             </div>
@@ -221,17 +226,17 @@ export function PainelGateway() {
               {resultado.boleto.linhaDigitavel && (
                 <div className="space-y-2">
                   <p className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant">
-                    Linha digitável
+                    {t("gateway.linhaDigitavel")}
                   </p>
                   <p className="text-sm text-on-surface break-all bg-surface-container-highest/30 rounded-xl p-3 font-mono">
                     {resultado.boleto.linhaDigitavel}
                   </p>
                   <button
-                    onClick={() => copiar(resultado.boleto.linhaDigitavel, "Linha digitável")}
+                    onClick={() => copiar(resultado.boleto.linhaDigitavel, t("gateway.linhaDigitavel"))}
                     className="flex items-center gap-1.5 text-sm text-primary font-semibold cursor-pointer hover:underline"
                   >
                     <Icone name="content_copy" className="text-base" />
-                    Copiar linha
+                    {t("gateway.copiarLinha")}
                   </button>
                 </div>
               )}
@@ -243,7 +248,7 @@ export function PainelGateway() {
                   className="inline-flex items-center gap-1.5 text-sm text-primary font-semibold hover:underline"
                 >
                   <Icone name="open_in_new" className="text-base" />
-                  Abrir boleto
+                  {t("gateway.abrirBoleto")}
                 </a>
               )}
             </div>
@@ -257,7 +262,7 @@ export function PainelGateway() {
               className="inline-flex items-center gap-1.5 text-sm text-on-surface-variant hover:text-on-surface"
             >
               <Icone name="link" className="text-base" />
-              Página de pagamento do gateway
+              {t("gateway.paginaPagamento")}
             </a>
           )}
         </div>

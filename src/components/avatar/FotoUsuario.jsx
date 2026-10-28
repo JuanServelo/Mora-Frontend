@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Icone } from "../icones/Icone";
 import { fotoUrlCompleta } from "../../utils/avatar";
 
@@ -23,6 +24,7 @@ export function FotoUsuario({
   // Guarda a URL que falhou, e não um booleano: quando o usuário envia uma foto
   // nova, a URL muda e a tentativa recomeça sozinha. Com booleano, o avatar
   // ficaria preso no ícone até recarregar a página.
+  const { t } = useTranslation("layout");
   const [urlComFalha, setUrlComFalha] = useState(null);
 
   const url = fotoUrlCompleta(usuario?.fotoUrl);
@@ -34,7 +36,7 @@ export function FotoUsuario({
   return (
     <img
       src={url}
-      alt={usuario?.nome ? `Foto de ${usuario.nome}` : "Foto de perfil"}
+      alt={usuario?.nome ? t("foto.alt", { nome: usuario.nome }) : t("foto.altPadrao")}
       onError={() => setUrlComFalha(url)}
       className="w-full h-full object-cover"
     />

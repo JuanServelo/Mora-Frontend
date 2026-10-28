@@ -132,15 +132,68 @@ export const financeiroApi = {
     return financeiro.get(`${base}/gastos`, { params: ano ? { ano } : {} });
   },
 
-  // ── Notificações ──────────────────────────────────────
-  listarNotificacoes() {
-    return financeiro.get(`${base}/notificacoes`);
+  // As notificações saíram daqui: a caixa de entrada é lida no
+  // comunicacao-service (`comunicacaoApi`), e o financeiro não serve mais as
+  // rotas antigas.
+
+  // ── Multas (RF-16) ────────────────────────────────────
+  listarMultas(filtros = {}) {
+    return financeiro.get(`${base}/admin/multas`, { params: filtros });
   },
-  marcarNotificacaoLida(id) {
-    return financeiro.patch(`${base}/notificacoes/${id}/lida`);
+  aplicarMulta(dados) {
+    return financeiro.post(`${base}/admin/multas`, dados);
   },
-  marcarTodasNotificacoesLidas() {
-    return financeiro.patch(`${base}/notificacoes/marcar-todas-lidas`);
+  julgarRecurso(id, aceito, justificativa) {
+    return financeiro.patch(`${base}/admin/multas/${id}/julgar`, { aceito, justificativa });
+  },
+  cancelarMulta(id, justificativa) {
+    return financeiro.patch(`${base}/admin/multas/${id}/cancelar`, { justificativa });
+  },
+  minhasMultas() {
+    return financeiro.get(`${base}/multas/minhas`);
+  },
+  recorrerMulta(id, texto) {
+    return financeiro.post(`${base}/multas/${id}/recurso`, { texto });
+  },
+
+  // ── Contratos de locação (RF-15) ──────────────────────
+  listarContratos() {
+    return financeiro.get(`${base}/admin/contratos`);
+  },
+  criarContrato(dados) {
+    return financeiro.post(`${base}/admin/contratos`, dados);
+  },
+  encerrarContrato(id) {
+    return financeiro.patch(`${base}/admin/contratos/${id}/encerrar`);
+  },
+  meusContratos() {
+    return financeiro.get(`${base}/contratos/meus`);
+  },
+  criarMeuContrato(dados) {
+    return financeiro.post(`${base}/contratos/meus`, dados);
+  },
+  encerrarMeuContrato(id) {
+    return financeiro.patch(`${base}/contratos/${id}/encerrar`);
+  },
+
+  // ── Prestação de contas (RF-17) ───────────────────────
+  obterPrestacao(competencia) {
+    return financeiro.get(`${base}/admin/prestacao/${competencia}`);
+  },
+  lancar(competencia, dados) {
+    return financeiro.post(`${base}/admin/prestacao/${competencia}/lancamentos`, dados);
+  },
+  excluirLancamento(id) {
+    return financeiro.delete(`${base}/admin/prestacao/lancamentos/${id}`);
+  },
+  publicarPrestacao(competencia) {
+    return financeiro.post(`${base}/admin/prestacao/${competencia}/publicar`);
+  },
+  prestacoesPublicadas() {
+    return financeiro.get(`${base}/prestacao`);
+  },
+  prestacaoPublicada(competencia) {
+    return financeiro.get(`${base}/prestacao/${competencia}`);
   },
 };
 

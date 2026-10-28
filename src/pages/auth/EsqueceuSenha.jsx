@@ -8,7 +8,7 @@ import { Botao } from "../../components/botoes/Botao";
 import { Icone } from "../../components/icones/Icone";
 
 export function EsqueceuSenha() {
-  const { t } = useTranslation();
+  const { t } = useTranslation("auth");
   const { esqueciSenha } = useAuth();
   const [enviado, setEnviado] = useState(false);
   const [erro, setErro] = useState("");
@@ -23,7 +23,7 @@ export function EsqueceuSenha() {
     const email = form.get("email-recuperacao")?.trim();
 
     if (!email) {
-      setErro("Informe seu e-mail.");
+      setErro(t("recovery.erros.emailVazio"));
       setCarregando(false);
       return;
     }
@@ -32,7 +32,7 @@ export function EsqueceuSenha() {
       await esqueciSenha(email);
       setEnviado(true);
     } catch (err) {
-      setErro(err.response?.data?.mensagem || "Erro ao enviar e-mail.");
+      setErro(err.response?.data?.mensagem || t("recovery.erros.falha"));
     } finally {
       setCarregando(false);
     }
@@ -44,12 +44,12 @@ export function EsqueceuSenha() {
         {/* Coluna esquerda — Marca + Suporte */}
         <div className="lg:col-span-7 hidden lg:flex flex-col space-y-8">
           <div className="space-y-2">
-            <h1 className="font-headline text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tighter bg-gradient-to-br from-primary to-primary-container bg-clip-text text-transparent">
+            <h1 className="font-headline text-6xl font-extrabold tracking-tighter bg-gradient-to-br from-primary to-primary-container bg-clip-text text-transparent">
               Mora
             </h1>
           </div>
 
-          <p className="text-on-surface-variant text-base lg:text-lg max-w-md leading-relaxed">
+          <p className="text-on-surface-variant text-lg max-w-md leading-relaxed">
             {t("recovery.left.description")}
           </p>
 
@@ -60,6 +60,7 @@ export function EsqueceuSenha() {
               <br />
               <Trans
                 i18nKey="recovery.concierge"
+                t={t}
                 components={{
                   span: (
                     <span className="text-secondary cursor-pointer hover:underline" />
@@ -72,13 +73,13 @@ export function EsqueceuSenha() {
 
         {/* Coluna direita — Card de recuperação */}
         <div className="lg:col-span-5 flex justify-center lg:justify-end w-full">
-          <div className="glass-panel w-full max-w-sm rounded-[2rem] p-6 sm:p-8 shadow-2xl relative overflow-hidden group">
+          <div className="glass-panel w-full max-w-sm rounded-[2rem] p-8 shadow-2xl relative overflow-hidden group">
             <div className="absolute -top-24 -left-24 w-48 h-48 bg-primary/20 blur-[60px] pointer-events-none transition-all duration-700 group-hover:bg-primary/30" />
 
             <div className="relative z-10">
               {/* Ícone */}
               <div className="mb-6 flex flex-col items-center lg:items-start">
-                <div className="w-12 h-12 shrink-0 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
+                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
                   <Icone name="lock_reset" className="text-primary text-2xl" />
                 </div>
                 <h2 className="font-headline text-2xl font-bold text-on-surface mb-1">
@@ -92,9 +93,9 @@ export function EsqueceuSenha() {
               {enviado ? (
                 <div className="text-center space-y-3 py-4">
                   <Icone name="mark_email_read" className="text-primary text-4xl" />
-                  <p className="text-on-surface font-semibold">E-mail enviado!</p>
+                  <p className="text-on-surface font-semibold">{t("recovery.enviado.titulo")}</p>
                   <p className="text-on-surface-variant text-sm">
-                    Se o e-mail estiver cadastrado, voce recebera um link de recuperacao.
+                    {t("recovery.enviado.texto")}
                   </p>
                 </div>
               ) : (
@@ -114,7 +115,7 @@ export function EsqueceuSenha() {
 
                   <div className="pt-1">
                     <Botao type="submit" disabled={carregando}>
-                      {carregando ? "Enviando..." : t("recovery.submit")}
+                      {carregando ? t("recovery.enviando") : t("recovery.submit")}
                       {!carregando && <Icone name="arrow_forward" className="text-xl" />}
                     </Botao>
                   </div>

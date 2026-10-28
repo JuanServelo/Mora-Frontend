@@ -1,0 +1,95 @@
+{
+  "cabecalho": {
+    "secao": "Painel Administrativo",
+    "tituloPrefixo": "Gestão de",
+    "tituloDestaque": "Entregas",
+    "nova": "Nova Entrega"
+  },
+  "stats": {
+    "total": "Total",
+    "pendentes": "Pendentes",
+    "retiradas": "Retiradas"
+  },
+  "status": {
+    "PENDENTE": "Pendente",
+    "RETIRADA": "Retirada"
+  },
+  "unidade": {
+    "apt": "Apt {{numero}}"
+  },
+  "filtros": {
+    "titulo": "Filtros",
+    "limpar": "Limpar filtros",
+    "status": "Status",
+    "todos": "Todos",
+    "bloco": "Bloco",
+    "todosBlocos": "Todos os blocos",
+    "apartamento": "Apartamento",
+    "destinatario": "Destinatário",
+    "nomePlaceholder": "Nome...",
+    "recebimentoDe": "Recebimento — de",
+    "recebimentoAte": "Recebimento — até",
+    "retiradaDe": "Retirada — de",
+    "retiradaAte": "Retirada — até"
+  },
+  "lista": {
+    "exibindo": "Exibindo <destaque>{{filtradas}}</destaque> de {{total}} entregas",
+    "carregando": "Carregando...",
+    "vazio": "Nenhuma entrega encontrada.",
+    "recebida": "Recebida",
+    "retirada": "Retirada"
+  },
+  "moradores": {
+    "nenhumVinculado": "Nenhum morador vinculado ao apartamento {{apartamento}}.",
+    "selecione": "Selecione o morador"
+  },
+  "erros": {
+    "cadastrar": "Erro ao cadastrar entrega.",
+    "atualizar": "Erro ao atualizar entrega.",
+    "selecioneRecebedor": "Selecione quem retirou a encomenda.",
+    "informeDataRetirada": "Informe a data de retirada.",
+    "retiradaFutura": "A data de retirada não pode ser futura.",
+    "retiradaAnterior": "A data de retirada não pode ser anterior à data de recebimento.",
+    "recebimentoDataFutura": "A data de recebimento não pode ser uma data futura.",
+    "retiradaDataFutura": "A data de retirada não pode ser uma data futura."
+  },
+  "retirada": {
+    "titulo": "Confirmar retirada",
+    "encomenda": "Encomenda",
+    "quemRetirou": "Quem retirou",
+    "dataRetirada": "Data de retirada",
+    "recebidaEm": "Recebida em {{data}} — data de retirada não pode ser anterior.",
+    "confirmar": "Confirmar retirada"
+  },
+  "form": {
+    "destinatario": "Destinatário",
+    "selecioneMorador": "Selecione um morador",
+    "bloco": "Bloco",
+    "apartamento": "Apartamento",
+    "preenchidoAutomaticamente": "Preenchido automaticamente",
+    "descricao": "Descrição",
+    "descricaoPlaceholder": "Ex: Caixa Amazon, envelope AR, etc.",
+    "remetente": "Remetente",
+    "remetentePlaceholder": "Ex: Correios, Mercado Livre, etc.",
+    "dataRecebimento": "Data de recebimento",
+    "status": "Status",
+    "dataRetirada": "Data de retirada",
+    "recebidaPor": "Recebida por",
+    "observacoes": "Observações",
+    "observacoesPlaceholder": "Opcional",
+    "salvarAlteracoes": "Salvar alterações",
+    "cadastrar": "Cadastrar entrega"
+  },
+  "detalhes": {
+    "destinatario": "Destinatário",
+    "bloco": "Bloco",
+    "apartamento": "Apartamento",
+    "remetente": "Remetente",
+    "descricao": "Descrição",
+    "recebidaEm": "Recebida em",
+    "retiradaEm": "Retirada em",
+    "observacoes": "Observações",
+    "recebidaPor": "Recebida por",
+    "marcarRetirada": "Marcar como retirada"
+  }
+}

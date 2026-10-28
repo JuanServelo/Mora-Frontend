@@ -7,20 +7,19 @@ import api from "../../services/api";
 import { Campo } from "../../components/campos/Campo";
 import { Botao } from "../../components/botoes/Botao";
 import { Icone } from "../../components/icones/Icone";
+import { SeletorIdioma } from "../../components/idioma/SeletorIdioma";
 
+// Código de erro devolvido pelo backend na URL → chave da mensagem.
 const ERROS_OAUTH = {
-  oauth: "Não foi possível entrar com Google.",
-  oauth_nao_configurado:
-    "Login com Google ainda não está configurado. Use e-mail e senha ou peça ao administrador.",
-  conta_nao_encontrada:
-    "Nenhuma conta Mora encontrada para este e-mail. Ative sua conta via convite antes de usar o Google.",
-  conta_desativada: "Esta conta foi desativada.",
-  cadastro_pendente:
-    "Seu cadastro ainda não foi concluído. Acesse o link enviado para seu e-mail para criar sua senha.",
+  oauth: "login.erros.oauth",
+  oauth_nao_configurado: "login.erros.oauthNaoConfigurado",
+  conta_nao_encontrada: "login.erros.contaNaoEncontrada",
+  conta_desativada: "login.erros.contaDesativada",
+  cadastro_pendente: "login.erros.cadastroPendente",
 };
 
 export function Login() {
-  const { t } = useTranslation();
+  const { t } = useTranslation("auth");
   const { login, loginComGoogle } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -35,9 +34,9 @@ export function Login() {
       return;
     }
     if (erroParam && ERROS_OAUTH[erroParam]) {
-      setErro(ERROS_OAUTH[erroParam]);
+      setErro(t(ERROS_OAUTH[erroParam]));
     }
-  }, [searchParams, navigate]);
+  }, [searchParams, navigate, t]);
 
   useEffect(() => {
     api.get("/api/auth/google/disponivel")
@@ -55,7 +54,7 @@ export function Login() {
     const senha = form.get("senha")?.trim();
 
     if (!email || !senha) {
-      setErro("Preencha todos os campos.");
+      setErro(t("geral.camposVazios"));
       setCarregando(false);
       return;
     }
@@ -64,7 +63,7 @@ export function Login() {
       const res = await login(email, senha);
       navigate(res.redirectPath || "/inicio");
     } catch (err) {
-      setErro(err.response?.data?.mensagem || "Erro ao fazer login.");
+      setErro(err.response?.data?.mensagem || t("login.erros.falha"));
     } finally {
       setCarregando(false);
     }
@@ -72,6 +71,10 @@ export function Login() {
 
   return (
     <div className="min-h-screen w-full overflow-x-hidden flex items-center justify-center px-4 py-8">
+      {/* Idioma: escolhido antes de entrar, quando ainda não há menu. */}
+      <div className="fixed top-4 right-4 z-20">
+        <SeletorIdioma compacto />
+      </div>
       <main className="relative w-full max-w-4xl grid lg:grid-cols-12 gap-8 items-center">
         {/* Coluna esquerda — Narrativa da marca */}
         <div className="lg:col-span-7 hidden lg:flex flex-col space-y-6">
@@ -79,7 +82,7 @@ export function Login() {
             <span className="text-secondary font-headline tracking-[0.2em] text-xs uppercase font-bold">
               {t("login.welcome")}
             </span>
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-headline font-extrabold tracking-tight text-on-surface leading-tight">
+            <h1 className="text-5xl font-headline font-extrabold tracking-tight text-on-surface leading-tight">
               {t("login.tagline")}
               <br />
               <span className="bg-gradient-to-r from-primary to-tertiary bg-clip-text text-transparent italic">
@@ -87,7 +90,7 @@ export function Login() {
               </span>
             </h1>
           </div>
-          <p className="text-on-surface-variant text-base lg:text-lg max-w-md leading-relaxed">
+          <p className="text-on-surface-variant text-lg max-w-md leading-relaxed">
             {t("login.description")}
           </p>
           <div className="flex items-center gap-5 pt-2">
@@ -110,7 +113,7 @@ export function Login() {
 
         {/* Coluna direita — Card de login */}
         <div className="lg:col-span-5 flex justify-center lg:justify-end w-full">
-          <div className="glass-panel w-full max-w-sm rounded-[2rem] p-6 sm:p-8 shadow-2xl relative overflow-hidden group">
+          <div className="glass-panel w-full max-w-sm rounded-[2rem] p-8 shadow-2xl relative overflow-hidden group">
             <div className="absolute -top-24 -left-24 w-48 h-48 bg-primary/20 blur-[60px] pointer-events-none transition-all duration-700 group-hover:bg-primary/30" />
 
             <div className="relative z-10">
@@ -130,9 +133,9 @@ export function Login() {
                 <Campo
                   id="email"
                   name="email"
-                  label="E-mail"
+                  label={t("field.email.label")}
                   type="email"
-                  placeholder="seu@email.com"
+                  placeholder={t("geral.emailPlaceholder")}
                   icon="mail"
                 />
 
@@ -173,7 +176,7 @@ export function Login() {
 
                 <div className="pt-2">
                   <Botao type="submit" disabled={carregando}>
-                    {carregando ? "Entrando..." : t("login.submit")}
+                    {carregando ? t("login.entrando") : t("login.submit")}
                     {!carregando && <Icone name="arrow_forward" className="text-xl" />}
                   </Botao>
                 </div>
@@ -186,7 +189,7 @@ export function Login() {
                       <div className="w-full border-t border-outline-variant/20" />
                     </div>
                     <div className="relative flex justify-center text-xs uppercase">
-                      <span className="bg-surface px-3 text-on-surface-variant">ou</span>
+                      <span className="bg-surface px-3 text-on-surface-variant">{t("login.ou")}</span>
                     </div>
                   </div>
 
@@ -213,7 +216,7 @@ export function Login() {
                         d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
                       />
                     </svg>
-                    Entrar com Google
+                    {t("login.google")}
                   </button>
                 </>
               )}
@@ -225,7 +228,7 @@ export function Login() {
                     to="/sem-convite"
                     className="text-primary font-bold hover:text-tertiary transition-colors"
                   >
-                    Ativar conta
+                    {t("login.ativarConta")}
                   </Link>
                 </p>
               </div>
@@ -235,7 +238,7 @@ export function Login() {
       </main>
 
       {/* Rodapé */}
-      <footer className="hidden sm:flex fixed bottom-6 w-full px-8 justify-between items-center text-[10px] text-on-surface-variant/40 font-medium tracking-widest uppercase pointer-events-none">
+      <footer className="fixed bottom-6 w-full px-8 flex justify-between items-center text-[10px] text-on-surface-variant/40 font-medium tracking-widest uppercase pointer-events-none">
         <div className="flex items-center gap-4">
           <span>{t("footer.privacy")}</span>
           <span>{t("footer.terms")}</span>

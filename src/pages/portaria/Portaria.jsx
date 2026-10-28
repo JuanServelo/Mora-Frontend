@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
+import { useTranslation, Trans } from "react-i18next";
 import { Link } from "react-router-dom";
 import { acessoApi } from "../../services/acessoApi";
 import { veiculoApi, atendimentoApi, apartamentoApi, preAutorizacaoApi } from "../../services/portariaApi";
@@ -6,49 +7,29 @@ import { Icone } from "../../components/icones/Icone";
 import { Campo } from "../../components/campos/Campo";
 import { useToast } from "../../contexts/ToastContext";
 import { PERFIS_FUNCIONARIO } from "../../utils/perfis";
+import {
+  errMsg, formatarCpfMask, fmtData, fmtHora, fmtDuracao, hoje,
+  unidadeLabel, fmtDuracaoEntre, normalizarPlaca, placaValida,
+} from "./portariaHelpers";
 
 // ─── helpers ───────────────────────────────────────────────────────────────
 
-function errMsg(err) {
-  const d = err?.response?.data;
-  return d?.mensagem ?? d?.message ?? d?.erro ?? null;
-}
 
-function formatarCpfMask(cpf) {
-  const d = String(cpf).replace(/\D/g, "");
-  if (d.length !== 11) return cpf;
-  return `${d.slice(0, 3)}.${d.slice(3, 6)}.${d.slice(6, 9)}-${d.slice(9)}`;
-}
 
-function fmtData(iso) {
-  if (!iso) return "—";
-  return new Date(iso).toLocaleDateString("pt-BR");
-}
 
-function fmtHora(iso) {
-  if (!iso) return "—";
-  return new Date(iso).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
-}
 
-function fmtDuracao(entradaEm) {
-  const diff = Math.floor((Date.now() - new Date(entradaEm)) / 1000);
-  if (diff < 60) return `${diff}s`;
-  if (diff < 3600) return `${Math.floor(diff / 60)}min`;
-  const h = Math.floor(diff / 3600);
-  const m = Math.floor((diff % 3600) / 60);
-  return m > 0 ? `${h}h ${m}min` : `${h}h`;
-}
 
-function hoje() {
-  const d = new Date();
-  return [
-    d.getFullYear(),
-    String(d.getMonth() + 1).padStart(2, "0"),
-    String(d.getDate()).padStart(2, "0"),
-  ].join("-");
-}
 
-const PERFIS_OPCOES = ["Morador", "Dono Aluguel", "Visitante", "Porteiro", "Terceiro", "Admin Síndico", "Admin Geral"];
+// `valor` vai para a API como filtro; `rotuloKey` é só o texto da opção.
+const PERFIS_OPCOES = [
+  { valor: "Morador", rotuloKey: "perfis.morador" },
+  { valor: "Dono Aluguel", rotuloKey: "perfis.donoAluguel" },
+  { valor: "Visitante", rotuloKey: "perfis.visitante" },
+  { valor: "Porteiro", rotuloKey: "perfis.porteiro" },
+  { valor: "Terceiro", rotuloKey: "perfis.terceiro" },
+  { valor: "Admin Síndico", rotuloKey: "perfis.adminSindico" },
+  { valor: "Admin Geral", rotuloKey: "perfis.adminGeral" },
+];
 
 // Perfis de funcionário que aparecem na aba Funcionários (auth-api)
 // Importada de utils/perfis para não haver lista paralela com a reserva de evento.
@@ -56,29 +37,32 @@ const PERFIS_OPCOES = ["Morador", "Dono Aluguel", "Visitante", "Porteiro", "Terc
 // ─── sub-componentes registrar acesso ──────────────────────────────────────
 
 function BadgeAcesso({ status }) {
+  const { t } = useTranslation("portaria");
   const dentro = status === "DENTRO";
   return (
     <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider ${
       dentro ? "bg-primary/10 text-primary" : "bg-outline-variant/20 text-on-surface-variant"
     }`}>
       <span className={`w-1.5 h-1.5 rounded-full ${dentro ? "bg-primary" : "bg-outline-variant"}`} />
-      {dentro ? "Dentro" : "Fora"}
+      {dentro ? t("status.dentro") : t("status.fora")}
     </span>
   );
 }
 
 function BadgePermissao({ permitida }) {
+  const { t } = useTranslation("portaria");
   return (
     <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider ${
       permitida ? "bg-secondary/10 text-secondary" : "bg-error/10 text-error"
     }`}>
       <Icone name={permitida ? "check_circle" : "cancel"} className="text-sm" />
-      {permitida ? "Entrada autorizada" : "Entrada bloqueada"}
+      {permitida ? t("permissao.autorizada") : t("permissao.bloqueada")}
     </span>
   );
 }
 
 function CartaoUsuario({ usuario, onEntrada, onSaida, showPermissao = false, carregando }) {
+  const { t } = useTranslation("portaria");
   const dentro = usuario.statusAcesso === "DENTRO";
   const isGuest = usuario.perfil === "CONVIDADO";
   const isVisitantePortaria = usuario.perfil === "VISITANTE";
@@ -92,9 +76,9 @@ function CartaoUsuario({ usuario, onEntrada, onSaida, showPermissao = false, car
       <div className="flex-1 min-w-0">
         <p className="font-semibold text-on-surface truncate">{usuario.nome}</p>
         <p className="text-xs text-on-surface-variant">
-          {usuario.cpf ? `CPF: ${formatarCpfMask(usuario.cpf)}` : "Sem CPF"}
+          {usuario.cpf ? t("cartao.cpf", { cpf: formatarCpfMask(usuario.cpf) }) : t("cartao.semCpf")}
           {usuario._perfilLabel && ` · ${usuario._perfilLabel}`}
-          {!usuario._perfilLabel && usuario.unidadeId && " · Unidade vinculada"}
+          {!usuario._perfilLabel && usuario.unidadeId && ` · ${t("cartao.unidadeVinculada")}`}
           {usuario.empresa && ` · ${usuario.empresa}`}
         </p>
         <div className="flex flex-wrap gap-2 mt-1.5">
@@ -110,13 +94,13 @@ function CartaoUsuario({ usuario, onEntrada, onSaida, showPermissao = false, car
               className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-semibold border border-primary/30 text-primary hover:bg-primary/10 transition-all"
             >
               <Icone name="open_in_new" className="text-base" />
-              Ir ao atendimento
+              {t("acoes.irAtendimento")}
             </Link>
           ) : (
             <button
               onClick={() => onEntrada(usuario)}
               disabled={carregando || bloqueado}
-              title={bloqueado ? "Entrada não autorizada pelo responsável" : "Registrar entrada"}
+              title={bloqueado ? t("cartao.entradaNaoAutorizada") : t("cartao.registrarEntrada")}
               className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-semibold transition-all border ${
                 bloqueado
                   ? "border-outline-variant/20 text-outline-variant cursor-not-allowed opacity-50"
@@ -124,7 +108,7 @@ function CartaoUsuario({ usuario, onEntrada, onSaida, showPermissao = false, car
               }`}
             >
               <Icone name="login" className="text-base" />
-              Entrada
+              {t("acoes.entrada")}
             </button>
           )
         ) : (
@@ -134,7 +118,7 @@ function CartaoUsuario({ usuario, onEntrada, onSaida, showPermissao = false, car
             className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-semibold border border-secondary/30 text-secondary hover:bg-secondary/10 transition-all cursor-pointer"
           >
             <Icone name="logout" className="text-base" />
-            Saída
+            {t("acoes.saida")}
           </button>
         )}
       </div>
@@ -145,20 +129,21 @@ function CartaoUsuario({ usuario, onEntrada, onSaida, showPermissao = false, car
 // ─── aba "Registrar acesso" — sub-aba Funcionários ────────────────────────
 
 const PERFIL_LABEL_FUNC = {
-  PORTEIRO: "Porteiro",
-  ADMIN_SINDICO: "Síndico",
-  TERCEIRO: "Terceiro",
+  PORTEIRO: "perfis.porteiro",
+  ADMIN_SINDICO: "perfis.sindico",
+  TERCEIRO: "perfis.terceiro",
 };
 
 function AbaFuncionarios({ residentes, portTerceiros = [], acao, onEntrada, onSaida }) {
+  const { t } = useTranslation("portaria");
   const [busca, setBusca] = useState("");
   const [filtroPerfil, setFiltroPerfil] = useState("");
 
   const authFuncionarios = useMemo(() =>
     residentes
       .filter((u) => PERFIS_FUNCIONARIO.includes(u.perfil))
-      .map((u) => ({ ...u, _perfilLabel: PERFIL_LABEL_FUNC[u.perfil] || u.perfil })),
-    [residentes]
+      .map((u) => ({ ...u, _perfilLabel: PERFIL_LABEL_FUNC[u.perfil] ? t(PERFIL_LABEL_FUNC[u.perfil]) : u.perfil })),
+    [residentes, t]
   );
 
   const tercMapped = useMemo(() =>
@@ -169,12 +154,12 @@ function AbaFuncionarios({ residentes, portTerceiros = [], acao, onEntrada, onSa
       empresa: v.empresa || null,
       statusAcesso: v.status === "DENTRO" ? "DENTRO" : "FORA",
       perfil: "TERCEIRO",
-      _perfilLabel: "Terceiro",
+      _perfilLabel: t("perfis.terceiro"),
       entradaPermitida: true,
       _portaria: true,
       _tipoVisita: "SERVICO",
     })),
-    [portTerceiros]
+    [portTerceiros, t]
   );
 
   const todos = useMemo(() => {
@@ -200,7 +185,7 @@ function AbaFuncionarios({ residentes, portTerceiros = [], acao, onEntrada, onSa
         <div className="flex-1 min-w-[180px] max-w-xs">
           <Campo
             id="busca-func"
-            placeholder="Nome ou CPF..."
+            placeholder={t("funcionarios.buscaPlaceholder")}
             icon="search"
             value={busca}
             onChange={(e) => setBusca(e.target.value)}
@@ -212,9 +197,9 @@ function AbaFuncionarios({ residentes, portTerceiros = [], acao, onEntrada, onSa
             onChange={(e) => setFiltroPerfil(e.target.value)}
             className="h-[42px] rounded-xl border border-outline-variant/30 bg-surface px-3 py-2 text-sm text-on-surface focus:outline-none focus:border-primary/60 transition-colors"
           >
-            <option value="">Todos os perfis</option>
+            <option value="">{t("funcionarios.todosPerfis")}</option>
             {Object.entries(PERFIL_LABEL_FUNC).map(([v, l]) => (
-              <option key={v} value={v}>{l}</option>
+              <option key={v} value={v}>{t(l)}</option>
             ))}
           </select>
         </div>
@@ -224,8 +209,8 @@ function AbaFuncionarios({ residentes, portTerceiros = [], acao, onEntrada, onSa
       {filtrados.length === 0 ? (
         <div className="glass-panel rounded-3xl p-6 sm:p-10 text-center text-on-surface-variant">
           {busca || filtroPerfil
-            ? "Nenhum resultado para os filtros aplicados."
-            : "Nenhum funcionário ou terceiro cadastrado neste condomínio."}
+            ? t("funcionarios.semResultadoFiltros")
+            : t("funcionarios.vazio")}
         </div>
       ) : (
         <div className="space-y-3">
@@ -252,6 +237,7 @@ function AbaFuncionarios({ residentes, portTerceiros = [], acao, onEntrada, onSa
 // que grava visitante e veículo na mesma transação e consome a autorização.
 
 function ListaPreAprovados({ somenteComVeiculo = false, onRegistrado }) {
+  const { t } = useTranslation("portaria");
   const toast = useToast();
   const [lista, setLista] = useState([]);
   const [carregando, setCarregando] = useState(true);
@@ -266,11 +252,11 @@ function ListaPreAprovados({ somenteComVeiculo = false, onRegistrado }) {
       const todas = Array.isArray(res.data) ? res.data : [];
       setLista(somenteComVeiculo ? todas.filter((p) => p.placaVeiculo) : todas);
     } catch (err) {
-      setErro(errMsg(err) || "Não foi possível carregar os visitantes pré-aprovados.");
+      setErro(errMsg(err) || t("preAprovados.erroCarregar"));
     } finally {
       setCarregando(false);
     }
-  }, [somenteComVeiculo]);
+  }, [somenteComVeiculo, t]);
 
   useEffect(() => { carregar(); }, [carregar]);
 
@@ -278,30 +264,32 @@ function ListaPreAprovados({ somenteComVeiculo = false, onRegistrado }) {
     setAcao(pa.id);
     try {
       const res = await preAutorizacaoApi.registrarEntrada(pa.id, { incluirVeiculo });
-      const placa = incluirVeiculo && pa.placaVeiculo ? ` e do veículo ${pa.placaVeiculo}` : "";
-      toast.success(res.data?.mensagem || `Entrada de ${pa.nomeVisitante}${placa} registrada.`);
+      const msgPadrao = incluirVeiculo && pa.placaVeiculo
+        ? t("preAprovados.entradaRegistradaComVeiculo", { nome: pa.nomeVisitante, placa: pa.placaVeiculo })
+        : t("preAprovados.entradaRegistrada", { nome: pa.nomeVisitante });
+      toast.success(res.data?.mensagem || msgPadrao);
       await carregar();
       onRegistrado?.();
     } catch (err) {
-      toast.error(errMsg(err) || "Não foi possível registrar a entrada.");
+      toast.error(errMsg(err) || t("preAprovados.erroRegistrar"));
     } finally {
       setAcao(null);
     }
   }
 
   if (carregando) {
-    return <div className="glass-panel rounded-3xl p-6 sm:p-10 text-center text-on-surface-variant">Carregando...</div>;
+    return <div className="glass-panel rounded-3xl p-6 sm:p-10 text-center text-on-surface-variant">{t("comum:estado.carregando")}</div>;
   }
   if (erro) {
     return (
       <div className="glass-panel rounded-3xl p-6 sm:p-10 text-center space-y-4">
         <div className="flex items-center justify-center gap-2 text-error">
           <Icone name="error_outline" className="text-2xl" />
-          <p className="font-semibold">Falha ao carregar</p>
+          <p className="font-semibold">{t("erros.falhaCarregar")}</p>
         </div>
         <p className="text-on-surface-variant text-sm">{erro}</p>
         <button onClick={carregar} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-primary/30 text-primary hover:bg-primary/10 text-sm font-semibold transition-all cursor-pointer">
-          <Icone name="refresh" className="text-base" />Tentar novamente
+          <Icone name="refresh" className="text-base" />{t("comum:acoes.tentarNovamente")}
         </button>
       </div>
     );
@@ -310,8 +298,8 @@ function ListaPreAprovados({ somenteComVeiculo = false, onRegistrado }) {
     return (
       <div className="glass-panel rounded-3xl p-6 sm:p-10 text-center text-on-surface-variant">
         {somenteComVeiculo
-          ? "Nenhum veículo de visitante pré-aprovado para hoje."
-          : "Nenhum visitante pré-aprovado para hoje."}
+          ? t("preAprovados.vazioVeiculos")
+          : t("preAprovados.vazio")}
       </div>
     );
   }
@@ -321,9 +309,7 @@ function ListaPreAprovados({ somenteComVeiculo = false, onRegistrado }) {
       <div className="flex items-start gap-2 px-4 py-3 rounded-xl bg-surface-container-highest/30 text-on-surface-variant text-xs">
         <Icone name="info" className="text-primary text-base shrink-0 mt-0.5" />
         <span>
-          Autorizados previamente pelo morador. Registrar a entrada aqui grava o visitante
-          {somenteComVeiculo ? " junto com o veículo dele" : " (e o veículo, se houver)"} e
-          consome a autorização — a vaga é conferida neste momento.
+          {somenteComVeiculo ? t("preAprovados.infoVeiculos") : t("preAprovados.info")}
         </span>
       </div>
 
@@ -335,7 +321,7 @@ function ListaPreAprovados({ somenteComVeiculo = false, onRegistrado }) {
           <div className="flex-1 min-w-0">
             <p className="font-semibold text-on-surface truncate">{pa.nomeVisitante}</p>
             <p className="text-xs text-on-surface-variant">
-              {pa.cpfVisitante ? `CPF: ${formatarCpfMask(pa.cpfVisitante)}` : "Sem CPF"}
+              {pa.cpfVisitante ? t("cartao.cpf", { cpf: formatarCpfMask(pa.cpfVisitante) }) : t("cartao.semCpf")}
               {pa.telefoneVisitante ? ` · ${pa.telefoneVisitante}` : ""}
             </p>
             {pa.placaVeiculo && (
@@ -346,7 +332,7 @@ function ListaPreAprovados({ somenteComVeiculo = false, onRegistrado }) {
               </p>
             )}
             <p className="text-xs text-on-surface-variant mt-0.5">
-              Válida até {String(pa.validadeFim || "").split("-").reverse().join("/")}
+              {t("preAprovados.validaAte", { data: String(pa.validadeFim || "").split("-").reverse().join("/") })}
             </p>
           </div>
           <div className="flex flex-wrap gap-2 shrink-0">
@@ -356,7 +342,7 @@ function ListaPreAprovados({ somenteComVeiculo = false, onRegistrado }) {
               className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-semibold border border-primary/30 text-primary hover:bg-primary/10 transition-all cursor-pointer disabled:opacity-50"
             >
               <Icone name="login" className="text-base" />
-              {acao === pa.id ? "Registrando…" : pa.placaVeiculo ? "Entrada com veículo" : "Entrada"}
+              {acao === pa.id ? t("preAprovados.registrando") : pa.placaVeiculo ? t("preAprovados.entradaComVeiculo") : t("acoes.entrada")}
             </button>
             {pa.placaVeiculo && (
               // Sem vaga na chegada o veículo não entra, mas a pessoa pode entrar a pé.
@@ -366,7 +352,7 @@ function ListaPreAprovados({ somenteComVeiculo = false, onRegistrado }) {
                 className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-semibold border border-outline-variant/30 text-on-surface-variant hover:bg-white/5 transition-all cursor-pointer disabled:opacity-50"
               >
                 <Icone name="directions_walk" className="text-base" />
-                Só a pé
+                {t("preAprovados.soAPe")}
               </button>
             )}
           </div>
@@ -379,6 +365,7 @@ function ListaPreAprovados({ somenteComVeiculo = false, onRegistrado }) {
 // ─── aba "Registrar acesso" ────────────────────────────────────────────────
 
 function AbaRegistrar({ residentes, guests, portVisitantes = [], portTerceiros = [], dentro, carregando, erroCarregamento, onCarregar, acao, onEntrada, onSaida }) {
+  const { t } = useTranslation("portaria");
   const [abaSub, setAbaSub] = useState("residentes");
   const [busca, setBusca] = useState("");
 
@@ -421,10 +408,10 @@ function AbaRegistrar({ residentes, guests, portVisitantes = [], portTerceiros =
   }
 
   const abasSub = [
-    { id: "residentes",    label: "Moradores",     icon: "people",         count: moradores.length },
-    { id: "guests",        label: "Visitantes",    icon: "person_outline", count: allGuests.length },
-    { id: "preaprovados",  label: "Pré-aprovados", icon: "how_to_reg" },
-    { id: "funcionarios",  label: "Funcionários",  icon: "badge",          count: funcCount },
+    { id: "residentes",    label: t("registrar.abas.moradores"),    icon: "people",         count: moradores.length },
+    { id: "guests",        label: t("registrar.abas.visitantes"),   icon: "person_outline", count: allGuests.length },
+    { id: "preaprovados",  label: t("registrar.abas.preAprovados"), icon: "how_to_reg" },
+    { id: "funcionarios",  label: t("registrar.abas.funcionarios"), icon: "badge",          count: funcCount },
   ];
 
   const listaAtual = abaSub === "residentes" ? filtrar(moradores) : filtrar(allGuests);
@@ -459,16 +446,16 @@ function AbaRegistrar({ residentes, guests, portVisitantes = [], portTerceiros =
         <ListaPreAprovados onRegistrado={onCarregar} />
       ) : abaSub === "funcionarios" ? (
         carregando ? (
-          <div className="glass-panel rounded-3xl p-6 sm:p-10 text-center text-on-surface-variant">Carregando...</div>
+          <div className="glass-panel rounded-3xl p-6 sm:p-10 text-center text-on-surface-variant">{t("comum:estado.carregando")}</div>
         ) : erroCarregamento ? (
           <div className="glass-panel rounded-3xl p-6 sm:p-10 text-center space-y-4">
             <div className="flex items-center justify-center gap-2 text-error">
               <Icone name="error_outline" className="text-2xl" />
-              <p className="font-semibold">Falha ao carregar dados</p>
+              <p className="font-semibold">{t("erros.falhaCarregarDados")}</p>
             </div>
             <p className="text-on-surface-variant text-sm">{erroCarregamento}</p>
             <button onClick={onCarregar} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-primary/30 text-primary hover:bg-primary/10 text-sm font-semibold transition-all cursor-pointer">
-              <Icone name="refresh" className="text-base" />Tentar novamente
+              <Icone name="refresh" className="text-base" />{t("comum:acoes.tentarNovamente")}
             </button>
           </div>
         ) : (
@@ -486,7 +473,7 @@ function AbaRegistrar({ residentes, guests, portVisitantes = [], portTerceiros =
           <div className="max-w-sm">
             <Campo
               id="busca-registrar"
-              placeholder="Buscar por nome ou CPF..."
+              placeholder={t("registrar.buscaPlaceholder")}
               icon="search"
               value={busca}
               onChange={(e) => setBusca(e.target.value)}
@@ -496,13 +483,13 @@ function AbaRegistrar({ residentes, guests, portVisitantes = [], portTerceiros =
           {/* Lista */}
           {carregando ? (
             <div className="glass-panel rounded-3xl p-6 sm:p-10 text-center text-on-surface-variant">
-              Carregando...
+              {t("comum:estado.carregando")}
             </div>
           ) : erroCarregamento ? (
             <div className="glass-panel rounded-3xl p-6 sm:p-10 text-center space-y-4">
               <div className="flex items-center justify-center gap-2 text-error">
                 <Icone name="error_outline" className="text-2xl" />
-                <p className="font-semibold">Falha ao carregar dados</p>
+                <p className="font-semibold">{t("erros.falhaCarregarDados")}</p>
               </div>
               <p className="text-on-surface-variant text-sm">{erroCarregamento}</p>
               <button
@@ -510,16 +497,16 @@ function AbaRegistrar({ residentes, guests, portVisitantes = [], portTerceiros =
                 className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-primary/30 text-primary hover:bg-primary/10 text-sm font-semibold transition-all cursor-pointer"
               >
                 <Icone name="refresh" className="text-base" />
-                Tentar novamente
+                {t("comum:acoes.tentarNovamente")}
               </button>
             </div>
           ) : listaAtual.length === 0 ? (
             <div className="glass-panel rounded-3xl p-6 sm:p-10 text-center text-on-surface-variant">
               {busca
-                ? "Nenhum resultado para a busca."
+                ? t("registrar.semResultadoBusca")
                 : abaSub === "residentes"
-                ? "Nenhum residente cadastrado neste condomínio."
-                : "Nenhum visitante cadastrado neste condomínio."}
+                ? t("registrar.semResidentes")
+                : t("registrar.semVisitantes")}
             </div>
           ) : (
             <div className="space-y-3">
@@ -527,7 +514,7 @@ function AbaRegistrar({ residentes, guests, portVisitantes = [], portTerceiros =
                 <div className="flex items-start gap-2 px-4 py-3 rounded-xl bg-surface-container-highest/30 text-on-surface-variant text-xs">
                   <Icone name="info" className="text-primary text-base shrink-0 mt-0.5" />
                   <span>
-                    Visitantes com entrada bloqueada não podem ser registrados. O responsável da unidade deve autorizar.
+                    {t("registrar.infoBloqueados")}
                   </span>
                 </div>
               )}
@@ -551,16 +538,9 @@ function AbaRegistrar({ residentes, guests, portVisitantes = [], portTerceiros =
 
 // ─── aba "Dentro agora" ────────────────────────────────────────────────────
 
-function unidadeLabel(unidadeId, apartamentoId, apartamentoNumero, blocoNome, apartamentoMap) {
-  if (apartamentoNumero) {
-    return blocoNome ? `${blocoNome} - Apto ${apartamentoNumero}` : `Apto ${apartamentoNumero}`;
-  }
-  if (unidadeId && apartamentoMap[unidadeId]) return apartamentoMap[unidadeId];
-  if (apartamentoId && apartamentoMap[apartamentoId]) return apartamentoMap[apartamentoId];
-  return "—";
-}
 
 function AbaDentro({ dentro, visitantesDentro, carregando, erroCarregamento, onCarregar, acao, onSaida, apartamentoMap }) {
+  const { t } = useTranslation("portaria");
   useEffect(() => {
     const id = setInterval(() => {}, 30_000);
     return () => clearInterval(id);
@@ -573,7 +553,7 @@ function AbaDentro({ dentro, visitantesDentro, carregando, erroCarregamento, onC
       usuarioId: null,
       entradaEm: v.horarioEntrada,
       nome: v.nome,
-      perfil: v.tipoVisita === 'VISITA' ? 'Visitante' : 'Terceiro',
+      perfil: v.tipoVisita === 'VISITA' ? t("perfis.visitante") : t("perfis.terceiro"),
       unidadeId: v.apartamentoId,
       _apartamentoNumero: v.apartamentoNumero,
       _blocoNome: v.blocoNome,
@@ -583,12 +563,12 @@ function AbaDentro({ dentro, visitantesDentro, carregando, erroCarregamento, onC
       id: v.id,
     }));
     return [...auth, ...port].sort((a, b) => new Date(b.entradaEm) - new Date(a.entradaEm));
-  }, [dentro, visitantesDentro]);
+  }, [dentro, visitantesDentro, t]);
 
   if (carregando) {
     return (
       <div className="glass-panel rounded-3xl p-6 sm:p-10 text-center text-on-surface-variant">
-        Carregando...
+        {t("comum:estado.carregando")}
       </div>
     );
   }
@@ -598,7 +578,7 @@ function AbaDentro({ dentro, visitantesDentro, carregando, erroCarregamento, onC
       <div className="glass-panel rounded-3xl p-6 sm:p-10 text-center space-y-4">
         <div className="flex items-center justify-center gap-2 text-error">
           <Icone name="error_outline" className="text-2xl" />
-          <p className="font-semibold">Falha ao carregar dados</p>
+          <p className="font-semibold">{t("erros.falhaCarregarDados")}</p>
         </div>
         <p className="text-on-surface-variant text-sm">{erroCarregamento}</p>
         <button
@@ -606,7 +586,7 @@ function AbaDentro({ dentro, visitantesDentro, carregando, erroCarregamento, onC
           className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-primary/30 text-primary hover:bg-primary/10 text-sm font-semibold transition-all cursor-pointer"
         >
           <Icone name="refresh" className="text-base" />
-          Tentar novamente
+          {t("comum:acoes.tentarNovamente")}
         </button>
       </div>
     );
@@ -616,8 +596,8 @@ function AbaDentro({ dentro, visitantesDentro, carregando, erroCarregamento, onC
     return (
       <div className="glass-panel rounded-2xl p-10 flex flex-col items-center text-center gap-3 border border-outline-variant/15">
         <Icone name="home" className="text-on-surface-variant/30 text-5xl" />
-        <p className="font-semibold text-on-surface">Nenhum usuário dentro agora</p>
-        <p className="text-sm text-on-surface-variant">Quando uma entrada for registrada, aparecerá aqui.</p>
+        <p className="font-semibold text-on-surface">{t("dentro.vazioTitulo")}</p>
+        <p className="text-sm text-on-surface-variant">{t("dentro.vazioDescricao")}</p>
       </div>
     );
   }
@@ -628,9 +608,9 @@ function AbaDentro({ dentro, visitantesDentro, carregando, erroCarregamento, onC
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-outline-variant/15 bg-surface-variant/10">
-              {["Nome", "Perfil", "Unidade", "Data entrada", "Hora", "Permanência", "Registrado por", ""].map((h) => (
+              {["nome", "perfil", "unidade", "dataEntrada", "hora", "permanencia", "registradoPor", ""].map((h) => (
                 <th key={h} className="text-left text-xs font-semibold text-on-surface-variant uppercase tracking-wide px-4 py-3 whitespace-nowrap">
-                  {h}
+                  {h && t(`tabela.${h}`)}
                 </th>
               ))}
             </tr>
@@ -656,7 +636,7 @@ function AbaDentro({ dentro, visitantesDentro, carregando, erroCarregamento, onC
                     className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold bg-secondary/10 text-secondary hover:bg-secondary/20 transition-colors cursor-pointer disabled:opacity-50"
                   >
                     <Icone name="logout" className="text-sm" />
-                    Saída
+                    {t("acoes.saida")}
                   </button>
                 </td>
               </tr>
@@ -671,6 +651,7 @@ function AbaDentro({ dentro, visitantesDentro, carregando, erroCarregamento, onC
 // ─── aba "Histórico" ───────────────────────────────────────────────────────
 
 function AbaHistorico({ apartamentoMap }) {
+  const { t } = useTranslation("portaria");
   const toast = useToast();
   const [registros, setRegistros] = useState([]);
   const [carregando, setCarregando] = useState(false);
@@ -723,8 +704,10 @@ function AbaHistorico({ apartamentoMap }) {
             id: v.id,
             _key: `p-${v.id}`,
             nome: v.nome,
-            perfil: v.tipoVisita === "VISITA" ? "Visitante" : "Terceiro",
-            _unidade: v.blocoNome ? `${v.blocoNome} - Apto ${v.apartamentoNumero}` : (v.apartamentoNumero ? `Apto ${v.apartamentoNumero}` : "—"),
+            perfil: v.tipoVisita === "VISITA" ? t("perfis.visitante") : t("perfis.terceiro"),
+            _unidade: v.blocoNome
+              ? t("unidade.blocoApto", { bloco: v.blocoNome, numero: v.apartamentoNumero })
+              : (v.apartamentoNumero ? t("unidade.apto", { numero: v.apartamentoNumero }) : "—"),
             entradaEm: v.horarioEntrada,
             saidaEm: v.horarioSaida,
             registradoPorNome: null,
@@ -748,13 +731,13 @@ function AbaHistorico({ apartamentoMap }) {
       );
       setRegistros(merged);
     } catch (err) {
-      const msg = errMsg(err) || "Não foi possível carregar o histórico.";
+      const msg = errMsg(err) || t("erros.carregarHistorico");
       setErro(msg);
       toast.error(msg);
     } finally {
       setCarregando(false);
     }
-  }, [toast, apartamentoMap]);
+  }, [toast, apartamentoMap, t]);
 
   useEffect(() => { buscar(filtros); }, []);
 
@@ -774,43 +757,43 @@ function AbaHistorico({ apartamentoMap }) {
       {/* Filtros */}
       <form onSubmit={aplicar} className="glass-panel rounded-2xl p-5 border border-outline-variant/15 space-y-4">
         <div className="flex items-center justify-between">
-          <h3 className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider">Filtros</h3>
+          <h3 className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider">{t("filtros.titulo")}</h3>
           <button type="button" onClick={limpar} className="text-xs text-primary font-semibold hover:underline cursor-pointer">
-            Limpar filtros
+            {t("filtros.limpar")}
           </button>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
           <div>
-            <label className="block text-xs text-on-surface-variant mb-1">Data inicial</label>
+            <label className="block text-xs text-on-surface-variant mb-1">{t("filtros.dataInicial")}</label>
             <input type="date" value={filtros.dataInicio} onChange={(e) => setF("dataInicio", e.target.value)}
               className="w-full rounded-xl border border-outline-variant/30 bg-surface px-3 py-2 text-sm text-on-surface focus:outline-none focus:border-primary/60 transition-colors" />
           </div>
           <div>
-            <label className="block text-xs text-on-surface-variant mb-1">Data final</label>
+            <label className="block text-xs text-on-surface-variant mb-1">{t("filtros.dataFinal")}</label>
             <input type="date" value={filtros.dataFim} onChange={(e) => setF("dataFim", e.target.value)}
               className="w-full rounded-xl border border-outline-variant/30 bg-surface px-3 py-2 text-sm text-on-surface focus:outline-none focus:border-primary/60 transition-colors" />
           </div>
           <div>
-            <label className="block text-xs text-on-surface-variant mb-1">Nome</label>
+            <label className="block text-xs text-on-surface-variant mb-1">{t("filtros.nome")}</label>
             <input type="text" value={filtros.nome} onChange={(e) => setF("nome", e.target.value)}
-              placeholder="Busca parcial…"
+              placeholder={t("filtros.buscaParcial")}
               className="w-full rounded-xl border border-outline-variant/30 bg-surface px-3 py-2 text-sm text-on-surface placeholder-on-surface-variant/40 focus:outline-none focus:border-primary/60 transition-colors" />
           </div>
           <div>
-            <label className="block text-xs text-on-surface-variant mb-1">Perfil</label>
+            <label className="block text-xs text-on-surface-variant mb-1">{t("filtros.perfil")}</label>
             <select value={filtros.perfil} onChange={(e) => setF("perfil", e.target.value)}
               className="w-full rounded-xl border border-outline-variant/30 bg-surface px-3 py-2 text-sm text-on-surface focus:outline-none focus:border-primary/60 transition-colors">
-              <option value="">Todos</option>
-              {PERFIS_OPCOES.map((p) => <option key={p} value={p}>{p}</option>)}
+              <option value="">{t("comum:estado.todos")}</option>
+              {PERFIS_OPCOES.map((p) => <option key={p.valor} value={p.valor}>{t(p.rotuloKey)}</option>)}
             </select>
           </div>
           <div>
-            <label className="block text-xs text-on-surface-variant mb-1">Status</label>
+            <label className="block text-xs text-on-surface-variant mb-1">{t("filtros.status")}</label>
             <select value={filtros.status} onChange={(e) => setF("status", e.target.value)}
               className="w-full rounded-xl border border-outline-variant/30 bg-surface px-3 py-2 text-sm text-on-surface focus:outline-none focus:border-primary/60 transition-colors">
-              <option value="">Todos</option>
-              <option value="DENTRO">Dentro</option>
-              <option value="SAIU">Saiu</option>
+              <option value="">{t("comum:estado.todos")}</option>
+              <option value="DENTRO">{t("status.dentro")}</option>
+              <option value="SAIU">{t("status.saiu")}</option>
             </select>
           </div>
         </div>
@@ -818,7 +801,7 @@ function AbaHistorico({ apartamentoMap }) {
           <button type="submit"
             className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-primary text-on-primary text-xs font-semibold hover:opacity-90 transition-opacity cursor-pointer">
             <Icone name="filter_list" className="text-sm" />
-            Aplicar
+            {t("filtros.aplicar")}
           </button>
         </div>
       </form>
@@ -827,7 +810,7 @@ function AbaHistorico({ apartamentoMap }) {
       {carregando ? (
         <div className="flex items-center justify-center py-10 text-on-surface-variant gap-2">
           <Icone name="sync" className="text-2xl animate-spin" />
-          Carregando…
+          {t("comum:estado.carregando")}
         </div>
       ) : erro ? (
         <div className="glass-panel rounded-2xl p-8 text-center border border-outline-variant/15 space-y-2">
@@ -837,7 +820,7 @@ function AbaHistorico({ apartamentoMap }) {
       ) : registros.length === 0 ? (
         <div className="glass-panel rounded-2xl p-8 text-center border border-outline-variant/15">
           <Icone name="inbox" className="text-on-surface-variant/30 text-4xl mb-2" />
-          <p className="text-sm text-on-surface-variant">Nenhum registro encontrado para os filtros selecionados.</p>
+          <p className="text-sm text-on-surface-variant">{t("historico.vazio")}</p>
         </div>
       ) : (
         <div className="glass-panel rounded-2xl border border-outline-variant/15 overflow-hidden">
@@ -845,9 +828,9 @@ function AbaHistorico({ apartamentoMap }) {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-outline-variant/15 bg-surface-variant/10">
-                  {["Nome", "Perfil", "Unidade", "Data entrada", "Hora entrada", "Saída", "Duração", "Registrado por"].map((h) => (
+                  {["nome", "perfil", "unidade", "dataEntrada", "horaEntrada", "saida", "duracao", "registradoPor"].map((h) => (
                     <th key={h} className="text-left text-xs font-semibold text-on-surface-variant uppercase tracking-wide px-4 py-3 whitespace-nowrap">
-                      {h}
+                      {t(`tabela.${h}`)}
                     </th>
                   ))}
                 </tr>
@@ -865,7 +848,7 @@ function AbaHistorico({ apartamentoMap }) {
                       <td className="px-4 py-3 whitespace-nowrap">
                         {dentro ? (
                           <span className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full bg-primary/10 text-primary">
-                            Dentro
+                            {t("status.dentro")}
                           </span>
                         ) : (
                           <span className="text-on-surface-variant">{fmtData(r.saidaEm)} {fmtHora(r.saidaEm)}</span>
@@ -891,31 +874,16 @@ function AbaHistorico({ apartamentoMap }) {
   );
 }
 
-function fmtDuracaoEntre(inicio, fim) {
-  if (!inicio || !fim) return "—";
-  const diff = Math.floor((new Date(fim) - new Date(inicio)) / 1000);
-  if (diff < 60) return `${diff}s`;
-  if (diff < 3600) return `${Math.floor(diff / 60)}min`;
-  const h = Math.floor(diff / 3600);
-  const m = Math.floor((diff % 3600) / 60);
-  return m > 0 ? `${h}h ${m}min` : `${h}h`;
-}
 
 // ─── validação de placa ────────────────────────────────────────────────────
 
-const PLACA_REGEX = /^[A-Z]{3}[0-9]{4}$|^[A-Z]{3}[0-9][A-Z][0-9]{2}$/;
 
-function normalizarPlaca(v) {
-  return v.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 7);
-}
 
-function placaValida(p) {
-  return PLACA_REGEX.test(p);
-}
 
 // ─── seção de veículos ─────────────────────────────────────────────────────
 
 function AbaRegistrarVeiculo() {
+  const { t } = useTranslation("portaria");
   const toast = useToast();
   const [veiculos, setVeiculos] = useState([]);
   const [carregando, setCarregando] = useState(true);
@@ -930,11 +898,11 @@ function AbaRegistrarVeiculo() {
       const r = await veiculoApi.listar();
       setVeiculos(r.data || []);
     } catch (err) {
-      setErro(errMsg(err) || "Não foi possível carregar os veículos.");
+      setErro(errMsg(err) || t("veiculos.erroCarregar"));
     } finally {
       setCarregando(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => { carregar(); }, [carregar]);
 
@@ -951,9 +919,9 @@ function AbaRegistrarVeiculo() {
   const naoEncontradoNaCerta = busca.length === 7 && placaValida(normalizarPlaca(busca)) && !veiculos.find((v) => v.placa === normalizarPlaca(busca));
 
   function tipoProprietarioLabel(tipo) {
-    if (tipo === "MORADOR") return "Morador";
-    if (tipo === "VISITANTE") return "Visitante";
-    if (tipo === "FUNCIONARIO") return "Terceiro";
+    if (tipo === "MORADOR") return t("perfis.morador");
+    if (tipo === "VISITANTE") return t("perfis.visitante");
+    if (tipo === "FUNCIONARIO") return t("perfis.terceiro");
     return tipo || "";
   }
 
@@ -962,9 +930,9 @@ function AbaRegistrarVeiculo() {
     try {
       await veiculoApi.registrarEntrada(veiculo.id);
       setVeiculos((prev) => prev.map((v) => v.id === veiculo.id ? { ...v, status: "DENTRO", dataEntrada: new Date().toISOString() } : v));
-      toast.success(`Entrada de ${veiculo.placa} registrada.`);
+      toast.success(t("toast.entradaRegistrada", { nome: veiculo.placa }));
     } catch (err) {
-      toast.error(errMsg(err) || "Erro ao registrar entrada.");
+      toast.error(errMsg(err) || t("toast.erroEntrada"));
     } finally {
       setAcao(null);
     }
@@ -977,12 +945,12 @@ function AbaRegistrarVeiculo() {
       setVeiculos((prev) => prev.map((v) => v.id === veiculo.id ? { ...v, status: "SAIU", dataSaida: new Date().toISOString() } : v));
       const d = res?.data;
       if (d?.visitanteSaiu && d?.visitanteNome) {
-        toast.success(`Saída registrada: veículo ${veiculo.placa} e visitante ${d.visitanteNome}.`);
+        toast.success(t("toast.saidaVeiculoEVisitante", { placa: veiculo.placa, nome: d.visitanteNome }));
       } else {
-        toast.success(`Saída de ${veiculo.placa} registrada.`);
+        toast.success(t("toast.saidaRegistrada", { nome: veiculo.placa }));
       }
     } catch (err) {
-      toast.error(errMsg(err) || "Erro ao registrar saída.");
+      toast.error(errMsg(err) || t("toast.erroSaida"));
     } finally {
       setAcao(null);
     }
@@ -993,21 +961,21 @@ function AbaRegistrarVeiculo() {
       {/* Veículos de visitantes pré-aprovados pelo morador */}
       <section className="space-y-3">
         <h3 className="font-headline font-bold text-on-surface text-base">
-          Veículos pré-aprovados
+          {t("veiculos.preAprovados")}
         </h3>
         <ListaPreAprovados somenteComVeiculo onRegistrado={carregar} />
       </section>
 
       <div className="border-t border-outline-variant/15 pt-6 space-y-4">
         <h3 className="font-headline font-bold text-on-surface text-base">
-          Veículos cadastrados
+          {t("veiculos.cadastrados")}
         </h3>
 
       {/* Campo de busca */}
       <div className="max-w-sm">
         <Campo
           id="busca-veiculo"
-          placeholder="Buscar por placa ou modelo..."
+          placeholder={t("veiculos.buscaPlaceholder")}
           icon="search"
           value={busca}
           onChange={(e) => setBusca(e.target.value.toUpperCase())}
@@ -1017,13 +985,13 @@ function AbaRegistrarVeiculo() {
       {/* Estados */}
       {carregando ? (
         <div className="glass-panel rounded-3xl p-6 sm:p-10 text-center text-on-surface-variant">
-          Carregando...
+          {t("comum:estado.carregando")}
         </div>
       ) : erro ? (
         <div className="glass-panel rounded-3xl p-6 sm:p-10 text-center space-y-4">
           <div className="flex items-center justify-center gap-2 text-error">
             <Icone name="error_outline" className="text-2xl" />
-            <p className="font-semibold">Falha ao carregar veículos</p>
+            <p className="font-semibold">{t("veiculos.falhaCarregar")}</p>
           </div>
           <p className="text-on-surface-variant text-sm">{erro}</p>
           <button
@@ -1031,29 +999,34 @@ function AbaRegistrarVeiculo() {
             className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-primary/30 text-primary hover:bg-primary/10 text-sm font-semibold transition-all cursor-pointer"
           >
             <Icone name="refresh" className="text-base" />
-            Tentar novamente
+            {t("comum:acoes.tentarNovamente")}
           </button>
         </div>
       ) : veiculos.length === 0 ? (
         <div className="glass-panel rounded-3xl p-6 sm:p-10 text-center text-on-surface-variant">
-          Nenhum veículo cadastrado neste condomínio.
+          {t("veiculos.vazio")}
         </div>
       ) : semResultado ? (
         <>
           <div className="glass-panel rounded-3xl p-6 sm:p-10 text-center text-on-surface-variant">
-            Nenhum resultado para &quot;{busca}&quot;.
+            {t("veiculos.semResultado", { busca })}
           </div>
           {naoEncontradoNaCerta && (
             <div className="glass-panel rounded-2xl p-5 space-y-3 border border-outline-variant/15">
               <p className="text-sm text-on-surface-variant">
-                Veículo <span className="font-mono font-bold text-on-surface">{normalizarPlaca(busca)}</span> não cadastrado no condomínio.
+                <Trans
+                  t={t}
+                  i18nKey="veiculos.naoCadastrado"
+                  values={{ placa: normalizarPlaca(busca) }}
+                  components={{ placa: <span className="font-mono font-bold text-on-surface" /> }}
+                />
               </p>
               <Link
                 to={`/atendimento?placa=${normalizarPlaca(busca)}`}
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-primary/30 text-primary hover:bg-primary/10 text-sm font-semibold transition-all"
               >
                 <Icone name="person_add" className="text-base" />
-                Cadastrar no atendimento
+                {t("veiculos.cadastrarAtendimento")}
               </Link>
             </div>
           )}
@@ -1070,14 +1043,14 @@ function AbaRegistrarVeiculo() {
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold text-on-surface font-mono">{v.placa}</p>
                   <p className="text-xs text-on-surface-variant">
-                    {v.modelo || "Modelo não informado"}
+                    {v.modelo || t("veiculos.modeloNaoInformado")}
                     {v.cor && ` · ${v.cor}`}
-                    {v.vagaNumero && ` · Vaga ${v.vagaNumero}`}
+                    {v.vagaNumero && ` · ${t("veiculos.vaga", { numero: v.vagaNumero })}`}
                   </p>
                   {v.proprietarioNome && (
                     <p className="text-xs text-on-surface-variant mt-0.5">
                       {v.proprietarioNome} · {tipoProprietarioLabel(v.tipoProprietario)}
-                      {v.apartamentoNumero && ` · Apto ${v.apartamentoNumero}`}
+                      {v.apartamentoNumero && ` · ${t("unidade.apto", { numero: v.apartamentoNumero })}`}
                     </p>
                   )}
                   <span className={`inline-flex items-center gap-1 mt-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider ${
@@ -1086,7 +1059,7 @@ function AbaRegistrarVeiculo() {
                       : "bg-outline-variant/20 text-on-surface-variant"
                   }`}>
                     <span className={`w-1.5 h-1.5 rounded-full ${v.status === "DENTRO" ? "bg-primary" : "bg-outline-variant"}`} />
-                    {v.status === "DENTRO" ? "Dentro" : "Fora"}
+                    {v.status === "DENTRO" ? t("status.dentro") : t("status.fora")}
                   </span>
                 </div>
                 <div className="flex gap-2 shrink-0">
@@ -1097,7 +1070,7 @@ function AbaRegistrarVeiculo() {
                         className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-semibold border border-primary/30 text-primary hover:bg-primary/10 transition-all"
                       >
                         <Icone name="open_in_new" className="text-base" />
-                        Ir ao atendimento
+                        {t("acoes.irAtendimento")}
                       </Link>
                     ) : (
                       <button
@@ -1106,7 +1079,7 @@ function AbaRegistrarVeiculo() {
                         className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-semibold border border-primary/30 text-primary hover:bg-primary/10 transition-all cursor-pointer disabled:opacity-50"
                       >
                         <Icone name="login" className="text-base" />
-                        Entrada
+                        {t("acoes.entrada")}
                       </button>
                     )
                   ) : (
@@ -1116,7 +1089,7 @@ function AbaRegistrarVeiculo() {
                       className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-semibold border border-secondary/30 text-secondary hover:bg-secondary/10 transition-all cursor-pointer disabled:opacity-50"
                     >
                       <Icone name="logout" className="text-base" />
-                      Saída
+                      {t("acoes.saida")}
                     </button>
                   )}
                 </div>
@@ -1131,6 +1104,7 @@ function AbaRegistrarVeiculo() {
 }
 
 function AbaDentroVeiculos() {
+  const { t } = useTranslation("portaria");
   const toast = useToast();
   const [dentro, setDentro] = useState([]);
   const [carregando, setCarregando] = useState(true);
@@ -1145,11 +1119,11 @@ function AbaDentroVeiculos() {
       const res = await veiculoApi.listarDentroPortaria();
       setDentro(res.data || []);
     } catch (err) {
-      setErro(errMsg(err) || "Não foi possível carregar os veículos dentro.");
+      setErro(errMsg(err) || t("veiculos.erroCarregarDentro"));
     } finally {
       setCarregando(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => { carregar(); }, [carregar]);
   useEffect(() => {
@@ -1162,31 +1136,31 @@ function AbaDentroVeiculos() {
     try {
       await veiculoApi.registrarSaidaPorPlaca(mov.placa);
       setDentro((prev) => prev.filter((m) => m.id !== mov.id));
-      toast.success(`Saída de ${mov.placa} registrada.`);
+      toast.success(t("toast.saidaRegistrada", { nome: mov.placa }));
     } catch (err) {
-      toast.error(errMsg(err) || "Erro ao registrar saída.");
+      toast.error(errMsg(err) || t("toast.erroSaida"));
     } finally {
       setAcao(null);
     }
   }
 
   if (carregando) return (
-    <div className="glass-panel rounded-3xl p-10 text-center text-on-surface-variant">Carregando...</div>
+    <div className="glass-panel rounded-3xl p-10 text-center text-on-surface-variant">{t("comum:estado.carregando")}</div>
   );
   if (erro) return (
     <div className="glass-panel rounded-3xl p-10 text-center space-y-3">
       <Icone name="error_outline" className="text-error text-3xl" />
       <p className="text-sm text-on-surface-variant">{erro}</p>
       <button onClick={carregar} className="inline-flex items-center gap-2 px-5 py-2 rounded-full border border-primary/30 text-primary hover:bg-primary/10 text-sm font-semibold cursor-pointer">
-        <Icone name="refresh" className="text-base" />Tentar novamente
+        <Icone name="refresh" className="text-base" />{t("comum:acoes.tentarNovamente")}
       </button>
     </div>
   );
   if (!dentro.length) return (
     <div className="glass-panel rounded-2xl p-10 flex flex-col items-center text-center gap-3 border border-outline-variant/15">
       <Icone name="directions_car" className="text-on-surface-variant/30 text-5xl" />
-      <p className="font-semibold text-on-surface">Nenhum veículo dentro agora</p>
-      <p className="text-sm text-on-surface-variant">Quando uma entrada for registrada, aparecerá aqui.</p>
+      <p className="font-semibold text-on-surface">{t("veiculos.dentroVazio")}</p>
+      <p className="text-sm text-on-surface-variant">{t("dentro.vazioDescricao")}</p>
     </div>
   );
 
@@ -1197,8 +1171,8 @@ function AbaDentroVeiculos() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-outline-variant/15 bg-surface-variant/10">
-                {["Placa", "Modelo", "Vinculado a", "Data entrada", "Hora", "Permanência", ""].map((h) => (
-                  <th key={h} className="text-left text-xs font-semibold text-on-surface-variant uppercase tracking-wide px-4 py-3 whitespace-nowrap">{h}</th>
+                {["placa", "modelo", "vinculadoA", "dataEntrada", "hora", "permanencia", ""].map((h) => (
+                  <th key={h} className="text-left text-xs font-semibold text-on-surface-variant uppercase tracking-wide px-4 py-3 whitespace-nowrap">{h && t(`tabela.${h}`)}</th>
                 ))}
               </tr>
             </thead>
@@ -1207,7 +1181,7 @@ function AbaDentroVeiculos() {
                 <tr key={m.id} className="border-b border-outline-variant/10 hover:bg-surface-variant/10 transition-colors">
                   <td className="px-4 py-3 font-mono font-semibold text-on-surface whitespace-nowrap">{m.placa}</td>
                   <td className="px-4 py-3 text-on-surface-variant whitespace-nowrap">{m.modelo || "—"}</td>
-                  <td className="px-4 py-3 text-on-surface-variant whitespace-nowrap">{m.vinculadoNome || "Avulso"}</td>
+                  <td className="px-4 py-3 text-on-surface-variant whitespace-nowrap">{m.vinculadoNome || t("veiculos.avulso")}</td>
                   <td className="px-4 py-3 text-on-surface-variant whitespace-nowrap">{fmtData(m.entradaEm)}</td>
                   <td className="px-4 py-3 text-on-surface-variant whitespace-nowrap">{fmtHora(m.entradaEm)}</td>
                   <td className="px-4 py-3 whitespace-nowrap font-mono text-xs text-primary">{fmtDuracao(m.entradaEm)}</td>
@@ -1217,7 +1191,7 @@ function AbaDentroVeiculos() {
                       disabled={acao === m.id}
                       className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold bg-secondary/10 text-secondary hover:bg-secondary/20 transition-colors cursor-pointer disabled:opacity-50"
                     >
-                      <Icone name="logout" className="text-sm" />Saída
+                      <Icone name="logout" className="text-sm" />{t("acoes.saida")}
                     </button>
                   </td>
                 </tr>
@@ -1228,7 +1202,7 @@ function AbaDentroVeiculos() {
       </div>
       <div className="flex justify-center">
         <button onClick={carregar} disabled={carregando} className="flex items-center gap-2 text-sm font-semibold text-on-surface-variant hover:text-primary transition-colors cursor-pointer disabled:opacity-50">
-          <Icone name="refresh" className="text-base" />Atualizar
+          <Icone name="refresh" className="text-base" />{t("comum:acoes.atualizar")}
         </button>
       </div>
     </div>
@@ -1236,6 +1210,7 @@ function AbaDentroVeiculos() {
 }
 
 function AbaHistoricoVeiculos() {
+  const { t } = useTranslation("portaria");
   const toast = useToast();
   const [registros, setRegistros] = useState([]);
   const [carregando, setCarregando] = useState(false);
@@ -1256,13 +1231,13 @@ function AbaHistoricoVeiculos() {
       const res = await veiculoApi.historicoAcesso(params);
       setRegistros(res.data || []);
     } catch (err) {
-      const msg = errMsg(err) || "Não foi possível carregar o histórico.";
+      const msg = errMsg(err) || t("erros.carregarHistorico");
       setErro(msg);
       toast.error(msg);
     } finally {
       setCarregando(false);
     }
-  }, [toast]);
+  }, [toast, t]);
 
   useEffect(() => { buscar(filtros); }, []);
 
@@ -1277,52 +1252,52 @@ function AbaHistoricoVeiculos() {
     <div className="space-y-6">
       <form onSubmit={aplicar} className="glass-panel rounded-2xl p-5 border border-outline-variant/15 space-y-4">
         <div className="flex items-center justify-between">
-          <h3 className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider">Filtros</h3>
-          <button type="button" onClick={limpar} className="text-xs text-primary font-semibold hover:underline cursor-pointer">Limpar filtros</button>
+          <h3 className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider">{t("filtros.titulo")}</h3>
+          <button type="button" onClick={limpar} className="text-xs text-primary font-semibold hover:underline cursor-pointer">{t("filtros.limpar")}</button>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <div>
-            <label className="block text-xs text-on-surface-variant mb-1">Data inicial</label>
+            <label className="block text-xs text-on-surface-variant mb-1">{t("filtros.dataInicial")}</label>
             <input type="date" value={filtros.dataInicio} onChange={(e) => setF("dataInicio", e.target.value)}
               className="w-full rounded-xl border border-outline-variant/30 bg-surface px-3 py-2 text-sm text-on-surface focus:outline-none focus:border-primary/60 transition-colors" />
           </div>
           <div>
-            <label className="block text-xs text-on-surface-variant mb-1">Data final</label>
+            <label className="block text-xs text-on-surface-variant mb-1">{t("filtros.dataFinal")}</label>
             <input type="date" value={filtros.dataFim} onChange={(e) => setF("dataFim", e.target.value)}
               className="w-full rounded-xl border border-outline-variant/30 bg-surface px-3 py-2 text-sm text-on-surface focus:outline-none focus:border-primary/60 transition-colors" />
           </div>
           <div>
-            <label className="block text-xs text-on-surface-variant mb-1">Placa</label>
+            <label className="block text-xs text-on-surface-variant mb-1">{t("filtros.placa")}</label>
             <input type="text" value={filtros.placa} onChange={(e) => setF("placa", normalizarPlaca(e.target.value))}
-              placeholder="Busca parcial…"
+              placeholder={t("filtros.buscaParcial")}
               className="w-full rounded-xl border border-outline-variant/30 bg-surface px-3 py-2 text-sm font-mono text-on-surface placeholder-on-surface-variant/40 focus:outline-none focus:border-primary/60 transition-colors" />
           </div>
           <div>
-            <label className="block text-xs text-on-surface-variant mb-1">Status</label>
+            <label className="block text-xs text-on-surface-variant mb-1">{t("filtros.status")}</label>
             <select value={filtros.status} onChange={(e) => setF("status", e.target.value)}
               className="w-full rounded-xl border border-outline-variant/30 bg-surface px-3 py-2 text-sm text-on-surface focus:outline-none focus:border-primary/60 transition-colors">
-              <option value="">Todos</option>
-              <option value="DENTRO">Dentro</option>
-              <option value="SAIU">Saiu</option>
+              <option value="">{t("comum:estado.todos")}</option>
+              <option value="DENTRO">{t("status.dentro")}</option>
+              <option value="SAIU">{t("status.saiu")}</option>
             </select>
           </div>
         </div>
         <div>
-          <label className="block text-xs text-on-surface-variant mb-1">Vinculado a</label>
+          <label className="block text-xs text-on-surface-variant mb-1">{t("filtros.vinculadoA")}</label>
           <input type="text" value={filtros.vinculadoNome} onChange={(e) => setF("vinculadoNome", e.target.value)}
-            placeholder="Nome do morador, visitante ou terceiro…"
+            placeholder={t("filtros.vinculadoPlaceholder")}
             className="w-full rounded-xl border border-outline-variant/30 bg-surface px-3 py-2 text-sm text-on-surface placeholder-on-surface-variant/40 focus:outline-none focus:border-primary/60 transition-colors" />
         </div>
         <div className="flex justify-end">
           <button type="submit" className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-primary text-on-primary text-xs font-semibold hover:opacity-90 transition-opacity cursor-pointer">
-            <Icone name="filter_list" className="text-sm" />Aplicar
+            <Icone name="filter_list" className="text-sm" />{t("filtros.aplicar")}
           </button>
         </div>
       </form>
 
       {carregando ? (
         <div className="flex items-center justify-center py-10 text-on-surface-variant gap-2">
-          <Icone name="sync" className="text-2xl animate-spin" />Carregando…
+          <Icone name="sync" className="text-2xl animate-spin" />{t("comum:estado.carregando")}
         </div>
       ) : erro ? (
         <div className="glass-panel rounded-2xl p-8 text-center border border-outline-variant/15 space-y-2">
@@ -1337,7 +1312,7 @@ function AbaHistoricoVeiculos() {
         return registrosFiltrados.length === 0 ? (
         <div className="glass-panel rounded-2xl p-8 text-center border border-outline-variant/15">
           <Icone name="inbox" className="text-on-surface-variant/30 text-4xl mb-2" />
-          <p className="text-sm text-on-surface-variant">Nenhum registro encontrado para os filtros selecionados.</p>
+          <p className="text-sm text-on-surface-variant">{t("historico.vazio")}</p>
         </div>
       ) : (
         <div className="glass-panel rounded-2xl border border-outline-variant/15 overflow-hidden">
@@ -1345,8 +1320,8 @@ function AbaHistoricoVeiculos() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-outline-variant/15 bg-surface-variant/10">
-                  {["Placa", "Modelo", "Vinculado a", "Data entrada", "Hora entrada", "Saída", "Duração"].map((h) => (
-                    <th key={h} className="text-left text-xs font-semibold text-on-surface-variant uppercase tracking-wide px-4 py-3 whitespace-nowrap">{h}</th>
+                  {["placa", "modelo", "vinculadoA", "dataEntrada", "horaEntrada", "saida", "duracao"].map((h) => (
+                    <th key={h} className="text-left text-xs font-semibold text-on-surface-variant uppercase tracking-wide px-4 py-3 whitespace-nowrap">{t(`tabela.${h}`)}</th>
                   ))}
                 </tr>
               </thead>
@@ -1357,12 +1332,12 @@ function AbaHistoricoVeiculos() {
                     <tr key={r.id} className={`border-b border-outline-variant/10 hover:bg-surface-variant/10 transition-colors ${dentro ? "bg-primary/3" : ""}`}>
                       <td className="px-4 py-3 font-mono font-semibold text-on-surface whitespace-nowrap">{r.placa}</td>
                       <td className="px-4 py-3 text-on-surface-variant whitespace-nowrap">{r.modelo || "—"}</td>
-                      <td className="px-4 py-3 text-on-surface-variant whitespace-nowrap">{r.vinculadoNome || "Avulso"}</td>
+                      <td className="px-4 py-3 text-on-surface-variant whitespace-nowrap">{r.vinculadoNome || t("veiculos.avulso")}</td>
                       <td className="px-4 py-3 text-on-surface-variant whitespace-nowrap">{fmtData(r.entradaEm)}</td>
                       <td className="px-4 py-3 text-on-surface-variant whitespace-nowrap">{fmtHora(r.entradaEm)}</td>
                       <td className="px-4 py-3 whitespace-nowrap">
                         {dentro ? (
-                          <span className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full bg-primary/10 text-primary">Dentro</span>
+                          <span className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full bg-primary/10 text-primary">{t("status.dentro")}</span>
                         ) : (
                           <span className="text-on-surface-variant">{fmtData(r.saidaEm)} {fmtHora(r.saidaEm)}</span>
                         )}
@@ -1384,12 +1359,13 @@ function AbaHistoricoVeiculos() {
 }
 
 function SecaoVeiculos() {
+  const { t } = useTranslation("portaria");
   const [aba, setAba] = useState("registrar");
 
   const abas = [
-    { id: "registrar", label: "Registrar acesso", icon: "add_road" },
-    { id: "dentro",    label: "Dentro agora",     icon: "directions_car" },
-    { id: "historico", label: "Histórico",         icon: "history" },
+    { id: "registrar", label: t("abas.registrar"), icon: "add_road" },
+    { id: "dentro",    label: t("abas.dentro"),    icon: "directions_car" },
+    { id: "historico", label: t("abas.historico"), icon: "history" },
   ];
 
   return (
@@ -1420,6 +1396,7 @@ function SecaoVeiculos() {
 // ─── componente principal ──────────────────────────────────────────────────
 
 export function Portaria() {
+  const { t } = useTranslation("portaria");
   const toast = useToast();
   const [modo, setModo] = useState("pessoas"); // 'pessoas' | 'veiculos'
   const [abaTop, setAbaTop] = useState("registrar");
@@ -1440,11 +1417,13 @@ export function Portaria() {
       const map = {};
       (r.data || []).forEach(a => {
         const bloco = a.blocoNome || a.bloco?.nome || "";
-        map[a.id] = bloco ? `${bloco} - Apto ${a.numero}` : `Apto ${a.numero}`;
+        map[a.id] = bloco
+          ? t("unidade.blocoApto", { bloco, numero: a.numero })
+          : t("unidade.apto", { numero: a.numero });
       });
       setApartamentoMap(map);
     }).catch(() => {});
-  }, []);
+  }, [t]);
 
   const carregar = useCallback(async () => {
     setCarregando(true);
@@ -1465,13 +1444,13 @@ export function Portaria() {
       setPortVisitantes(Array.isArray(portHistRes.data) ? portHistRes.data : []);
       setPortTerceiros(Array.isArray(portTercRes.data) ? portTercRes.data : []);
     } catch (err) {
-      const msg = errMsg(err) || "Não foi possível carregar os dados da portaria.";
+      const msg = errMsg(err) || t("erros.carregarPortaria");
       console.error("[Portaria] Erro ao carregar:", err?.response?.status, err?.response?.data ?? err?.message);
       setErroCarregamento(msg);
     } finally {
       setCarregando(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => { carregar(); }, [carregar]);
 
@@ -1507,9 +1486,9 @@ export function Portaria() {
         }
         const portDentroRes = await atendimentoApi.dentro().catch(() => ({ data: [] }));
         setVisitantesDentro(Array.isArray(portDentroRes.data) ? portDentroRes.data : []);
-        toast.success(`Entrada de ${usuario.nome} registrada.`);
+        toast.success(t("toast.entradaRegistrada", { nome: usuario.nome }));
       } catch (err) {
-        toast.error(errMsg(err) || "Erro ao registrar entrada.");
+        toast.error(errMsg(err) || t("toast.erroEntrada"));
       } finally {
         setAcao(null);
       }
@@ -1521,9 +1500,9 @@ export function Portaria() {
       atualizarStatusListas(usuario.id, "ENTRADA");
       const dentroRes = await acessoApi.listarDentro();
       setDentro(dentroRes.data.dentro || []);
-      toast.success(`Entrada de ${usuario.nome} registrada.`);
+      toast.success(t("toast.entradaRegistrada", { nome: usuario.nome }));
     } catch (err) {
-      toast.error(errMsg(err) || "Erro ao registrar entrada.");
+      toast.error(errMsg(err) || t("toast.erroEntrada"));
     } finally {
       setAcao(null);
     }
@@ -1546,15 +1525,16 @@ export function Portaria() {
         setVisitantesDentro((prev) => prev.filter((v) => v.id !== usuario.id));
         const d = res?.data;
         if (d?.veiculoDentroPlaca) {
-          const vagaInfo = d.vagaDentroNumero ? ` e a vaga ${d.vagaDentroNumero}` : "";
           toast.success(
-            `Saída de ${usuario.nome} registrada. O veículo ${d.veiculoDentroPlaca} permanece no condomínio${vagaInfo} e seguirá ocupado até a saída do veículo ser registrada.`
+            d.vagaDentroNumero
+              ? t("toast.saidaVeiculoVagaPermanece", { nome: usuario.nome, placa: d.veiculoDentroPlaca, vaga: d.vagaDentroNumero })
+              : t("toast.saidaVeiculoPermanece", { nome: usuario.nome, placa: d.veiculoDentroPlaca })
           );
         } else {
-          toast.success(`Saída de ${usuario.nome} registrada.`);
+          toast.success(t("toast.saidaRegistrada", { nome: usuario.nome }));
         }
       } catch (err) {
-        toast.error(errMsg(err) || "Erro ao registrar saída.");
+        toast.error(errMsg(err) || t("toast.erroSaida"));
       } finally {
         setAcao(null);
       }
@@ -1565,9 +1545,9 @@ export function Portaria() {
       await acessoApi.registrarSaida(usuario.id);
       atualizarStatusListas(usuario.id, "SAIDA");
       setDentro((prev) => prev.filter((r) => r.usuarioId !== usuario.id));
-      toast.success(`Saída de ${usuario.nome} registrada.`);
+      toast.success(t("toast.saidaRegistrada", { nome: usuario.nome }));
     } catch (err) {
-      toast.error(errMsg(err) || "Erro ao registrar saída.");
+      toast.error(errMsg(err) || t("toast.erroSaida"));
     } finally {
       setAcao(null);
     }
@@ -1586,9 +1566,10 @@ export function Portaria() {
         );
         const d = res?.data;
         if (d?.veiculoDentroPlaca) {
-          const vagaInfo = d.vagaDentroNumero ? ` e a vaga ${d.vagaDentroNumero}` : "";
           toast.success(
-            `Saída de ${registro.nome} registrada. O veículo ${d.veiculoDentroPlaca} permanece no condomínio${vagaInfo}.`
+            d.vagaDentroNumero
+              ? t("toast.saidaVeiculoVagaFica", { nome: registro.nome, placa: d.veiculoDentroPlaca, vaga: d.vagaDentroNumero })
+              : t("toast.saidaVeiculoFica", { nome: registro.nome, placa: d.veiculoDentroPlaca })
           );
           return;
         }
@@ -1597,18 +1578,18 @@ export function Portaria() {
         setDentro((prev) => prev.filter((r) => r.usuarioId !== registro.usuarioId));
         atualizarStatusListas(registro.usuarioId, "SAIDA");
       }
-      toast.success(`Saída de ${registro.nome} registrada.`);
+      toast.success(t("toast.saidaRegistrada", { nome: registro.nome }));
     } catch (err) {
-      toast.error(errMsg(err) || "Erro ao registrar saída.");
+      toast.error(errMsg(err) || t("toast.erroSaida"));
     } finally {
       setAcao(null);
     }
   }
 
   const abasTop = [
-    { id: "registrar", label: "Registrar acesso", icon: "how_to_reg" },
-    { id: "dentro", label: "Dentro agora", icon: "home", count: dentro.length + visitantesDentro.length },
-    { id: "historico", label: "Histórico", icon: "history" },
+    { id: "registrar", label: t("abas.registrar"), icon: "how_to_reg" },
+    { id: "dentro", label: t("abas.dentro"), icon: "home", count: dentro.length + visitantesDentro.length },
+    { id: "historico", label: t("abas.historico"), icon: "history" },
   ];
 
   return (
@@ -1619,22 +1600,22 @@ export function Portaria() {
         <header className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
             <p className="text-on-surface-variant text-xs font-semibold uppercase tracking-widest mb-1">
-              Controle de Acesso
+              {t("cabecalho.sobretitulo")}
             </p>
             <h1 className="font-headline text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-on-surface">
               <span className="bg-gradient-to-r from-primary to-tertiary bg-clip-text text-transparent">
-                Portaria
+                {t("cabecalho.titulo")}
               </span>
             </h1>
           </div>
           <div className="flex flex-wrap gap-3 w-full sm:w-auto">
             <div className="glass-panel rounded-2xl px-4 sm:px-5 py-3 text-center flex-1 sm:flex-none min-w-[92px]">
               <p className="text-2xl font-headline font-bold text-primary">{dentro.length + visitantesDentro.length}</p>
-              <p className="text-on-surface-variant text-xs uppercase tracking-wider">Dentro</p>
+              <p className="text-on-surface-variant text-xs uppercase tracking-wider">{t("cabecalho.dentro")}</p>
             </div>
             <div className="glass-panel rounded-2xl px-4 sm:px-5 py-3 text-center flex-1 sm:flex-none min-w-[92px]">
               <p className="text-2xl font-headline font-bold text-on-surface">{residentes.length + guests.length}</p>
-              <p className="text-on-surface-variant text-xs uppercase tracking-wider">Total</p>
+              <p className="text-on-surface-variant text-xs uppercase tracking-wider">{t("cabecalho.total")}</p>
             </div>
           </div>
         </header>
@@ -1642,8 +1623,8 @@ export function Portaria() {
         {/* Seletor pessoas / veículos */}
         <div className="glass-panel rounded-2xl p-1.5 flex gap-1 w-fit">
           {[
-            { id: "pessoas", label: "Pessoas", icon: "people" },
-            { id: "veiculos", label: "Veículos", icon: "directions_car" },
+            { id: "pessoas", label: t("modos.pessoas"), icon: "people" },
+            { id: "veiculos", label: t("modos.veiculos"), icon: "directions_car" },
           ].map((m) => (
             <button
               key={m.id}
@@ -1651,7 +1632,7 @@ export function Portaria() {
               className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 cursor-pointer ${
                 modo === m.id
                   ? "bg-primary/15 text-primary"
-                  : "text-on-surface-variant hover:text-on-surface hover:bg-veu/5"
+                  : "text-on-surface-variant hover:text-on-surface hover:bg-white/5"
               }`}
             >
               <Icone name={m.icon} className="text-lg" />
@@ -1725,7 +1706,7 @@ export function Portaria() {
                   className="flex items-center gap-2 text-sm font-semibold text-on-surface-variant hover:text-primary transition-colors cursor-pointer disabled:opacity-50"
                 >
                   <Icone name="refresh" className="text-base" />
-                  Atualizar
+                  {t("comum:acoes.atualizar")}
                 </button>
               </div>
             )}

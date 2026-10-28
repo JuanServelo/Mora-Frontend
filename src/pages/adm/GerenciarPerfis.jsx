@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import api from "../../services/api";
 import { Icone } from "../../components/icones/Icone";
 import { ADM_LINKS, linksDoPerfil } from "../../utils/menuAdmin";
@@ -29,12 +30,13 @@ const ACESSO_ADMIN = Object.fromEntries(
 
 const CATEGORIAS = ["plataforma", "condominio", "unidade"];
 const CATEGORIA_LABEL = {
-  plataforma:  "Nível Plataforma",
-  condominio:  "Nível Condomínio",
-  unidade:     "Nível Unidade",
+  plataforma:  "categorias.plataforma",
+  condominio:  "categorias.condominio",
+  unidade:     "categorias.unidade",
 };
 
 export function GerenciarPerfis() {
+  const { t } = useTranslation("perfis");
   const [dados, setDados] = useState(null);
   const [carregando, setCarregando] = useState(true);
   const [aba, setAba] = useState("plataforma");
@@ -58,23 +60,23 @@ export function GerenciarPerfis() {
   const perfisAba = perfisPorCategoria[aba] || [];
 
   return (
-    <div className="min-h-screen w-full pt-4 pb-20 px-4 sm:px-6">
+    <div className="min-h-screen w-full pt-4 pb-20 px-6">
       <div className="max-w-6xl mx-auto space-y-8">
 
         {/* Header */}
         <header className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
             <p className="text-on-surface-variant text-xs font-semibold uppercase tracking-widest mb-1">
-              Painel Administrativo
+              {t("cabecalho.painel")}
             </p>
-            <h1 className="font-headline text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-on-surface">
-              Gerenciar{" "}
+            <h1 className="font-headline text-4xl font-extrabold tracking-tight text-on-surface">
+              {t("cabecalho.gerenciar")}{" "}
               <span className="bg-gradient-to-r from-primary to-tertiary bg-clip-text text-transparent">
-                Perfis
+                {t("cabecalho.perfis")}
               </span>
             </h1>
             <p className="text-on-surface-variant text-sm mt-1">
-              Visualize as permissões e responsabilidades de cada perfil de usuário.
+              {t("cabecalho.descricao")}
             </p>
           </div>
 
@@ -87,24 +89,24 @@ export function GerenciarPerfis() {
             }`}
           >
             <Icone name="grid_on" className="text-xl" />
-            Matriz de Acesso
+            {t("matriz.botao")}
           </button>
         </header>
 
         {/* Sub-navbar de abas */}
         {!abaMatriz && (
-          <div className="glass-panel rounded-2xl p-1.5 flex flex-wrap gap-1 w-full sm:w-fit">
+          <div className="glass-panel rounded-2xl p-1.5 flex gap-1 w-fit">
             {CATEGORIAS.map((cat) => (
               <button
                 key={cat}
                 onClick={() => setAba(cat)}
-                className={`flex items-center gap-2 px-3 sm:px-5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 cursor-pointer ${
+                className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 cursor-pointer ${
                   aba === cat
                     ? "bg-primary/15 text-primary"
                     : "text-on-surface-variant hover:text-on-surface hover:bg-veu/5"
                 }`}
               >
-                {CATEGORIA_LABEL[cat]}
+                {t(CATEGORIA_LABEL[cat])}
               </button>
             ))}
           </div>
@@ -127,8 +129,8 @@ export function GerenciarPerfis() {
             )}
 
             {!carregando && perfisAba.length === 0 && (
-              <div className="glass-panel rounded-3xl p-6 sm:p-10 text-center text-on-surface-variant">
-                Nenhum perfil encontrado nesta categoria.
+              <div className="glass-panel rounded-3xl p-10 text-center text-on-surface-variant">
+                {t("lista.vazio")}
               </div>
             )}
 
@@ -145,6 +147,7 @@ export function GerenciarPerfis() {
 }
 
 function CardPerfil({ perfil }) {
+  const { t } = useTranslation("perfis");
   const meta = PERFIL_META[perfil.chave] || { icon: "person", cor: "outline" };
   const corClasse = COR_CLASSE[meta.cor];
   const [expandido, setExpandido] = useState(false);
@@ -167,7 +170,7 @@ function CardPerfil({ perfil }) {
             </h3>
             {perfil.semAcessoSistema && (
               <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-error/10 text-error border border-error/20">
-                Sem acesso ao sistema
+                {t("card.semAcesso")}
               </span>
             )}
           </div>
@@ -190,7 +193,7 @@ function CardPerfil({ perfil }) {
           {perfil.permissoes?.length > 0 && (
             <div>
               <p className="text-xs font-semibold uppercase tracking-widest text-on-surface-variant mb-3">
-                O que pode fazer
+                {t("card.permissoes")}
               </p>
               <ul className="space-y-2">
                 {perfil.permissoes.map((perm, i) => (
@@ -207,7 +210,7 @@ function CardPerfil({ perfil }) {
           {perfil.podeCadastrar?.length > 0 && (
             <div>
               <p className="text-xs font-semibold uppercase tracking-widest text-on-surface-variant mb-3">
-                Pode cadastrar
+                {t("card.podeCadastrar")}
               </p>
               <div className="flex flex-wrap gap-2">
                 {perfil.podeCadastrarLabels?.map((label, i) => (
@@ -227,7 +230,7 @@ function CardPerfil({ perfil }) {
           {ACESSO_ADMIN[perfil.chave] && (
             <div>
               <p className="text-xs font-semibold uppercase tracking-widest text-on-surface-variant mb-3">
-                Abas administrativas liberadas
+                {t("card.abasLiberadas")}
               </p>
               <div className="flex flex-wrap gap-2">
                 {ADMIN_ABAS.map((aba) => {
@@ -256,31 +259,31 @@ function CardPerfil({ perfil }) {
 }
 
 function MatrizAcesso() {
+  const { t } = useTranslation("perfis");
   const perfisAdmin = ["ADMIN_GERAL", "ADMIN_SINDICO"];
 
   const labelCurto = {
-    ADMIN_GERAL:   "Admin Geral",
-    ADMIN_SINDICO: "Admin Síndico",
+    ADMIN_GERAL:   t("matriz.perfis.adminGeral"),
+    ADMIN_SINDICO: t("matriz.perfis.adminSindico"),
   };
 
   return (
-    <div className="glass-panel rounded-3xl p-4 sm:p-6">
+    <div className="glass-panel rounded-3xl p-6 overflow-x-auto">
       <div className="flex items-center gap-3 mb-6">
-        <div className="w-10 h-10 shrink-0 rounded-xl bg-tertiary/10 flex items-center justify-center">
+        <div className="w-10 h-10 rounded-xl bg-tertiary/10 flex items-center justify-center">
           <Icone name="grid_on" className="text-tertiary" />
         </div>
-        <div className="min-w-0">
-          <h2 className="font-headline text-lg font-bold text-on-surface">Matriz de Acesso ao Admin</h2>
-          <p className="text-on-surface-variant text-sm">Quais perfis acessam cada aba administrativa</p>
+        <div>
+          <h2 className="font-headline text-lg font-bold text-on-surface">{t("matriz.titulo")}</h2>
+          <p className="text-on-surface-variant text-sm">{t("matriz.descricao")}</p>
         </div>
       </div>
 
-      <div className="-mx-4 sm:mx-0 px-4 sm:px-0 overflow-x-auto">
       <table className="w-full text-sm border-separate border-spacing-y-1">
         <thead>
           <tr>
             <th className="text-left text-xs font-semibold uppercase tracking-widest text-on-surface-variant py-2 pr-4 min-w-[140px]">
-              Aba
+              {t("matriz.colunaAba")}
             </th>
             {perfisAdmin.map((p) => (
               <th key={p} className="text-center text-xs font-semibold text-on-surface-variant py-2 px-3 min-w-[110px]">
@@ -318,12 +321,11 @@ function MatrizAcesso() {
           ))}
         </tbody>
       </table>
-      </div>
 
       {/* Perfis de nível unidade */}
       <div className="mt-6 pt-5 border-t border-outline-variant/15">
         <p className="text-xs font-semibold uppercase tracking-widest text-on-surface-variant mb-3">
-          Perfis de nível Unidade (sem acesso ao painel admin)
+          {t("matriz.perfisUnidade")}
         </p>
         <div className="flex flex-wrap gap-2">
           {["MORADOR","DONO_ALUGUEL","CONVIDADO"].map((p) => {

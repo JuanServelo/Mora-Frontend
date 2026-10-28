@@ -1,21 +1,22 @@
 // src/pages/adm/GerenciarEntregas.jsx
 import { useState, useEffect, useMemo } from "react";
+import { Trans, useTranslation } from "react-i18next";
 import { acessoApi } from "../../services/acessoApi";
 import { entregaApi } from "../../services/entregasApi";
+import { apartamentoApi } from "../../services/estruturasApi";
 import { Icone } from "../../components/icones/Icone";
 import { Campo } from "../../components/campos/Campo";
 import { Botao } from "../../components/botoes/Botao";
+import { formatarData } from "../../utils/datas";
 
 // ─── helpers ─────────────────────────────────
 const STATUS = {
-  PENDENTE: { label: "Pendente", color: "bg-secondary/10 text-secondary", icon: "schedule" },
-  RETIRADA: { label: "Retirada", color: "bg-primary/10 text-primary",   icon: "check_circle" },
+  PENDENTE: { rotuloKey: "status.PENDENTE", color: "bg-secondary/10 text-secondary", icon: "schedule" },
+  RETIRADA: { rotuloKey: "status.RETIRADA", color: "bg-primary/10 text-primary",   icon: "check_circle" },
 };
 
 function fmtData(iso) {
-  if (!iso) return "—";
-  const [y, m, d] = iso.split("T")[0].split("-");
-  return `${d}/${m}/${y}`;
+  return formatarData(iso);
 }
 
 function hoje() {
@@ -32,6 +33,7 @@ const selectCls =
 export function GerenciarEntregas() {
   const [entregas, setEntregas] = useState([]);
   const [usuarios, setUsuarios] = useState([]);
+  const [apartamentos, setApartamentos] = useState([]);
   const [carregando, setCarregando] = useState(true);
   const [criando, setCriando] = useState(false);
   const [expandido, setExpandido] = useState(null);
@@ -39,6 +41,7 @@ export function GerenciarEntregas() {
   const [erroCriar, setErroCriar] = useState("");
   const [erroEditar, setErroEditar] = useState("");
   const [modalRetirada, setModalRetirada] = useState(null); // entrega | null
+  const { t } = useTranslation("entregas");
 
   // ─── filtros ─────────────────────────────
   const [filtroStatus, setFiltroStatus] = useState("TODOS");
@@ -54,14 +57,32 @@ export function GerenciarEntregas() {
     // `/api/users` recusa o porteiro — ele nao esta em PERFIS_GESTAO_USUARIOS.
     // `/api/portaria/usuarios-condominio` responde para porteiro e gestao, ja
     // filtrado pelo condominio do token, que e o recorte certo de qualquer jeito.
-    Promise.all([entregaApi.listarTodas(), acessoApi.listarUsuariosCondominio()])
-      .then(([resEntregas, resUsuarios]) => {
+    // O usuario do auth-api so traz `unidadeId` (bloco/apartamento viraram
+    // colunas do apartamento no portaria-service) — por isso cruzamos aqui.
+    Promise.all([
+      entregaApi.listarTodas(),
+      acessoApi.listarUsuariosCondominio(),
+      apartamentoApi.listar(),
+    ])
+      .then(([resEntregas, resUsuarios, resApartamentos]) => {
         setEntregas(resEntregas.data || []);
         setUsuarios(resUsuarios.data?.usuarios || []);
+        setApartamentos(resApartamentos.data || []);
       })
       .catch((err) => console.error("Erro ao carregar dados:", err))
       .finally(() => setCarregando(false));
   }, []);
+
+  // Resolve bloco/apartamento do usuario a partir do unidadeId, ja que o
+  // auth-api nao devolve mais esses campos diretamente.
+  const usuariosComUnidade = useMemo(
+    () =>
+      usuarios.map((u) => {
+        const apt = apartamentos.find((a) => a.id === u.unidadeId);
+        return { ...u, bloco: apt?.blocoNome || "", apartamento: apt?.numero || "" };
+      }),
+    [usuarios, apartamentos],
+  );
 
   const blocosUnicos = useMemo(
     () => [...new Set(entregas.map((e) => e.bloco).filter(Boolean))].sort(),
@@ -118,7 +139,7 @@ export function GerenciarEntregas() {
       setCriando(false);
     } catch (err) {
       const d = err.response?.data;
-      setErroCriar(d?.mensagem || d?.message || "Erro ao cadastrar entrega.");
+      setErroCriar(d?.mensagem || d?.message || t("erros.cadastrar"));
     }
   }
 
@@ -130,7 +151,7 @@ export function GerenciarEntregas() {
       setEditando(null);
     } catch (err) {
       const d = err.response?.data;
-      setErroEditar(d?.mensagem || d?.message || "Erro ao atualizar entrega.");
+      setErroEditar(d?.mensagem || d?.message || t("erros.atualizar"));
     }
   }
 
@@ -156,19 +177,19 @@ export function GerenciarEntregas() {
   };
 
   return (
-    <div className="min-h-screen w-full pt-4 pb-20 px-4 sm:px-6">
+    <div className="min-h-screen w-full pt-4 pb-20 px-6">
       <div className="max-w-6xl mx-auto space-y-8">
 
         {/* Header */}
         <header className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
             <p className="text-on-surface-variant text-xs font-semibold uppercase tracking-widest mb-1">
-              Painel Administrativo
+              {t("cabecalho.secao")}
             </p>
-            <h1 className="font-headline text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-on-surface">
-              Gestão de{" "}
+            <h1 className="font-headline text-4xl font-extrabold tracking-tight text-on-surface">
+              {t("cabecalho.tituloPrefixo")}{" "}
               <span className="bg-gradient-to-r from-primary to-tertiary bg-clip-text text-transparent">
-                Entregas
+                {t("cabecalho.tituloDestaque")}
               </span>
             </h1>
           </div>
@@ -181,18 +202,18 @@ export function GerenciarEntregas() {
             }`}
           >
             <Icone name={criando ? "close" : "add"} className="text-xl" />
-            {criando ? "Cancelar" : "Nova Entrega"}
+            {criando ? t("comum:acoes.cancelar") : t("cabecalho.nova")}
           </button>
         </header>
 
         {/* Stats */}
-        <div className="flex flex-wrap gap-3 w-full sm:w-auto">
+        <div className="flex gap-3 flex-wrap">
           {[
-            { label: "Total",      value: contadores.total,    color: "text-on-surface" },
-            { label: "Pendentes",  value: contadores.pendente, color: "text-secondary"  },
-            { label: "Retiradas",  value: contadores.retirada, color: "text-primary"    },
+            { label: t("stats.total"),      value: contadores.total,    color: "text-on-surface" },
+            { label: t("stats.pendentes"),  value: contadores.pendente, color: "text-secondary"  },
+            { label: t("stats.retiradas"),  value: contadores.retirada, color: "text-primary"    },
           ].map((s) => (
-            <div key={s.label} className="glass-panel rounded-2xl px-4 sm:px-5 py-3 text-center flex-1 min-w-[80px]">
+            <div key={s.label} className="glass-panel rounded-2xl px-5 py-3 text-center min-w-[90px]">
               <p className={`text-2xl font-headline font-bold ${s.color}`}>{s.value}</p>
               <p className="text-on-surface-variant text-xs uppercase tracking-wider">{s.label}</p>
             </div>
@@ -201,15 +222,15 @@ export function GerenciarEntregas() {
 
         {/* Form nova entrega */}
         {criando && (
-          <div className="glass-panel rounded-3xl p-4 sm:p-6 lg:p-8 border border-primary/15">
+          <div className="glass-panel rounded-3xl p-6 lg:p-8 border border-primary/15">
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 shrink-0 rounded-xl bg-primary/10 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
                 <Icone name="inventory_2" className="text-primary" />
               </div>
-              <h2 className="font-headline text-xl font-bold text-on-surface">Nova Entrega</h2>
+              <h2 className="font-headline text-xl font-bold text-on-surface">{t("cabecalho.nova")}</h2>
             </div>
             <FormEntrega
-              usuarios={usuarios}
+              usuarios={usuariosComUnidade}
               onSalvar={handleCriar}
               onCancelar={() => { setCriando(false); setErroCriar(""); }}
               erro={erroCriar}
@@ -221,49 +242,49 @@ export function GerenciarEntregas() {
         <div className="glass-panel rounded-3xl p-5 space-y-4">
           <div className="flex items-center justify-between">
             <p className="text-sm font-semibold text-on-surface-variant uppercase tracking-wider flex items-center gap-2">
-              <Icone name="filter_list" className="text-base" /> Filtros
+              <Icone name="filter_list" className="text-base" /> {t("filtros.titulo")}
             </p>
             {temFiltro && (
               <button
                 onClick={limparFiltros}
                 className="text-xs text-error hover:underline cursor-pointer"
               >
-                Limpar filtros
+                {t("filtros.limpar")}
               </button>
             )}
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant">Status</label>
+              <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant">{t("filtros.status")}</label>
               <select value={filtroStatus} onChange={(e) => setFiltroStatus(e.target.value)} className={inputCls}>
-                <option value="TODOS">Todos</option>
-                <option value="PENDENTE">Pendente</option>
-                <option value="RETIRADA">Retirada</option>
+                <option value="TODOS">{t("filtros.todos")}</option>
+                <option value="PENDENTE">{t("status.PENDENTE")}</option>
+                <option value="RETIRADA">{t("status.RETIRADA")}</option>
               </select>
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant">Bloco</label>
+              <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant">{t("filtros.bloco")}</label>
               <select value={filtroBloco} onChange={(e) => setFiltroBloco(e.target.value)} className={inputCls}>
-                <option value="">Todos os blocos</option>
+                <option value="">{t("filtros.todosBlocos")}</option>
                 {blocosUnicos.map((b) => <option key={b} value={b}>{b}</option>)}
               </select>
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant">Apartamento</label>
+              <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant">{t("filtros.apartamento")}</label>
               <select value={filtroApartamento} onChange={(e) => setFiltroApartamento(e.target.value)} className={inputCls}>
-                <option value="">Todos</option>
-                {apartamentosUnicos.map((a) => <option key={a} value={a}>Apt {a}</option>)}
+                <option value="">{t("filtros.todos")}</option>
+                {apartamentosUnicos.map((a) => <option key={a} value={a}>{t("unidade.apt", { numero: a })}</option>)}
               </select>
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant">Destinatário</label>
+              <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant">{t("filtros.destinatario")}</label>
               <input
                 type="text"
-                placeholder="Nome..."
+                placeholder={t("filtros.nomePlaceholder")}
                 value={filtroDestinatario}
                 onChange={(e) => setFiltroDestinatario(e.target.value)}
                 className={inputCls}
@@ -271,22 +292,22 @@ export function GerenciarEntregas() {
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant">Recebimento — de</label>
+              <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant">{t("filtros.recebimentoDe")}</label>
               <input type="date" value={filtroRecebDe} onChange={(e) => setFiltroRecebDe(e.target.value)} className={inputCls} />
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant">Recebimento — até</label>
+              <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant">{t("filtros.recebimentoAte")}</label>
               <input type="date" value={filtroRecebAte} onChange={(e) => setFiltroRecebAte(e.target.value)} className={inputCls} />
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant">Retirada — de</label>
+              <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant">{t("filtros.retiradaDe")}</label>
               <input type="date" value={filtroRetDe} onChange={(e) => setFiltroRetDe(e.target.value)} className={inputCls} />
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant">Retirada — até</label>
+              <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant">{t("filtros.retiradaAte")}</label>
               <input type="date" value={filtroRetAte} onChange={(e) => setFiltroRetAte(e.target.value)} className={inputCls} />
             </div>
           </div>
@@ -294,19 +315,24 @@ export function GerenciarEntregas() {
 
         {temFiltro && (
           <p className="text-xs text-on-surface-variant -mt-4">
-            Exibindo <strong className="text-on-surface">{filtradas.length}</strong> de {entregas.length} entregas
+            <Trans
+              t={t}
+              i18nKey="lista.exibindo"
+              values={{ filtradas: filtradas.length, total: entregas.length }}
+              components={{ destaque: <strong className="text-on-surface" /> }}
+            />
           </p>
         )}
 
         {/* Lista */}
         {carregando ? (
-          <div className="glass-panel rounded-3xl p-6 sm:p-10 text-center text-on-surface-variant">Carregando...</div>
+          <div className="glass-panel rounded-3xl p-10 text-center text-on-surface-variant">{t("lista.carregando")}</div>
         ) : (
           <div className="space-y-3">
             {filtradas.length === 0 && (
-              <div className="glass-panel rounded-3xl py-12 sm:py-16 px-4 text-center flex flex-col items-center gap-3 text-on-surface-variant">
+              <div className="glass-panel rounded-3xl py-16 flex flex-col items-center gap-3 text-on-surface-variant">
                 <Icone name="inventory_2" className="text-5xl opacity-30" />
-                <p className="text-sm">Nenhuma entrega encontrada.</p>
+                <p className="text-sm">{t("lista.vazio")}</p>
               </div>
             )}
 
@@ -316,7 +342,7 @@ export function GerenciarEntregas() {
                 <div key={entrega.id} className="glass-panel rounded-3xl overflow-hidden">
                   <button
                     onClick={() => { setExpandido((p) => (p === entrega.id ? null : entrega.id)); setEditando(null); }}
-                    className="w-full flex items-center gap-3 sm:gap-4 p-4 sm:p-5 text-left hover:bg-veu/5 transition-all cursor-pointer"
+                    className="w-full flex items-center gap-4 p-5 text-left hover:bg-veu/5 transition-all cursor-pointer"
                   >
                     <div className={`w-11 h-11 rounded-full flex items-center justify-center shrink-0 ${cfg.color}`}>
                       <Icone name={cfg.icon} className="text-xl" />
@@ -325,7 +351,7 @@ export function GerenciarEntregas() {
                     <div className="flex-1 min-w-0">
                       <p className="text-on-surface font-semibold truncate">{entrega.destinatarioNome || "—"}</p>
                       <p className="text-on-surface-variant text-sm truncate">
-                        {[entrega.bloco, entrega.apartamento ? `Apt ${entrega.apartamento}` : null, entrega.descricao]
+                        {[entrega.bloco, entrega.apartamento ? t("unidade.apt", { numero: entrega.apartamento }) : null, entrega.descricao]
                           .filter(Boolean)
                           .join(" · ")}
                       </p>
@@ -333,8 +359,8 @@ export function GerenciarEntregas() {
 
                     <div className="hidden sm:flex gap-6 text-sm shrink-0">
                       {[
-                        { label: "Recebida",  value: fmtData(entrega.dataRecebimento) },
-                        { label: "Retirada",  value: fmtData(entrega.dataRetirada)    },
+                        { label: t("lista.recebida"),  value: fmtData(entrega.dataRecebimento) },
+                        { label: t("lista.retirada"),  value: fmtData(entrega.dataRetirada)    },
                       ].map((col) => (
                         <div key={col.label} className="text-center">
                           <p className="text-on-surface-variant text-xs uppercase tracking-wider">{col.label}</p>
@@ -344,7 +370,7 @@ export function GerenciarEntregas() {
                     </div>
 
                     <span className={`shrink-0 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider ${cfg.color}`}>
-                      {cfg.label}
+                      {t(cfg.rotuloKey)}
                     </span>
 
                     <Icone
@@ -354,11 +380,11 @@ export function GerenciarEntregas() {
                   </button>
 
                   {expandido === entrega.id && (
-                    <div className="border-t border-outline-variant/15 px-4 sm:px-5 pb-6 pt-5">
+                    <div className="border-t border-outline-variant/15 px-5 pb-6 pt-5">
                       {editando === entrega.id ? (
                         <FormEntrega
                           inicial={entrega}
-                          usuarios={usuarios}
+                          usuarios={usuariosComUnidade}
                           onSalvar={(dados) => handleAtualizar(entrega.id, dados)}
                           onCancelar={() => { setEditando(null); setErroEditar(""); }}
                           erro={erroEditar}
@@ -383,7 +409,7 @@ export function GerenciarEntregas() {
       {modalRetirada && (
         <PopupRetirada
           entrega={modalRetirada}
-          usuarios={usuarios}
+          usuarios={usuariosComUnidade}
           onConfirmar={(recebedorNome, dataRetirada) =>
             handleConfirmarRetirada(modalRetirada, recebedorNome, dataRetirada)
           }
@@ -398,6 +424,7 @@ export function GerenciarEntregas() {
 // POPUP DE RETIRADA
 // ════════════════════════════════════════════
 function PopupRetirada({ entrega, usuarios, onConfirmar, onCancelar }) {
+  const { t } = useTranslation("entregas");
   const moradoresApartamento = useMemo(
     () =>
       usuarios.filter(
@@ -421,19 +448,19 @@ function PopupRetirada({ entrega, usuarios, onConfirmar, onCancelar }) {
   function handleConfirmar() {
     setErro("");
     if (!recebedorId) {
-      setErro("Selecione quem retirou a encomenda.");
+      setErro(t("erros.selecioneRecebedor"));
       return;
     }
     if (!dataRetirada) {
-      setErro("Informe a data de retirada.");
+      setErro(t("erros.informeDataRetirada"));
       return;
     }
     if (dataRetirada > hoje()) {
-      setErro("A data de retirada não pode ser futura.");
+      setErro(t("erros.retiradaFutura"));
       return;
     }
     if (minData && dataRetirada < minData) {
-      setErro("A data de retirada não pode ser anterior à data de recebimento.");
+      setErro(t("erros.retiradaAnterior"));
       return;
     }
     const recebedor = moradoresApartamento.find((u) => u.id.toString() === recebedorId);
@@ -442,16 +469,16 @@ function PopupRetirada({ entrega, usuarios, onConfirmar, onCancelar }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-      <div className="glass-panel rounded-3xl p-5 sm:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto shadow-2xl border border-primary/20 space-y-5">
+      <div className="glass-panel rounded-3xl p-6 w-full max-w-md shadow-2xl border border-primary/20 space-y-5">
         {/* Título */}
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 shrink-0 rounded-xl bg-primary/10 flex items-center justify-center">
+          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
             <Icone name="check_circle" className="text-primary text-xl" />
           </div>
           <div>
-            <h2 className="font-headline text-lg font-bold text-on-surface">Confirmar retirada</h2>
+            <h2 className="font-headline text-lg font-bold text-on-surface">{t("retirada.titulo")}</h2>
             <p className="text-on-surface-variant text-xs">
-              {entrega.descricao || "Encomenda"} · {entrega.bloco}, Apt {entrega.apartamento}
+              {entrega.descricao || t("retirada.encomenda")} · {entrega.bloco}, {t("unidade.apt", { numero: entrega.apartamento })}
             </p>
           </div>
         </div>
@@ -459,11 +486,11 @@ function PopupRetirada({ entrega, usuarios, onConfirmar, onCancelar }) {
         {/* Quem retirou */}
         <div className="space-y-2">
           <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant ml-1">
-            Quem retirou <span className="text-error">*</span>
+            {t("retirada.quemRetirou")} <span className="text-error">*</span>
           </label>
           {moradoresApartamento.length === 0 ? (
             <p className="text-sm text-on-surface-variant bg-surface-container-highest/30 rounded-xl px-4 py-3">
-              Nenhum morador vinculado ao apartamento {entrega.apartamento}.
+              {t("moradores.nenhumVinculado", { apartamento: entrega.apartamento })}
             </p>
           ) : (
             <select
@@ -471,7 +498,7 @@ function PopupRetirada({ entrega, usuarios, onConfirmar, onCancelar }) {
               onChange={(e) => setRecebedorId(e.target.value)}
               className={selectCls}
             >
-              <option value="">Selecione o morador</option>
+              <option value="">{t("moradores.selecione")}</option>
               {moradoresApartamento.map((u) => (
                 <option key={u.id} value={u.id}>
                   {u.nome}
@@ -484,7 +511,7 @@ function PopupRetirada({ entrega, usuarios, onConfirmar, onCancelar }) {
         {/* Data de retirada */}
         <div className="space-y-2">
           <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant ml-1">
-            Data de retirada <span className="text-error">*</span>
+            {t("retirada.dataRetirada")} <span className="text-error">*</span>
           </label>
           <input
             type="date"
@@ -496,7 +523,7 @@ function PopupRetirada({ entrega, usuarios, onConfirmar, onCancelar }) {
           />
           {minData && (
             <p className="text-xs text-on-surface-variant ml-1">
-              Recebida em {fmtData(entrega.dataRecebimento)} — data de retirada não pode ser anterior.
+              {t("retirada.recebidaEm", { data: fmtData(entrega.dataRecebimento) })}
             </p>
           )}
         </div>
@@ -506,16 +533,16 @@ function PopupRetirada({ entrega, usuarios, onConfirmar, onCancelar }) {
         )}
 
         {/* Ações */}
-        <div className="flex flex-col-reverse sm:flex-row gap-3 pt-1">
+        <div className="flex gap-3 pt-1">
           <Botao type="button" onClick={handleConfirmar} className="flex-1">
-            Confirmar retirada
+            {t("retirada.confirmar")}
           </Botao>
           <button
             type="button"
             onClick={onCancelar}
             className="flex-1 py-4 rounded-full border border-outline-variant/30 text-on-surface-variant hover:bg-veu/5 font-semibold text-sm transition-all cursor-pointer"
           >
-            Cancelar
+            {t("comum:acoes.cancelar")}
           </button>
         </div>
       </div>
@@ -542,6 +569,7 @@ function FormEntrega({ inicial, usuarios, onSalvar, onCancelar, erro }) {
   const [bloco, setBloco] = useState(inicial?.bloco || "");
   const [apartamento, setApartamento] = useState(inicial?.apartamento || "");
   const [erroLocal, setErroLocal] = useState("");
+  const { t } = useTranslation("entregas");
 
   useEffect(() => {
     if (!destinatarioId) { setBloco(""); setApartamento(""); return; }
@@ -559,17 +587,17 @@ function FormEntrega({ inicial, usuarios, onSalvar, onCancelar, erro }) {
     setErroLocal("");
 
     if (form.dataRecebimento > hoje()) {
-      setErroLocal("A data de recebimento não pode ser uma data futura.");
+      setErroLocal(t("erros.recebimentoDataFutura"));
       return;
     }
 
     if (form.status === "RETIRADA" && form.dataRetirada) {
       if (form.dataRetirada > hoje()) {
-        setErroLocal("A data de retirada não pode ser uma data futura.");
+        setErroLocal(t("erros.retiradaDataFutura"));
         return;
       }
       if (form.dataRecebimento && form.dataRetirada < form.dataRecebimento) {
-        setErroLocal("A data de retirada não pode ser anterior à data de recebimento.");
+        setErroLocal(t("erros.retiradaAnterior"));
         return;
       }
     }
@@ -596,7 +624,7 @@ function FormEntrega({ inicial, usuarios, onSalvar, onCancelar, erro }) {
         {/* Destinatário */}
         <div className="space-y-2 sm:col-span-2">
           <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant ml-1">
-            Destinatário <span className="text-error">*</span>
+            {t("form.destinatario")} <span className="text-error">*</span>
           </label>
           <select
             value={destinatarioId}
@@ -604,12 +632,12 @@ function FormEntrega({ inicial, usuarios, onSalvar, onCancelar, erro }) {
             required={!isEdicao}
             className={selectCls}
           >
-            <option value="">Selecione um morador</option>
+            <option value="">{t("form.selecioneMorador")}</option>
             {usuarios
               .filter((u) => u.bloco && u.apartamento)
               .map((u) => (
                 <option key={u.id} value={u.id}>
-                  {u.nome} — {u.bloco}, Apt {u.apartamento}
+                  {u.nome} — {u.bloco}, {t("unidade.apt", { numero: u.apartamento })}
                 </option>
               ))}
           </select>
@@ -617,20 +645,20 @@ function FormEntrega({ inicial, usuarios, onSalvar, onCancelar, erro }) {
 
         {/* Bloco e Apartamento (somente leitura) */}
         <div className="space-y-2">
-          <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant ml-1">Bloco</label>
+          <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant ml-1">{t("form.bloco")}</label>
           <input
             value={bloco}
             readOnly
-            placeholder="Preenchido automaticamente"
+            placeholder={t("form.preenchidoAutomaticamente")}
             className={`${selectCls} opacity-60 cursor-not-allowed`}
           />
         </div>
         <div className="space-y-2">
-          <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant ml-1">Apartamento</label>
+          <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant ml-1">{t("form.apartamento")}</label>
           <input
             value={apartamento}
             readOnly
-            placeholder="Preenchido automaticamente"
+            placeholder={t("form.preenchidoAutomaticamente")}
             className={`${selectCls} opacity-60 cursor-not-allowed`}
           />
         </div>
@@ -638,8 +666,8 @@ function FormEntrega({ inicial, usuarios, onSalvar, onCancelar, erro }) {
         {/* Descrição */}
         <Campo
           id="ent-desc"
-          label="Descrição"
-          placeholder="Ex: Caixa Amazon, envelope AR, etc."
+          label={t("form.descricao")}
+          placeholder={t("form.descricaoPlaceholder")}
           value={form.descricao}
           onChange={(e) => set("descricao", e.target.value)}
         />
@@ -647,8 +675,8 @@ function FormEntrega({ inicial, usuarios, onSalvar, onCancelar, erro }) {
         {/* Remetente */}
         <Campo
           id="ent-remetente"
-          label="Remetente"
-          placeholder="Ex: Correios, Mercado Livre, etc."
+          label={t("form.remetente")}
+          placeholder={t("form.remetentePlaceholder")}
           value={form.remetente}
           onChange={(e) => set("remetente", e.target.value)}
         />
@@ -656,7 +684,7 @@ function FormEntrega({ inicial, usuarios, onSalvar, onCancelar, erro }) {
         {/* Data de recebimento */}
         <div className="space-y-2">
           <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant ml-1">
-            Data de recebimento <span className="text-error">*</span>
+            {t("form.dataRecebimento")} <span className="text-error">*</span>
           </label>
           <input
             type="date"
@@ -671,14 +699,14 @@ function FormEntrega({ inicial, usuarios, onSalvar, onCancelar, erro }) {
         {/* Status — só na edição */}
         {isEdicao && (
           <div className="space-y-2">
-            <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant ml-1">Status</label>
+            <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant ml-1">{t("form.status")}</label>
             <select
               value={form.status}
               onChange={(e) => set("status", e.target.value)}
               className={selectCls}
             >
-              <option value="PENDENTE">Pendente</option>
-              <option value="RETIRADA">Retirada</option>
+              <option value="PENDENTE">{t("status.PENDENTE")}</option>
+              <option value="RETIRADA">{t("status.RETIRADA")}</option>
             </select>
           </div>
         )}
@@ -686,7 +714,7 @@ function FormEntrega({ inicial, usuarios, onSalvar, onCancelar, erro }) {
         {/* Data de retirada — só na edição quando status = RETIRADA */}
         {isEdicao && form.status === "RETIRADA" && (
           <div className="space-y-2">
-            <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant ml-1">Data de retirada</label>
+            <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant ml-1">{t("form.dataRetirada")}</label>
             <input
               type="date"
               value={form.dataRetirada}
@@ -702,11 +730,11 @@ function FormEntrega({ inicial, usuarios, onSalvar, onCancelar, erro }) {
         {isEdicao && form.status === "RETIRADA" && (
           <div className="space-y-2 sm:col-span-2">
             <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant ml-1">
-              Recebida por
+              {t("form.recebidaPor")}
             </label>
             {usuarios.filter((u) => u.bloco === bloco && u.apartamento === apartamento).length === 0 ? (
               <p className="text-sm text-on-surface-variant bg-surface-container-highest/30 rounded-xl px-4 py-3">
-                Nenhum morador vinculado ao apartamento {apartamento}.
+                {t("moradores.nenhumVinculado", { apartamento })}
               </p>
             ) : (
               <select
@@ -714,7 +742,7 @@ function FormEntrega({ inicial, usuarios, onSalvar, onCancelar, erro }) {
                 onChange={(e) => set("recebedorNome", e.target.value)}
                 className={selectCls}
               >
-                <option value="">Selecione o morador</option>
+                <option value="">{t("moradores.selecione")}</option>
                 {usuarios
                   .filter((u) => u.bloco === bloco && u.apartamento === apartamento)
                   .map((u) => (
@@ -730,8 +758,8 @@ function FormEntrega({ inicial, usuarios, onSalvar, onCancelar, erro }) {
         {/* Observações */}
         <Campo
           id="ent-obs"
-          label="Observações"
-          placeholder="Opcional"
+          label={t("form.observacoes")}
+          placeholder={t("form.observacoesPlaceholder")}
           value={form.observacoes}
           onChange={(e) => set("observacoes", e.target.value)}
         />
@@ -740,13 +768,13 @@ function FormEntrega({ inicial, usuarios, onSalvar, onCancelar, erro }) {
       {erroExibido && <p className="text-error text-xs">{erroExibido}</p>}
 
       <div className="flex gap-3 pt-2">
-        <Botao type="submit">{isEdicao ? "Salvar alterações" : "Cadastrar entrega"}</Botao>
+        <Botao type="submit">{isEdicao ? t("form.salvarAlteracoes") : t("form.cadastrar")}</Botao>
         <button
           type="button"
           onClick={onCancelar}
           className="flex-1 py-4 rounded-full border border-outline-variant/30 text-on-surface-variant hover:bg-veu/5 font-semibold transition-all cursor-pointer"
         >
-          Cancelar
+          {t("comum:acoes.cancelar")}
         </button>
       </div>
     </form>
@@ -757,24 +785,25 @@ function FormEntrega({ inicial, usuarios, onSalvar, onCancelar, erro }) {
 // DETALHES
 // ════════════════════════════════════════════
 function DetalhesEntrega({ entrega, onEditar, onMarcarRetirada }) {
+  const { t } = useTranslation("entregas");
   const campos = [
-    { label: "Destinatário",  value: entrega.destinatarioNome || "—" },
-    { label: "Bloco",         value: entrega.bloco            || "—" },
-    { label: "Apartamento",   value: entrega.apartamento ? `Apt ${entrega.apartamento}` : "—" },
-    { label: "Remetente",     value: entrega.remetente        || "—" },
-    { label: "Descrição",     value: entrega.descricao        || "—" },
-    { label: "Recebida em",   value: fmtData(entrega.dataRecebimento) },
-    { label: "Retirada em",   value: fmtData(entrega.dataRetirada)    },
-    { label: "Observações",   value: entrega.observacoes      || "—" },
+    { label: t("detalhes.destinatario"),  value: entrega.destinatarioNome || "—" },
+    { label: t("detalhes.bloco"),         value: entrega.bloco            || "—" },
+    { label: t("detalhes.apartamento"),   value: entrega.apartamento ? t("unidade.apt", { numero: entrega.apartamento }) : "—" },
+    { label: t("detalhes.remetente"),     value: entrega.remetente        || "—" },
+    { label: t("detalhes.descricao"),     value: entrega.descricao        || "—" },
+    { label: t("detalhes.recebidaEm"),   value: fmtData(entrega.dataRecebimento) },
+    { label: t("detalhes.retiradaEm"),   value: fmtData(entrega.dataRetirada)    },
+    { label: t("detalhes.observacoes"),   value: entrega.observacoes      || "—" },
   ];
 
   if (entrega.status === "RETIRADA") {
-    campos.push({ label: "Recebida por", value: entrega.recebedorNome || "—" });
+    campos.push({ label: t("detalhes.recebidaPor"), value: entrega.recebedorNome || "—" });
   }
 
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {campos.map((item) => (
           <div key={item.label} className="bg-surface-container-highest/20 rounded-xl p-3">
             <p className="text-on-surface-variant text-xs uppercase tracking-wider mb-1">{item.label}</p>
@@ -788,7 +817,7 @@ function DetalhesEntrega({ entrega, onEditar, onMarcarRetirada }) {
           onClick={onEditar}
           className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-primary/30 text-primary hover:bg-primary/10 text-sm font-semibold transition-all cursor-pointer"
         >
-          <Icone name="edit" className="text-lg" /> Editar
+          <Icone name="edit" className="text-lg" /> {t("comum:acoes.editar")}
         </button>
 
         {entrega.status === "PENDENTE" && (
@@ -796,7 +825,7 @@ function DetalhesEntrega({ entrega, onEditar, onMarcarRetirada }) {
             onClick={onMarcarRetirada}
             className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-primary/30 text-primary hover:bg-primary/10 text-sm font-semibold transition-all cursor-pointer"
           >
-            <Icone name="check_circle" className="text-lg" /> Marcar como retirada
+            <Icone name="check_circle" className="text-lg" /> {t("detalhes.marcarRetirada")}
           </button>
         )}
       </div>

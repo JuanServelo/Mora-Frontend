@@ -1,56 +1,60 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "../../contexts/AuthContext";
-import { useModules } from "../../contexts/ModulesContext";
+import { usePlano } from "../../contexts/PlanoContext";
 import { condominiosApi } from "../../services/condominiosApi";
 import { Icone } from "../../components/icones/Icone";
-import { linkLiberado } from "../../utils/modulosPlano";
 
+// `modulo` espelha os slugs do plano contratado; sem o campo, o card e
+// infraestrutura e aparece sempre (caso de Usuarios do Condominio).
 const CARDS_PORTEIRO = [
   {
+    // Tela trazida da branch feat/ajus: cadastro de visitante e prestador no
+    // momento da chegada, sem depender de pre-autorizacao do morador.
     to: "/atendimento",
-    label: "Cadastros",
-    desc: "Registrar entrada de visitantes e prestadores de serviço",
+    modulo: "portaria",
+    labelKey: "inicio.cards.cadastros.titulo",
+    descKey: "inicio.cards.cadastros.descricao",
     icon: "waving_hand",
     color: "primary",
-    modulo: "portaria",
   },
   {
     to: "/entradas-e-saidas",
-    label: "Controle de Acesso",
-    desc: "Registrar entradas e saídas de moradores e visitantes",
-    icon: "sensor_door",
-    color: "secondary",
     modulo: "portaria",
+    labelKey: "inicio.cards.acesso.titulo",
+    descKey: "inicio.cards.acesso.descricao",
+    icon: "sensor_door",
+    color: "primary",
   },
   {
     to: "/portaria/entregas",
-    label: "Controle de Entregas",
-    desc: "Receber e registrar encomendas e pacotes",
+    modulo: "entregas",
+    labelKey: "inicio.cards.entregas.titulo",
+    descKey: "inicio.cards.entregas.descricao",
     icon: "inventory_2",
     color: "secondary",
-    modulo: "entregas",
   },
   {
     to: "/chaves",
-    label: "Controle de Chaves",
-    desc: "Gerenciar chaves e acessos do condomínio",
+    modulo: "chaves",
+    labelKey: "inicio.cards.chaves.titulo",
+    descKey: "inicio.cards.chaves.descricao",
     icon: "key",
     color: "tertiary",
-    modulo: "chaves",
   },
   {
     to: "/espacos",
-    label: "Espaços",
-    desc: "Visualizar e acompanhar áreas comuns",
+    modulo: "areas_comuns",
+    labelKey: "inicio.cards.espacos.titulo",
+    descKey: "inicio.cards.espacos.descricao",
     icon: "deck",
     color: "primary",
-    modulo: "areas_comuns",
   },
   {
     to: "/usuarios",
-    label: "Usuários do Condomínio",
-    desc: "Consultar moradores, porteiros e funcionários",
+    labelKey: "inicio.cards.usuarios.titulo",
+    descKey: "inicio.cards.usuarios.descricao",
     icon: "people",
     color: "tertiary",
   },
@@ -78,9 +82,13 @@ const COLOR_MAP = {
 };
 
 export function InicioDoorman() {
+  const { t } = useTranslation("portaria");
   const { usuario } = useAuth();
-  const { activeModules } = useModules();
-  const primeiroNome = usuario?.nome?.split(" ")[0] || "Porteiro";
+  const { hasModulo } = usePlano();
+  const primeiroNome = usuario?.nome?.split(" ")[0] || t("inicio.porteiroPadrao");
+  // Mesma regra da barra lateral: oferecer aqui o que o plano não inclui
+  // levaria a uma tela que o condomínio não contratou.
+  const cardsVisiveis = CARDS_PORTEIRO.filter((c) => !c.modulo || hasModulo(c.modulo));
   const [nomeCondominio, setNomeCondominio] = useState(null);
 
   useEffect(() => {
@@ -92,27 +100,27 @@ export function InicioDoorman() {
   }, [usuario?.condominioId]);
 
   return (
-    <div className="min-h-screen w-full pt-4 pb-20 px-4 sm:px-6">
+    <div className="min-h-screen w-full pt-4 pb-20 px-6">
       <div className="max-w-5xl mx-auto space-y-10">
 
         <header className="text-center max-w-3xl mx-auto">
           <p className="text-on-surface-variant text-xs font-semibold uppercase tracking-widest mb-2">
-            {nomeCondominio ?? "Condomínio"} · Portaria
+            {t("inicio.sobretitulo", { condominio: nomeCondominio ?? t("inicio.condominioPadrao") })}
           </p>
           <h1 className="font-headline text-4xl md:text-5xl font-extrabold tracking-tight text-on-surface mb-4">
-            Olá,{" "}
+            {t("inicio.ola")}{" "}
             <span className="bg-gradient-to-r from-primary to-tertiary bg-clip-text text-transparent">
               {primeiroNome}
             </span>
           </h1>
           <p className="text-on-surface-variant text-lg leading-relaxed">
-            Painel de controle da portaria. Selecione a funcionalidade desejada.
+            {t("inicio.descricao")}
           </p>
         </header>
 
         <section>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {CARDS_PORTEIRO.filter((item) => linkLiberado(activeModules, item)).map((item) => {
+            {cardsVisiveis.map((item) => {
               const c = COLOR_MAP[item.color];
               return (
                 <Link
@@ -126,13 +134,13 @@ export function InicioDoorman() {
                     <Icone name={item.icon} className={`${c.text} text-3xl`} />
                   </div>
                   <h3 className="font-headline font-bold text-on-surface text-lg mb-1.5">
-                    {item.label}
+                    {t(item.labelKey)}
                   </h3>
-                  <p className="text-on-surface-variant text-sm leading-snug">{item.desc}</p>
+                  <p className="text-on-surface-variant text-sm leading-snug">{t(item.descKey)}</p>
                   <span
                     className={`mt-4 inline-flex items-center gap-1 ${c.text} text-sm font-semibold opacity-0 group-hover:opacity-100 transition-opacity`}
                   >
-                    Abrir
+                    {t("inicio.abrir")}
                     <Icone name="chevron_right" className="text-lg" />
                   </span>
                 </Link>
@@ -149,10 +157,10 @@ export function InicioDoorman() {
             </div>
             <div>
               <h3 className="font-headline text-lg font-bold text-on-surface mb-0.5">
-                Segurança em primeiro lugar
+                {t("inicio.seguranca.titulo")}
               </h3>
               <p className="text-on-surface-variant text-sm">
-                Registre todas as entradas e saídas. Convidados bloqueados não podem ser autorizados sem permissão do responsável da unidade.
+                {t("inicio.seguranca.descricao")}
               </p>
             </div>
           </div>

@@ -1,11 +1,13 @@
 // src/pages/usuario/MeusVeiculos.jsx
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { meusVeiculosApi } from "../../services/portariaApi";
 import { Icone } from "../../components/icones/Icone";
 import { Campo } from "../../components/campos/Campo";
 import { Botao } from "../../components/botoes/Botao";
 import { useToast } from "../../contexts/ToastContext";
+import { usePlano } from "../../contexts/PlanoContext";
 
 // ── helpers ──────────────────────────────────────────────────────────────────
 
@@ -42,6 +44,7 @@ function Carregando() {
 }
 
 function Erro({ mensagem, onTentar }) {
+  const { t } = useTranslation("veiculos");
   return (
     <div className="glass-panel rounded-2xl p-8 text-center border border-error/20 space-y-3">
       <Icone name="error_outline" className="text-error text-4xl" />
@@ -51,7 +54,7 @@ function Erro({ mensagem, onTentar }) {
           onClick={onTentar}
           className="inline-flex items-center gap-2 px-5 py-2 rounded-full border border-primary/30 text-primary hover:bg-primary/10 text-sm font-semibold cursor-pointer"
         >
-          <Icone name="refresh" className="text-base" />Tentar novamente
+          <Icone name="refresh" className="text-base" />{t("comum:acoes.tentarNovamente")}
         </button>
       )}
     </div>
@@ -61,21 +64,22 @@ function Erro({ mensagem, onTentar }) {
 // ── Página ───────────────────────────────────────────────────────────────────
 
 export function MeusVeiculos() {
+  const { t } = useTranslation("veiculos");
   return (
     <div className="min-h-screen w-full pt-4 pb-20 px-4 sm:px-6">
       <div className="max-w-5xl mx-auto space-y-8">
         <header>
           <p className="text-on-surface-variant text-xs font-semibold uppercase tracking-widest mb-1">
-            Minha Unidade
+            {t("meus.cabecalho.sobretitulo")}
           </p>
           <h1 className="font-headline text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-on-surface">
-            Meus{" "}
+            {t("meus.cabecalho.titulo")}{" "}
             <span className="bg-gradient-to-r from-primary to-tertiary bg-clip-text text-transparent">
-              Veículos
+              {t("meus.cabecalho.tituloDestaque")}
             </span>
           </h1>
           <p className="text-on-surface-variant text-sm mt-1">
-            Veículos da sua unidade, pessoas vinculadas e situação das vagas.
+            {t("meus.cabecalho.descricao")}
           </p>
         </header>
 
@@ -89,10 +93,10 @@ export function MeusVeiculos() {
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-semibold text-on-surface">
-              Para liberar o veículo de um visitante, use Meus convidados.
+              {t("meus.convidados.titulo")}
             </p>
             <p className="text-xs text-on-surface-variant mt-0.5">
-              A pré-liberação é sempre do visitante, com o veículo como parte dela.
+              {t("meus.convidados.descricao")}
             </p>
           </div>
           <Icone name="chevron_right" className="text-on-surface-variant group-hover:text-primary transition-colors text-xl shrink-0" />
@@ -107,7 +111,9 @@ export function MeusVeiculos() {
 // ── Aba: veículos + vagas (RN-02) ────────────────────────────────────────────
 
 function AbaVeiculos() {
+  const { t } = useTranslation("veiculos");
   const toast = useToast();
+  const { hasModulo } = usePlano();
   const [dados, setDados] = useState({ veiculos: [], vagas: [] });
   const [pessoas, setPessoas] = useState([]);
   const [carregando, setCarregando] = useState(true);
@@ -126,11 +132,11 @@ function AbaVeiculos() {
         vagas: res.data?.vagas ?? [],
       });
     } catch (err) {
-      setErro(errMsg(err) || "Não foi possível carregar os veículos da sua unidade.");
+      setErro(errMsg(err) || t("meus.erroCarregar"));
     } finally {
       setCarregando(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => { carregar(); }, [carregar]);
 
@@ -146,17 +152,17 @@ function AbaVeiculos() {
     // RN-05: o morador precisa saber, antes de confirmar, se sai do carro
     // ou apaga o cadastro dele.
     const aviso = ultimo
-      ? `Você é o último vínculo do veículo ${veiculo.placa}.\n\nAo confirmar, ele será REMOVIDO do cadastro da unidade e a vaga será liberada. O histórico de acessos é preservado.`
-      : `Remover apenas o SEU vínculo com o veículo ${veiculo.placa}?\n\nEle continuará cadastrado para as outras pessoas da unidade.`;
+      ? t("meus.desvincular.confirmarUltimo", { placa: veiculo.placa })
+      : t("meus.desvincular.confirmarApenasMeu", { placa: veiculo.placa });
     if (!window.confirm(aviso)) return;
 
     setAcao(veiculo.id);
     try {
       const res = await meusVeiculosApi.desvincular(veiculo.id);
-      toast.success(res.data?.mensagem || "Desvinculação registrada.");
+      toast.success(res.data?.mensagem || t("meus.desvincular.sucesso"));
       await carregar();
     } catch (err) {
-      toast.error(errMsg(err) || "Não foi possível desvincular o veículo.");
+      toast.error(errMsg(err) || t("meus.desvincular.erro"));
     } finally {
       setAcao(null);
     }
@@ -171,21 +177,21 @@ function AbaVeiculos() {
       <section className="space-y-4">
         <div className="flex items-center justify-between gap-3 flex-wrap">
           <h2 className="font-headline font-bold text-on-surface text-lg">
-            Meus veículos
+            {t("meus.lista.titulo")}
             <span className="ml-2 text-xs font-normal text-on-surface-variant">
               ({dados.veiculos.length})
             </span>
           </h2>
           <Botao type="button" onClick={() => setForm("novo")}>
             <span className="flex items-center gap-2">
-              <Icone name="add" className="text-lg" />Cadastrar veículo
+              <Icone name="add" className="text-lg" />{t("meus.lista.cadastrar")}
             </span>
           </Botao>
         </div>
 
         {dados.veiculos.length === 0 ? (
           <Vazio icone="directions_car">
-            Nenhum veículo cadastrado na sua unidade. Use “Cadastrar veículo” para incluir o primeiro.
+            {t("meus.lista.vazio")}
           </Vazio>
         ) : (
           <div className="space-y-3">
@@ -204,17 +210,18 @@ function AbaVeiculos() {
       </section>
 
       {/* ── Conjunto 2: vagas da unidade ── */}
-      <section className="space-y-4">
-        <h2 className="font-headline font-bold text-on-surface text-lg">
-          Vagas da minha unidade
-          <span className="ml-2 text-xs font-normal text-on-surface-variant">
-            ({dados.vagas.length})
-          </span>
-        </h2>
+      {hasModulo("vagas") && (
+        <section className="space-y-4">
+          <h2 className="font-headline font-bold text-on-surface text-lg">
+            {t("meus.vagas.titulo")}
+            <span className="ml-2 text-xs font-normal text-on-surface-variant">
+              ({dados.vagas.length})
+            </span>
+          </h2>
 
         {dados.vagas.length === 0 ? (
           <Vazio icone="local_parking">
-            Sua unidade não possui vagas cadastradas. A administração do condomínio faz esse cadastro.
+            {t("meus.vagas.vazio")}
           </Vazio>
         ) : (
           <div className="glass-panel rounded-2xl border border-outline-variant/15 overflow-hidden">
@@ -222,9 +229,9 @@ function AbaVeiculos() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-outline-variant/15 bg-surface-variant/10">
-                    {["Vaga", "Situação", "Ocupada por", "Origem"].map((h) => (
+                    {["vaga", "situacao", "ocupadaPor", "origem"].map((h) => (
                       <th key={h} className="text-left text-xs font-semibold text-on-surface-variant uppercase tracking-wide px-4 py-3 whitespace-nowrap">
-                        {h}
+                        {t(`meus.vagas.colunas.${h}`)}
                       </th>
                     ))}
                   </tr>
@@ -242,7 +249,7 @@ function AbaVeiculos() {
                         <span className={`inline-flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-full ${
                           vg.ocupada ? "bg-secondary/10 text-secondary" : "bg-primary/10 text-primary"
                         }`}>
-                          {vg.ocupada ? "Ocupada" : "Livre"}
+                          {vg.ocupada ? t("meus.vagas.ocupada") : t("meus.vagas.livre")}
                         </span>
                       </td>
                       <td className="px-4 py-3 text-on-surface-variant whitespace-nowrap">
@@ -256,10 +263,10 @@ function AbaVeiculos() {
                       <td className="px-4 py-3 whitespace-nowrap">
                         {vg.origem === "VISITANTE" ? (
                           <span className="inline-flex items-center gap-1 text-xs font-semibold text-on-surface-variant">
-                            <Icone name="lock" className="text-sm" />Visitante
+                            <Icone name="lock" className="text-sm" />{t("meus.vagas.visitante")}
                           </span>
                         ) : vg.origem === "MORADOR" ? (
-                          <span className="text-xs font-semibold text-on-surface-variant">Morador</span>
+                          <span className="text-xs font-semibold text-on-surface-variant">{t("meus.vagas.morador")}</span>
                         ) : "—"}
                       </td>
                     </tr>
@@ -270,10 +277,10 @@ function AbaVeiculos() {
           </div>
         )}
         <p className="text-xs text-on-surface-variant">
-          A situação considera quem está no condomínio agora: uma vaga atribuída a um veículo que saiu aparece como livre.
-          Veículo de visitante é somente leitura.
+          {t("meus.vagas.nota")}
         </p>
       </section>
+      )}
 
       {form && (
         <ModalVeiculo
@@ -298,6 +305,7 @@ function AbaVeiculos() {
 }
 
 function CartaoVeiculo({ veiculo: v, ocupado, onEditar, onPessoas, onDesvincular }) {
+  const { t } = useTranslation("veiculos");
   const dentro = v.status === "DENTRO";
   const ultimo = (v.pessoas?.length ?? 0) <= 1;
 
@@ -311,7 +319,7 @@ function CartaoVeiculo({ veiculo: v, ocupado, onEditar, onPessoas, onDesvincular
           <div className="min-w-0">
             <p className="font-mono font-bold text-on-surface text-lg leading-tight">{v.placa}</p>
             <p className="text-xs text-on-surface-variant">
-              {v.modelo || "Modelo não informado"}{v.cor ? ` · ${v.cor}` : ""}
+              {v.modelo || t("meus.cartao.modeloNaoInformado")}{v.cor ? ` · ${v.cor}` : ""}
             </p>
           </div>
         </div>
@@ -319,16 +327,16 @@ function CartaoVeiculo({ veiculo: v, ocupado, onEditar, onPessoas, onDesvincular
           dentro ? "bg-primary/10 text-primary" : "bg-outline-variant/20 text-on-surface-variant"
         }`}>
           <span className={`w-1.5 h-1.5 rounded-full ${dentro ? "bg-primary" : "bg-outline-variant"}`} />
-          {dentro ? "Dentro do condomínio" : "Fora do condomínio"}
+          {dentro ? t("meus.cartao.dentro") : t("meus.cartao.fora")}
         </span>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
         <p className="text-on-surface-variant">
-          <span className="font-semibold">Vaga:</span> {v.vagaNumero || "Sem vaga"}
+          <span className="font-semibold">{t("meus.cartao.vaga")}</span> {v.vagaNumero || t("meus.cartao.semVaga")}
         </p>
         <p className="text-on-surface-variant">
-          <span className="font-semibold">Pessoas vinculadas:</span>{" "}
+          <span className="font-semibold">{t("meus.cartao.pessoasVinculadas")}</span>{" "}
           {v.pessoas?.length ? v.pessoas.map((p) => p.nome).join(", ") : "—"}
         </p>
       </div>
@@ -341,31 +349,31 @@ function CartaoVeiculo({ veiculo: v, ocupado, onEditar, onPessoas, onDesvincular
 
       <div className="flex flex-wrap gap-2 pt-1">
         <button type="button" onClick={onEditar} disabled={ocupado}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border border-outline-variant/30 text-on-surface-variant hover:bg-white/5 transition-all cursor-pointer disabled:opacity-50">
-          <Icone name="edit" className="text-sm" />Editar
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border border-outline-variant/30 text-on-surface-variant hover:bg-veu/5 transition-all cursor-pointer disabled:opacity-50">
+          <Icone name="edit" className="text-sm" />{t("comum:acoes.editar")}
         </button>
         <button type="button" onClick={onPessoas} disabled={ocupado}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border border-outline-variant/30 text-on-surface-variant hover:bg-white/5 transition-all cursor-pointer disabled:opacity-50">
-          <Icone name="group" className="text-sm" />Pessoas
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border border-outline-variant/30 text-on-surface-variant hover:bg-veu/5 transition-all cursor-pointer disabled:opacity-50">
+          <Icone name="group" className="text-sm" />{t("meus.cartao.pessoas")}
         </button>
         <button
           type="button"
           onClick={onDesvincular}
           disabled={ocupado || dentro}
           title={dentro
-            ? "Registre a saída do veículo antes de desvinculá-lo"
-            : ultimo ? "Remove o veículo do cadastro da unidade" : "Remove apenas o seu vínculo"}
+            ? t("meus.cartao.tituloSaidaAntes")
+            : ultimo ? t("meus.cartao.tituloRemoveVeiculo") : t("meus.cartao.tituloRemoveVinculo")}
           className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-error/10 text-error hover:bg-error/20 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
         >
           <Icone name="link_off" className="text-sm" />
-          {ultimo ? "Remover veículo" : "Desvincular-me"}
+          {ultimo ? t("meus.cartao.removerVeiculo") : t("meus.cartao.desvincularMe")}
         </button>
       </div>
 
       {dentro && (
         <p className="text-xs text-on-surface-variant flex items-center gap-1.5">
           <Icone name="info" className="text-sm text-secondary" />
-          Para desvincular, registre primeiro a saída do veículo na portaria.
+          {t("meus.cartao.avisoDentro")}
         </p>
       )}
     </div>
@@ -375,6 +383,7 @@ function CartaoVeiculo({ veiculo: v, ocupado, onEditar, onPessoas, onDesvincular
 // ── Modal: cadastrar / editar (RN-03, RN-04) ─────────────────────────────────
 
 function ModalVeiculo({ veiculo, vagas, pessoas, onFechar, onSalvo }) {
+  const { t } = useTranslation("veiculos");
   const toast = useToast();
   const editando = Boolean(veiculo);
   const [form, setForm] = useState({
@@ -414,11 +423,11 @@ function ModalVeiculo({ veiculo, vagas, pessoas, onFechar, onSalvo }) {
     if (!editando) {
       const placa = normalizarPlaca(form.placa);
       if (!placaValida(placa)) {
-        setErro("Placa inválida. Use o formato AAA-9999 ou AAA9A99 (Mercosul).");
+        setErro(t("meus.modal.erros.placaInvalida"));
         return;
       }
       if (pessoaIds.length === 0) {
-        setErro("Selecione ao menos uma pessoa para vincular ao veículo.");
+        setErro(t("meus.modal.erros.selecionePessoa"));
         return;
       }
     }
@@ -432,7 +441,7 @@ function ModalVeiculo({ veiculo, vagas, pessoas, onFechar, onSalvo }) {
           obs: form.obs || null,
           vagaId: form.vagaId || null,
         });
-        toast.success(`Veículo ${veiculo.placa} atualizado.`);
+        toast.success(t("meus.modal.toast.atualizado", { placa: veiculo.placa }));
       } else {
         await meusVeiculosApi.cadastrar({
           placa: normalizarPlaca(form.placa),
@@ -442,11 +451,11 @@ function ModalVeiculo({ veiculo, vagas, pessoas, onFechar, onSalvo }) {
           vagaId: form.vagaId || null,
           pessoaIds,
         });
-        toast.success("Veículo cadastrado.");
+        toast.success(t("meus.modal.toast.cadastrado"));
       }
       onSalvo();
     } catch (err) {
-      setErro(errMsg(err) || "Não foi possível salvar o veículo.");
+      setErro(errMsg(err) || t("meus.modal.erros.salvar"));
     } finally {
       setSalvando(false);
     }
@@ -457,7 +466,7 @@ function ModalVeiculo({ veiculo, vagas, pessoas, onFechar, onSalvo }) {
       <div className="glass-panel rounded-3xl p-6 w-full max-w-lg border border-outline-variant/20 shadow-xl my-auto" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between mb-5">
           <h2 className="font-headline text-lg font-bold text-on-surface">
-            {editando ? `Editar ${veiculo.placa}` : "Cadastrar veículo"}
+            {editando ? t("meus.modal.tituloEditar", { placa: veiculo.placa }) : t("meus.modal.tituloCadastrar")}
           </h2>
           <button onClick={onFechar} className="text-on-surface-variant hover:text-on-surface transition-colors cursor-pointer">
             <Icone name="close" className="text-xl" />
@@ -469,15 +478,15 @@ function ModalVeiculo({ veiculo, vagas, pessoas, onFechar, onSalvo }) {
             <div className="bg-surface-container-highest/20 rounded-xl px-4 py-3 flex items-start gap-2">
               <Icone name="lock" className="text-on-surface-variant text-base shrink-0 mt-0.5" />
               <p className="text-xs text-on-surface-variant">
-                A placa <span className="font-mono font-bold text-on-surface">{veiculo.placa}</span> não
-                pode ser alterada. Se estiver errada, remova o veículo e cadastre novamente — editá-la
-                faria o histórico de acessos apontar para o carro errado.
+                {t("meus.modal.placaBloqueadaAntes")}{" "}
+                <span className="font-mono font-bold text-on-surface">{veiculo.placa}</span>{" "}
+                {t("meus.modal.placaBloqueadaDepois")}
               </p>
             </div>
           ) : (
             <Campo
               id="placa"
-              label="Placa"
+              label={t("meus.modal.placa")}
               name="placa"
               value={form.placa}
               onChange={(e) => set("placa", normalizarPlaca(e.target.value))}
@@ -488,47 +497,47 @@ function ModalVeiculo({ veiculo, vagas, pessoas, onFechar, onSalvo }) {
           )}
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Campo id="modelo" label="Modelo" optional value={form.modelo}
-              onChange={(e) => set("modelo", e.target.value)} placeholder="Ex.: Civic" />
-            <Campo id="cor" label="Cor" optional value={form.cor}
-              onChange={(e) => set("cor", e.target.value)} placeholder="Ex.: Prata" />
+            <Campo id="modelo" label={t("meus.modal.modelo")} optional value={form.modelo}
+              onChange={(e) => set("modelo", e.target.value)} placeholder={t("meus.modal.modeloPlaceholder")} />
+            <Campo id="cor" label={t("meus.modal.cor")} optional value={form.cor}
+              onChange={(e) => set("cor", e.target.value)} placeholder={t("meus.modal.corPlaceholder")} />
           </div>
 
           <div className="space-y-2">
             <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant ml-1">
-              Vaga <span className="font-normal normal-case tracking-normal text-on-surface-variant/60">(opcional)</span>
+              {t("meus.modal.vaga")} <span className="font-normal normal-case tracking-normal text-on-surface-variant/60">{t("meus.modal.opcional")}</span>
             </label>
             <select
               value={form.vagaId}
               onChange={(e) => set("vagaId", e.target.value)}
               className="w-full bg-surface-container-highest/40 border-none rounded-xl py-3 px-4 text-on-surface focus:ring-2 focus:ring-primary/50 focus:outline-none transition-all"
             >
-              <option value="">Sem vaga</option>
+              <option value="">{t("meus.modal.semVaga")}</option>
               {vagas.map((vg) => (
                 <option key={vg.id} value={vg.id}>
-                  Vaga {vg.numero}{vg.localizacao ? ` — ${vg.localizacao}` : ""}
+                  {t("meus.modal.opcaoVaga", { numero: vg.numero })}{vg.localizacao ? ` — ${vg.localizacao}` : ""}
                 </option>
               ))}
             </select>
             <p className="text-xs text-on-surface-variant ml-1">
-              Apenas vagas da sua unidade aparecem aqui.
+              {t("meus.modal.apenasVagasUnidade")}
             </p>
           </div>
 
           {!editando && (
             <div className="space-y-2">
               <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant ml-1">
-                Pessoas vinculadas <span className="text-red-500">*</span>
+                {t("meus.modal.pessoasVinculadas")} <span className="text-red-500">*</span>
               </label>
               {pessoas.length === 0 ? (
                 <p className="text-xs text-on-surface-variant py-2">
-                  Não foi possível carregar as pessoas da unidade. O veículo será vinculado a você.
+                  {t("meus.modal.erroPessoas")}
                 </p>
               ) : (
                 <div className="space-y-1.5">
                   {pessoas.map((p) => (
                     <label key={p.pessoaId}
-                      className="flex items-center gap-3 px-3 py-2 rounded-xl bg-surface-container-highest/20 cursor-pointer hover:bg-white/5 transition-all">
+                      className="flex items-center gap-3 px-3 py-2 rounded-xl bg-surface-container-highest/20 cursor-pointer hover:bg-veu/5 transition-all">
                       <input
                         type="checkbox"
                         checked={pessoaIds.includes(p.pessoaId)}
@@ -545,7 +554,7 @@ function ModalVeiculo({ veiculo, vagas, pessoas, onFechar, onSalvo }) {
 
           <div className="space-y-2">
             <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant ml-1">
-              Observações <span className="font-normal normal-case tracking-normal text-on-surface-variant/60">(opcional)</span>
+              {t("meus.modal.observacoes")} <span className="font-normal normal-case tracking-normal text-on-surface-variant/60">{t("meus.modal.opcional")}</span>
             </label>
             <textarea
               value={form.obs}
@@ -564,11 +573,11 @@ function ModalVeiculo({ veiculo, vagas, pessoas, onFechar, onSalvo }) {
 
           <div className="flex flex-col-reverse sm:flex-row gap-3 sm:justify-end pt-1">
             <button type="button" onClick={onFechar}
-              className="px-5 py-2.5 rounded-xl text-sm font-semibold text-on-surface-variant hover:bg-white/5 transition-all cursor-pointer">
-              Cancelar
+              className="px-5 py-2.5 rounded-xl text-sm font-semibold text-on-surface-variant hover:bg-veu/5 transition-all cursor-pointer">
+              {t("comum:acoes.cancelar")}
             </button>
             <Botao type="submit" disabled={salvando}>
-              {salvando ? "Salvando…" : editando ? "Salvar alterações" : "Cadastrar"}
+              {salvando ? t("comum:acoes.salvando") : editando ? t("meus.modal.salvarAlteracoes") : t("meus.modal.cadastrar")}
             </Botao>
           </div>
         </form>
@@ -580,6 +589,7 @@ function ModalVeiculo({ veiculo, vagas, pessoas, onFechar, onSalvo }) {
 // ── Modal: pessoas vinculadas (RN-06) ────────────────────────────────────────
 
 function ModalPessoas({ veiculo, pessoas, onFechar, onAlterado }) {
+  const { t } = useTranslation("veiculos");
   const toast = useToast();
   const [acao, setAcao] = useState(null);
 
@@ -592,24 +602,24 @@ function ModalPessoas({ veiculo, pessoas, onFechar, onAlterado }) {
     setAcao(pessoaId);
     try {
       await meusVeiculosApi.vincularPessoa(veiculo.id, pessoaId);
-      toast.success("Pessoa vinculada ao veículo.");
+      toast.success(t("meus.pessoas.toast.vinculada"));
       await onAlterado();
     } catch (err) {
-      toast.error(errMsg(err) || "Não foi possível vincular a pessoa.");
+      toast.error(errMsg(err) || t("meus.pessoas.toast.erroVincular"));
     } finally {
       setAcao(null);
     }
   }
 
   async function desvincular(pessoa) {
-    if (!window.confirm(`Remover o vínculo de ${pessoa.nome} com o veículo ${veiculo.placa}?`)) return;
+    if (!window.confirm(t("meus.pessoas.confirmarRemover", { nome: pessoa.nome, placa: veiculo.placa }))) return;
     setAcao(pessoa.pessoaId);
     try {
       await meusVeiculosApi.desvincularPessoa(veiculo.id, pessoa.pessoaId);
-      toast.success("Vínculo removido.");
+      toast.success(t("meus.pessoas.toast.removido"));
       await onAlterado();
     } catch (err) {
-      toast.error(errMsg(err) || "Não foi possível remover o vínculo.");
+      toast.error(errMsg(err) || t("meus.pessoas.toast.erroRemover"));
     } finally {
       setAcao(null);
     }
@@ -619,19 +629,19 @@ function ModalPessoas({ veiculo, pessoas, onFechar, onAlterado }) {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4 py-8 overflow-y-auto" onClick={onFechar}>
       <div className="glass-panel rounded-3xl p-6 w-full max-w-md border border-outline-variant/20 shadow-xl my-auto" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between mb-1">
-          <h2 className="font-headline text-lg font-bold text-on-surface">Pessoas vinculadas</h2>
+          <h2 className="font-headline text-lg font-bold text-on-surface">{t("meus.pessoas.titulo")}</h2>
           <button onClick={onFechar} className="text-on-surface-variant hover:text-on-surface transition-colors cursor-pointer">
             <Icone name="close" className="text-xl" />
           </button>
         </div>
         <p className="text-sm text-on-surface-variant mb-5">
-          Veículo <span className="font-mono font-semibold text-on-surface">{veiculo.placa}</span>
+          {t("meus.pessoas.veiculo")} <span className="font-mono font-semibold text-on-surface">{veiculo.placa}</span>
         </p>
 
         <div className="space-y-4">
           <div className="space-y-1.5">
             <p className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant">
-              Vinculadas ({vinculadas.length})
+              {t("meus.pessoas.vinculadas", { n: vinculadas.length })}
             </p>
             {vinculadas.map((p) => (
               <div key={p.pessoaId} className="flex items-center justify-between gap-3 px-3 py-2 rounded-xl bg-surface-container-highest/20">
@@ -640,29 +650,28 @@ function ModalPessoas({ veiculo, pessoas, onFechar, onAlterado }) {
                   type="button"
                   onClick={() => desvincular(p)}
                   disabled={acao === p.pessoaId || ultimo}
-                  title={ultimo ? "É o último vínculo — use “Remover veículo” no cartão" : "Remover vínculo"}
+                  title={ultimo ? t("meus.pessoas.tituloUltimo") : t("meus.pessoas.tituloRemover")}
                   className="shrink-0 text-xs font-semibold px-2.5 py-1 rounded-lg bg-error/10 text-error hover:bg-error/20 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
                 >
-                  Remover
+                  {t("comum:acoes.remover")}
                 </button>
               </div>
             ))}
             {ultimo && (
               <p className="text-xs text-on-surface-variant flex items-start gap-1.5 pt-1">
                 <Icone name="info" className="text-sm text-secondary shrink-0 mt-0.5" />
-                Último vínculo não pode ser removido aqui — sem vínculo o veículo ficaria órfão.
-                Use “Remover veículo” no cartão.
+                {t("meus.pessoas.avisoUltimo")}
               </p>
             )}
           </div>
 
           <div className="space-y-1.5">
             <p className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant">
-              Adicionar da minha unidade
+              {t("meus.pessoas.adicionar")}
             </p>
             {disponiveis.length === 0 ? (
               <p className="text-xs text-on-surface-variant py-1">
-                Todas as pessoas da unidade já estão vinculadas.
+                {t("meus.pessoas.todasVinculadas")}
               </p>
             ) : disponiveis.map((p) => (
               <div key={p.pessoaId} className="flex items-center justify-between gap-3 px-3 py-2 rounded-xl bg-surface-container-highest/10">
@@ -673,7 +682,7 @@ function ModalPessoas({ veiculo, pessoas, onFechar, onAlterado }) {
                   disabled={acao === p.pessoaId}
                   className="shrink-0 text-xs font-semibold px-2.5 py-1 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-all cursor-pointer disabled:opacity-50"
                 >
-                  Vincular
+                  {t("meus.pessoas.vincular")}
                 </button>
               </div>
             ))}

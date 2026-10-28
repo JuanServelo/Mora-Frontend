@@ -1,0 +1,50 @@
+{
+  "titulo": "Conversas",
+  "subtituloGestao": "Chamados dos moradores e conversas diretas",
+  "subtituloMorador": "Fale com a administração do condomínio",
+  "nova": "Nova conversa",
+  "erroCarregar": "Não foi possível carregar as conversas.",
+  "buscarPlaceholder": "Buscar conversa",
+  "lista": {
+    "semResultado": "Nenhuma conversa com esse termo.",
+    "vazioGestao": "Nenhum chamado aberto.",
+    "vazioMorador": "Você ainda não abriu nenhuma conversa.",
+    "semMensagem": "sem mensagem visível"
+  },
+  "vazio": {
+    "titulo": "Escolha uma conversa",
+    "gestao": "Os chamados dos moradores chegam aqui sem ninguém precisar encaminhar.",
+    "morador": "Você fala com a administração, não com uma pessoa — a conversa continua mesmo se o síndico mudar."
+  },
+  "thread": {
+    "erroAbrir": "Não foi possível abrir a conversa.",
+    "erroEnviar": "Não foi possível enviar.",
+    "erroEncerrar": "Não foi possível encerrar.",
+    "voltarLista": "Voltar para a lista",
+    "comAdministracao": "Com a administração",
+    "direta": "Conversa direta",
+    "encerradaSufixo": " · encerrada",
+    "encerrar": "Encerrar",
+    "encerradaAviso": "Esta conversa foi encerrada pela administração.",
+    "placeholder": "Escreva sua mensagem…",
+    "enviar": "Enviar"
+  },
+  "balao": {
+    "removida": "mensagem removida",
+    "administracao": "Administração",
+    "morador": "Morador"
+  },
+  "modal": {
+    "titulo": "Nova conversa",
+    "comPessoa": "Com uma pessoa",
+    "abertaAdministracao": "Aberta à administração",
+    "para": "Para",
+    "escolhaDestinatario": "Escolha o destinatário",
+    "avisoMorador": "Sua mensagem vai para a administração do condomínio. Quem estiver respondendo a atende — e a conversa continua mesmo se o síndico mudar.",
+    "assunto": "Assunto",
+    "assuntoPlaceholder": "Ex.: Infiltração na garagem",
+    "mensagem": "Mensagem",
+    "mensagemPlaceholder": "Descreva o que está acontecendo…",
+    "erroAbrir": "Não foi possível abrir a conversa."
+  }
+}

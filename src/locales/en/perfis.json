@@ -1,0 +1,33 @@
+{
+  "cabecalho": {
+    "painel": "Admin Panel",
+    "gerenciar": "Manage",
+    "perfis": "Roles",
+    "descricao": "See the permissions and responsibilities of each user role."
+  },
+  "categorias": {
+    "plataforma": "Platform level",
+    "condominio": "Condominium level",
+    "unidade": "Unit level"
+  },
+  "lista": {
+    "vazio": "No roles found in this category."
+  },
+  "card": {
+    "semAcesso": "No system access",
+    "permissoes": "What they can do",
+    "podeCadastrar": "Can register",
+    "abasLiberadas": "Admin tabs enabled"
+  },
+  "matriz": {
+    "botao": "Access Matrix",
+    "titulo": "Admin Access Matrix",
+    "descricao": "Which roles can access each admin tab",
+    "colunaAba": "Tab",
+    "perfis": {
+      "adminGeral": "Platform Admin",
+      "adminSindico": "Property Manager"
+    },
+    "perfisUnidade": "Unit-level roles (no admin panel access)"
+  }
+}

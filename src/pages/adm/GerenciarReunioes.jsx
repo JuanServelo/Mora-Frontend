@@ -8,6 +8,9 @@ import { useToast } from "../../contexts/ToastContext";
 import { useConfirm } from "../../contexts/ConfirmContext";
 import { useAuth } from "../../contexts/AuthContext";
 import api from "../../services/api";
+import { useTranslation } from "react-i18next";
+import { idiomaAtual } from "../../i18n";
+import { formatarData } from "../../utils/datas";
 
 function TextArea({ label, ...props }) {
   return (
@@ -27,26 +30,26 @@ function TextArea({ label, ...props }) {
 
 // ─── helpers ────────────────────────────────
 const STATUS_MEETING = {
-  AGENDADA: { label: "Agendada", cls: "bg-primary/10 text-primary" },
-  CANCELADA: { label: "Cancelada", cls: "bg-error/10 text-error" },
-  FINALIZADA: { label: "Finalizada", cls: "bg-secondary/10 text-secondary" },
+  AGENDADA: { rotuloKey: "status.reuniao.agendada", cls: "bg-primary/10 text-primary" },
+  CANCELADA: { rotuloKey: "status.reuniao.cancelada", cls: "bg-error/10 text-error" },
+  FINALIZADA: { rotuloKey: "status.reuniao.finalizada", cls: "bg-secondary/10 text-secondary" },
 };
 
 const STATUS_POLL = {
-  ABERTA: { label: "Aberta", cls: "bg-primary/10 text-primary" },
-  ENCERRADA: { label: "Encerrada", cls: "bg-secondary/10 text-secondary" },
-  CANCELADA: { label: "Cancelada", cls: "bg-error/10 text-error" },
+  ABERTA: { rotuloKey: "status.votacao.aberta", cls: "bg-primary/10 text-primary" },
+  ENCERRADA: { rotuloKey: "status.votacao.encerrada", cls: "bg-secondary/10 text-secondary" },
+  CANCELADA: { rotuloKey: "status.votacao.cancelada", cls: "bg-error/10 text-error" },
 };
 
 const ATTENDANCE_LABEL = {
-  PENDENTE: "Pendente",
-  CONFIRMADO: "Confirmado",
-  RECUSADO: "Recusado",
+  PENDENTE: "status.presenca.pendente",
+  CONFIRMADO: "status.presenca.confirmado",
+  RECUSADO: "status.presenca.recusado",
 };
 
 function fmt(dt) {
   if (!dt) return "—";
-  return new Date(dt).toLocaleString("pt-BR", {
+  return new Date(dt).toLocaleString(idiomaAtual(), {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
@@ -89,56 +92,49 @@ function filtrarReunioesDaSemana(lista) {
 
 // ════════════════════════════════════════════
 export function GerenciarReunioes() {
+  const { t } = useTranslation("reunioes");
   const [aba, setAba] = useState("reunioes");
-  const [reuniaoParaVotar, setReuniaoParaVotar] = useState(null);
-
-  const irParaVotacao = (meetingId) => {
-    setReuniaoParaVotar(meetingId);
-    setAba("votacoes");
-  };
 
   return (
-    <div className="min-h-screen w-full pt-4 pb-20 px-4 sm:px-6">
+    <div className="min-h-screen w-full pt-4 pb-20 px-6">
       <div className="max-w-6xl mx-auto space-y-8">
         {/* Header */}
         <header className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
             <p className="text-on-surface-variant text-xs font-semibold uppercase tracking-widest mb-1">
-              Painel Administrativo
+              {t("cabecalho.painelAdministrativo")}
             </p>
-            <h1 className="font-headline text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-on-surface">
-              Gestão de{" "}
+            <h1 className="font-headline text-4xl font-extrabold tracking-tight text-on-surface">
+              {t("cabecalho.gestaoDe")}{" "}
               <span className="bg-gradient-to-r from-primary to-tertiary bg-clip-text text-transparent">
-                Reuniões
+                {t("cabecalho.reunioes")}
               </span>
             </h1>
           </div>
         </header>
 
         {/* Sub-navbar de abas */}
-        <div className="glass-panel rounded-2xl p-1.5 flex flex-wrap gap-1 w-full sm:w-fit">
+        <div className="glass-panel rounded-2xl p-1.5 flex gap-1 w-fit flex-wrap">
           {[
-            { id: "reunioes", label: "Reuniões", icon: "groups" },
-            { id: "votacoes", label: "Votações", icon: "how_to_vote" },
-            { id: "atas", label: "Atas", icon: "description" },
+            { id: "reunioes", rotuloKey: "abas.reunioes", icon: "groups" },
+            { id: "atas", rotuloKey: "abas.atas", icon: "description" },
           ].map((tab) => (
             <button
               key={tab.id}
               onClick={() => setAba(tab.id)}
-              className={`flex items-center gap-2 px-3 sm:px-5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 cursor-pointer ${
+              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 cursor-pointer ${
                 aba === tab.id
                   ? "bg-primary/15 text-primary"
                   : "text-on-surface-variant hover:text-on-surface hover:bg-veu/5"
               }`}
             >
               <Icone name={tab.icon} className="text-lg" />
-              {tab.label}
+              {t(tab.rotuloKey)}
             </button>
           ))}
         </div>
 
-        {aba === "reunioes" && <AbaReunioes irParaVotacao={irParaVotacao} />}
-        {aba === "votacoes" && <AbaVotacoes reuniaoPreenchida={reuniaoParaVotar} />}
+        {aba === "reunioes" && <AbaReunioes />}
         {aba === "atas" && <AbaAtas />}
       </div>
     </div>
@@ -158,6 +154,7 @@ const EMPTY_MEETING = {
 };
 
 function AbaReunioes({ irParaVotacao }) {
+  const { t } = useTranslation("reunioes");
   const toast = useToast();
   const confirm = useConfirm();
   const { usuario } = useAuth();
@@ -303,11 +300,11 @@ function AbaReunioes({ irParaVotacao }) {
 
       if (editandoMeetingId) {
         await meetingApi.atualizar(editandoMeetingId, payload);
-        mostrarNotificacao("Reunião atualizada com sucesso!", "sucesso");
+        mostrarNotificacao(t("reunioes.toast.atualizada"), "sucesso");
         setEditandoMeetingId(null);
       } else {
         await meetingApi.criar(payload);
-        mostrarNotificacao("Reunião agendada com sucesso!", "sucesso");
+        mostrarNotificacao(t("reunioes.toast.agendada"), "sucesso");
       }
 
       setForm(EMPTY_MEETING);
@@ -320,7 +317,7 @@ function AbaReunioes({ irParaVotacao }) {
         carregarAtaReuniao(editandoMeetingId);
       }
     } catch (e) {
-      const msg = e.response?.data?.message || "Erro ao salvar reunião.";
+      const msg = e.response?.data?.message || t("reunioes.toast.erroSalvar");
       setErro(msg);
       mostrarNotificacao(msg, "erro");
     } finally {
@@ -356,25 +353,21 @@ function AbaReunioes({ irParaVotacao }) {
       const payload = {
         topicosDiscutidos: ataForm.topicosDiscutidos,
         decisoesTomadas: ataForm.decisoesTomadas,
-        idPresentes: ataForm.idPresentes
-          .split(",")
-          .map((s) => s.trim())
-          .filter(Boolean)
-          .map(Number),
+        idPresentes: detalhe.convidados?.filter(c => c.status === "CONFIRMADO").map(c => c.usuarioId) || [],
       };
       
       let res;
       if (ataReuniao) {
         res = await ataApi.atualizar(detalhe.id, payload);
-        mostrarNotificacao("Ata atualizada com sucesso!", "sucesso");
+        mostrarNotificacao(t("reunioes.toast.ataAtualizada"), "sucesso");
       } else {
         res = await ataApi.registrar(detalhe.id, payload);
-        mostrarNotificacao("Ata criada com sucesso!", "sucesso");
+        mostrarNotificacao(t("reunioes.toast.ataCriada"), "sucesso");
       }
       setAtaReuniao(res.data);
       setEscrevendoAta(false);
     } catch (err) {
-      mostrarNotificacao("Erro ao salvar ata: " + (err.response?.data?.message || err.message), "erro");
+      mostrarNotificacao(t("reunioes.toast.erroSalvarAta", { erro: err.response?.data?.message || err.message }), "erro");
     } finally {
       setSalvandoAta(false);
     }
@@ -393,43 +386,49 @@ function AbaReunioes({ irParaVotacao }) {
       });
       setResultadosBusca(filtradas);
       if (filtradas.length === 0) {
-        setErroDetalhe("Nenhuma reunião encontrada para esta data.");
+        setErroDetalhe(t("reunioes.busca.nenhuma"));
       }
     } catch {
-      setErroDetalhe("Erro ao buscar reuniões.");
+      setErroDetalhe(t("reunioes.busca.erro"));
     } finally {
       setBuscando(false);
     }
   }
 
+
+
   async function cancelar(id) {
     const ok = await confirm({
-      titulo: "Cancelar reunião",
-      mensagem: "Deseja cancelar esta reunião?",
-      confirmarTexto: "Cancelar reunião",
+      titulo: t("reunioes.confirmar.cancelarTitulo"),
+      mensagem: t("reunioes.confirmar.cancelarMensagem"),
+      confirmarTexto: t("reunioes.confirmar.cancelarBotao"),
       variante: "danger",
     });
     if (!ok) return;
     try {
       await meetingApi.cancelar(id);
       setDetalhe((p) => (p ? { ...p, status: "CANCELADA" } : p));
+      setResultadosBusca((prev) => prev ? prev.map((r) => r.id === id ? { ...r, status: "CANCELADA" } : r) : prev);
+      setReunioesSemana((prev) => prev ? prev.map((r) => r.id === id ? { ...r, status: "CANCELADA" } : r) : prev);
     } catch {
-      toast.error("Erro ao cancelar reunião.");
+      toast.error(t("reunioes.toast.erroCancelar"));
     }
   }
 
   async function finalizar(id) {
     const ok = await confirm({
-      titulo: "Finalizar reunião",
-      mensagem: "Deseja finalizar esta reunião?",
-      confirmarTexto: "Finalizar",
+      titulo: t("reunioes.confirmar.finalizarTitulo"),
+      mensagem: t("reunioes.confirmar.finalizarMensagem"),
+      confirmarTexto: t("acoes.finalizar"),
     });
     if (!ok) return;
     try {
       await meetingApi.finalizar(id);
       setDetalhe((p) => (p ? { ...p, status: "FINALIZADA" } : p));
+      setResultadosBusca((prev) => prev ? prev.map((r) => r.id === id ? { ...r, status: "FINALIZADA" } : r) : prev);
+      setReunioesSemana((prev) => prev ? prev.map((r) => r.id === id ? { ...r, status: "FINALIZADA" } : r) : prev);
     } catch {
-      toast.error("Erro ao finalizar reunião.");
+      toast.error(t("reunioes.toast.erroFinalizar"));
     }
   }
 
@@ -444,9 +443,9 @@ function AbaReunioes({ irParaVotacao }) {
       });
       setAvalForm({ nota: "", comentario: "" });
       setAvalUsuarioId("");
-      toast.success("Avaliação registrada!");
+      toast.success(t("reunioes.toast.avaliacaoRegistrada"));
     } catch (e) {
-      toast.error(e.response?.data?.message || "Erro ao avaliar.");
+      toast.error(e.response?.data?.message || t("reunioes.toast.erroAvaliar"));
     } finally {
       setSalvandoAval(false);
     }
@@ -455,14 +454,14 @@ function AbaReunioes({ irParaVotacao }) {
   async function responderPresenca(meetingId, status) {
     try {
         await meetingApi.responderPresenca(meetingId, { status });
-        toast.success("Resposta registrada!");
+        toast.success(t("reunioes.toast.respostaRegistrada"));
         carregarReunioesSemana();
         if (detalhe?.id === meetingId) {
             const res = await meetingApi.buscar(meetingId);
             setDetalhe(res.data);
         }
     } catch (err) {
-        toast.error("Erro ao responder presença.");
+        toast.error(t("reunioes.toast.erroPresenca"));
     }
   }
 
@@ -491,185 +490,10 @@ function AbaReunioes({ irParaVotacao }) {
       )}
 
 
-      {/* Minhas Reuniões da Semana */}
-      <div className="glass-panel rounded-3xl p-6 space-y-4 border border-veu/5">
-        <div className="flex items-center justify-between gap-3 border-b border-veu/5 pb-3">
-          <div className="flex items-center gap-2">
-            <span className="p-2 rounded-xl bg-primary/10 text-primary">
-              <Icone name="date_range" className="text-xl" />
-            </span>
-            <div>
-              <h2 className="font-headline text-lg font-bold text-on-surface">Minhas Reuniões da Semana</h2>
-              <p className="text-[10px] text-on-surface-variant uppercase tracking-wider font-semibold">
-                Período: {fmt(getWeekRange().start).split(" ")[0]} a {fmt(getWeekRange().end).split(" ")[0]}
-              </p>
-            </div>
-          </div>
-          <button
-            onClick={carregarReunioesSemana}
-            disabled={carregandoSemana}
-            className="p-2 rounded-xl hover:bg-veu/5 text-on-surface-variant hover:text-on-surface transition cursor-pointer"
-            title="Atualizar reuniões"
-          >
-            <Icone name="refresh" className={`text-lg ${carregandoSemana ? "animate-spin" : ""}`} />
-          </button>
-        </div>
-
-        {carregandoSemana ? (
-          <div className="text-center py-8 text-on-surface-variant text-xs flex flex-col items-center justify-center gap-2">
-            <Icone name="sync" className="text-lg animate-spin text-primary" />
-            Carregando reuniões...
-          </div>
-        ) : reunioesSemana.length === 0 ? (
-          <div className="text-center py-10 text-on-surface-variant text-sm flex flex-col items-center justify-center gap-2 bg-veu/2 rounded-2xl border border-veu/5">
-            <Icone name="event_busy" className="text-3xl text-primary/40" />
-            <p className="font-medium text-xs">Você não tem reuniões agendadas para esta semana.</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {reunioesSemana.map((reuniao) => {
-              const isOrganizador = reuniao.idOrganizador === usuario?.id;
-              const meuConvidado = reuniao.convidados?.find((c) => c.usuarioId === usuario?.id);
-              const meuStatusPresenca = meuConvidado?.status || "PENDENTE";
-
-              return (
-                <div key={reuniao.id} className="relative bg-surface-container-highest/20 hover:bg-surface-container-highest/30 rounded-2xl border border-veu/5 p-4 flex flex-col justify-between gap-4 transition-all duration-300 hover:scale-[1.01] hover:shadow-lg">
-                  <div className="space-y-2">
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="space-y-0.5 min-w-0">
-                        <span className="font-semibold text-sm text-on-surface truncate block" title={reuniao.titulo}>
-                          {reuniao.titulo}
-                        </span>
-                        <span className="text-[10px] text-on-surface-variant/80 block">
-                          ID: #{reuniao.id}
-                        </span>
-                      </div>
-                      <div className="flex gap-1.5 shrink-0">
-                        {isOrganizador && (
-                          <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-tertiary/15 text-tertiary uppercase tracking-wider">
-                            Organizador
-                          </span>
-                        )}
-                        <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider ${STATUS_MEETING[reuniao.status]?.cls ?? "bg-veu/10 text-white"}`}>
-                          {STATUS_MEETING[reuniao.status]?.label ?? reuniao.status}
-                        </span>
-                      </div>
-                    </div>
-
-                    {reuniao.descricao && (
-                      <p className="text-on-surface-variant text-xs line-clamp-2" title={reuniao.descricao}>
-                        {reuniao.descricao}
-                      </p>
-                    )}
-
-                    <div className="space-y-1 pt-1 border-t border-veu/5">
-                      <p className="flex items-center gap-1.5 text-[11px] text-on-surface-variant">
-                        <Icone name="schedule" className="text-xs text-primary" />
-                        Início: {fmt(reuniao.dataHoraInicio)}
-                      </p>
-                      <p className="flex items-center gap-1.5 text-[11px] text-on-surface-variant">
-                        <Icone name="event_available" className="text-xs text-primary" />
-                        Fim: {fmt(reuniao.dataHoraFim)}
-                      </p>
-                    </div>
-
-                    {reuniao.googleMeetLink && (
-                      <div className="pt-1">
-                        <a
-                          href={reuniao.googleMeetLink}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-primary hover:underline"
-                        >
-                          <Icone name="videocam" className="text-sm shrink-0" />
-                          Entrar no Google Meet
-                        </a>
-                      </div>
-                    )}
-                  </div>
-
-                  {!isOrganizador && reuniao.status === "AGENDADA" && (
-                    <div className="flex items-center justify-between gap-2 bg-veu/5 p-2 rounded-xl border border-veu/5">
-                      <div className="flex flex-col">
-                        <span className="text-[9px] text-on-surface-variant font-semibold uppercase tracking-wider">Sua Presença</span>
-                        <span className={`text-[10px] font-bold ${
-                          meuStatusPresenca === 'CONFIRMADO' ? 'text-primary' : meuStatusPresenca === 'RECUSADO' ? 'text-error' : 'text-secondary'
-                        }`}>
-                          {ATTENDANCE_LABEL[meuStatusPresenca] || meuStatusPresenca}
-                        </span>
-                      </div>
-                      <div className="flex gap-1">
-                        <button
-                          type="button"
-                          onClick={() => responderPresenca(reuniao.id, 'CONFIRMADO')}
-                          className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[10px] font-semibold transition cursor-pointer ${
-                            meuStatusPresenca === 'CONFIRMADO' 
-                              ? 'bg-primary/20 text-primary border border-primary/30' 
-                              : 'bg-veu/5 text-on-surface-variant hover:bg-primary/10 hover:text-primary'
-                          }`}
-                        >
-                          <Icone name="check" className="text-xs" />
-                          Confirmar
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => responderPresenca(reuniao.id, 'RECUSADO')}
-                          className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[10px] font-semibold transition cursor-pointer ${
-                            meuStatusPresenca === 'RECUSADO' 
-                              ? 'bg-error/20 text-error border border-error/30' 
-                              : 'bg-veu/5 text-on-surface-variant hover:bg-error/10 hover:text-error'
-                          }`}
-                        >
-                          <Icone name="close" className="text-xs" />
-                          Recusar
-                        </button>
-                      </div>
-                    </div>
-                  )}
-
-                  <div className="flex justify-end pt-1 gap-3">
-                    {isOrganizador && reuniao.status === "AGENDADA" && (
-                      <button
-                        type="button"
-                        onClick={() => iniciarEdicao(reuniao)}
-                        className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary hover:underline cursor-pointer"
-                      >
-                        <Icone name="edit" className="text-xs" />
-                        Editar
-                      </button>
-                    )}
-                    <button
-                      type="button"
-                      onClick={async () => {
-                        try {
-                          const res = await meetingApi.buscar(reuniao.id);
-                          setDetalhe(res.data);
-                          carregarAtaReuniao(reuniao.id);
-                          setTimeout(() => {
-                            const el = document.getElementById("meeting-detalhe-container");
-                            if (el) el.scrollIntoView({ behavior: 'smooth' });
-                          }, 100);
-                        } catch {
-                          mostrarNotificacao("Erro ao carregar detalhes da reunião.", "erro");
-                        }
-                      }}
-                      className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary hover:underline cursor-pointer"
-                    >
-                      Ver detalhes
-                      <Icone name="arrow_forward" className="text-xs" />
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
-
       {/* Toolbar */}
-      <div className="glass-panel rounded-3xl p-4 sm:p-6 space-y-4">
+      <div className="glass-panel rounded-3xl p-6 space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="font-headline text-xl font-bold text-on-surface">Reuniões</h2>
+          <h2 className="font-headline text-xl font-bold text-on-surface">{t("reunioes.titulo")}</h2>
           <button
             onClick={() => {
               if (criando) {
@@ -682,7 +506,7 @@ function AbaReunioes({ irParaVotacao }) {
             className="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary/10 text-primary hover:bg-primary/20 transition text-sm font-semibold cursor-pointer"
           >
             <Icone name={criando ? "close" : "add"} className="text-base" />
-            {criando ? "Cancelar" : "Nova Reunião"}
+            {criando ? t("comum:acoes.cancelar") : t("reunioes.nova")}
           </button>
         </div>
 
@@ -691,7 +515,7 @@ function AbaReunioes({ irParaVotacao }) {
           <form id="form-meeting-topo" onSubmit={salvarReuniao} className="bg-surface-container-highest/20 rounded-xl p-4 space-y-4 border border-veu/10">
             <div className="flex items-center justify-between border-b border-veu/5 pb-2">
               <h3 className="font-semibold text-on-surface text-sm">
-                {editandoMeetingId ? `Editar Reunião #${editandoMeetingId}` : "Nova Reunião"}
+                {editandoMeetingId ? t("reunioes.editarId", { id: editandoMeetingId }) : t("reunioes.nova")}
               </h3>
               {editandoMeetingId && (
                 <button
@@ -703,35 +527,35 @@ function AbaReunioes({ irParaVotacao }) {
                   }}
                   className="text-primary hover:underline text-xs font-semibold cursor-pointer"
                 >
-                  Descartar Edição
+                  {t("reunioes.descartarEdicao")}
                 </button>
               )}
             </div>
             
             {erro && <p className="text-error text-xs">{erro}</p>}
             
-            <Campo label="Título" name="titulo" value={form.titulo} onChange={handleForm} placeholder="Ex: Reunião de Condomínio" required />
+            <Campo label={t("reunioes.form.titulo")} name="titulo" value={form.titulo} onChange={handleForm} placeholder={t("reunioes.form.tituloPlaceholder")} required />
             
-            <TextArea label="Descrição" name="descricao" value={form.descricao} onChange={handleForm} rows={2} placeholder="Descrição da reunião" />
+            <TextArea label={t("reunioes.form.descricao")} name="descricao" value={form.descricao} onChange={handleForm} rows={2} placeholder={t("reunioes.form.descricaoPlaceholder")} />
             
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <Campo label="Início" id="dataHoraInicio" type="datetime-local" name="dataHoraInicio" value={form.dataHoraInicio} onChange={handleForm} required />
-              <Campo label="Fim" id="dataHoraFim" type="datetime-local" name="dataHoraFim" value={form.dataHoraFim} onChange={handleForm} required />
+              <Campo label={t("reunioes.form.inicio")} id="dataHoraInicio" type="datetime-local" name="dataHoraInicio" value={form.dataHoraInicio} onChange={handleForm} required />
+              <Campo label={t("reunioes.form.fim")} id="dataHoraFim" type="datetime-local" name="dataHoraFim" value={form.dataHoraFim} onChange={handleForm} required />
             </div>
 
             {/* Indicação visual do organizador logado */}
             <div className="space-y-2">
-              <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant ml-1">Organizador</label>
+              <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant ml-1">{t("reunioes.form.organizador")}</label>
               <div className="w-full bg-surface-container-highest/40 rounded-xl py-3 px-4 text-on-surface-variant flex items-center gap-2 border border-veu/5 backdrop-blur-sm">
                 <Icone name="verified_user" className="text-primary text-base shrink-0" />
-                <span className="text-xs font-medium">Você ({usuario?.nome || "Carregando..."})</span>
+                <span className="text-xs font-medium">{t("reunioes.form.voce", { nome: usuario?.nome || t("reunioes.form.carregando") })}</span>
               </div>
             </div>
 
             {/* Seleção visual de convidados */}
             <div className="space-y-2">
               <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant ml-1">
-                Selecionar Convidados
+                {t("reunioes.form.selecionarConvidados")}
               </label>
               
               {/* Badges de selecionados */}
@@ -746,7 +570,7 @@ function AbaReunioes({ irParaVotacao }) {
                     return (
                       <span key={uId} className="flex items-center gap-1 bg-primary/10 border border-primary/20 text-primary rounded-full pl-3 pr-1.5 py-1 text-xs font-semibold backdrop-blur-sm">
                         <Icone name="person" className="text-[10px]" />
-                        {usr.nome} (Apt {usr.apartamento || "—"})
+                        {t("reunioes.form.nomeApt", { nome: usr.nome, apt: usr.apartamento || "—" })}
                         <button
                           type="button"
                           onClick={() => {
@@ -764,14 +588,14 @@ function AbaReunioes({ irParaVotacao }) {
                     );
                   })}
                 {(!form.idConvidados || form.idConvidados.split(",").map((s) => s.trim()).filter(Boolean).length === 0) && (
-                  <p className="text-xs text-on-surface-variant italic ml-1">Nenhum convidado selecionado.</p>
+                  <p className="text-xs text-on-surface-variant italic ml-1">{t("reunioes.form.nenhumConvidado")}</p>
                 )}
               </div>
 
               {/* Lista e Busca de Moradores */}
               <div className="bg-surface-container-highest/10 border border-veu/5 rounded-2xl p-4 space-y-3">
                 <Campo
-                  placeholder="Buscar moradores por nome, e-mail, bloco ou apt..."
+                  placeholder={t("reunioes.form.buscarMoradores")}
                   icon="search"
                   value={buscaUsuario}
                   onChange={(e) => setBuscaUsuario(e.target.value)}
@@ -816,7 +640,7 @@ function AbaReunioes({ irParaVotacao }) {
                             <div className="min-w-0">
                               <p className="font-semibold text-xs truncate">{u.nome}</p>
                               <p className="text-[10px] opacity-60 truncate">
-                                Bloco {u.bloco || "—"} · Apt {u.apartamento || "—"}
+                                {t("reunioes.form.blocoApt", { bloco: u.bloco || "—", apt: u.apartamento || "—" })}
                               </p>
                             </div>
                           </div>
@@ -825,14 +649,14 @@ function AbaReunioes({ irParaVotacao }) {
                       );
                     })}
                   {todosUsuarios.filter((u) => u.id !== usuario?.id).length === 0 && (
-                    <p className="text-center text-xs text-on-surface-variant py-4">Nenhum outro morador cadastrado.</p>
+                    <p className="text-center text-xs text-on-surface-variant py-4">{t("reunioes.form.nenhumMorador")}</p>
                   )}
                 </div>
               </div>
             </div>
 
             <Botao type="submit" disabled={salvando}>
-              {salvando ? "Salvando..." : editandoMeetingId ? "Salvar Alterações" : "Criar Reunião"}
+              {salvando ? t("acoes.salvando") : editandoMeetingId ? t("acoes.salvarAlteracoes") : t("reunioes.form.criar")}
             </Botao>
           </form>
         )}
@@ -842,7 +666,7 @@ function AbaReunioes({ irParaVotacao }) {
           <div className="flex gap-2">
             <div className="flex-1">
               <Campo 
-                label="Buscar reuniões por data" 
+                label={t("reunioes.busca.label")} 
                 type="date" 
                 value={buscaDia} 
                 onChange={(e) => setBuscaDia(e.target.value)} 
@@ -854,7 +678,7 @@ function AbaReunioes({ irParaVotacao }) {
               className="self-end mb-0.5 flex items-center gap-2 px-5 py-3 rounded-xl bg-primary/10 text-primary hover:bg-primary/20 transition text-sm font-semibold cursor-pointer"
             >
               <Icone name="search" className="text-base" />
-              {buscando ? "Buscando..." : "Buscar"}
+              {buscando ? t("reunioes.busca.buscando") : t("comum:acoes.buscar")}
             </button>
           </div>
           {erroDetalhe && <p className="text-error text-xs">{erroDetalhe}</p>}
@@ -864,7 +688,7 @@ function AbaReunioes({ irParaVotacao }) {
         {resultadosBusca !== null && resultadosBusca.length > 0 && (
           <div className="space-y-3">
             <h3 className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider">
-              Reuniões encontradas para o dia ({buscaDia.split("-").reverse().join("/")})
+              {t("reunioes.busca.encontradas", { data: formatarData(buscaDia) })}
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {resultadosBusca.map((reuniao) => {
@@ -881,17 +705,17 @@ function AbaReunioes({ irParaVotacao }) {
                             {reuniao.titulo}
                           </span>
                           <span className="text-[10px] text-on-surface-variant/80 block">
-                            ID: #{reuniao.id}
+                            {t("reunioes.card.id", { id: reuniao.id })}
                           </span>
                         </div>
                         <div className="flex gap-1.5 shrink-0">
                           {isOrganizador && (
                             <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-tertiary/15 text-tertiary uppercase tracking-wider">
-                              Organizador
+                              {t("reunioes.card.organizador")}
                             </span>
                           )}
                           <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider ${STATUS_MEETING[reuniao.status]?.cls ?? "bg-veu/10 text-white"}`}>
-                            {STATUS_MEETING[reuniao.status]?.label ?? reuniao.status}
+                            {STATUS_MEETING[reuniao.status] ? t(STATUS_MEETING[reuniao.status].rotuloKey) : reuniao.status}
                           </span>
                         </div>
                       </div>
@@ -905,11 +729,11 @@ function AbaReunioes({ irParaVotacao }) {
                       <div className="space-y-1 pt-1 border-t border-veu/5">
                         <p className="flex items-center gap-1.5 text-[11px] text-on-surface-variant">
                           <Icone name="schedule" className="text-xs text-primary" />
-                          Início: {fmt(reuniao.dataHoraInicio)}
+                          {t("reunioes.card.inicio", { data: fmt(reuniao.dataHoraInicio) })}
                         </p>
                         <p className="flex items-center gap-1.5 text-[11px] text-on-surface-variant">
                           <Icone name="event_available" className="text-xs text-primary" />
-                          Fim: {fmt(reuniao.dataHoraFim)}
+                          {t("reunioes.card.fim", { data: fmt(reuniao.dataHoraFim) })}
                         </p>
                       </div>
 
@@ -922,7 +746,7 @@ function AbaReunioes({ irParaVotacao }) {
                             className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-primary hover:underline"
                           >
                             <Icone name="videocam" className="text-sm shrink-0" />
-                            Entrar no Google Meet
+                            {t("reunioes.card.entrarMeet")}
                           </a>
                         </div>
                       )}
@@ -931,11 +755,11 @@ function AbaReunioes({ irParaVotacao }) {
                     {!isOrganizador && reuniao.status === "AGENDADA" && (
                       <div className="flex items-center justify-between gap-2 bg-veu/5 p-2 rounded-xl border border-veu/5">
                         <div className="flex flex-col">
-                          <span className="text-[9px] text-on-surface-variant font-semibold uppercase tracking-wider">Sua Presença</span>
+                          <span className="text-[9px] text-on-surface-variant font-semibold uppercase tracking-wider">{t("reunioes.card.suaPresenca")}</span>
                           <span className={`text-[10px] font-bold ${
                             meuStatusPresenca === 'CONFIRMADO' ? 'text-primary' : meuStatusPresenca === 'RECUSADO' ? 'text-error' : 'text-secondary'
                           }`}>
-                            {ATTENDANCE_LABEL[meuStatusPresenca] || meuStatusPresenca}
+                            {ATTENDANCE_LABEL[meuStatusPresenca] ? t(ATTENDANCE_LABEL[meuStatusPresenca]) : meuStatusPresenca}
                           </span>
                         </div>
                         <div className="flex gap-1">
@@ -949,7 +773,7 @@ function AbaReunioes({ irParaVotacao }) {
                             }`}
                           >
                             <Icone name="check" className="text-xs" />
-                            Confirmar
+                            {t("comum:acoes.confirmar")}
                           </button>
                           <button
                             type="button"
@@ -961,7 +785,7 @@ function AbaReunioes({ irParaVotacao }) {
                             }`}
                           >
                             <Icone name="close" className="text-xs" />
-                            Recusar
+                            {t("reunioes.card.recusar")}
                           </button>
                         </div>
                       </div>
@@ -975,7 +799,30 @@ function AbaReunioes({ irParaVotacao }) {
                           className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary hover:underline cursor-pointer"
                         >
                           <Icone name="edit" className="text-xs" />
-                          Editar
+                          {t("comum:acoes.editar")}
+                        </button>
+                      )}
+                      {isOrganizador && (
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            try {
+                              const res = await meetingApi.buscar(reuniao.id);
+                              setDetalhe(res.data);
+                              await carregarAtaReuniao(reuniao.id);
+                              setEscrevendoAta(true);
+                              setTimeout(() => {
+                                const el = document.getElementById("meeting-detalhe-container");
+                                if (el) el.scrollIntoView({ behavior: 'smooth' });
+                              }, 100);
+                            } catch {
+                              mostrarNotificacao(t("reunioes.toast.erroAbrirAta"), "erro");
+                            }
+                          }}
+                          className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary hover:underline cursor-pointer"
+                        >
+                          <Icone name="description" className="text-xs" />
+                          {t("reunioes.card.criarAta")}
                         </button>
                       )}
                       <button
@@ -990,12 +837,12 @@ function AbaReunioes({ irParaVotacao }) {
                               if (el) el.scrollIntoView({ behavior: 'smooth' });
                             }, 100);
                           } catch {
-                            mostrarNotificacao("Erro ao carregar detalhes da reunião.", "erro");
+                            mostrarNotificacao(t("reunioes.toast.erroDetalhes"), "erro");
                           }
                         }}
                         className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary hover:underline cursor-pointer"
                       >
-                        Ver detalhes
+                        {t("comum:acoes.verDetalhes")}
                         <Icone name="arrow_forward" className="text-xs" />
                       </button>
                     </div>
@@ -1009,33 +856,33 @@ function AbaReunioes({ irParaVotacao }) {
         {/* Detalhe da reunião */}
         {detalhe && (
           <div id="meeting-detalhe-container" className="bg-surface-container-highest/20 rounded-xl border border-veu/10 divide-y divide-veu/5 overflow-hidden animate-fade-in">
-            <div className="p-4 flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+            <div className="p-4 flex items-start justify-between gap-3">
               <div className="space-y-1">
-                <div className="flex flex-wrap items-center gap-2 min-w-0">
+                <div className="flex items-center gap-2">
                   <span className="font-semibold text-on-surface">{detalhe.titulo}</span>
                   <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${STATUS_MEETING[detalhe.status]?.cls ?? ""}`}>
-                    {STATUS_MEETING[detalhe.status]?.label ?? detalhe.status}
+                    {STATUS_MEETING[detalhe.status] ? t(STATUS_MEETING[detalhe.status].rotuloKey) : detalhe.status}
                   </span>
                 </div>
                 {detalhe.descricao && (
                   <p className="text-on-surface-variant text-xs">{detalhe.descricao}</p>
                 )}
-                <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-on-surface-variant mt-1">
+                <div className="flex flex-wrap gap-4 text-xs text-on-surface-variant mt-1">
                   <span className="flex items-center gap-1">
-                    <Icone name="schedule" className="text-sm" /> Início: {fmt(detalhe.dataHoraInicio)}
+                    <Icone name="schedule" className="text-sm" /> {t("reunioes.card.inicio", { data: fmt(detalhe.dataHoraInicio) })}
                   </span>
                   <span className="flex items-center gap-1">
-                    <Icone name="event_available" className="text-sm" /> Fim: {fmt(detalhe.dataHoraFim)}
+                    <Icone name="event_available" className="text-sm" /> {t("reunioes.card.fim", { data: fmt(detalhe.dataHoraFim) })}
                   </span>
                   {detalhe.googleMeetLink && (
                     <a href={detalhe.googleMeetLink} target="_blank" rel="noreferrer"
                       className="flex items-center gap-1 text-primary hover:underline">
-                      <Icone name="videocam" className="text-sm" /> Google Meet
+                      <Icone name="videocam" className="text-sm" /> {t("reunioes.detalhe.googleMeet")}
                     </a>
                   )}
                 </div>
               </div>
-              <div className="flex flex-wrap gap-2 sm:flex-shrink-0">
+              <div className="flex gap-2 flex-shrink-0">
                 {detalhe.status === "AGENDADA" && (
                   <>
                     {detalhe.idOrganizador === usuario?.id && (
@@ -1043,23 +890,29 @@ function AbaReunioes({ irParaVotacao }) {
                         onClick={() => iniciarEdicao(detalhe)}
                         className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition text-xs font-semibold cursor-pointer"
                       >
-                        <Icone name="edit" className="text-sm" /> Editar
+                        <Icone name="edit" className="text-sm" /> {t("comum:acoes.editar")}
                       </button>
                     )}
                     <button
                       onClick={() => finalizar(detalhe.id)}
                       className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-secondary/10 text-secondary hover:bg-secondary/20 transition text-xs font-semibold cursor-pointer"
                     >
-                      <Icone name="check_circle" className="text-sm" /> Finalizar
+                      <Icone name="check_circle" className="text-sm" /> {t("acoes.finalizar")}
                     </button>
                     <button
                       onClick={() => cancelar(detalhe.id)}
                       className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-error/10 text-error hover:bg-error/20 transition text-xs font-semibold cursor-pointer"
                     >
-                      <Icone name="cancel" className="text-sm" /> Cancelar
+                      <Icone name="cancel" className="text-sm" /> {t("comum:acoes.cancelar")}
                     </button>
                   </>
                 )}
+                <button
+                  onClick={() => setDetalhe(null)}
+                  className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-surface-container-highest/50 text-on-surface-variant hover:bg-surface-container-highest hover:text-on-surface transition text-xs font-semibold cursor-pointer border border-veu/5"
+                >
+                  <Icone name="close" className="text-sm font-bold" /> {t("comum:acoes.fechar")}
+                </button>
               </div>
             </div>
 
@@ -1067,18 +920,18 @@ function AbaReunioes({ irParaVotacao }) {
             <div className="p-5 space-y-4">
               <h4 className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider flex items-center gap-2">
                 <Icone name="people" className="text-base text-primary" />
-                Convidados e Presenças ({detalhe.convidados?.length || 0})
+                {t("reunioes.detalhe.convidados", { total: detalhe.convidados?.length || 0 })}
               </h4>
               
               {(!detalhe.convidados || detalhe.convidados.length === 0) ? (
-                <p className="text-xs text-on-surface-variant italic pl-1">Nenhum convidado nesta reunião.</p>
+                <p className="text-xs text-on-surface-variant italic pl-1">{t("reunioes.detalhe.nenhumConvidado")}</p>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {detalhe.convidados.map((convidado) => {
                     const usr = todosUsuarios.find((u) => u.id === convidado.usuarioId);
-                    const nome = usr ? usr.nome : `Usuário ID #${convidado.usuarioId}`;
+                    const nome = usr ? usr.nome : t("reunioes.detalhe.usuarioId", { id: convidado.usuarioId });
                     const detalhesResidencia = usr 
-                      ? `Bloco ${usr.bloco || "—"} · Apt ${usr.apartamento || "—"}` 
+                      ? t("reunioes.form.blocoApt", { bloco: usr.bloco || "—", apt: usr.apartamento || "—" })
                       : "";
                     
                     return (
@@ -1098,30 +951,11 @@ function AbaReunioes({ irParaVotacao }) {
                               ? "bg-error/10 text-error border border-error/20"
                               : "bg-secondary/10 text-secondary border border-secondary/20"
                           }`}>
-                            {ATTENDANCE_LABEL[convidado.status] || convidado.status}
+                            {ATTENDANCE_LABEL[convidado.status] ? t(ATTENDANCE_LABEL[convidado.status]) : convidado.status}
                           </span>
                         </div>
 
-                        {/* Avaliação (se houver nota/comentário) */}
-                        {convidado.nota !== null && convidado.nota !== undefined && (
-                          <div className="mt-1 pt-2 border-t border-veu/5 space-y-1">
-                            <div className="flex items-center gap-1 text-[10px] text-tertiary">
-                              <span className="font-semibold uppercase tracking-wider text-[8px] text-on-surface-variant mr-1">Avaliação:</span>
-                              {Array.from({ length: 5 }).map((_, idx) => (
-                                <Icone 
-                                  key={idx} 
-                                  name="star" 
-                                  className={`text-xs ${idx < convidado.nota ? "text-amber-400" : "text-veu/10"}`} 
-                                />
-                              ))}
-                            </div>
-                            {convidado.comentario && (
-                              <p className="text-[11px] text-on-surface-variant italic bg-veu/2 p-2 rounded-xl border border-veu/2 mt-1">
-                                "{convidado.comentario}"
-                              </p>
-                            )}
-                          </div>
-                        )}
+
                       </div>
                     );
                   })}
@@ -1129,84 +963,13 @@ function AbaReunioes({ irParaVotacao }) {
               )}
             </div>
 
-            {/* Avaliação (só para FINALIZADA) */}
-            {detalhe.status === "FINALIZADA" && (
-              <div className="p-4 space-y-4 border-t border-veu/5">
-                <p className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider flex items-center gap-2">
-                  <Icone name="rate_review" className="text-base text-primary" />
-                  Registrar Avaliação
-                </p>
-                <form onSubmit={salvarAvaliacao} className="space-y-3">
-                  <div className="space-y-2">
-                    <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant ml-1">
-                      Convidado Avaliador
-                    </label>
-                    <select
-                      value={avalUsuarioId}
-                      onChange={(e) => setAvalUsuarioId(e.target.value)}
-                      required
-                      className="w-full bg-surface-container-highest/40 border border-veu/5 rounded-xl py-3 px-4 text-on-surface focus:ring-2 focus:ring-primary/50 focus:outline-none backdrop-blur-sm transition-all"
-                    >
-                      <option value="" className="bg-surface-container-highest text-on-surface">Selecione um convidado...</option>
-                      {detalhe.convidados?.filter(c => c.status === "CONFIRMADO").map((c) => {
-                        const usr = todosUsuarios.find((u) => u.id === c.usuarioId);
-                        if (!usr) return null;
-                        return (
-                          <option key={c.usuarioId} value={c.usuarioId} className="bg-surface-container-highest text-on-surface">
-                            {usr.nome} (Apt {usr.apartamento || "—"})
-                          </option>
-                        );
-                      })}
-                    </select>
-                  </div>
-                  <Campo label="Nota (1 a 5)" type="number" min={1} max={5} value={avalForm.nota} onChange={(e) => setAvalForm((p) => ({ ...p, nota: e.target.value }))} placeholder="1 a 5" required />
-                  <TextArea label="Comentário (opcional)" value={avalForm.comentario} rows={2} onChange={(e) => setAvalForm((p) => ({ ...p, comentario: e.target.value }))} placeholder="Comentário opcional" />
-                  <Botao type="submit" disabled={salvandoAval}>
-                    {salvandoAval ? "Enviando..." : "Enviar Avaliação"}
-                  </Botao>
-                </form>
-              </div>
-            )}
 
-            {/* Seção de Votações da Reunião */}
-            <div className="p-5 space-y-4 border-t border-veu/5">
-              <div className="flex items-center justify-between">
-                <h4 className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider flex items-center gap-2">
-                  <Icone name="how_to_vote" className="text-base text-primary" />
-                  Votações da Reunião
-                </h4>
-                {detalhe.idOrganizador === usuario?.id && (
-                  <button
-                    onClick={() => irParaVotacao(detalhe.id)}
-                    className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-primary text-on-primary hover:bg-primary-hover shadow-lg shadow-primary/20 hover:shadow-primary/30 transition text-xs font-semibold cursor-pointer"
-                  >
-                    <Icone name="add" className="text-sm font-bold" /> Criar Votação
-                  </button>
-                )}
-              </div>
-              
-              {votacoesReuniao.length > 0 ? (
-                <div className="grid gap-2 mt-2">
-                  {votacoesReuniao.map((poll) => (
-                    <div key={poll.id} className="flex items-center justify-between p-3 rounded-xl bg-veu/5 border border-veu/10 hover:bg-veu/10 transition cursor-pointer" onClick={() => irParaVotacao(detalhe.id)}>
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs font-medium text-on-surface">{poll.titulo}</span>
-                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${poll.status === 'ABERTA' ? 'bg-primary/20 text-primary' : 'bg-surface-container text-on-surface-variant'}`}>{poll.status}</span>
-                      </div>
-                      <Icone name="chevron_right" className="text-sm text-on-surface-variant" />
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-xs text-on-surface-variant italic">Nenhuma votação registrada para esta reunião.</p>
-              )}
-            </div>
 
             {/* Seção da Ata da Reunião integrada */}
             {carregandoAta ? (
               <div className="p-5 text-center text-xs text-on-surface-variant flex items-center justify-center gap-2 border-t border-veu/5">
                 <Icone name="sync" className="text-sm animate-spin text-primary" />
-                Carregando Ata...
+                {t("reunioes.ata.carregando")}
               </div>
             ) : ataReuniao ? (
               /* Visualização e edição da Ata Existente */
@@ -1214,14 +977,14 @@ function AbaReunioes({ irParaVotacao }) {
                 <div className="flex items-center justify-between">
                   <h4 className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider flex items-center gap-2">
                     <Icone name="description" className="text-base text-primary" />
-                    Ata da Reunião
+                    {t("reunioes.ata.titulo")}
                   </h4>
                   {detalhe.idOrganizador === usuario?.id && !escrevendoAta && (
                     <button
                       onClick={() => setEscrevendoAta(true)}
                       className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition text-xs font-semibold cursor-pointer"
                     >
-                      <Icone name="edit" className="text-sm" /> Editar Ata
+                      <Icone name="edit" className="text-sm" /> {t("reunioes.ata.editar")}
                     </button>
                   )}
                 </div>
@@ -1230,38 +993,32 @@ function AbaReunioes({ irParaVotacao }) {
                   /* Form de Edição da Ata */
                   <form onSubmit={salvarAtaInline} className="space-y-4 bg-veu/5 rounded-2xl p-4 border border-veu/5 animate-fade-in">
                     <TextArea
-                      label="Tópicos Discutidos"
+                      label={t("reunioes.ata.topicos")}
                       value={ataForm.topicosDiscutidos}
                       onChange={(e) => setAtaForm((p) => ({ ...p, topicosDiscutidos: e.target.value }))}
-                      placeholder="Liste os tópicos principais discutidos..."
+                      placeholder={t("reunioes.ata.topicosPlaceholder")}
                       rows={3}
                       required
                     />
                     <TextArea
-                      label="Decisões Tomadas"
+                      label={t("reunioes.ata.decisoes")}
                       value={ataForm.decisoesTomadas}
                       onChange={(e) => setAtaForm((p) => ({ ...p, decisoesTomadas: e.target.value }))}
-                      placeholder="Liste as decisões e resoluções acordadas..."
+                      placeholder={t("reunioes.ata.decisoesPlaceholder")}
                       rows={3}
                       required
                     />
-                    <Campo
-                      label="IDs dos Presentes (separados por vírgula)"
-                      value={ataForm.idPresentes}
-                      onChange={(e) => setAtaForm((p) => ({ ...p, idPresentes: e.target.value }))}
-                      placeholder="ex: 1, 2, 3"
-                      required
-                    />
+
                     <div className="flex justify-end gap-2">
                       <button
                         type="button"
                         onClick={() => setEscrevendoAta(false)}
                         className="px-4 py-2 rounded-xl text-xs font-semibold text-on-surface-variant hover:text-on-surface hover:bg-veu/5 transition cursor-pointer"
                       >
-                        Cancelar
+                        {t("comum:acoes.cancelar")}
                       </button>
                       <Botao type="submit" disabled={salvandoAta} style={{ width: "auto", paddingLeft: "1.5rem", paddingRight: "1.5rem" }}>
-                        {salvandoAta ? "Salvando..." : "Salvar Ata"}
+                        {salvandoAta ? t("acoes.salvando") : t("reunioes.ata.salvar")}
                       </Botao>
                     </div>
                   </form>
@@ -1269,21 +1026,21 @@ function AbaReunioes({ irParaVotacao }) {
                   /* Detalhes da Ata */
                   <div className="bg-veu/5 border border-veu/5 rounded-2xl p-4 space-y-3">
                     <div>
-                      <p className="text-[10px] text-on-surface-variant uppercase font-semibold tracking-wider">Tópicos Discutidos</p>
+                      <p className="text-[10px] text-on-surface-variant uppercase font-semibold tracking-wider">{t("reunioes.ata.topicos")}</p>
                       <p className="text-xs text-on-surface leading-relaxed whitespace-pre-wrap">{ataReuniao.topicosDiscutidos}</p>
                     </div>
                     <div className="pt-2 border-t border-veu/5">
-                      <p className="text-[10px] text-on-surface-variant uppercase font-semibold tracking-wider">Decisões Tomadas</p>
+                      <p className="text-[10px] text-on-surface-variant uppercase font-semibold tracking-wider">{t("reunioes.ata.decisoes")}</p>
                       <p className="text-xs text-on-surface leading-relaxed whitespace-pre-wrap">{ataReuniao.decisoesTomadas}</p>
                     </div>
                     <div className="pt-2 border-t border-veu/5">
-                      <p className="text-[10px] text-on-surface-variant uppercase font-semibold tracking-wider">Presentes na Reunião</p>
+                      <p className="text-[10px] text-on-surface-variant uppercase font-semibold tracking-wider">{t("reunioes.ata.presentes")}</p>
                       <div className="flex flex-wrap gap-1.5 mt-1">
                         {(ataReuniao.idPresentes || []).map((id) => {
                           const usr = todosUsuarios.find((u) => u.id === id);
                           return (
                             <span key={id} className="px-2 py-0.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-[10px] font-medium">
-                              {usr ? usr.nome : `ID #${id}`}
+                              {usr ? usr.nome : t("reunioes.ata.idPresente", { id })}
                             </span>
                           );
                         })}
@@ -1291,7 +1048,7 @@ function AbaReunioes({ irParaVotacao }) {
                     </div>
                     {ataReuniao.dataPublicacao && (
                       <p className="text-[10px] text-on-surface-variant/60 italic pt-1">
-                        Publicada em: {fmt(ataReuniao.dataPublicacao)}
+                        {t("reunioes.ata.publicadaEm", { data: fmt(ataReuniao.dataPublicacao) })}
                       </p>
                     )}
                   </div>
@@ -1304,7 +1061,7 @@ function AbaReunioes({ irParaVotacao }) {
                   <div className="flex items-center justify-between">
                     <h4 className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider flex items-center gap-2">
                       <Icone name="description" className="text-base text-primary" />
-                      Ata da Reunião
+                      {t("reunioes.ata.titulo")}
                     </h4>
                     {!escrevendoAta && (
                       <button
@@ -1324,7 +1081,7 @@ function AbaReunioes({ irParaVotacao }) {
                         }}
                         className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-primary text-on-primary hover:bg-primary-hover shadow-lg shadow-primary/20 hover:shadow-primary/30 transition text-xs font-semibold cursor-pointer"
                       >
-                        <Icone name="add" className="text-sm font-bold" /> Criar Ata
+                        <Icone name="add" className="text-sm font-bold" /> {t("reunioes.ata.criar")}
                       </button>
                     )}
                   </div>
@@ -1332,38 +1089,32 @@ function AbaReunioes({ irParaVotacao }) {
                   {escrevendoAta && (
                     <form onSubmit={salvarAtaInline} className="space-y-4 bg-veu/5 rounded-2xl p-4 border border-veu/5 animate-fade-in">
                       <TextArea
-                        label="Tópicos Discutidos"
+                        label={t("reunioes.ata.topicos")}
                         value={ataForm.topicosDiscutidos}
                         onChange={(e) => setAtaForm((p) => ({ ...p, topicosDiscutidos: e.target.value }))}
-                        placeholder="Liste os tópicos principais discutidos..."
+                        placeholder={t("reunioes.ata.topicosPlaceholder")}
                         rows={3}
                         required
                       />
                       <TextArea
-                        label="Decisões Tomadas"
+                        label={t("reunioes.ata.decisoes")}
                         value={ataForm.decisoesTomadas}
                         onChange={(e) => setAtaForm((p) => ({ ...p, decisoesTomadas: e.target.value }))}
-                        placeholder="Liste as decisões e resoluções acordadas..."
+                        placeholder={t("reunioes.ata.decisoesPlaceholder")}
                         rows={3}
                         required
                       />
-                      <Campo
-                        label="IDs dos Presentes (separados por vírgula)"
-                        value={ataForm.idPresentes}
-                        onChange={(e) => setAtaForm((p) => ({ ...p, idPresentes: e.target.value }))}
-                        placeholder="ex: 1, 2, 3"
-                        required
-                      />
+
                       <div className="flex justify-end gap-2">
                         <button
                           type="button"
                           onClick={() => setEscrevendoAta(false)}
                           className="px-4 py-2 rounded-xl text-xs font-semibold text-on-surface-variant hover:text-on-surface hover:bg-veu/5 transition cursor-pointer"
                         >
-                          Cancelar
+                          {t("comum:acoes.cancelar")}
                         </button>
                         <Botao type="submit" disabled={salvandoAta} style={{ width: "auto", paddingLeft: "1.5rem", paddingRight: "1.5rem" }}>
-                          {salvandoAta ? "Salvando..." : "Salvar Ata"}
+                          {salvandoAta ? t("acoes.salvando") : t("reunioes.ata.salvar")}
                         </Botao>
                       </div>
                     </form>
@@ -1402,288 +1153,222 @@ function AbaReunioes({ irParaVotacao }) {
                 onClick={() => setConfirmModal({ aberto: false })}
                 className="px-4 py-2.5 rounded-xl text-xs font-semibold text-on-surface-variant hover:text-on-surface hover:bg-veu/5 transition cursor-pointer"
               >
-                Cancelar
+                {t("comum:acoes.cancelar")}
               </button>
               <button
                 type="button"
                 onClick={confirmModal.onConfirmar}
                 className="px-5 py-2.5 rounded-xl text-xs font-semibold bg-primary text-on-primary hover:bg-primary-hover shadow-lg shadow-primary/20 hover:shadow-primary/30 transition cursor-pointer"
               >
-                Confirmar
+                {t("comum:acoes.confirmar")}
               </button>
             </div>
           </div>
         </div>
       )}
-    </div>
-  );
-}
 
-// ════════════════════════════════════════════
-// ABA: VOTAÇÕES
-// ════════════════════════════════════════════
-function AbaVotacoes({ reuniaoPreenchida }) {
-  const toast = useToast();
-  const confirm = useConfirm();
-  const [buscaId, setBuscaId] = useState("");
-  const [buscaData, setBuscaData] = useState("");
-  const [detalhe, setDetalhe] = useState(null);
-  const [resultadosBusca, setResultadosBusca] = useState([]);
-  const [buscando, setBuscando] = useState(false);
-  const [erroDetalhe, setErroDetalhe] = useState("");
-
-  const [form, setForm] = useState({ titulo: "", descricao: "", meetingId: reuniaoPreenchida || "", opcoes: "" });
-  const [criando, setCriando] = useState(!!reuniaoPreenchida);
-  const [salvando, setSalvando] = useState(false);
-  const [erro, setErro] = useState("");
-
-  useEffect(() => {
-    if (reuniaoPreenchida) {
-      setForm(p => ({ ...p, meetingId: reuniaoPreenchida }));
-      setCriando(true);
-      setDetalhe(null);
-    }
-  }, [reuniaoPreenchida]);
-
-  // voto
-  const [voteForm, setVoteForm] = useState({ pollOptionId: "", usuarioId: "" });
-  const [votando, setVotando] = useState(false);
-
-  function handleForm(e) {
-    setForm((p) => ({ ...p, [e.target.name]: e.target.value }));
-  }
-
-  async function salvarPoll(e) {
-    e.preventDefault();
-    setSalvando(true);
-    setErro("");
-    try {
-      const payload = {
-        titulo: form.titulo,
-        descricao: form.descricao,
-        meetingId: Number(form.meetingId),
-        opcoes: form.opcoes
-          .split(",")
-          .map((s) => s.trim())
-          .filter(Boolean),
-      };
-      await pollApi.criar(payload);
-      setForm({ ...form, titulo: "", descricao: "", opcoes: "" });
-      setCriando(false);
-      toast.success("Votação criada!");
-    } catch (e) {
-      setErro(e.response?.data?.message || "Erro ao criar votação.");
-    } finally {
-      setSalvando(false);
-    }
-  }
-
-  async function buscarPoll() {
-    if (!buscaId) return;
-    setBuscando(true);
-    setErroDetalhe("");
-    setDetalhe(null);
-    setResultadosBusca([]);
-    try {
-      const res = await pollApi.buscar(buscaId);
-      setDetalhe(res.data);
-    } catch {
-      setErroDetalhe("Votação não encontrada.");
-    } finally {
-      setBuscando(false);
-    }
-  }
-
-  async function buscarPollsPorData() {
-    if (!buscaData) return;
-    setBuscando(true);
-    setErroDetalhe("");
-    setDetalhe(null);
-    try {
-      const res = await pollApi.listar({ date: buscaData });
-      setResultadosBusca(res.data || []);
-      if (res.data.length === 0) setErroDetalhe("Nenhuma votação encontrada para esta data.");
-    } catch (e) {
-      setErroDetalhe("Erro ao buscar votações.");
-      setResultadosBusca([]);
-    } finally {
-      setBuscando(false);
-    }
-  }
-
-  async function encerrarPoll() {
-    if (!detalhe) return;
-    const ok = await confirm({
-      titulo: "Encerrar votação",
-      mensagem: "Deseja encerrar esta votação?",
-      confirmarTexto: "Encerrar",
-      variante: "danger",
-    });
-    if (!ok) return;
-    try {
-      await pollApi.encerrar(detalhe.id);
-      setDetalhe((p) => (p ? { ...p, status: "ENCERRADA" } : p));
-      toast.success("Votação encerrada!");
-    } catch {
-      toast.error("Erro ao encerrar votação.");
-    }
-  }
-
-  async function registrarVoto(e) {
-    e.preventDefault();
-    if (!detalhe) return;
-    setVotando(true);
-    try {
-      await pollApi.votar(detalhe.id, {
-        pollOptionId: Number(voteForm.pollOptionId),
-        usuarioId: Number(voteForm.usuarioId),
-      });
-      setVoteForm({ pollOptionId: "", usuarioId: "" });
-      const res = await pollApi.buscar(detalhe.id);
-      setDetalhe(res.data);
-      toast.success("Voto registrado!");
-    } catch (e) {
-      toast.error(e.response?.data?.message || "Erro ao registrar voto.");
-    } finally {
-      setVotando(false);
-    }
-  }
-
-  return (
-    <div className="space-y-6">
-      <div className="glass-panel rounded-3xl p-4 sm:p-6 space-y-4">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="font-headline text-xl font-bold text-on-surface">Votações</h2>
+      {/* Minhas Reuniões da Semana */}
+      <div className="glass-panel rounded-3xl p-6 space-y-4 border border-veu/5">
+        <div className="flex items-center justify-between gap-3 border-b border-veu/5 pb-3">
+          <div className="flex items-center gap-2">
+            <span className="p-2 rounded-xl bg-primary/10 text-primary">
+              <Icone name="date_range" className="text-xl" />
+            </span>
+            <div>
+              <h2 className="font-headline text-lg font-bold text-on-surface">{t("reunioes.semana.titulo")}</h2>
+              <p className="text-[10px] text-on-surface-variant uppercase tracking-wider font-semibold">
+                {t("reunioes.semana.periodo", { inicio: fmt(getWeekRange().start).split(" ")[0], fim: fmt(getWeekRange().end).split(" ")[0] })}
+              </p>
+            </div>
+          </div>
           <button
-            onClick={() => { setCriando(!criando); setErro(""); }}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary/10 text-primary hover:bg-primary/20 transition text-sm font-semibold cursor-pointer"
+            onClick={carregarReunioesSemana}
+            disabled={carregandoSemana}
+            className="p-2 rounded-xl hover:bg-veu/5 text-on-surface-variant hover:text-on-surface transition cursor-pointer"
+            title={t("reunioes.semana.atualizar")}
           >
-            <Icone name={criando ? "close" : "add"} className="text-base" />
-            {criando ? "Cancelar" : "Nova Votação"}
+            <Icone name="refresh" className={`text-lg ${carregandoSemana ? "animate-spin" : ""}`} />
           </button>
         </div>
 
-        {criando && (
-          <form onSubmit={salvarPoll} className="bg-surface-container-highest/20 rounded-xl p-4 space-y-3 border border-veu/10">
-            <h3 className="font-semibold text-on-surface text-sm">Nova Votação</h3>
-            {erro && <p className="text-error text-xs">{erro}</p>}
-            <Campo label="Título" name="titulo" value={form.titulo} onChange={handleForm} placeholder="Ex: Aprovação do orçamento" required />
-            <TextArea label="Descrição" name="descricao" value={form.descricao} onChange={handleForm} rows={2} placeholder="Descrição da votação" />
-            <Campo label="ID da Reunião" type="number" name="meetingId" value={form.meetingId} onChange={handleForm} placeholder="Ex: 1" required />
-            <Campo label="Opções (separadas por vírgula)" name="opcoes" value={form.opcoes} onChange={handleForm} placeholder="ex: Sim, Não, Abstenção" />
-            <Botao type="submit" disabled={salvando}>
-              {salvando ? "Salvando..." : "Criar Votação"}
-            </Botao>
-          </form>
-        )}
-
-        {/* Busca por ID ou Data */}
-        <div className="space-y-4">
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="flex-1 space-y-1">
-              <Campo label="Buscar votação por ID" type="number" value={buscaId} onChange={(e) => setBuscaId(e.target.value)} placeholder="Digite o ID da votação" />
-              <button
-                onClick={buscarPoll}
-                disabled={buscando || !buscaId}
-                className="w-full flex justify-center items-center gap-1 px-4 py-2 rounded-xl bg-primary/10 text-primary hover:bg-primary/20 transition text-sm font-semibold cursor-pointer"
-              >
-                <Icone name="search" className="text-base" /> Buscar por ID
-              </button>
-            </div>
-            <div className="flex-1 space-y-1">
-              <Campo label="Buscar votações por Data" type="date" value={buscaData} onChange={(e) => setBuscaData(e.target.value)} />
-              <button
-                onClick={buscarPollsPorData}
-                disabled={buscando || !buscaData}
-                className="w-full flex justify-center items-center gap-1 px-4 py-2 rounded-xl bg-primary/10 text-primary hover:bg-primary/20 transition text-sm font-semibold cursor-pointer"
-              >
-                <Icone name="event" className="text-base" /> Buscar por Data
-              </button>
-            </div>
+        {carregandoSemana ? (
+          <div className="text-center py-8 text-on-surface-variant text-xs flex flex-col items-center justify-center gap-2">
+            <Icone name="sync" className="text-lg animate-spin text-primary" />
+            {t("reunioes.semana.carregando")}
           </div>
-          {erroDetalhe && <p className="text-error text-xs">{erroDetalhe}</p>}
-        </div>
-
-        {/* Lista de Resultados da Busca por Data */}
-        {resultadosBusca.length > 0 && !detalhe && (
-          <div className="space-y-2">
-            <h3 className="font-semibold text-sm text-on-surface">Votações de {buscaData}</h3>
-            {resultadosBusca.map(poll => (
-              <div key={poll.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-3 rounded-xl bg-veu/5 border border-veu/10 hover:bg-veu/10 transition cursor-pointer" onClick={() => setDetalhe(poll)}>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-bold text-on-surface">{poll.titulo}</span>
-                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${STATUS_POLL[poll.status]?.cls ?? ""}`}>{poll.status}</span>
-                  </div>
-                  <p className="text-xs text-on-surface-variant">Reunião ID: {poll.meetingId}</p>
-                </div>
-                <Icone name="chevron_right" className="text-on-surface-variant hidden sm:block" />
-              </div>
-            ))}
+        ) : reunioesSemana.length === 0 ? (
+          <div className="text-center py-10 text-on-surface-variant text-sm flex flex-col items-center justify-center gap-2 bg-veu/2 rounded-2xl border border-veu/5">
+            <Icone name="event_busy" className="text-3xl text-primary/40" />
+            <p className="font-medium text-xs">{t("reunioes.semana.vazio")}</p>
           </div>
-        )}
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {reunioesSemana.map((reuniao) => {
+              const isOrganizador = reuniao.idOrganizador === usuario?.id;
+              const meuConvidado = reuniao.convidados?.find((c) => c.usuarioId === usuario?.id);
+              const meuStatusPresenca = meuConvidado?.status || "PENDENTE";
 
-        {/* Detalhe da votação */}
-        {detalhe && (
-          <div className="bg-surface-container-highest/20 rounded-xl border border-veu/10 divide-y divide-veu/5">
-            <div className="p-4 space-y-2">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div className="flex flex-wrap items-center gap-2 min-w-0">
-                  <span className="font-semibold text-on-surface">{detalhe.titulo}</span>
-                  <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${STATUS_POLL[detalhe.status]?.cls ?? ""}`}>
-                    {STATUS_POLL[detalhe.status]?.label ?? detalhe.status}
-                  </span>
-                </div>
-                {detalhe.status === "ABERTA" && (
-                  <button
-                    onClick={encerrarPoll}
-                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-error/10 text-error hover:bg-error/20 transition text-xs font-semibold cursor-pointer"
-                  >
-                    <Icone name="lock" className="text-sm" /> Encerrar
-                  </button>
-                )}
-              </div>
-              {detalhe.descricao && (
-                <p className="text-on-surface-variant text-xs">{detalhe.descricao}</p>
-              )}
-              <p className="text-on-surface-variant text-xs">Reunião ID: {detalhe.meetingId}</p>
+              return (
+                <div key={reuniao.id} className="relative bg-surface-container-highest/20 hover:bg-surface-container-highest/30 rounded-2xl border border-veu/5 p-4 flex flex-col justify-between gap-4 transition-all duration-300 hover:scale-[1.01] hover:shadow-lg">
+                  <div className="space-y-2">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="space-y-0.5 min-w-0">
+                        <span className="font-semibold text-sm text-on-surface truncate block" title={reuniao.titulo}>
+                          {reuniao.titulo}
+                        </span>
+                        <span className="text-[10px] text-on-surface-variant/80 block">
+                          {t("reunioes.card.id", { id: reuniao.id })}
+                        </span>
+                      </div>
+                      <div className="flex gap-1.5 shrink-0">
+                        {isOrganizador && (
+                          <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-tertiary/15 text-tertiary uppercase tracking-wider">
+                            {t("reunioes.card.organizador")}
+                          </span>
+                        )}
+                        <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider ${STATUS_MEETING[reuniao.status]?.cls ?? "bg-veu/10 text-white"}`}>
+                          {STATUS_MEETING[reuniao.status] ? t(STATUS_MEETING[reuniao.status].rotuloKey) : reuniao.status}
+                        </span>
+                      </div>
+                    </div>
 
-              {/* Opções */}
-              {detalhe.opcoes?.length > 0 && (
-                <div className="space-y-1 pt-2">
-                  <p className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider">Opções</p>
-                  <div className="flex flex-wrap gap-2">
-                    {detalhe.opcoes.map((op) => (
-                      <span key={op.id} className="px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium">
-                        #{op.id} {op.descricao}
-                      </span>
-                    ))}
+                    {reuniao.descricao && (
+                      <p className="text-on-surface-variant text-xs line-clamp-2" title={reuniao.descricao}>
+                        {reuniao.descricao}
+                      </p>
+                    )}
+
+                    <div className="space-y-1 pt-1 border-t border-veu/5">
+                      <p className="flex items-center gap-1.5 text-[11px] text-on-surface-variant">
+                        <Icone name="schedule" className="text-xs text-primary" />
+                        {t("reunioes.card.inicio", { data: fmt(reuniao.dataHoraInicio) })}
+                      </p>
+                      <p className="flex items-center gap-1.5 text-[11px] text-on-surface-variant">
+                        <Icone name="event_available" className="text-xs text-primary" />
+                        {t("reunioes.card.fim", { data: fmt(reuniao.dataHoraFim) })}
+                      </p>
+                    </div>
+
+                    {reuniao.googleMeetLink && (
+                      <div className="pt-1">
+                        <a
+                          href={reuniao.googleMeetLink}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-primary hover:underline"
+                        >
+                          <Icone name="videocam" className="text-sm shrink-0" />
+                          {t("reunioes.card.entrarMeet")}
+                        </a>
+                      </div>
+                    )}
+                  </div>
+
+                  {!isOrganizador && reuniao.status === "AGENDADA" && (
+                    <div className="flex items-center justify-between gap-2 bg-veu/5 p-2 rounded-xl border border-veu/5">
+                      <div className="flex flex-col">
+                        <span className="text-[9px] text-on-surface-variant font-semibold uppercase tracking-wider">{t("reunioes.card.suaPresenca")}</span>
+                        <span className={`text-[10px] font-bold ${
+                          meuStatusPresenca === 'CONFIRMADO' ? 'text-primary' : meuStatusPresenca === 'RECUSADO' ? 'text-error' : 'text-secondary'
+                        }`}>
+                          {ATTENDANCE_LABEL[meuStatusPresenca] ? t(ATTENDANCE_LABEL[meuStatusPresenca]) : meuStatusPresenca}
+                        </span>
+                      </div>
+                      <div className="flex gap-1">
+                        <button
+                          type="button"
+                          onClick={() => responderPresenca(reuniao.id, 'CONFIRMADO')}
+                          className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[10px] font-semibold transition cursor-pointer ${
+                            meuStatusPresenca === 'CONFIRMADO' 
+                              ? 'bg-primary/20 text-primary border border-primary/30' 
+                              : 'bg-veu/5 text-on-surface-variant hover:bg-primary/10 hover:text-primary'
+                          }`}
+                        >
+                          <Icone name="check" className="text-xs" />
+                          {t("comum:acoes.confirmar")}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => responderPresenca(reuniao.id, 'RECUSADO')}
+                          className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[10px] font-semibold transition cursor-pointer ${
+                            meuStatusPresenca === 'RECUSADO' 
+                              ? 'bg-error/20 text-error border border-error/30' 
+                              : 'bg-veu/5 text-on-surface-variant hover:bg-error/10 hover:text-error'
+                          }`}
+                        >
+                          <Icone name="close" className="text-xs" />
+                          {t("reunioes.card.recusar")}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="flex justify-end pt-1 gap-3">
+                    {isOrganizador && reuniao.status === "AGENDADA" && (
+                      <button
+                        type="button"
+                        onClick={() => iniciarEdicao(reuniao)}
+                        className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary hover:underline cursor-pointer"
+                      >
+                        <Icone name="edit" className="text-xs" />
+                        {t("comum:acoes.editar")}
+                      </button>
+                    )}
+                    {isOrganizador && (
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          try {
+                            const res = await meetingApi.buscar(reuniao.id);
+                            setDetalhe(res.data);
+                            await carregarAtaReuniao(reuniao.id);
+                            setEscrevendoAta(true);
+                            setTimeout(() => {
+                              const el = document.getElementById("meeting-detalhe-container");
+                              if (el) el.scrollIntoView({ behavior: 'smooth' });
+                            }, 100);
+                          } catch {
+                            mostrarNotificacao(t("reunioes.toast.erroAbrirAta"), "erro");
+                          }
+                        }}
+                        className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary hover:underline cursor-pointer"
+                      >
+                        <Icone name="description" className="text-xs" />
+                        {t("reunioes.card.criarAta")}
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        try {
+                          const res = await meetingApi.buscar(reuniao.id);
+                          setDetalhe(res.data);
+                          carregarAtaReuniao(reuniao.id);
+                          setTimeout(() => {
+                            const el = document.getElementById("meeting-detalhe-container");
+                            if (el) el.scrollIntoView({ behavior: 'smooth' });
+                          }, 100);
+                        } catch {
+                          mostrarNotificacao(t("reunioes.toast.erroDetalhes"), "erro");
+                        }
+                      }}
+                      className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary hover:underline cursor-pointer"
+                    >
+                      {t("comum:acoes.verDetalhes")}
+                      <Icone name="arrow_forward" className="text-xs" />
+                    </button>
                   </div>
                 </div>
-              )}
-            </div>
-
-            {/* Formulário voto */}
-            {detalhe.status === "ABERTA" && (
-              <div className="p-4 space-y-3">
-                <p className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider">Registrar Voto</p>
-                <form onSubmit={registrarVoto} className="space-y-3">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <Campo label="ID do Usuário" type="number" value={voteForm.usuarioId} onChange={(e) => setVoteForm((p) => ({ ...p, usuarioId: e.target.value }))} placeholder="Ex: 1" required />
-                    <Campo label="ID da Opção" type="number" value={voteForm.pollOptionId} onChange={(e) => setVoteForm((p) => ({ ...p, pollOptionId: e.target.value }))} placeholder="Ex: 1" required />
-                  </div>
-                  <Botao type="submit" disabled={votando}>
-                    {votando ? "Registrando..." : "Votar"}
-                  </Botao>
-                </form>
-              </div>
-            )}
+              );
+            })}
           </div>
         )}
       </div>
+
     </div>
   );
 }
+
 
 // ════════════════════════════════════════════
 // ABA: ATAS
@@ -1691,6 +1376,7 @@ function AbaVotacoes({ reuniaoPreenchida }) {
 const EMPTY_ATA = { topicosDiscutidos: "", decisoesTomadas: "", idPresentes: "" };
 
 function AbaAtas() {
+  const { t } = useTranslation("reunioes");
   const [meetingId, setMeetingId] = useState("");
   const [detalhe, setDetalhe] = useState(null);
   const [buscando, setBuscando] = useState(false);
@@ -1720,7 +1406,7 @@ function AbaAtas() {
         idPresentes: (res.data.idPresentes || []).join(", "),
       });
     } catch {
-      setErroDetalhe("Ata não encontrada para esta reunião. Você pode criar uma.");
+      setErroDetalhe(t("atas.naoEncontrada"));
     } finally {
       setBuscando(false);
     }
@@ -1734,11 +1420,7 @@ function AbaAtas() {
       const payload = {
         topicosDiscutidos: form.topicosDiscutidos,
         decisoesTomadas: form.decisoesTomadas,
-        idPresentes: form.idPresentes
-          .split(",")
-          .map((s) => s.trim())
-          .filter(Boolean)
-          .map(Number),
+        idPresentes: [],
       };
       let res;
       if (modo === "criar") {
@@ -1749,7 +1431,7 @@ function AbaAtas() {
       setDetalhe(res.data);
       setModo("");
     } catch (e) {
-      setErro(e.response?.data?.message || "Erro ao salvar ata.");
+      setErro(e.response?.data?.message || t("atas.erroSalvar"));
     } finally {
       setSalvando(false);
     }
@@ -1757,32 +1439,32 @@ function AbaAtas() {
 
   return (
     <div className="space-y-6">
-      <div className="glass-panel rounded-3xl p-4 sm:p-6 space-y-4">
-        <h2 className="font-headline text-xl font-bold text-on-surface">Atas de Reunião</h2>
+      <div className="glass-panel rounded-3xl p-6 space-y-4">
+        <h2 className="font-headline text-xl font-bold text-on-surface">{t("atas.titulo")}</h2>
 
         {/* Busca */}
         <div className="flex gap-2">
           <div className="flex-1">
-            <Campo label="ID da Reunião" type="number" value={meetingId} onChange={(e) => setMeetingId(e.target.value)} placeholder="Digite o ID da reunião" />
+            <Campo label={t("atas.idReuniao")} type="number" value={meetingId} onChange={(e) => setMeetingId(e.target.value)} placeholder={t("atas.idPlaceholder")} />
           </div>
           <button
             onClick={buscarAta}
             disabled={buscando}
-            className="sm:self-end sm:mb-0.5 flex items-center justify-center gap-1 px-4 py-2 rounded-xl bg-primary/10 text-primary hover:bg-primary/20 transition text-sm font-semibold cursor-pointer"
+            className="self-end mb-0.5 flex items-center gap-1 px-4 py-2 rounded-xl bg-primary/10 text-primary hover:bg-primary/20 transition text-sm font-semibold cursor-pointer"
           >
             <Icone name="search" className="text-base" />
-            {buscando ? "..." : "Buscar"}
+            {buscando ? "..." : t("comum:acoes.buscar")}
           </button>
         </div>
 
         {erroDetalhe && (
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-surface-container-highest/20 rounded-xl p-3 border border-veu/10">
+          <div className="flex items-center justify-between bg-surface-container-highest/20 rounded-xl p-3 border border-veu/10">
             <p className="text-on-surface-variant text-sm">{erroDetalhe}</p>
             <button
               onClick={() => { setModo("criar"); setErroDetalhe(""); setForm(EMPTY_ATA); }}
               className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition text-xs font-semibold cursor-pointer"
             >
-              <Icone name="add" className="text-sm" /> Criar Ata
+              <Icone name="add" className="text-sm" /> {t("atas.criar")}
             </button>
           </div>
         )}
@@ -1790,28 +1472,28 @@ function AbaAtas() {
         {/* Detalhe da ata */}
         {detalhe && modo === "" && (
           <div className="bg-surface-container-highest/20 rounded-xl border border-veu/10 p-4 space-y-3">
-            <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="flex items-center justify-between">
               <p className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider">
-                Ata da Reunião #{detalhe.meetingId}
+                {t("atas.tituloId", { id: detalhe.meetingId })}
               </p>
               <button
                 onClick={() => setModo("editar")}
                 className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition text-xs font-semibold cursor-pointer"
               >
-                <Icone name="edit" className="text-sm" /> Editar
+                <Icone name="edit" className="text-sm" /> {t("comum:acoes.editar")}
               </button>
             </div>
             <div className="space-y-2">
               <div>
-                <p className="text-xs text-on-surface-variant mb-0.5">Tópicos Discutidos</p>
+                <p className="text-xs text-on-surface-variant mb-0.5">{t("reunioes.ata.topicos")}</p>
                 <p className="text-sm text-on-surface">{detalhe.topicosDiscutidos}</p>
               </div>
               <div>
-                <p className="text-xs text-on-surface-variant mb-0.5">Decisões Tomadas</p>
+                <p className="text-xs text-on-surface-variant mb-0.5">{t("reunioes.ata.decisoes")}</p>
                 <p className="text-sm text-on-surface">{detalhe.decisoesTomadas}</p>
               </div>
               <div>
-                <p className="text-xs text-on-surface-variant mb-0.5">Presentes (IDs)</p>
+                <p className="text-xs text-on-surface-variant mb-0.5">{t("atas.presentesIds")}</p>
                 <div className="flex flex-wrap gap-1">
                   {(detalhe.idPresentes || []).map((id) => (
                     <span key={id} className="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-xs">
@@ -1822,7 +1504,7 @@ function AbaAtas() {
               </div>
               {detalhe.dataPublicacao && (
                 <p className="text-xs text-on-surface-variant">
-                  Publicada em: {fmt(detalhe.dataPublicacao)}
+                  {t("reunioes.ata.publicadaEm", { data: fmt(detalhe.dataPublicacao) })}
                 </p>
               )}
             </div>
@@ -1834,7 +1516,7 @@ function AbaAtas() {
           <form onSubmit={salvarAta} className="bg-surface-container-highest/20 rounded-xl p-4 space-y-3 border border-veu/10">
             <div className="flex items-center justify-between">
               <h3 className="font-semibold text-on-surface text-sm">
-                {modo === "criar" ? "Nova Ata" : "Editar Ata"}
+                {modo === "criar" ? t("atas.nova") : t("atas.editar")}
               </h3>
               <button type="button" onClick={() => setModo("")}
                 className="text-on-surface-variant hover:text-on-surface">
@@ -1842,11 +1524,11 @@ function AbaAtas() {
               </button>
             </div>
             {erro && <p className="text-error text-xs">{erro}</p>}
-            <TextArea label="Tópicos Discutidos" name="topicosDiscutidos" value={form.topicosDiscutidos} onChange={handleForm} rows={3} placeholder="Liste os tópicos discutidos" required />
-            <TextArea label="Decisões Tomadas" name="decisoesTomadas" value={form.decisoesTomadas} onChange={handleForm} rows={3} placeholder="Liste as decisões tomadas" required />
-            <Campo label="IDs dos Presentes (separados por vírgula)" name="idPresentes" value={form.idPresentes} onChange={handleForm} placeholder="ex: 1, 2, 3" required />
+            <TextArea label={t("reunioes.ata.topicos")} name="topicosDiscutidos" value={form.topicosDiscutidos} onChange={handleForm} rows={3} placeholder={t("atas.topicosPlaceholder")} required />
+            <TextArea label={t("reunioes.ata.decisoes")} name="decisoesTomadas" value={form.decisoesTomadas} onChange={handleForm} rows={3} placeholder={t("atas.decisoesPlaceholder")} required />
+
             <Botao type="submit" disabled={salvando}>
-              {salvando ? "Salvando..." : modo === "criar" ? "Registrar Ata" : "Salvar Alterações"}
+              {salvando ? t("acoes.salvando") : modo === "criar" ? t("atas.registrar") : t("acoes.salvarAlteracoes")}
             </Botao>
           </form>
         )}

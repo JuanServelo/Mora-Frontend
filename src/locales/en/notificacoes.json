@@ -1,0 +1,11 @@
+{
+  "titulo": "Notifications",
+  "naoLidas_one": "{{count}} unread",
+  "naoLidas_other": "{{count}} unread",
+  "emDia": "All caught up",
+  "marcarTodas": "Mark all as read",
+  "vazio": {
+    "titulo": "No notifications",
+    "descricao": "Invoices, replies from the management and announcements show up here."
+  }
+}

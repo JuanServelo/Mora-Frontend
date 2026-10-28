@@ -10,10 +10,11 @@ export function ConfirmProvider({ children }) {
   const confirm = useCallback((opts) => new Promise((resolve) => {
     resolveRef.current = resolve;
     setState({
-      titulo: opts.titulo || "Confirmar",
+      // Sem texto, o ConfirmDialog usa os padrões traduzidos (Confirmar/Cancelar).
+      titulo: opts.titulo,
       mensagem: opts.mensagem || "",
-      confirmarTexto: opts.confirmarTexto || "Confirmar",
-      cancelarTexto: opts.cancelarTexto || "Cancelar",
+      confirmarTexto: opts.confirmarTexto,
+      cancelarTexto: opts.cancelarTexto,
       variante: opts.variante || "default",
     });
   }), []);

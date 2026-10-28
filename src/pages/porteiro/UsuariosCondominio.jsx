@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { acessoApi } from "../../services/acessoApi";
 import { apartamentoApi } from "../../services/portariaApi";
 import { Icone } from "../../components/icones/Icone";
@@ -16,9 +17,9 @@ const STATUS_STYLE = {
 };
 
 const STATUS_LABEL = {
-  active: "Ativo",
-  pending_activation: "Pendente",
-  inactive: "Inativo",
+  active: "condominio.status.ativo",
+  pending_activation: "condominio.status.pendente",
+  inactive: "condominio.status.inativo",
 };
 
 function mascaraCpfLista(cpf) {
@@ -38,6 +39,7 @@ function mascaraCpfFull(cpf) {
 // ─── CartaoUsuario ────────────────────────────────────────────────────────────
 
 function CartaoUsuario({ usuario, onSelect }) {
+  const { t } = useTranslation("usuarios");
   return (
     <button
       type="button"
@@ -61,7 +63,7 @@ function CartaoUsuario({ usuario, onSelect }) {
                 STATUS_STYLE[usuario.status] ?? STATUS_STYLE.inactive
               }`}
             >
-              {STATUS_LABEL[usuario.status] ?? usuario.status}
+              {STATUS_LABEL[usuario.status] ? t(STATUS_LABEL[usuario.status]) : usuario.status}
             </span>
           )}
           {usuario.cpf && (
@@ -103,6 +105,7 @@ function LinhaDetalhe({ icone, label, valor }) {
 }
 
 function DetalheUsuario({ usuario, apartamentoMap, onFechar }) {
+  const { t } = useTranslation("usuarios");
   if (!usuario) return null;
 
   const unidadeLabel = (() => {
@@ -151,16 +154,16 @@ function DetalheUsuario({ usuario, apartamentoMap, onFechar }) {
           <div className="flex items-center gap-2">
             <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${STATUS_STYLE[usuario.status] ?? STATUS_STYLE.inactive}`}>
               <span className="w-1.5 h-1.5 rounded-full bg-current" />
-              {STATUS_LABEL[usuario.status] ?? usuario.status}
+              {STATUS_LABEL[usuario.status] ? t(STATUS_LABEL[usuario.status]) : usuario.status}
             </span>
           </div>
         )}
 
         {/* Dados comuns */}
         <div className="space-y-3 border-t border-outline-variant/15 pt-4">
-          <LinhaDetalhe icone="mail" label="E-mail" valor={usuario.email} />
-          <LinhaDetalhe icone="badge" label="CPF" valor={mascaraCpfFull(usuario.cpf)} />
-          <LinhaDetalhe icone="phone" label="Telefone" valor={usuario.telefone} />
+          <LinhaDetalhe icone="mail" label={t("condominio.detalhe.email")} valor={usuario.email} />
+          <LinhaDetalhe icone="badge" label={t("condominio.detalhe.cpf")} valor={mascaraCpfFull(usuario.cpf)} />
+          <LinhaDetalhe icone="phone" label={t("condominio.detalhe.telefone")} valor={usuario.telefone} />
         </div>
 
         {/* Dados por perfil */}
@@ -169,19 +172,19 @@ function DetalheUsuario({ usuario, apartamentoMap, onFechar }) {
             {/* MORADOR / DONO_ALUGUEL / CONVIDADO */}
             {isUnidade && (
               <>
-                <LinhaDetalhe icone="home" label="Unidade" valor={unidadeLabel} />
+                <LinhaDetalhe icone="home" label={t("condominio.detalhe.unidade")} valor={unidadeLabel} />
                 {usuario.perfil === PERFIS.DONO_ALUGUEL && (
                   <div className="rounded-xl bg-surface-container-highest/30 px-3 py-2 text-xs text-on-surface-variant">
-                    Dono não residente — proprietário do imóvel
+                    {t("condominio.detalhe.donoNaoResidente")}
                   </div>
                 )}
                 {usuario.perfil === PERFIS.CONVIDADO && (
-                  <LinhaDetalhe icone="waving_hand" label="Tipo" valor="Visitante pré-autorizado" />
+                  <LinhaDetalhe icone="waving_hand" label={t("condominio.detalhe.tipo")} valor={t("condominio.detalhe.visitantePreAutorizado")} />
                 )}
                 {usuario.responsavelFinanceiro && (
                   <div className="flex items-center gap-2 rounded-xl bg-primary/5 border border-primary/15 px-3 py-2 text-xs text-primary font-semibold">
                     <Icone name="star" className="text-sm" />
-                    Responsável financeiro da unidade
+                    {t("condominio.detalhe.responsavelFinanceiro")}
                   </div>
                 )}
               </>
@@ -191,13 +194,13 @@ function DetalheUsuario({ usuario, apartamentoMap, onFechar }) {
             {isStaff && (
               <>
                 {usuario.perfil === PERFIS.PORTEIRO && (
-                  <LinhaDetalhe icone="security" label="Função" valor="Operador de portaria" />
+                  <LinhaDetalhe icone="security" label={t("condominio.detalhe.funcao")} valor={t("condominio.detalhe.funcoes.porteiro")} />
                 )}
                 {usuario.perfil === PERFIS.ADMIN_SINDICO && (
-                  <LinhaDetalhe icone="manage_accounts" label="Função" valor="Administrador do condomínio" />
+                  <LinhaDetalhe icone="manage_accounts" label={t("condominio.detalhe.funcao")} valor={t("condominio.detalhe.funcoes.adminSindico")} />
                 )}
                 {usuario.perfil === PERFIS.ADMIN_GERAL && (
-                  <LinhaDetalhe icone="admin_panel_settings" label="Função" valor="Administrador geral da plataforma" />
+                  <LinhaDetalhe icone="admin_panel_settings" label={t("condominio.detalhe.funcao")} valor={t("condominio.detalhe.funcoes.adminGeral")} />
                 )}
               </>
             )}
@@ -205,8 +208,8 @@ function DetalheUsuario({ usuario, apartamentoMap, onFechar }) {
             {/* TERCEIRO */}
             {usuario.perfil === PERFIS.TERCEIRO && (
               <>
-                <LinhaDetalhe icone="business" label="Empresa" valor={usuario.empresa} />
-                <LinhaDetalhe icone="engineering" label="Tipo" valor="Prestador de serviço" />
+                <LinhaDetalhe icone="business" label={t("condominio.detalhe.empresa")} valor={usuario.empresa} />
+                <LinhaDetalhe icone="engineering" label={t("condominio.detalhe.tipo")} valor={t("condominio.detalhe.prestadorServico")} />
               </>
             )}
           </div>
@@ -220,7 +223,7 @@ function DetalheUsuario({ usuario, apartamentoMap, onFechar }) {
               : "bg-primary/5 text-primary"
           }`}>
             <Icone name={usuario.semAcessoSistema ? "lock" : "lock_open"} className="text-sm" />
-            {usuario.semAcessoSistema ? "Sem acesso ao sistema" : "Com acesso ao sistema"}
+            {usuario.semAcessoSistema ? t("condominio.detalhe.semAcesso") : t("condominio.detalhe.comAcesso")}
           </div>
         </div>
       </div>
@@ -231,6 +234,7 @@ function DetalheUsuario({ usuario, apartamentoMap, onFechar }) {
 // ─── Componente principal ─────────────────────────────────────────────────────
 
 export function UsuariosCondominio() {
+  const { t } = useTranslation("usuarios");
   const toast = useToast();
   const [usuarios, setUsuarios] = useState([]);
   const [carregando, setCarregando] = useState(true);
@@ -244,7 +248,7 @@ export function UsuariosCondominio() {
       const res = await acessoApi.listarUsuariosCondominio();
       setUsuarios(res.data.usuarios || []);
     } catch {
-      toast.error("Erro ao carregar usuários do condomínio.");
+      toast.error(t("condominio.toast.erroCarregar"));
     } finally {
       setCarregando(false);
     }
@@ -281,24 +285,24 @@ export function UsuariosCondominio() {
         <header className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
             <p className="text-on-surface-variant text-xs font-semibold uppercase tracking-widest mb-1">
-              Portaria
+              {t("condominio.cabecalho.portaria")}
             </p>
             <h1 className="font-headline text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-on-surface">
               <span className="bg-gradient-to-r from-primary to-tertiary bg-clip-text text-transparent">
-                Usuários do Condomínio
+                {t("condominio.cabecalho.titulo")}
               </span>
             </h1>
           </div>
           <div className="glass-panel rounded-2xl px-4 sm:px-5 py-3 text-center flex-1 sm:flex-none min-w-[92px]">
             <p className="text-2xl font-headline font-bold text-primary">{usuarios.length}</p>
-            <p className="text-on-surface-variant text-xs uppercase tracking-wider">Total</p>
+            <p className="text-on-surface-variant text-xs uppercase tracking-wider">{t("condominio.total")}</p>
           </div>
         </header>
 
         <div className="max-w-sm">
           <Campo
             id="busca"
-            placeholder="Buscar por nome, e-mail ou CPF..."
+            placeholder={t("condominio.buscaPlaceholder")}
             icon="search"
             value={busca}
             onChange={(e) => setBusca(e.target.value)}
@@ -307,11 +311,11 @@ export function UsuariosCondominio() {
 
         {carregando ? (
           <div className="glass-panel rounded-3xl p-6 sm:p-10 text-center text-on-surface-variant">
-            Carregando...
+            {t("condominio.carregando")}
           </div>
         ) : filtrados.length === 0 ? (
           <div className="glass-panel rounded-3xl p-6 sm:p-10 text-center text-on-surface-variant">
-            {busca ? "Nenhum resultado encontrado." : "Nenhum usuário cadastrado neste condomínio."}
+            {busca ? t("condominio.semResultados") : t("condominio.vazio")}
           </div>
         ) : (
           <div className="space-y-3">
@@ -332,7 +336,7 @@ export function UsuariosCondominio() {
             className="flex items-center gap-2 text-sm font-semibold text-on-surface-variant hover:text-primary transition-colors cursor-pointer disabled:opacity-50"
           >
             <Icone name="refresh" className="text-base" />
-            Atualizar
+            {t("comum:acoes.atualizar")}
           </button>
         </div>
 

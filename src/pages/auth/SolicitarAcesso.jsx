@@ -8,7 +8,7 @@ import { Campo } from "../../components/campos/Campo";
 import { Botao } from "../../components/botoes/Botao";
 
 export function SolicitarAcesso() {
-  const { t } = useTranslation();
+  const { t } = useTranslation("auth");
   const { registrar } = useAuth();
   const navigate = useNavigate();
   const [erro, setErro] = useState("");
@@ -25,13 +25,13 @@ export function SolicitarAcesso() {
     const senha = form.get("senha")?.trim();
 
     if (!nome || !email || !senha) {
-      setErro("Preencha todos os campos.");
+      setErro(t("geral.camposVazios"));
       setCarregando(false);
       return;
     }
 
     if (senha.length < 6) {
-      setErro("Senha deve ter no minimo 6 caracteres.");
+      setErro(t("form.erros.senhaCurta"));
       setCarregando(false);
       return;
     }
@@ -40,7 +40,7 @@ export function SolicitarAcesso() {
       await registrar(nome, email, senha);
       navigate("/inicio");
     } catch (err) {
-      setErro(err.response?.data?.mensagem || "Erro ao solicitar acesso.");
+      setErro(err.response?.data?.mensagem || t("form.erros.falha"));
     } finally {
       setCarregando(false);
     }
@@ -52,7 +52,7 @@ export function SolicitarAcesso() {
         {/* Coluna esquerda — Hero da marca */}
         <div className="hidden lg:flex flex-col space-y-6">
           <div className="space-y-4">
-            <h1 className="font-headline text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tighter text-on-surface">
+            <h1 className="font-headline text-5xl font-extrabold tracking-tighter text-on-surface">
               Mora<span className="text-primary">.</span>
             </h1>
             <p className="text-lg font-headline text-on-surface-variant max-w-sm leading-relaxed">
@@ -60,7 +60,7 @@ export function SolicitarAcesso() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4">
+          <div className="grid grid-cols-2 gap-4 pt-4">
             <CartaoRecurso
               icon="concierge"
               iconColor="text-primary"
@@ -78,12 +78,12 @@ export function SolicitarAcesso() {
 
         {/* Coluna direita — Formulário */}
         <div className="w-full flex justify-center lg:justify-end">
-          <div className="w-full max-w-sm p-5 sm:p-6 md:p-8 rounded-[2rem] shadow-2xl relative overflow-hidden glass-panel">
+          <div className="w-full max-w-sm p-6 md:p-8 rounded-[2rem] shadow-2xl relative overflow-hidden glass-panel">
             <div className="absolute -top-24 -left-24 w-48 h-48 bg-primary/20 blur-[80px] rounded-full" />
 
             <div className="relative z-10">
               <div className="mb-10">
-                <h2 className="font-headline text-2xl sm:text-3xl font-bold text-on-surface tracking-tight">
+                <h2 className="font-headline text-3xl font-bold text-on-surface tracking-tight">
                   {t("form.title")}
                 </h2>
                 <p className="text-on-surface-variant mt-2">
@@ -104,15 +104,15 @@ export function SolicitarAcesso() {
                   name="email"
                   label={t("field.email.label")}
                   type="email"
-                  placeholder="julian@exemplo.com"
+                  placeholder={t("form.emailPlaceholder")}
                   icon="mail"
                 />
                 <Campo
                   id="senha"
                   name="senha"
-                  label="Senha"
+                  label={t("field.password.label")}
                   type="password"
-                  placeholder="Min. 6 caracteres"
+                  placeholder={t("form.senhaPlaceholder")}
                   icon="lock"
                 />
 
@@ -122,7 +122,7 @@ export function SolicitarAcesso() {
 
                 <div className="pt-4">
                   <Botao type="submit" disabled={carregando}>
-                    {carregando ? "Criando conta..." : t("form.submit")}
+                    {carregando ? t("form.criando") : t("form.submit")}
                   </Botao>
                 </div>
               </form>
@@ -131,6 +131,7 @@ export function SolicitarAcesso() {
                 <p className="text-on-surface-variant text-sm">
                   <Trans
                     i18nKey="already.have.account"
+                    t={t}
                     components={{
                       lnk: (
                         <Link

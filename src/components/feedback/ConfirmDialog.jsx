@@ -1,15 +1,18 @@
+import { useTranslation } from "react-i18next";
 import { Icone } from "../icones/Icone";
 
 export function ConfirmDialog({
   aberto,
   titulo,
   mensagem,
-  confirmarTexto = "Confirmar",
-  cancelarTexto = "Cancelar",
+  confirmarTexto,
+  cancelarTexto,
   variante = "default",
   onConfirmar,
   onCancelar,
 }) {
+  const { t } = useTranslation("layout");
+
   if (!aberto) return null;
 
   const isDanger = variante === "danger";
@@ -24,30 +27,30 @@ export function ConfirmDialog({
         type="button"
         className="absolute inset-0 bg-black/60 backdrop-blur-sm cursor-default"
         onClick={onCancelar}
-        aria-label="Fechar"
+        aria-label={t("comum:acoes.fechar")}
       />
-      <div className="relative glass-panel rounded-3xl p-5 sm:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto shadow-2xl border border-outline-variant/20 animate-[fadeIn_0.2s_ease-out]">
-        <div className="flex items-start gap-3 sm:gap-4 mb-6">
+      <div className="relative glass-panel rounded-3xl p-6 w-full max-w-md shadow-2xl border border-outline-variant/20 animate-[fadeIn_0.2s_ease-out]">
+        <div className="flex items-start gap-4 mb-6">
           <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${isDanger ? "bg-error/15" : "bg-primary/15"}`}>
             <Icone
               name={isDanger ? "warning" : "help"}
               className={`text-2xl ${isDanger ? "text-error" : "text-primary"}`}
             />
           </div>
-          <div className="min-w-0">
-            <h2 className="font-headline text-lg font-bold text-on-surface">{titulo}</h2>
+          <div>
+            <h2 className="font-headline text-lg font-bold text-on-surface">{titulo || t("comum:acoes.confirmar")}</h2>
             {mensagem && (
               <p className="text-on-surface-variant text-sm mt-1 leading-relaxed">{mensagem}</p>
             )}
           </div>
         </div>
-        <div className="flex flex-col-reverse sm:flex-row gap-3 sm:justify-end">
+        <div className="flex gap-3 justify-end">
           <button
             type="button"
             onClick={onCancelar}
             className="px-5 py-2.5 rounded-xl text-sm font-semibold text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest/50 transition-colors cursor-pointer"
           >
-            {cancelarTexto}
+            {cancelarTexto || t("comum:acoes.cancelar")}
           </button>
           <button
             type="button"
@@ -58,7 +61,7 @@ export function ConfirmDialog({
                 : "bg-primary/20 text-primary hover:bg-primary/30 border border-primary/30"
             }`}
           >
-            {confirmarTexto}
+            {confirmarTexto || t("comum:acoes.confirmar")}
           </button>
         </div>
       </div>

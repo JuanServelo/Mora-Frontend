@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { financeiroApi } from "../../../services/financeiroApi";
 import { Icone } from "../../icones/Icone";
 import { useToast } from "../../../contexts/ToastContext";
@@ -6,21 +7,18 @@ import { useToast } from "../../../contexts/ToastContext";
 const MODOS = [
   {
     valor: "FIXO",
-    titulo: "Valor fixo por unidade",
-    descricao:
-      "Todo apartamento paga o mesmo. Simples, e o que a maioria dos condomínios pequenos usa.",
+    chave: "fixo",
     icone: "grid_view",
   },
   {
     valor: "FRACAO_IDEAL",
-    titulo: "Proporcional à fração ideal",
-    descricao:
-      "Cada unidade paga conforme sua fração na convenção. Exige a fração cadastrada de todas.",
+    chave: "fracaoIdeal",
     icone: "pie_chart",
   },
 ];
 
 export function PainelConfiguracao({ aoSalvar }) {
+  const { t } = useTranslation("financeiro");
   const toast = useToast();
   const [config, setConfig] = useState(null);
   const [carregando, setCarregando] = useState(true);
@@ -35,7 +33,7 @@ export function PainelConfiguracao({ aoSalvar }) {
         // modo depois que alguém salvasse esta tela.
         aoSalvar?.(data.config);
       } catch {
-        toast.error("Não foi possível carregar a configuração financeira.");
+        toast.error(t("config.toast.erroCarregar"));
       } finally {
         setCarregando(false);
       }
@@ -52,17 +50,17 @@ export function PainelConfiguracao({ aoSalvar }) {
     try {
       const { data } = await financeiroApi.salvarConfig(config);
       setConfig(data.config);
-      toast.success("Configuração salva.");
+      toast.success(t("config.toast.salva"));
       aoSalvar?.(data.config);
     } catch (e) {
-      toast.error(e.response?.data?.mensagem || "Erro ao salvar a configuração.");
+      toast.error(e.response?.data?.mensagem || t("config.toast.erroSalvar"));
     } finally {
       setSalvando(false);
     }
   }
 
   if (carregando) {
-    return <p className="text-on-surface-variant text-sm">Carregando…</p>;
+    return <p className="text-on-surface-variant text-sm">{t("comum:estado.carregando")}</p>;
   }
   if (!config) return null;
 
@@ -70,7 +68,7 @@ export function PainelConfiguracao({ aoSalvar }) {
     <div className="space-y-6">
       <section className="space-y-3">
         <h3 className="font-headline text-lg font-bold text-on-surface">
-          Como a taxa é dividida
+          {t("config.divisao.titulo")}
         </h3>
         <div className="grid md:grid-cols-2 gap-3">
           {MODOS.map((m) => {
@@ -90,13 +88,13 @@ export function PainelConfiguracao({ aoSalvar }) {
                     name={m.icone}
                     className={ativo ? "text-primary" : "text-on-surface-variant"}
                   />
-                  <span className="font-semibold text-on-surface">{m.titulo}</span>
+                  <span className="font-semibold text-on-surface">{t(`config.modos.${m.chave}.titulo`)}</span>
                   {ativo && (
                     <Icone name="check_circle" className="text-primary text-base ml-auto" />
                   )}
                 </div>
                 <p className="text-xs text-on-surface-variant leading-relaxed">
-                  {m.descricao}
+                  {t(`config.modos.${m.chave}.descricao`)}
                 </p>
               </button>
             );
@@ -106,24 +104,24 @@ export function PainelConfiguracao({ aoSalvar }) {
 
       <section className="space-y-3">
         <h3 className="font-headline text-lg font-bold text-on-surface">
-          Calendário de cobrança
+          {t("config.calendario.titulo")}
         </h3>
         <div className="grid sm:grid-cols-3 gap-4">
           <CampoDia
-            label="Dia do fechamento"
-            ajuda="Quando as faturas do mês são geradas"
+            label={t("config.calendario.diaFechamento")}
+            ajuda={t("config.calendario.diaFechamentoAjuda")}
             valor={config.diaFechamento}
             aoMudar={(v) => alterar("diaFechamento", v)}
           />
           <CampoDia
-            label="Dia do vencimento"
-            ajuda="Prazo de pagamento do morador"
+            label={t("config.calendario.diaVencimento")}
+            ajuda={t("config.calendario.diaVencimentoAjuda")}
             valor={config.diaVencimento}
             aoMudar={(v) => alterar("diaVencimento", v)}
           />
           <div className="space-y-2">
             <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant ml-1">
-              Prazo de recurso
+              {t("config.calendario.prazoRecurso")}
             </label>
             <input
               type="number"
@@ -133,7 +131,7 @@ export function PainelConfiguracao({ aoSalvar }) {
               className="w-full bg-surface-container-highest/40 border-none rounded-xl py-3 px-4 text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/50"
             />
             <p className="text-[11px] text-on-surface-variant ml-1">
-              Dias que o morador tem para recorrer de uma multa
+              {t("config.calendario.prazoRecursoAjuda")}
             </p>
           </div>
         </div>
@@ -141,8 +139,7 @@ export function PainelConfiguracao({ aoSalvar }) {
             valer para os doze meses do ano. */}
         <p className="text-[11px] text-on-surface-variant flex items-center gap-1.5">
           <Icone name="info" className="text-sm" />
-          Os dias vão até 28 para que a regra funcione em todos os meses,
-          fevereiro incluído.
+          {t("config.calendario.limiteDias")}
         </p>
       </section>
 
@@ -152,7 +149,7 @@ export function PainelConfiguracao({ aoSalvar }) {
           disabled={salvando}
           className="px-6 py-3 rounded-full bg-gradient-to-br from-primary to-primary-container text-on-primary-container font-bold cursor-pointer disabled:opacity-60 transition hover:scale-[1.02]"
         >
-          {salvando ? "Salvando…" : "Salvar configuração"}
+          {salvando ? t("comum:acoes.salvando") : t("config.salvar")}
         </button>
       </div>
     </div>
@@ -160,6 +157,7 @@ export function PainelConfiguracao({ aoSalvar }) {
 }
 
 function CampoDia({ label, ajuda, valor, aoMudar }) {
+  const { t } = useTranslation("financeiro");
   return (
     <div className="space-y-2">
       <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant ml-1">
@@ -172,7 +170,7 @@ function CampoDia({ label, ajuda, valor, aoMudar }) {
       >
         {Array.from({ length: 28 }, (_, i) => i + 1).map((d) => (
           <option key={d} value={d}>
-            Dia {d}
+            {t("config.calendario.dia", { dia: d })}
           </option>
         ))}
       </select>

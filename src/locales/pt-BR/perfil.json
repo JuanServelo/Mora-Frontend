@@ -1,0 +1,123 @@
+{
+  "views": {
+    "detalhes": "Detalhes da Conta",
+    "privacidade": "Privacidade e Segurança",
+    "aparencia": "Aparência",
+    "familia": "Ocupantes da unidade",
+    "cobranca": "Histórico de Cobrança"
+  },
+  "itens": {
+    "detalhes": { "titulo": "Detalhes da Conta", "desc": "Informações pessoais e de residência" },
+    "privacidade": { "titulo": "Privacidade e Segurança", "desc": "Senha, biometria e acessos" },
+    "aparencia": { "titulo": "Aparência", "desc": "Tema claro, escuro ou o do seu aparelho" },
+    "familia": { "titulo": "Ocupantes da unidade", "desc": "Gerencie Lessee, Occupant e Guest vinculados à sua unidade" },
+    "cobranca": { "titulo": "Histórico de Cobrança", "desc": "Faturas anteriores e comprovantes" }
+  },
+  "detalhes": {
+    "foto": {
+      "titulo": "Foto de Perfil",
+      "formatos": "JPG ou PNG - Max. 5MB",
+      "enviando": "Enviando...",
+      "alterar": "Alterar"
+    },
+    "campos": {
+      "nome": { "label": "Nome Completo", "placeholder": "Seu nome" },
+      "email": { "label": "E-mail", "placeholder": "seu@email.com" },
+      "telefone": { "label": "Telefone", "placeholder": "(11) 99999-9999" },
+      "dataNascimento": "Data de Nascimento"
+    },
+    "validacao": {
+      "obrigatorio": "Este campo é obrigatório."
+    },
+    "msg": {
+      "salvo": "Dados atualizados com sucesso.",
+      "erroSalvar": "Erro ao salvar.",
+      "fotoAtualizada": "Foto atualizada com sucesso.",
+      "erroFoto": "Erro ao enviar foto."
+    },
+    "salvando": "Salvando...",
+    "salvar": "Salvar Alterações"
+  },
+  "privacidade": {
+    "titulo": "Alterar Senha",
+    "campos": {
+      "senhaAtual": "Senha Atual",
+      "novaSenha": "Nova Senha",
+      "novaSenhaPlaceholder": "Mín. 8 caracteres, 1 número, 1 maiúscula",
+      "confirmarSenha": "Confirmar Nova Senha"
+    },
+    "erros": {
+      "preencherTodos": "Preencha todos os campos.",
+      "naoCoincidem": "As senhas não coincidem."
+    },
+    "msg": {
+      "atualizada": "Senha atualizada com sucesso.",
+      "erroAtualizar": "Erro ao atualizar senha."
+    },
+    "atualizando": "Atualizando...",
+    "atualizar": "Atualizar Senha"
+  },
+  "familia": {
+    "form": {
+      "titulos": {
+        "lessee": "Cadastrar Locatário (Lessee)",
+        "occupant": "Cadastrar Ocupante",
+        "guest": "Cadastrar Convidado (Guest)"
+      },
+      "campos": {
+        "nome": "Nome *",
+        "nomePlaceholder": "Nome completo",
+        "cpf": "CPF *",
+        "email": "E-mail *",
+        "emailPlaceholder": "email@exemplo.com",
+        "dataNascimento": "Data de nascimento",
+        "dataNascimentoObrigatoria": "Data de nascimento *"
+      },
+      "avisoGuest": "Guests não possuem acesso ao sistema — cadastro direto, sem convite por e-mail.",
+      "salvando": "Salvando...",
+      "cadastrar": "Cadastrar"
+    },
+    "card": {
+      "convitePendente": "Convite pendente",
+      "semAcesso": "Sem acesso ao sistema",
+      "responsavelFinanceiro": "Responsável financeiro",
+      "pendente": "pendente",
+      "ativo": "ativo",
+      "removerVinculo": "Remover vínculo"
+    },
+    "toast": {
+      "erroCarregar": "Erro ao carregar ocupantes.",
+      "conviteEnviado": "Convite enviado",
+      "codigo": "Código: {{codigo}}",
+      "erroCadastrar": "Erro ao cadastrar.",
+      "erroTransferir": "Erro na transferência.",
+      "erroRemover": "Erro ao remover vínculo."
+    },
+    "transferir": {
+      "titulo": "Transferir responsabilidade financeira",
+      "mensagem": "O Lessee ativo passará a ser o responsável financeiro e seu perfil será atualizado para Absent Owner. Ocupantes e convidados cadastrados por você serão desativados. Deseja continuar?",
+      "confirmar": "Transferir",
+      "aviso": "Você é o responsável financeiro. Pode transferir essa responsabilidade ao Lessee ativo."
+    },
+    "remover": {
+      "titulo": "Remover vínculo",
+      "mensagem": "Deseja remover {{nome}} desta unidade?",
+      "confirmar": "Remover"
+    },
+    "semPermissao": "Você não tem permissão para gerenciar ocupantes desta unidade.",
+    "semUnidade": {
+      "titulo": "Sua conta ainda não está vinculada a uma unidade.",
+      "desc": "Aguarde um administrador vincular seu usuário a um apartamento."
+    },
+    "carregando": "Carregando ocupantes...",
+    "vazio": "Nenhum ocupante vinculado a esta unidade.",
+    "contagem_one": "{{count}} vínculo(s) na unidade",
+    "contagem_other": "{{count}} vínculo(s) na unidade",
+    "botoes": {
+      "lessee": "Cadastrar Lessee",
+      "occupant": "Cadastrar Occupant",
+      "guest": "Cadastrar Guest",
+      "gerenciarAcessos": "Gerenciar Acessos"
+    }
+  }
+}

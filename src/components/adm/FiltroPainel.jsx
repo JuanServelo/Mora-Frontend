@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Icone } from "../icones/Icone";
 
 /**
@@ -9,20 +10,16 @@ import { Icone } from "../icones/Icone";
  * lugares diferentes, com chance de divergir.
  */
 
-const PERIODOS = [
-  { valor: 3, rotulo: "3 meses" },
-  { valor: 6, rotulo: "6 meses" },
-  { valor: 12, rotulo: "12 meses" },
-  { valor: 24, rotulo: "24 meses" },
-];
+const PERIODOS = [3, 6, 12, 24];
 
 const STATUS = [
-  { valor: "todos", rotulo: "Todos" },
-  { valor: "active", rotulo: "Ativos" },
-  { valor: "inactive", rotulo: "Inativos" },
+  { valor: "todos", rotuloKey: "filtro.status.todos" },
+  { valor: "active", rotuloKey: "filtro.status.ativos" },
+  { valor: "inactive", rotuloKey: "filtro.status.inativos" },
 ];
 
-export function FiltroPainel({ filtros, aoMudar, carregando }) {
+export function FiltroPainel({ filtros, aoMudar, carregando, planos, plano, aoMudarPlano }) {
+  const { t } = useTranslation("paineis");
   // Atualização funcional, não `{ ...filtros }`: o objeto do closure é o da
   // renderização anterior, e duas mudanças antes de um novo render fariam a
   // segunda descartar a primeira.
@@ -32,38 +29,57 @@ export function FiltroPainel({ filtros, aoMudar, carregando }) {
     <div className="glass-panel rounded-2xl p-4 flex flex-wrap items-center gap-x-6 gap-y-3">
       <div className="flex items-center gap-2 text-on-surface-variant">
         <Icone name="filter_alt" className="text-lg" />
-        <span className="text-xs font-semibold uppercase tracking-wider">Filtros</span>
+        <span className="text-xs font-semibold uppercase tracking-wider">{t("filtro.titulo")}</span>
       </div>
 
-      <Grupo rotulo="Período">
+      <Grupo rotulo={t("filtro.periodo")}>
         {PERIODOS.map((p) => (
           <Opcao
-            key={p.valor}
-            ativa={filtros.meses === p.valor}
-            onClick={() => alterar("meses", p.valor)}
+            key={p}
+            ativa={filtros.meses === p}
+            onClick={() => alterar("meses", p)}
           >
-            {p.rotulo}
+            {t("filtro.meses", { n: p })}
           </Opcao>
         ))}
       </Grupo>
 
-      <Grupo rotulo="Clientes">
+      <Grupo rotulo={t("filtro.clientes")}>
         {STATUS.map((s) => (
           <Opcao
             key={s.valor}
             ativa={filtros.status === s.valor}
             onClick={() => alterar("status", s.valor)}
           >
-            {s.rotulo}
+            {t(s.rotuloKey)}
           </Opcao>
         ))}
       </Grupo>
+
+      {/* Só recorta os blocos de receita. A lista vem do backend sempre
+          completa, mesmo com filtro ativo — montada da base já filtrada, o
+          seletor ficaria preso na escolha. */}
+      {planos?.length > 1 && (
+        <Grupo rotulo={t("filtro.plano")}>
+          <select
+            value={plano}
+            onChange={(e) => aoMudarPlano(e.target.value)}
+            aria-label={t("filtro.planoAria")}
+            className="bg-surface-container-highest/40 border-none rounded-lg py-1.5 px-2 text-xs font-semibold text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/50 cursor-pointer"
+          >
+            <option value="todos">{t("filtro.status.todos")}</option>
+            {planos.map((p) => (
+              <option key={p} value={p}>{p}</option>
+            ))}
+          </select>
+        </Grupo>
+      )}
 
       {/* Sinaliza que os números na tela ainda são os do filtro anterior. */}
       {carregando && (
         <span className="flex items-center gap-1.5 text-xs text-on-surface-variant ml-auto">
           <Icone name="progress_activity" className="text-base animate-spin" />
-          atualizando…
+          {t("filtro.atualizando")}
         </span>
       )}
     </div>

@@ -66,8 +66,14 @@ export const funcionarioApi = {
 // VAGAS DE ESTACIONAMENTO
 // ─────────────────────────────────────────────
 export const vagaApi = {
-  listar: () => portariaApi.get("/vagas"),
-  listarTodas: () => portariaApi.get("/vagas/todas"),
+  listar: (condominioId) =>
+    portariaApi.get("/vagas", { params: condominioId ? { condominioId } : {} }),
+  /**
+   * O condominioId e encaminhado de proposito: o VagaController ja o aceita, e
+   * sem ele o Admin Geral recebia as vagas de todos os clientes numa lista so.
+   */
+  listarTodas: (condominioId) =>
+    portariaApi.get("/vagas/todas", { params: condominioId ? { condominioId } : {} }),
   buscar: (id) => portariaApi.get(`/vagas/${id}`),
   listarPorApartamento: (apartamentoId) =>
     portariaApi.get(`/vagas/apartamento/${apartamentoId}`),
@@ -246,4 +252,3 @@ export const chaveApi = {
   deletar: (id) => portariaApi.delete(`/chaves/${id}`),
   historico: (id, params) => portariaApi.get(`/chaves/${id}/historico`, { params }),
 };
-

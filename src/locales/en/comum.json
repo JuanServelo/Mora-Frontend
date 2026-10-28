@@ -1,0 +1,56 @@
+{
+  "acoes": {
+    "salvar": "Save",
+    "salvando": "Saving…",
+    "cancelar": "Cancel",
+    "confirmar": "Confirm",
+    "fechar": "Close",
+    "editar": "Edit",
+    "excluir": "Delete",
+    "remover": "Remove",
+    "adicionar": "Add",
+    "criar": "Create",
+    "enviar": "Send",
+    "enviando": "Sending…",
+    "voltar": "Back",
+    "continuar": "Continue",
+    "buscar": "Search",
+    "filtrar": "Filter",
+    "limparFiltro": "clear filter",
+    "atualizar": "Refresh",
+    "verDetalhes": "View details",
+    "verTodos": "View all",
+    "tentarNovamente": "Try again",
+    "sair": "Sign out",
+    "sim": "Yes",
+    "nao": "No"
+  },
+  "estado": {
+    "carregando": "Loading…",
+    "semResultados": "No results found.",
+    "indisponivel": "Data unavailable right now.",
+    "erroInesperado": "Something went wrong. Please try again.",
+    "obrigatorio": "Required",
+    "opcional": "optional",
+    "todos": "All",
+    "todas": "All",
+    "nenhum": "None",
+    "ativo": "Active",
+    "inativo": "Inactive"
+  },
+  "tempo": {
+    "agora": "just now",
+    "minutosAtras": "{{n}} min ago",
+    "horasAtras": "{{n}}h ago",
+    "diasAtras": "{{n}}d ago",
+    "hoje": "Today",
+    "ontem": "Yesterday",
+    "meses_one": "{{count}} month",
+    "meses_other": "{{count}} months"
+  },
+  "idioma": {
+    "titulo": "Language",
+    "descricao": "Changes the system's texts, dates and amounts. Applies to this device and browser.",
+    "seletor": "Language"
+  }
+}

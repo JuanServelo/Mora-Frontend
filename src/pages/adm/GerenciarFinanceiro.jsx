@@ -1,5 +1,6 @@
 // src/pages/adm/GerenciarFinanceiro.jsx
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Icone } from "../../components/icones/Icone";
 import { PainelConfiguracao } from "../../components/adm/financeiro/PainelConfiguracao";
 import { PainelTaxas } from "../../components/adm/financeiro/PainelTaxas";
@@ -7,6 +8,9 @@ import { PainelFracoes } from "../../components/adm/financeiro/PainelFracoes";
 import { PainelGateway } from "../../components/adm/financeiro/PainelGateway";
 import { PainelContas } from "../../components/adm/financeiro/PainelContas";
 import { PainelFaturas } from "../../components/adm/financeiro/PainelFaturas";
+import { PainelMultas } from "../../components/adm/financeiro/PainelMultas";
+import { PainelContratos } from "../../components/adm/financeiro/PainelContratos";
+import { PainelPrestacao } from "../../components/adm/financeiro/PainelPrestacao";
 
 /**
  * Configuração financeira do condomínio.
@@ -23,44 +27,45 @@ import { PainelFaturas } from "../../components/adm/financeiro/PainelFaturas";
 const ABAS = [
   {
     id: "config",
-    label: "Regras",
     icone: "tune",
-    descricao: "Como a taxa é dividida e quando vence",
   },
   {
     id: "taxas",
-    label: "Taxas",
     icone: "receipt_long",
-    descricao: "O que é cobrado todo mês",
   },
   {
     id: "fracoes",
-    label: "Fração ideal",
     icone: "pie_chart",
-    descricao: "Quanto cabe a cada unidade",
   },
   {
     id: "contas",
-    label: "Contas",
     icone: "water_drop",
-    descricao: "Lançamentos de água, luz, gás e outras contas do condomínio",
   },
   {
     id: "faturas",
-    label: "Faturas",
     icone: "receipt_long",
-    descricao: "Faturas emitidas para as unidades — acompanhamento e baixa manual",
+  },
+  {
+    id: "multas",
+    icone: "gavel",
+  },
+  {
+    id: "contratos",
+    icone: "contract",
+  },
+  {
+    id: "prestacao",
+    icone: "account_balance",
   },
   {
     id: "gateway",
-    label: "Teste de cobrança",
     icone: "science",
-    descricao: "Emite uma cobrança no sandbox para conferir a integração",
     destaque: true,
   },
 ];
 
 export function GerenciarFinanceiro() {
+  const { t } = useTranslation("financeiro");
   const [aba, setAba] = useState("config");
   const [modoRateio, setModoRateio] = useState(null);
 
@@ -71,16 +76,16 @@ export function GerenciarFinanceiro() {
       <div className="max-w-6xl mx-auto space-y-8">
         <header>
           <p className="text-on-surface-variant text-xs font-semibold uppercase tracking-widest mb-1">
-            Síndico
+            {t("tela.sobretitulo")}
           </p>
           <h1 className="font-headline text-4xl font-extrabold tracking-tight text-on-surface">
-            Configuração{" "}
+            {t("tela.titulo")}{" "}
             <span className="bg-gradient-to-r from-primary to-tertiary bg-clip-text text-transparent">
-              Financeira
+              {t("tela.tituloDestaque")}
             </span>
           </h1>
           <p className="text-on-surface-variant text-sm mt-2 max-w-2xl">
-            O que o sistema precisa saber antes de emitir a primeira fatura.
+            {t("tela.descricao")}
           </p>
         </header>
 
@@ -102,7 +107,7 @@ export function GerenciarFinanceiro() {
                 }`}
               >
                 <Icone name={a.icone} className="text-lg" />
-                {a.label}
+                {t(`abas.${a.id}.rotulo`)}
               </button>
             );
           })}
@@ -115,10 +120,10 @@ export function GerenciarFinanceiro() {
             </span>
             <div>
               <h2 className="font-headline text-xl font-bold text-on-surface">
-                {atual.label}
+                {t(`abas.${atual.id}.rotulo`)}
               </h2>
               <p className="text-[11px] text-on-surface-variant uppercase tracking-wider font-semibold">
-                {atual.descricao}
+                {t(`abas.${atual.id}.descricao`)}
               </p>
             </div>
           </div>
@@ -131,6 +136,9 @@ export function GerenciarFinanceiro() {
           {aba === "gateway" && <PainelGateway />}
           {aba === "contas" && <PainelContas />}
           {aba === "faturas" && <PainelFaturas />}
+          {aba === "multas" && <PainelMultas />}
+          {aba === "contratos" && <PainelContratos />}
+          {aba === "prestacao" && <PainelPrestacao />}
         </div>
       </div>
     </div>

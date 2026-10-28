@@ -12,31 +12,37 @@ import { GerenciarUsuarios } from "../pages/adm/GerenciarUsuarios";
 import { GerenciarEstruturas } from "../pages/adm/GerenciarEstruturas";
 import { GerenciarReunioes } from "../pages/adm/GerenciarReunioes";
 import { GerenciarReclamacoes } from "../pages/adm/GerenciarReclamacoes";
+import { GerenciarOrdensServico } from "../pages/adm/GerenciarOrdensServico";
 import { GerenciarEntregas } from "../pages/adm/GerenciarEntregas";
 import { GerenciarConhecimento } from "../pages/adm/GerenciarConhecimento";
 import { GerenciarPerfis } from "../pages/adm/GerenciarPerfis";
-import { GerenciarFuncionarios } from "../pages/adm/GerenciarFuncionarios";
 import { GerenciarCondominios } from "../pages/adm/GerenciarCondominios";
 import { GerenciarPlanos } from "../pages/adm/GerenciarPlanos";
 import { GerenciarFinanceiro } from "../pages/adm/GerenciarFinanceiro";
 import { MeuPlano } from "../pages/adm/MeuPlano";
 import { GerenciarVeiculos } from "../pages/adm/GerenciarVeiculos";
-import { AtendimentoPortaria } from "../pages/porteiro/AtendimentoPortaria";
 import { FAQ } from "../pages/usuario/FAQ";
 import { MinhasReservas } from "../pages/usuario/MinhasReservas";
 import { MinhasReclamacoes } from "../pages/usuario/MinhasReclamacoes";
 import { MinhasEntregas } from "../pages/usuario/MinhasEntregas";
+import { MinhasReunioes } from "../pages/usuario/MinhasReunioes";
+import { MinhasVotacoes } from "../pages/usuario/MinhasVotacoes";
+import { GerenciarVotacoes } from "../pages/adm/GerenciarVotacoes";
 import { Inicio } from "../pages/inicio/Inicio";
-import { Servicos } from "../pages/servicos/Servicos";
 import { Comodidades } from "../pages/comodidades/Comodidades";
 import { Portaria } from "../pages/portaria/Portaria";
 import { Chaves } from "../pages/porteiro/Chaves";
+import { AtendimentoPortaria } from "../pages/porteiro/AtendimentoPortaria";
 import { UsuariosCondominio } from "../pages/porteiro/UsuariosCondominio";
 import { MeusConvidados } from "../pages/usuario/MeusConvidados";
+import { MeusVeiculos } from "../pages/usuario/MeusVeiculos";
 import { MinhasCobrancas } from "../pages/usuario/MinhasCobrancas";
 import { Notificacoes } from "../pages/usuario/Notificacoes";
+import { Conversas } from "../pages/usuario/Conversas";
 import { Avisos } from "../pages/usuario/Avisos";
-import { MeusVeiculos } from "../pages/usuario/MeusVeiculos";
+import { GerenciarComunicados } from "../pages/adm/GerenciarComunicados";
+import { GerenciarFuncionarios } from "../pages/adm/GerenciarFuncionarios";
+import { PainelCondominio } from "../pages/adm/PainelCondominio";
 import { AppLayout } from "../layouts/AppLayout";
 import { ProtectedRoute } from "./ProtectedRoute";
 import { DoormanRoute } from "./DoormanRoute";
@@ -87,13 +93,17 @@ export const router = createBrowserRouter([
     ),
     children: [
       { path: "/inicio", element: <Inicio /> },
-      { path: "/servicos", element: <Servicos /> },
+      // Serviços virou uma seção da tela inicial. A rota fica como atalho para
+      // quem tiver o endereço salvo, em vez de um 404.
+      { path: "/servicos", element: <Navigate to="/inicio" replace /> },
       { path: "/comodidades", element: <Comodidades /> },
       { path: "/faq", element: <FAQ /> },
       { path: "/perfil", element: <Perfil /> },
       { path: "/acesso-pendente", element: <AcessoPendente /> },
       { path: "/espacos", element: <MinhasReservas /> },
       { path: "/reclamacoes", element: <MinhasReclamacoes /> },
+      { path: "/reunioes", element: <MinhasReunioes /> },
+      { path: "/votacoes", element: <MinhasVotacoes /> },
       // Duas telas, dois papeis: o morador ve as encomendas dele; o porteiro
       // cadastra e da baixa nas do predio inteiro. Antes a gestao de entregas
       // ficava em /adm, onde o porteiro nao entra — quem recebe a encomenda
@@ -109,8 +119,8 @@ export const router = createBrowserRouter([
       },
       { path: "/portaria", element: <Portaria /> },
       { path: "/entradas-e-saidas", element: <Portaria /> },
+      { path: "/atendimento", element: <AtendimentoPortaria /> },
       { path: "/chaves", element: <Chaves /> },
-      { path: "/atendimento", element: <DoormanRoute><AtendimentoPortaria /></DoormanRoute> },
       {
         path: "/usuarios",
         element: (
@@ -120,10 +130,14 @@ export const router = createBrowserRouter([
         ),
       },
       { path: "/meus-convidados", element: <MeusConvidados /> },
+      { path: "/meus-veiculos", element: <MeusVeiculos /> },
       { path: "/financeiro", element: <MinhasCobrancas /> },
       { path: "/notificacoes", element: <Notificacoes /> },
       { path: "/avisos", element: <Avisos /> },
-      { path: "/meus-veiculos", element: <MeusVeiculos /> },
+      // A mesma tela com e sem conversa aberta: o serviço decide o que cada
+      // perfil enxerga, entao nao ha rota separada para sindico e morador.
+      { path: "/conversas", element: <Conversas /> },
+      { path: "/conversas/:id", element: <Conversas /> },
       // Todas as telas /adm passam pelo AdminRoute, que usa o mesmo mapa do menu
       // (src/utils/menuAdmin.js) — assim esconder do menu também barra a URL.
       { path: "/adm/geral", element: <AdminRoute><IndexAdminGeralLazy /></AdminRoute> },
@@ -133,13 +147,17 @@ export const router = createBrowserRouter([
       { path: "/adm/usuarios", element: <AdminRoute><GerenciarUsuarios /></AdminRoute> },
       { path: "/adm/estruturas", element: <AdminRoute><GerenciarEstruturas /></AdminRoute> },
       { path: "/adm/perfis", element: <AdminRoute><GerenciarPerfis /></AdminRoute> },
+      { path: "/adm/painel", element: <AdminRoute><PainelCondominio /></AdminRoute> },
       { path: "/adm/meu-plano", element: <AdminRoute><MeuPlano /></AdminRoute> },
-      { path: "/adm/funcionarios", element: <AdminRoute><GerenciarFuncionarios /></AdminRoute> },
       { path: "/adm/financeiro", element: <AdminRoute><GerenciarFinanceiro /></AdminRoute> },
+      { path: "/adm/comunicados", element: <AdminRoute><GerenciarComunicados /></AdminRoute> },
+      { path: "/adm/funcionarios", element: <AdminRoute><GerenciarFuncionarios /></AdminRoute> },
       { path: "/adm/reunioes", element: <AdminRoute><GerenciarReunioes /></AdminRoute> },
+      { path: "/adm/votacoes", element: <AdminRoute><GerenciarVotacoes /></AdminRoute> },
       { path: "/adm/reclamacoes", element: <AdminRoute><GerenciarReclamacoes /></AdminRoute> },
+      { path: "/adm/ordens-servico", element: <AdminRoute><GerenciarOrdensServico /></AdminRoute> },
       { path: "/adm/conhecimento", element: <AdminRoute><GerenciarConhecimento /></AdminRoute> },
-      { path: "/adm/veiculos", element: <AdminRoute><GerenciarVeiculos /></AdminRoute> },
+      { path: "/adm/veiculos", element: <GerenciarVeiculos /> },
 
       // Endereços antigos, mantidos como atalho: quem tiver link salvo ou
       // histórico do navegador chega ao lugar novo em vez de um 404 cru.

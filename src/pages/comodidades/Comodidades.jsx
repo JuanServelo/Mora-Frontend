@@ -1,9 +1,11 @@
 // src/pages/comodidades/Comodidades.jsx
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Icone } from "../../components/icones/Icone";
 
 export function Comodidades() {
+  const { t } = useTranslation("comodidades");
   const [itens, setItens] = useState([]);
   const [erro, setErro] = useState(null);
 
@@ -19,31 +21,31 @@ export function Comodidades() {
       })
       .catch(() => {
         if (ok) {
-          setErro("Não foi possível carregar a lista de comodidades.");
+          setErro(t("erroCarregar"));
           setItens([]);
         }
       });
     return () => {
       ok = false;
     };
-  }, []);
+  }, [t]);
 
   return (
-    <div className="min-h-screen w-full pt-4 pb-20 px-4 sm:px-6">
-      <div className="max-w-6xl mx-auto space-y-8 sm:space-y-10">
+    <div className="min-h-screen w-full pt-4 pb-20 px-6">
+      <div className="max-w-6xl mx-auto space-y-10">
         <header className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
           <div>
             <p className="text-on-surface-variant text-xs font-semibold uppercase tracking-widest mb-1">
-              Lazer e bem-estar
+              {t("cabecalho.sobretitulo")}
             </p>
-            <h1 className="font-headline text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-on-surface">
-              Comodidades{" "}
+            <h1 className="font-headline text-4xl font-extrabold tracking-tight text-on-surface">
+              {t("cabecalho.titulo")}{" "}
               <span className="bg-gradient-to-r from-primary to-tertiary bg-clip-text text-transparent">
-                do condomínio
+                {t("cabecalho.tituloDestaque")}
               </span>
             </h1>
             <p className="text-on-surface-variant text-sm mt-2 max-w-xl">
-              Para áreas reserváveis cadastradas pela gestão, use Espaços.
+              {t("cabecalho.descricao")}
             </p>
           </div>
           <Link
@@ -51,7 +53,7 @@ export function Comodidades() {
             className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-full bg-primary text-on-primary font-semibold hover:opacity-90 transition-opacity shrink-0"
           >
             <Icone name="event_available" className="text-xl" />
-            Reservar espaços
+            {t("reservarEspacos")}
           </Link>
         </header>
 
@@ -63,10 +65,10 @@ export function Comodidades() {
           {itens.map((c) => (
             <article
               key={c.titulo}
-              className="group glass-panel rounded-3xl p-4 sm:p-5 border border-outline-variant/10 hover:border-tertiary/30 transition-all duration-300 flex flex-col"
+              className="group glass-panel rounded-3xl p-5 border border-outline-variant/10 hover:border-tertiary/30 transition-all duration-300 flex flex-col"
             >
               <div className="flex items-center justify-between mb-4">
-                <div className="w-11 h-11 shrink-0 rounded-xl bg-tertiary/10 flex items-center justify-center group-hover:bg-tertiary/20 transition-colors">
+                <div className="w-11 h-11 rounded-xl bg-tertiary/10 flex items-center justify-center group-hover:bg-tertiary/20 transition-colors">
                   <Icone name={c.icon} className="text-tertiary text-2xl" />
                 </div>
                 <span className="text-[10px] font-bold uppercase tracking-widest text-primary bg-primary/10 px-2 py-1 rounded-full">
@@ -81,28 +83,28 @@ export function Comodidades() {
 
         {itens.length === 0 && !erro && (
           <div className="glass-panel rounded-3xl py-16 text-center text-on-surface-variant text-sm">
-            Nenhum item em comodidades.json ou arquivo vazio.
+            {t("vazio")}
           </div>
         )}
 
-        <section className="glass-panel rounded-[2rem] p-5 sm:p-8 md:p-10 border border-veu/5">
+        <section className="glass-panel rounded-[2rem] p-8 md:p-10 border border-veu/5">
           <div className="flex flex-col md:flex-row gap-8 md:items-center">
             <div className="flex-1 space-y-3">
               <h3 className="font-headline text-xl font-bold text-on-surface">
-                Regimento e boa convivência
+                {t("regimento.titulo")}
               </h3>
               <p className="text-on-surface-variant text-sm leading-relaxed">
-                Horários e normas de uso seguem o regimento interno e deliberações da assembleia.
+                {t("regimento.descricao")}
               </p>
             </div>
-            <div className="flex flex-wrap gap-3 md:justify-end">
+            <div className="flex gap-3 flex-wrap md:justify-end">
               <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-surface-container-highest/50 text-sm text-on-surface-variant">
                 <Icone name="schedule" className="text-primary" />
-                Portaria / regulamento
+                {t("regimento.portaria")}
               </div>
               <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-surface-container-highest/50 text-sm text-on-surface-variant">
                 <Icone name="groups" className="text-secondary" />
-                Assembleias e atas
+                {t("regimento.assembleias")}
               </div>
             </div>
           </div>

@@ -1,73 +1,176 @@
 // src/pages/inicio/Inicio.jsx
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "../../contexts/AuthContext";
-import { useModules } from "../../contexts/ModulesContext";
+import { usePlano } from "../../contexts/PlanoContext";
 import { condominiosApi } from "../../services/condominiosApi";
 import { comunicacaoApi, urlDaImagem } from "../../services/comunicacaoApi";
 import { useNotificacoes } from "../../contexts/NotificacoesContext";
 import { Icone } from "../../components/icones/Icone";
-import { PERFIS, isUsuarioRestrito, perfilTemAcessoSistema } from "../../utils/perfis";
-import { linkLiberado } from "../../utils/modulosPlano";
+import { PERFIS, isUsuarioRestrito, podeAcessarAdmin } from "../../utils/perfis";
+import { linksDoPerfil } from "../../utils/menuAdmin";
 import { formatarData } from "../../utils/datas";
 import { InicioDoorman } from "../porteiro/InicioDoorman";
 
+/**
+ * Tudo o que o morador alcança no app.
+ *
+ * `modulo` é o slug do plan-service (`PlanModule`), e segue a mesma regra da
+ * navbar: sem `modulo`, sempre aparece; com, só se o plano do condomínio o
+ * inclui. Os atalhos não podem oferecer o que o menu esconde — seria a mesma
+ * funcionalidade não contratada, só que por outra porta.
+ */
 const ACESSO_RAPIDO = [
   {
     to: "/avisos",
-    label: "Avisos",
-    desc: "Comunicados da administração",
+    chave: "avisos",
     icon: "campaign",
-    modulo: "comunicacao",
+  },
+  {
+    to: "/conversas",
+    chave: "conversas",
+    icon: "forum",
+  },
+  {
+    to: "/notificacoes",
+    chave: "notificacoes",
+    icon: "notifications",
   },
   {
     to: "/financeiro",
-    label: "Cobranças",
-    desc: "Faturas, boleto e PIX",
+    chave: "cobrancas",
     icon: "receipt_long",
-    modulo: "financeiro",
   },
   {
     to: "/espacos",
-    label: "Espaços",
-    desc: "Reservar áreas comuns",
+    chave: "espacos",
     icon: "event_available",
     modulo: "areas_comuns",
   },
   {
     to: "/entregas",
-    label: "Entregas",
-    desc: "Encomendas na portaria",
+    chave: "entregas",
     icon: "inventory_2",
     modulo: "entregas",
   },
   {
     to: "/meus-convidados",
-    label: "Convidados",
-    desc: "Autorizar a entrada de visitantes",
+    chave: "convidados",
     icon: "group_add",
+    modulo: "portaria",
   },
   {
+    // `/meus-veiculos`, e não `/veiculos`: aquela é a gestão da portaria, com
+    // os veículos do prédio inteiro. O morador cuida só dos da unidade dele.
     to: "/meus-veiculos",
-    label: "Veículos",
-    desc: "Carros e vagas da sua unidade",
+    chave: "veiculos",
     icon: "directions_car",
     modulo: "veiculos",
   },
   {
     to: "/reclamacoes",
-    label: "Reclamações",
-    desc: "Abrir ou acompanhar chamados",
+    chave: "reclamacoes",
     icon: "report",
     modulo: "reclamacoes",
   },
   {
-    to: "/servicos",
-    label: "Serviços",
-    desc: "Portaria, manutenção e mais",
-    icon: "room_service",
+    to: "/comodidades",
+    chave: "comodidades",
+    icon: "spa",
   },
 ];
+
+/**
+ * Se o botão "Acessar" de um serviço pode aparecer.
+ *
+ * O `servicos.json` é editável sem tocar no código e pode apontar para
+ * qualquer rota. Só liberar as que estão entre os atalhos visíveis impede que
+ * o arquivo reabra o que o plano fecha, ou leve o morador a uma tela que não é
+ * dele.
+ */
+function rotaLiberada(rota, atalhosVisiveis) {
+  return atalhosVisiveis.some((a) => a.to === rota);
+}
+
+/**
+ * Serviços do prédio — antes uma tela própria em /servicos.
+ *
+ * Separado, o morador precisava de dois cliques para descobrir o que o
+ * condomínio oferece. Falhar ao carregar esconde a seção em vez de mostrar
+ * erro: é conteúdo institucional, e a tela inicial tem coisa mais urgente.
+ */
+function ServicosDoPredio({ atalhosVisiveis }) {
+  const { t } = useTranslation("inicio");
+  const [itens, setItens] = useState([]);
+
+  useEffect(() => {
+    let ativo = true;
+    fetch("/data/servicos.json")
+      .then((r) => (r.ok ? r.json() : []))
+      .then((data) => {
+        if (ativo) setItens(Array.isArray(data) ? data : []);
+      })
+      .catch(() => {});
+    return () => {
+      ativo = false;
+    };
+  }, []);
+
+  if (itens.length === 0) return null;
+
+  return (
+    <section className="space-y-5">
+      <div>
+        <h2 className="font-headline text-2xl font-bold text-on-surface">{t("servicos.titulo")}</h2>
+        <p className="text-on-surface-variant text-sm mt-1">
+          {t("servicos.desc")}
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {itens.map((s) => (
+          <article
+            key={s.titulo}
+            className="glass-panel rounded-3xl p-5 border border-outline-variant/10 flex flex-col"
+          >
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 rounded-xl bg-secondary/10 flex items-center justify-center shrink-0">
+                <Icone name={s.icon} className="text-secondary text-xl" />
+              </div>
+              <div className="min-w-0">
+                <h3 className="font-headline font-bold text-on-surface">{s.titulo}</h3>
+                <p className="text-on-surface-variant text-sm mt-1 leading-snug">{s.descricao}</p>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap gap-2 mt-auto pt-4 items-center justify-between">
+              <div className="flex flex-wrap gap-1.5">
+                {(s.tags || []).map((t) => (
+                  <span
+                    key={t}
+                    className="text-[11px] font-semibold uppercase tracking-wide px-2.5 py-0.5 rounded-full bg-surface-container-highest/60 text-on-surface-variant"
+                  >
+                    {t}
+                  </span>
+                ))}
+              </div>
+              {s.rota && rotaLiberada(s.rota, atalhosVisiveis) && (
+                <Link
+                  to={s.rota}
+                  className="inline-flex items-center gap-1 text-primary text-sm font-semibold hover:underline shrink-0"
+                >
+                  {t("servicos.acessar")}
+                  <Icone name="chevron_right" className="text-lg" />
+                </Link>
+              )}
+            </div>
+          </article>
+        ))}
+      </div>
+    </section>
+  );
+}
 
 /**
  * O comunicado aberto.
@@ -77,6 +180,7 @@ const ACESSO_RAPIDO = [
  * caminho, existiria um jeito de ler o aviso sem que a leitura fosse contada.
  */
 function PopupAviso({ aviso, aoFechar }) {
+  const { t } = useTranslation("inicio");
   const caixa = useRef(null);
 
   useEffect(() => {
@@ -122,12 +226,12 @@ function PopupAviso({ aviso, aoFechar }) {
             </h2>
             <p className="text-[11px] text-on-surface-variant mt-0.5">
               {aviso.autor ? `${aviso.autor} · ` : ""}
-              vigente de {formatarData(aviso.dataInicio)} a {formatarData(aviso.dataFim)}
+              {t("aviso.vigencia", { inicio: formatarData(aviso.dataInicio), fim: formatarData(aviso.dataFim) })}
             </p>
           </div>
           <button
             onClick={aoFechar}
-            aria-label="Fechar"
+            aria-label={t("comum:acoes.fechar")}
             className="shrink-0 -mt-1 -mr-1 p-2 rounded-xl text-on-surface-variant hover:bg-veu/5 cursor-pointer"
           >
             <Icone name="close" />
@@ -151,13 +255,13 @@ function PopupAviso({ aviso, aoFechar }) {
 
         <footer className="p-6 pt-4 flex items-center justify-between gap-3">
           <p className="text-[11px] text-on-surface-variant/70">
-            Ao fechar, o aviso será marcado como lido.
+            {t("aviso.marcadoLido")}
           </p>
           <button
             onClick={aoFechar}
             className="shrink-0 px-5 py-2.5 rounded-xl bg-primary text-on-primary text-sm font-semibold hover:bg-primary/90 transition cursor-pointer"
           >
-            Entendi
+            {t("aviso.entendi")}
           </button>
         </footer>
       </div>
@@ -166,11 +270,11 @@ function PopupAviso({ aviso, aoFechar }) {
 }
 
 export function Inicio() {
+  const { t } = useTranslation("inicio");
   const { usuario } = useAuth();
   const { buscar: recarregarSino } = useNotificacoes();
-  const { activeModules } = useModules();
 
-  const primeiroNome = usuario?.nome?.split(" ")[0] || "Morador";
+  const primeiroNome = usuario?.nome?.split(" ")[0] || t("saudacao.morador");
   const [nomeCondominio, setNomeCondominio] = useState(null);
   const [avisos, setAvisos] = useState([]);
   const [avisoAberto, setAvisoAberto] = useState(null);
@@ -227,47 +331,48 @@ export function Inicio() {
 
   // Sem vínculo com unidade, a navbar já esconde todos os links. Os atalhos
   // precisavam seguir a mesma regra: ofereciam por outro caminho exatamente o
-  // que ela esconde — e agora são nove, não três.
+  // que ela esconde.
   const restrito = isUsuarioRestrito(usuario);
+  const { hasModulo, modulosAtivos } = usePlano();
+
+  // O síndico opera o condomínio, não mora nele: convidados, encomendas e
+  // veículos da unidade não existem no perfil dele. Em vez de uma segunda
+  // lista para manter em sincronia, os atalhos dele saem do MESMO ADM_LINKS
+  // que monta a barra lateral — inclusive o /adm/reclamacoes, que é a visão
+  // de quem recebe o chamado, não a de quem abre.
+  const ehAdmin = podeAcessarAdmin(usuario?.perfil);
+  const atalhosVisiveis = ehAdmin
+    ? linksDoPerfil(usuario?.perfil, modulosAtivos).map((l) => ({
+        to: l.to,
+        label: l.label,
+        icon: l.icon,
+        desc: l.description,
+      }))
+    : ACESSO_RAPIDO.filter((a) => !a.modulo || hasModulo(a.modulo)).map((a) => ({
+        ...a,
+        label: t(`atalhos.${a.chave}.label`),
+        desc: t(`atalhos.${a.chave}.desc`),
+      }));
 
   if (usuario?.perfil === PERFIS.PORTEIRO) {
     return <InicioDoorman />;
   }
 
-  if (!perfilTemAcessoSistema(usuario?.perfil)) {
-    return (
-      <div className="min-h-screen w-full flex items-center justify-center px-6">
-        <div className="glass-panel rounded-3xl p-10 max-w-md w-full text-center space-y-4 border border-outline-variant/15">
-          <div className="w-16 h-16 rounded-2xl bg-on-surface-variant/10 flex items-center justify-center mx-auto">
-            <Icone name="lock" className="text-on-surface-variant text-3xl" />
-          </div>
-          <h1 className="font-headline text-2xl font-bold text-on-surface">
-            Acesso não configurado
-          </h1>
-          <p className="text-on-surface-variant text-sm leading-relaxed">
-            Seu perfil ainda não possui acesso a nenhuma área do sistema.
-            Procure a administração do condomínio se isso for um engano.
-          </p>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen w-full pt-4 pb-20 px-4 sm:px-6">
+    <div className="min-h-screen w-full pt-4 pb-20 px-6">
       <div className="max-w-6xl mx-auto space-y-10">
         <header className="text-center max-w-3xl mx-auto">
           <p className="text-on-surface-variant text-xs font-semibold uppercase tracking-widest mb-2">
-            {nomeCondominio ?? "Condomínio"}
+            {nomeCondominio ?? t("saudacao.condominio")}
           </p>
           <h1 className="font-headline text-4xl md:text-5xl font-extrabold tracking-tight text-on-surface mb-4">
-            Olá,{" "}
+            {t("saudacao.ola")}{" "}
             <span className="bg-gradient-to-r from-primary to-tertiary bg-clip-text text-transparent">
               {primeiroNome}
             </span>
           </h1>
           <p className="text-on-surface-variant text-lg leading-relaxed">
-            Central do seu condomínio: reservas, comunicação e tudo o que você precisa em um só lugar.
+            {t("saudacao.desc")}
           </p>
         </header>
 
@@ -283,7 +388,7 @@ export function Inicio() {
           <section className="space-y-4">
             <div className="flex items-center gap-2">
               <Icone name="campaign" className="text-primary text-xl" />
-              <h2 className="font-headline text-2xl font-bold text-on-surface">Avisos</h2>
+              <h2 className="font-headline text-2xl font-bold text-on-surface">{t("avisos.titulo")}</h2>
             </div>
             <div className="space-y-3">
               {naoLidos.map((a) => (
@@ -293,7 +398,7 @@ export function Inicio() {
                   className="w-full text-left glass-panel rounded-2xl p-5 border border-primary/15 hover:border-primary/40 hover:bg-veu/[0.03] transition cursor-pointer"
                 >
                   <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 shrink-0 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                    <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
                       <Icone name="campaign" className="text-primary" />
                     </div>
                     <div className="flex-1 min-w-0">
@@ -302,7 +407,7 @@ export function Inicio() {
                           pop-up, e é abri-lo que conta como leitura. */}
                       <p className="text-sm text-on-surface-variant mt-1 line-clamp-2 break-words">{a.mensagem}</p>
                       <p className="text-xs text-on-surface-variant/70 mt-2 flex items-center gap-1.5">
-                        Até {formatarData(a.dataFim)}
+                        {t("avisos.ate", { data: formatarData(a.dataFim) })}
                         {a.autor ? ` · ${a.autor}` : ""}
                         {a.imagemUrl && <Icone name="image" className="text-sm" />}
                       </p>
@@ -319,30 +424,31 @@ export function Inicio() {
           <div className="glass-panel rounded-3xl p-6 flex items-start gap-3">
             <Icone name="info" className="text-primary text-xl shrink-0 mt-0.5" />
             <p className="text-sm text-on-surface-variant leading-relaxed">
-              Seu usuário ainda não está vinculado a uma unidade. Assim que a
-              administração fizer o vínculo, os atalhos do condomínio aparecem aqui.
+              {t("restrito")}
             </p>
           </div>
         ) : (
         <section className="space-y-5">
           <div className="flex items-end justify-between gap-4 flex-wrap">
             <div>
-              <h2 className="font-headline text-2xl font-bold text-on-surface">Acesso rápido</h2>
+              <h2 className="font-headline text-2xl font-bold text-on-surface">{t("acessoRapido.titulo")}</h2>
               <p className="text-on-surface-variant text-sm mt-1">
-                Atalhos para as áreas mais usadas do app
+                {ehAdmin
+                  ? t("acessoRapido.descAdmin")
+                  : t("acessoRapido.desc")}
               </p>
             </div>
             <Link
               to="/perfil"
               className="text-sm font-semibold text-primary hover:underline inline-flex items-center gap-1"
             >
-              Meu perfil
+              {t("acessoRapido.meuPerfil")}
               <Icone name="arrow_forward" className="text-base" />
             </Link>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {ACESSO_RAPIDO.filter((item) => linkLiberado(activeModules, item)).map((item) => (
+            {atalhosVisiveis.map((item) => (
               <Link
                 key={item.to}
                 to={item.to}
@@ -354,7 +460,7 @@ export function Inicio() {
                 <h3 className="font-headline font-bold text-on-surface text-lg mb-1">{item.label}</h3>
                 <p className="text-on-surface-variant text-sm leading-snug">{item.desc}</p>
                 <span className="mt-4 inline-flex items-center gap-1 text-primary text-sm font-semibold opacity-0 group-hover:opacity-100 transition-opacity">
-                  Abrir
+                  {t("acessoRapido.abrir")}
                   <Icone name="chevron_right" className="text-lg" />
                 </span>
               </Link>
@@ -363,6 +469,11 @@ export function Inicio() {
         </section>
         )}
 
+        {!restrito && !ehAdmin && <ServicosDoPredio atalhosVisiveis={atalhosVisiveis} />}
+
+        {/* Convite para abrir chamado com a administração: quem É a
+            administração não tem a quem recorrer por aqui. */}
+        {!ehAdmin && (
         <div className="glass-panel rounded-[2rem] p-8 md:p-10 relative overflow-hidden border border-primary/10">
           <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-tertiary/5 pointer-events-none" />
           <div className="relative flex flex-col md:flex-row md:items-center gap-6 justify-between">
@@ -372,10 +483,10 @@ export function Inicio() {
               </div>
               <div>
                 <h3 className="font-headline text-xl font-bold text-on-surface mb-1">
-                  Precisa de ajuda da administração?
+                  {t("ajuda.titulo")}
                 </h3>
                 <p className="text-on-surface-variant text-sm max-w-xl">
-                  Use reclamações para chamados ou consulte serviços do condomínio. Os avisos oficiais aparecem no topo desta página.
+                  {t("ajuda.desc")}
                 </p>
               </div>
             </div>
@@ -383,21 +494,22 @@ export function Inicio() {
               to="/reclamacoes"
               className="shrink-0 inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-primary text-on-primary font-semibold hover:opacity-90 transition-opacity"
             >
-              Ir para reclamações
+              {t("ajuda.botao")}
               <Icone name="arrow_forward" />
             </Link>
           </div>
         </div>
+        )}
       </div>
 
       <Link
         to="/faq"
         className="fixed bottom-6 right-6 z-40 inline-flex items-center justify-center gap-2 px-5 py-3 rounded-full glass-panel border border-outline-variant/15 text-on-surface hover:border-primary/35 hover:bg-veu/[0.03] transition-all duration-300"
-        aria-label="Abrir FAQ"
-        title="FAQ"
+        aria-label={t("faq.abrir")}
+        title={t("faq.rotulo")}
       >
         <Icone name="help" className="text-primary text-xl" />
-        <span className="text-sm font-semibold">FAQ</span>
+        <span className="text-sm font-semibold">{t("faq.rotulo")}</span>
       </Link>
     </div>
   );

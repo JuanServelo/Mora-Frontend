@@ -1,5 +1,6 @@
 // src/pages/adm/GerenciarFuncionarios.jsx
 import { useState, useEffect, useCallback, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { jornadaApi } from "../../services/portariaApi";
 import { acessoApi } from "../../services/acessoApi";
 import { Icone } from "../../components/icones/Icone";
@@ -7,6 +8,7 @@ import { Campo } from "../../components/campos/Campo";
 import { Botao } from "../../components/botoes/Botao";
 import { useToast } from "../../contexts/ToastContext";
 import { PERFIS_FUNCIONARIO, labelPerfil } from "../../utils/perfis";
+import { idiomaAtual } from "../../i18n";
 
 // ── helpers ──────────────────────────────────────────────────────────────────
 
@@ -16,20 +18,20 @@ function errMsg(err) {
 }
 
 const DIAS_SEMANA = [
-  { api: "SUNDAY", label: "Domingo" },
-  { api: "MONDAY", label: "Segunda" },
-  { api: "TUESDAY", label: "Terça" },
-  { api: "WEDNESDAY", label: "Quarta" },
-  { api: "THURSDAY", label: "Quinta" },
-  { api: "FRIDAY", label: "Sexta" },
-  { api: "SATURDAY", label: "Sábado" },
+  { api: "SUNDAY", rotuloKey: "diasSemana.domingo" },
+  { api: "MONDAY", rotuloKey: "diasSemana.segunda" },
+  { api: "TUESDAY", rotuloKey: "diasSemana.terca" },
+  { api: "WEDNESDAY", rotuloKey: "diasSemana.quarta" },
+  { api: "THURSDAY", rotuloKey: "diasSemana.quinta" },
+  { api: "FRIDAY", rotuloKey: "diasSemana.sexta" },
+  { api: "SATURDAY", rotuloKey: "diasSemana.sabado" },
 ];
 
 const SITUACOES = {
-  ATIVO: { label: "Ativo", cor: "bg-primary/10 text-primary" },
-  SUSPENSO: { label: "Suspenso", cor: "bg-amber-500/15 text-amber-600 dark:text-amber-400" },
-  AFASTADO: { label: "Afastado", cor: "bg-secondary/10 text-secondary" },
-  DEMITIDO: { label: "Demitido", cor: "bg-error/10 text-error" },
+  ATIVO: { rotuloKey: "situacoes.ativo", cor: "bg-primary/10 text-primary" },
+  SUSPENSO: { rotuloKey: "situacoes.suspenso", cor: "bg-amber-500/15 text-amber-600 dark:text-amber-400" },
+  AFASTADO: { rotuloKey: "situacoes.afastado", cor: "bg-secondary/10 text-secondary" },
+  DEMITIDO: { rotuloKey: "situacoes.demitido", cor: "bg-error/10 text-error" },
 };
 
 /** Modelos de escala — preenchem o padrão e seguem editáveis (RN-03). */
@@ -40,6 +42,9 @@ const MODELOS_ESCALA = {
   "6x1": { tamanho: 7, dias: Array.from({ length: 7 }, (_, i) => i < 6
     ? { folga: false, inicio: "08:00", fim: "17:00" } : { folga: true }) },
 };
+
+/** Rótulo traduzido dos modelos cujo nome tem texto (os demais são só números). */
+const MODELO_ROTULO_KEY = { "12x36 noturno": "modal.modelos.noturno12x36" };
 
 function hojeISO() {
   const d = new Date();
@@ -63,6 +68,7 @@ const INPUT =
 // ── Página ───────────────────────────────────────────────────────────────────
 
 export function GerenciarFuncionarios() {
+  const { t } = useTranslation("funcionarios");
   const toast = useToast();
   const [aba, setAba] = useState("quadro");
   const [funcionarios, setFuncionarios] = useState([]);
@@ -87,9 +93,9 @@ export function GerenciarFuncionarios() {
         setErro(null);
       })
       .catch((err) => {
-        setErro(errMsg(err) || "Não foi possível carregar o quadro de funcionários.");
+        setErro(errMsg(err) || t("erros.carregarQuadro"));
       });
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     carregar().finally(() => setCarregando(false));
@@ -106,32 +112,32 @@ export function GerenciarFuncionarios() {
       <div className="max-w-5xl mx-auto space-y-6">
         <header>
           <p className="text-on-surface-variant text-xs font-semibold uppercase tracking-widest mb-1">
-            Administrativo
+            {t("cabecalho.administrativo")}
           </p>
           <h1 className="font-headline text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-on-surface">
-            Funcionários{" "}
+            {t("cabecalho.funcionarios")}{" "}
             <span className="bg-gradient-to-r from-primary to-tertiary bg-clip-text text-transparent">
-              & Turnos
+              {t("cabecalho.turnos")}
             </span>
           </h1>
           <p className="text-on-surface-variant text-sm mt-1">
-            Situação funcional, jornada e liberações excepcionais da equipe.
+            {t("cabecalho.descricao")}
           </p>
         </header>
 
         <div className="glass-panel rounded-2xl p-1.5 flex flex-wrap gap-1 w-full sm:w-fit">
           {[
-            { id: "quadro", label: "Quadro", icon: "badge" },
-            { id: "acompanhamento", label: "Acompanhamento", icon: "monitoring" },
-            { id: "liberacoes", label: "Liberações", icon: "lock_open" },
-          ].map((t) => (
-            <button key={t.id} type="button" onClick={() => setAba(t.id)}
+            { id: "quadro", rotuloKey: "abas.quadro", icon: "badge" },
+            { id: "acompanhamento", rotuloKey: "abas.acompanhamento", icon: "monitoring" },
+            { id: "liberacoes", rotuloKey: "abas.liberacoes", icon: "lock_open" },
+          ].map((tab) => (
+            <button key={tab.id} type="button" onClick={() => setAba(tab.id)}
               className={`flex items-center gap-2 px-3 sm:px-5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 cursor-pointer ${
-                aba === t.id
+                aba === tab.id
                   ? "bg-primary/15 text-primary"
-                  : "text-on-surface-variant hover:text-on-surface hover:bg-white/5"
+                  : "text-on-surface-variant hover:text-on-surface hover:bg-veu/5"
               }`}>
-              <Icone name={t.icon} className="text-lg" />{t.label}
+              <Icone name={tab.icon} className="text-lg" />{t(tab.rotuloKey)}
             </button>
           ))}
         </div>
@@ -160,7 +166,7 @@ export function GerenciarFuncionarios() {
             onSalvo={async () => {
               setEditando(null);
               await carregar();
-              toast.success("Jornada atualizada.");
+              toast.success(t("toast.jornadaAtualizada"));
             }}
           />
         )}
@@ -172,12 +178,13 @@ export function GerenciarFuncionarios() {
 // ── Aba: quadro de funcionários ──────────────────────────────────────────────
 
 function AbaQuadro({ quadro, onEditar }) {
+  const { t } = useTranslation("funcionarios");
   if (quadro.length === 0) {
     return (
       <div className="glass-panel rounded-2xl py-14 flex flex-col items-center gap-3 text-center text-on-surface-variant px-4">
         <Icone name="badge" className="text-5xl opacity-30" />
         <p className="text-sm max-w-md">
-          Nenhum funcionário no condomínio. Cadastre porteiros e síndicos em Usuários.
+          {t("quadro.vazio")}
         </p>
       </div>
     );
@@ -193,6 +200,7 @@ function AbaQuadro({ quadro, onEditar }) {
 }
 
 function CartaoFuncionario({ funcionario: f, onEditar }) {
+  const { t } = useTranslation("funcionarios");
   const [plantoes, setPlantoes] = useState(null);
   const [aberto, setAberto] = useState(false);
   const j = f.jornada;
@@ -217,22 +225,22 @@ function CartaoFuncionario({ funcionario: f, onEditar }) {
             <p className="text-xs text-on-surface-variant">
               {labelPerfil(f.perfil)}
               {j ? ` · ${j.tipoJornada === "ESCALA"
-                ? `Escala ${j.cicloTamanho} dias`
-                : "Jornada semanal"}` : " · Sem jornada"}
+                ? t("quadro.escalaDias", { count: j.cicloTamanho })
+                : t("quadro.jornadaSemanal")}` : ` · ${t("quadro.semJornada")}`}
             </p>
           </div>
         </div>
         <div className="flex items-center gap-2 shrink-0">
           {sit ? (
-            <span className={`text-xs font-bold px-3 py-1 rounded-full ${sit.cor}`}>{sit.label}</span>
+            <span className={`text-xs font-bold px-3 py-1 rounded-full ${sit.cor}`}>{t(sit.rotuloKey)}</span>
           ) : (
             <span className="text-xs font-semibold px-3 py-1 rounded-full bg-outline-variant/20 text-on-surface-variant">
-              Não configurado
+              {t("quadro.naoConfigurado")}
             </span>
           )}
           <button onClick={onEditar}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border border-outline-variant/30 text-on-surface-variant hover:bg-white/5 transition-all cursor-pointer">
-            <Icone name="edit" className="text-sm" />{j ? "Editar" : "Configurar"}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border border-outline-variant/30 text-on-surface-variant hover:bg-veu/5 transition-all cursor-pointer">
+            <Icone name="edit" className="text-sm" />{j ? t("comum:acoes.editar") : t("quadro.configurar")}
           </button>
         </div>
       </div>
@@ -242,15 +250,15 @@ function CartaoFuncionario({ funcionario: f, onEditar }) {
           <button type="button" onClick={() => setAberto((a) => !a)}
             className="text-xs font-semibold text-primary hover:underline cursor-pointer flex items-center gap-1">
             <Icone name={aberto ? "expand_less" : "expand_more"} className="text-base" />
-            Próximos plantões
+            {t("quadro.proximosPlantoes")}
           </button>
 
           {aberto && (
             plantoes === null ? (
-              <p className="text-xs text-on-surface-variant">Carregando…</p>
+              <p className="text-xs text-on-surface-variant">{t("comum:estado.carregando")}</p>
             ) : plantoes.length === 0 ? (
               <p className="text-xs text-on-surface-variant">
-                Nenhum plantão nos próximos 14 dias.
+                {t("quadro.semPlantoes")}
               </p>
             ) : (
               <div className="flex flex-wrap gap-2">
@@ -274,6 +282,7 @@ function CartaoFuncionario({ funcionario: f, onEditar }) {
 // ── Modal: situação e jornada ────────────────────────────────────────────────
 
 function ModalJornada({ funcionario, onFechar, onSalvo }) {
+  const { t } = useTranslation("funcionarios");
   const j = funcionario.jornada;
   const [situacao, setSituacao] = useState(j?.situacao || "ATIVO");
   const [tipo, setTipo] = useState(j?.tipoJornada || "SEMANAL_FIXA");
@@ -355,7 +364,7 @@ function ModalJornada({ funcionario, onFechar, onSalvo }) {
       const r = await jornadaApi.previa(corpo(), 14);
       setPrevia(r.data || []);
     } catch (err) {
-      setErro(errMsg(err) || "Não foi possível gerar a prévia.");
+      setErro(errMsg(err) || t("modal.erros.previa"));
     }
   }
 
@@ -367,7 +376,7 @@ function ModalJornada({ funcionario, onFechar, onSalvo }) {
       await jornadaApi.salvar(corpo());
       onSalvo();
     } catch (err) {
-      setErro(errMsg(err) || "Não foi possível salvar a jornada.");
+      setErro(errMsg(err) || t("modal.erros.salvar"));
     } finally {
       setSalvando(false);
     }
@@ -377,7 +386,7 @@ function ModalJornada({ funcionario, onFechar, onSalvo }) {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4 py-8 overflow-y-auto" onClick={onFechar}>
       <div className="glass-panel rounded-3xl p-6 w-full max-w-2xl border border-outline-variant/20 shadow-xl my-auto" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between mb-1">
-          <h2 className="font-headline text-lg font-bold text-on-surface">Situação e jornada</h2>
+          <h2 className="font-headline text-lg font-bold text-on-surface">{t("modal.titulo")}</h2>
           <button onClick={onFechar} className="text-on-surface-variant hover:text-on-surface transition-colors cursor-pointer">
             <Icone name="close" className="text-xl" />
           </button>
@@ -390,7 +399,7 @@ function ModalJornada({ funcionario, onFechar, onSalvo }) {
           {/* Situação funcional */}
           <div className="space-y-2">
             <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant ml-1">
-              Situação <span className="text-red-500">*</span>
+              {t("modal.situacao")} <span className="text-red-500">*</span>
             </label>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
               {Object.entries(SITUACOES).map(([v, c]) => (
@@ -398,16 +407,16 @@ function ModalJornada({ funcionario, onFechar, onSalvo }) {
                   className={`py-2 rounded-xl text-sm font-semibold border transition-all cursor-pointer ${
                     situacao === v
                       ? "bg-primary text-on-primary border-primary"
-                      : "border-outline-variant/30 text-on-surface-variant hover:bg-white/5"
+                      : "border-outline-variant/30 text-on-surface-variant hover:bg-veu/5"
                   }`}>
-                  {c.label}
+                  {t(c.rotuloKey)}
                 </button>
               ))}
             </div>
             {situacao !== "ATIVO" && (
               <p className="text-xs text-on-surface-variant flex items-start gap-1.5 ml-1">
                 <Icone name="info" className="text-sm shrink-0 mt-0.5" />
-                Esta situação bloqueia o registro de entrada. A saída continua permitida.
+                {t("modal.avisoSituacao")}
               </p>
             )}
           </div>
@@ -415,16 +424,16 @@ function ModalJornada({ funcionario, onFechar, onSalvo }) {
           {/* Tipo de jornada */}
           <div className="space-y-2">
             <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant ml-1">
-              Tipo de jornada <span className="text-red-500">*</span>
+              {t("modal.tipoJornada")} <span className="text-red-500">*</span>
             </label>
             <div className="flex flex-col sm:flex-row gap-2">
               {[
-                { v: "SEMANAL_FIXA", l: "Semanal fixa", d: "Horário por dia da semana" },
-                { v: "ESCALA", l: "Escala", d: "Ciclo rotativo: 12x36, 24x48, 6x1" },
+                { v: "SEMANAL_FIXA", l: t("modal.tipos.semanalFixa"), d: t("modal.tipos.semanalFixaDescricao") },
+                { v: "ESCALA", l: t("modal.tipos.escala"), d: t("modal.tipos.escalaDescricao") },
               ].map((o) => (
                 <button key={o.v} type="button" onClick={() => { setTipo(o.v); setErro(""); setPrevia(null); }}
                   className={`flex-1 text-left px-4 py-3 rounded-xl border transition-all cursor-pointer ${
-                    tipo === o.v ? "bg-primary/10 border-primary/40" : "border-outline-variant/30 hover:bg-white/5"
+                    tipo === o.v ? "bg-primary/10 border-primary/40" : "border-outline-variant/30 hover:bg-veu/5"
                   }`}>
                   <p className={`text-sm font-semibold ${tipo === o.v ? "text-primary" : "text-on-surface"}`}>{o.l}</p>
                   <p className="text-xs text-on-surface-variant mt-0.5">{o.d}</p>
@@ -437,21 +446,21 @@ function ModalJornada({ funcionario, onFechar, onSalvo }) {
             <div className="space-y-1.5">
               {semana.map((d, i) => (
                 <div key={d.api} className="flex flex-wrap items-center gap-2 sm:gap-3 px-3 py-2 rounded-xl bg-surface-container-highest/20">
-                  <span className="text-sm text-on-surface w-20 shrink-0">{d.label}</span>
+                  <span className="text-sm text-on-surface w-20 shrink-0">{t(d.rotuloKey)}</span>
                   <label className="flex items-center gap-1.5 text-xs text-on-surface-variant cursor-pointer">
                     <input type="checkbox" checked={d.folga} className="accent-primary w-4 h-4"
                       onChange={(e) => setSemana((p) => p.map((x, k) => k === i ? { ...x, folga: e.target.checked } : x))} />
-                    Folga
+                    {t("modal.folga")}
                   </label>
                   <input type="time" value={d.inicio} disabled={d.folga}
                     onChange={(e) => setSemana((p) => p.map((x, k) => k === i ? { ...x, inicio: e.target.value } : x))}
                     className="bg-surface-container-highest/40 border-none rounded-lg py-1.5 px-2 text-sm text-on-surface focus:ring-2 focus:ring-primary/50 focus:outline-none disabled:opacity-40" />
-                  <span className="text-on-surface-variant text-xs">até</span>
+                  <span className="text-on-surface-variant text-xs">{t("modal.ate")}</span>
                   <input type="time" value={d.fim} disabled={d.folga}
                     onChange={(e) => setSemana((p) => p.map((x, k) => k === i ? { ...x, fim: e.target.value } : x))}
                     className="bg-surface-container-highest/40 border-none rounded-lg py-1.5 px-2 text-sm text-on-surface focus:ring-2 focus:ring-primary/50 focus:outline-none disabled:opacity-40" />
                   {!d.folga && d.fim <= d.inicio && (
-                    <span className="text-[11px] text-secondary font-semibold">vira o dia</span>
+                    <span className="text-[11px] text-secondary font-semibold">{t("modal.viraODia")}</span>
                   )}
                 </div>
               ))}
@@ -461,18 +470,18 @@ function ModalJornada({ funcionario, onFechar, onSalvo }) {
               <div className="flex flex-wrap gap-2">
                 {Object.keys(MODELOS_ESCALA).map((m) => (
                   <button key={m} type="button" onClick={() => aplicarModelo(m)}
-                    className="text-xs font-semibold px-3 py-1.5 rounded-lg border border-outline-variant/30 text-on-surface-variant hover:bg-white/5 transition-all cursor-pointer">
-                    {m}
+                    className="text-xs font-semibold px-3 py-1.5 rounded-lg border border-outline-variant/30 text-on-surface-variant hover:bg-veu/5 transition-all cursor-pointer">
+                    {MODELO_ROTULO_KEY[m] ? t(MODELO_ROTULO_KEY[m]) : m}
                   </button>
                 ))}
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <Campo id="cicloInicio" label="Início do ciclo" type="date" value={cicloInicio}
+                <Campo id="cicloInicio" label={t("modal.inicioCiclo")} type="date" value={cicloInicio}
                   onChange={(e) => { setCicloInicio(e.target.value); setPrevia(null); }} required />
                 <div className="space-y-2">
                   <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant ml-1">
-                    Tamanho do ciclo (dias) <span className="text-red-500">*</span>
+                    {t("modal.tamanhoCiclo")} <span className="text-red-500">*</span>
                   </label>
                   <input type="number" min={2} max={31} value={cicloTamanho}
                     onChange={(e) => redimensionarEscala(e.target.value)} className={INPUT} />
@@ -482,21 +491,21 @@ function ModalJornada({ funcionario, onFechar, onSalvo }) {
               <div className="space-y-1.5">
                 {escala.map((d, i) => (
                   <div key={i} className="flex flex-wrap items-center gap-2 sm:gap-3 px-3 py-2 rounded-xl bg-surface-container-highest/20">
-                    <span className="text-sm text-on-surface w-16 shrink-0">Dia {i + 1}</span>
+                    <span className="text-sm text-on-surface w-16 shrink-0">{t("modal.dia", { n: i + 1 })}</span>
                     <label className="flex items-center gap-1.5 text-xs text-on-surface-variant cursor-pointer">
                       <input type="checkbox" checked={d.folga} className="accent-primary w-4 h-4"
                         onChange={(e) => setEscala((p) => p.map((x, k) => k === i ? { ...x, folga: e.target.checked } : x))} />
-                      Folga
+                      {t("modal.folga")}
                     </label>
                     <input type="time" value={d.inicio} disabled={d.folga}
                       onChange={(e) => setEscala((p) => p.map((x, k) => k === i ? { ...x, inicio: e.target.value } : x))}
                       className="bg-surface-container-highest/40 border-none rounded-lg py-1.5 px-2 text-sm text-on-surface focus:ring-2 focus:ring-primary/50 focus:outline-none disabled:opacity-40" />
-                    <span className="text-on-surface-variant text-xs">até</span>
+                    <span className="text-on-surface-variant text-xs">{t("modal.ate")}</span>
                     <input type="time" value={d.fim} disabled={d.folga}
                       onChange={(e) => setEscala((p) => p.map((x, k) => k === i ? { ...x, fim: e.target.value } : x))}
                       className="bg-surface-container-highest/40 border-none rounded-lg py-1.5 px-2 text-sm text-on-surface focus:ring-2 focus:ring-primary/50 focus:outline-none disabled:opacity-40" />
                     {!d.folga && d.fim <= d.inicio && (
-                      <span className="text-[11px] text-secondary font-semibold">vira o dia</span>
+                      <span className="text-[11px] text-secondary font-semibold">{t("modal.viraODia")}</span>
                     )}
                   </div>
                 ))}
@@ -505,12 +514,12 @@ function ModalJornada({ funcionario, onFechar, onSalvo }) {
               <div>
                 <button type="button" onClick={verPrevia}
                   className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline cursor-pointer">
-                  <Icone name="preview" className="text-base" />Ver próximos plantões com esta configuração
+                  <Icone name="preview" className="text-base" />{t("modal.verPrevia")}
                 </button>
                 {previa && (
                   <div className="flex flex-wrap gap-2 mt-2">
                     {previa.length === 0 ? (
-                      <p className="text-xs text-on-surface-variant">Nenhum plantão nos próximos 14 dias.</p>
+                      <p className="text-xs text-on-surface-variant">{t("quadro.semPlantoes")}</p>
                     ) : previa.map((p) => (
                       <span key={p.dia} className="text-xs px-2.5 py-1 rounded-lg bg-primary/10 text-primary">
                         <span className="font-semibold">{fmtDia(p.dia)}</span> {hhmm(p.inicio)}–{hhmm(p.fim)}
@@ -525,7 +534,7 @@ function ModalJornada({ funcionario, onFechar, onSalvo }) {
 
           <div className="space-y-2">
             <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant ml-1">
-              Observações <span className="font-normal text-on-surface-variant/60">(opcional)</span>
+              {t("modal.observacoes")} <span className="font-normal text-on-surface-variant/60">({t("comum:estado.opcional")})</span>
             </label>
             <textarea value={observacoes} onChange={(e) => setObservacoes(e.target.value)} rows={2}
               className={`${INPUT} resize-none`} />
@@ -540,11 +549,11 @@ function ModalJornada({ funcionario, onFechar, onSalvo }) {
 
           <div className="flex flex-col-reverse sm:flex-row gap-3 sm:justify-end">
             <button type="button" onClick={onFechar}
-              className="px-5 py-2.5 rounded-xl text-sm font-semibold text-on-surface-variant hover:bg-white/5 transition-all cursor-pointer">
-              Cancelar
+              className="px-5 py-2.5 rounded-xl text-sm font-semibold text-on-surface-variant hover:bg-veu/5 transition-all cursor-pointer">
+              {t("comum:acoes.cancelar")}
             </button>
             <Botao type="submit" disabled={salvando}>
-              {salvando ? "Salvando…" : "Salvar jornada"}
+              {salvando ? t("comum:acoes.salvando") : t("modal.salvar")}
             </Botao>
           </div>
         </form>
@@ -557,7 +566,7 @@ function ModalJornada({ funcionario, onFechar, onSalvo }) {
 
 function fmtDataHora(iso) {
   if (!iso) return "—";
-  return new Date(iso).toLocaleString("pt-BR", {
+  return new Date(iso).toLocaleString(idiomaAtual(), {
     day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit",
   });
 }
@@ -572,6 +581,7 @@ function duracao(desde) {
 }
 
 function AbaAcompanhamento({ quadro }) {
+  const { t } = useTranslation("funcionarios");
   const [dentro, setDentro] = useState([]);
   const [historico, setHistorico] = useState([]);
   const [carregando, setCarregando] = useState(true);
@@ -594,9 +604,9 @@ function AbaAcompanhamento({ quadro }) {
         setErro(null);
       })
       .catch((err) => {
-        setErro(errMsg(err) || "Não foi possível carregar o acompanhamento.");
+        setErro(errMsg(err) || t("acompanhamento.erroCarregar"));
       });
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     carregar().finally(() => setCarregando(false));
@@ -644,9 +654,9 @@ function AbaAcompanhamento({ quadro }) {
       {/* Indicadores */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         {[
-          { label: "No condomínio agora", valor: presentes.length, cor: "text-primary" },
-          { label: "Sem entrada hoje", valor: semEntradaHoje.length, cor: "text-secondary" },
-          { label: "Por liberação", valor: porLiberacao.length, cor: "text-tertiary" },
+          { label: t("acompanhamento.indicadores.noCondominio"), valor: presentes.length, cor: "text-primary" },
+          { label: t("acompanhamento.indicadores.semEntradaHoje"), valor: semEntradaHoje.length, cor: "text-secondary" },
+          { label: t("acompanhamento.indicadores.porLiberacao"), valor: porLiberacao.length, cor: "text-tertiary" },
         ].map((s) => (
           <div key={s.label} className="glass-panel rounded-2xl px-4 py-3">
             <p className={`text-2xl font-headline font-bold ${s.cor}`}>{s.valor}</p>
@@ -657,10 +667,10 @@ function AbaAcompanhamento({ quadro }) {
 
       {/* Presença atual */}
       <section className="space-y-3">
-        <h2 className="font-headline font-bold text-on-surface text-base">Presença atual</h2>
+        <h2 className="font-headline font-bold text-on-surface text-base">{t("acompanhamento.presencaAtual")}</h2>
         {presentes.length === 0 ? (
           <div className="glass-panel rounded-2xl py-10 text-center text-on-surface-variant text-sm">
-            Nenhum funcionário no condomínio neste momento.
+            {t("acompanhamento.semPresentes")}
           </div>
         ) : (
           <div className="space-y-2">
@@ -672,13 +682,13 @@ function AbaAcompanhamento({ quadro }) {
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold text-on-surface truncate">{p.nome}</p>
                   <p className="text-xs text-on-surface-variant">
-                    {p.perfil} · entrada {fmtDataHora(p.entradaEm)} · há {duracao(p.entradaEm)}
-                    {p.turnoPrevisto ? ` · turno ${p.turnoPrevisto}` : ""}
+                    {p.perfil} · {t("acompanhamento.entradaHa", { entrada: fmtDataHora(p.entradaEm), duracao: duracao(p.entradaEm) })}
+                    {p.turnoPrevisto ? ` · ${t("acompanhamento.turno", { turno: p.turnoPrevisto })}` : ""}
                   </p>
                 </div>
                 {p.liberacaoExcepcional && (
                   <span className="text-xs font-bold px-3 py-1 rounded-full bg-tertiary/15 text-tertiary shrink-0">
-                    Liberação excepcional
+                    {t("acompanhamento.liberacaoExcepcional")}
                   </span>
                 )}
               </div>
@@ -691,7 +701,7 @@ function AbaAcompanhamento({ quadro }) {
       {semEntradaHoje.length > 0 && (
         <section className="space-y-2">
           <h2 className="font-headline font-bold text-on-surface text-base">
-            Sem registro de entrada hoje
+            {t("acompanhamento.semRegistroHoje")}
           </h2>
           <div className="glass-panel rounded-2xl p-4 flex flex-wrap gap-2">
             {semEntradaHoje.map((f) => (
@@ -701,8 +711,7 @@ function AbaAcompanhamento({ quadro }) {
             ))}
           </div>
           <p className="text-xs text-on-surface-variant">
-            Considera funcionários ativos; quem está de folga hoje aparece aqui e não é
-            necessariamente uma ausência.
+            {t("acompanhamento.semRegistroAviso")}
           </p>
         </section>
       )}
@@ -710,10 +719,10 @@ function AbaAcompanhamento({ quadro }) {
       {/* Histórico */}
       <section className="space-y-3">
         <div className="flex items-center justify-between gap-3 flex-wrap">
-          <h2 className="font-headline font-bold text-on-surface text-base">Histórico de acessos</h2>
+          <h2 className="font-headline font-bold text-on-surface text-base">{t("acompanhamento.historico")}</h2>
           <select value={filtroFunc} onChange={(e) => setFiltroFunc(e.target.value)}
             className={`${INPUT} max-w-xs`}>
-            <option value="">Todos os funcionários</option>
+            <option value="">{t("acompanhamento.todosFuncionarios")}</option>
             {quadro.map((f) => (
               <option key={f.id} value={String(f.id)}>{f.nome}</option>
             ))}
@@ -722,7 +731,7 @@ function AbaAcompanhamento({ quadro }) {
 
         {registros.length === 0 ? (
           <div className="glass-panel rounded-2xl py-10 text-center text-on-surface-variant text-sm">
-            Nenhum registro de acesso da equipe no período.
+            {t("acompanhamento.semRegistros")}
           </div>
         ) : (
           <div className="glass-panel rounded-2xl border border-outline-variant/15 overflow-hidden">
@@ -730,9 +739,9 @@ function AbaAcompanhamento({ quadro }) {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-outline-variant/15 bg-surface-variant/10">
-                    {["Funcionário", "Entrada", "Saída", "Status", "Turno previsto", "Observação", "Registrado por"].map((h) => (
+                    {["funcionario", "entrada", "saida", "status", "turnoPrevisto", "observacao", "registradoPor"].map((h) => (
                       <th key={h} className="text-left text-xs font-semibold text-on-surface-variant uppercase tracking-wide px-4 py-3 whitespace-nowrap">
-                        {h}
+                        {t(`acompanhamento.colunas.${h}`)}
                       </th>
                     ))}
                   </tr>
@@ -751,7 +760,7 @@ function AbaAcompanhamento({ quadro }) {
                           <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${
                             dentroAgora ? "bg-primary/10 text-primary" : "bg-outline-variant/20 text-on-surface-variant"
                           }`}>
-                            {dentroAgora ? "Dentro" : "Saiu"}
+                            {dentroAgora ? t("acompanhamento.dentro") : t("acompanhamento.saiu")}
                           </span>
                         </td>
                         <td className="px-4 py-3 text-on-surface-variant whitespace-nowrap">
@@ -760,7 +769,7 @@ function AbaAcompanhamento({ quadro }) {
                         <td className="px-4 py-3 text-xs whitespace-nowrap">
                           {r.liberacaoExcepcional ? (
                             <span className="text-tertiary font-semibold">
-                              Fora do turno — liberação excepcional
+                              {t("acompanhamento.foraDoTurno")}
                             </span>
                           ) : "—"}
                         </td>
@@ -785,13 +794,14 @@ function AbaAcompanhamento({ quadro }) {
 const LIB_INICIAL = { authUserId: "", data: hojeISO(), horaInicio: "", horaFim: "", motivo: "", observacoes: "" };
 
 const STATUS_LIB = {
-  AGUARDANDO: { label: "Aguardando", cor: "bg-secondary/10 text-secondary" },
-  UTILIZADA: { label: "Utilizada", cor: "bg-primary/10 text-primary" },
-  EXPIRADA: { label: "Expirada", cor: "bg-outline-variant/20 text-on-surface-variant" },
-  CANCELADA: { label: "Cancelada", cor: "bg-error/10 text-error" },
+  AGUARDANDO: { rotuloKey: "liberacoes.status.aguardando", cor: "bg-secondary/10 text-secondary" },
+  UTILIZADA: { rotuloKey: "liberacoes.status.utilizada", cor: "bg-primary/10 text-primary" },
+  EXPIRADA: { rotuloKey: "liberacoes.status.expirada", cor: "bg-outline-variant/20 text-on-surface-variant" },
+  CANCELADA: { rotuloKey: "liberacoes.status.cancelada", cor: "bg-error/10 text-error" },
 };
 
 function AbaLiberacoes({ quadro }) {
+  const { t } = useTranslation("funcionarios");
   const toast = useToast();
   const [lista, setLista] = useState([]);
   const [carregando, setCarregando] = useState(true);
@@ -825,9 +835,9 @@ function AbaLiberacoes({ quadro }) {
   async function criar(e) {
     e.preventDefault();
     setErro("");
-    if (!form.authUserId) { setErro("Selecione o funcionário."); return; }
-    if (!form.horaInicio || !form.horaFim) { setErro("Informe a janela de horário."); return; }
-    if (!form.motivo.trim()) { setErro("Informe o motivo da liberação."); return; }
+    if (!form.authUserId) { setErro(t("liberacoes.erros.selecioneFuncionario")); return; }
+    if (!form.horaInicio || !form.horaFim) { setErro(t("liberacoes.erros.informeJanela")); return; }
+    if (!form.motivo.trim()) { setErro(t("liberacoes.erros.informeMotivo")); return; }
 
     setSalvando(true);
     try {
@@ -841,24 +851,24 @@ function AbaLiberacoes({ quadro }) {
       });
       setForm(LIB_INICIAL);
       setCriando(false);
-      toast.success("Liberação criada.");
+      toast.success(t("liberacoes.toast.criada"));
       await carregar();
     } catch (err) {
-      setErro(errMsg(err) || "Não foi possível criar a liberação.");
+      setErro(errMsg(err) || t("liberacoes.erros.criar"));
     } finally {
       setSalvando(false);
     }
   }
 
   async function cancelar(l) {
-    if (!window.confirm(`Cancelar a liberação de ${l.funcionarioNome}?`)) return;
+    if (!window.confirm(t("liberacoes.confirmarCancelar", { nome: l.funcionarioNome }))) return;
     setAcao(l.id);
     try {
       await jornadaApi.cancelarLiberacao(l.id);
-      toast.success("Liberação cancelada.");
+      toast.success(t("liberacoes.toast.cancelada"));
       await carregar();
     } catch (err) {
-      toast.error(errMsg(err) || "Não foi possível cancelar.");
+      toast.error(errMsg(err) || t("liberacoes.erros.cancelar"));
     } finally {
       setAcao(null);
     }
@@ -869,30 +879,29 @@ function AbaLiberacoes({ quadro }) {
       <div className="flex items-start gap-2 px-4 py-3 rounded-xl bg-surface-container-highest/30 text-on-surface-variant text-xs">
         <Icone name="info" className="text-primary text-base shrink-0 mt-0.5" />
         <span>
-          A liberação autoriza a entrada fora do turno habitual, apenas na data e janela
-          informadas. Ela não contorna suspensão, afastamento nem demissão.
+          {t("liberacoes.info")}
         </span>
       </div>
 
       {!criando && (
         <div className="flex justify-end">
           <Botao onClick={() => setCriando(true)}>
-            <span className="flex items-center gap-2"><Icone name="add" className="text-lg" />Nova liberação</span>
+            <span className="flex items-center gap-2"><Icone name="add" className="text-lg" />{t("liberacoes.nova")}</span>
           </Botao>
         </div>
       )}
 
       {criando && (
         <form onSubmit={criar} className="glass-panel rounded-2xl p-5 space-y-4" noValidate>
-          <h3 className="font-headline font-bold text-on-surface text-base">Nova liberação excepcional</h3>
+          <h3 className="font-headline font-bold text-on-surface text-base">{t("liberacoes.novaTitulo")}</h3>
 
           <div className="space-y-2">
             <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant ml-1">
-              Funcionário <span className="text-red-500">*</span>
+              {t("liberacoes.campos.funcionario")} <span className="text-red-500">*</span>
             </label>
             <select value={form.authUserId} onChange={(e) => set("authUserId", e.target.value)} className={INPUT}>
               <option value="">
-                {elegiveis.length === 0 ? "Nenhum funcionário ativo com jornada" : "Selecione…"}
+                {elegiveis.length === 0 ? t("liberacoes.semElegiveis") : t("liberacoes.selecione")}
               </option>
               {elegiveis.map((f) => (
                 <option key={f.id} value={String(f.id)}>{f.nome} — {labelPerfil(f.perfil)}</option>
@@ -901,25 +910,25 @@ function AbaLiberacoes({ quadro }) {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <Campo id="data" label="Data" type="date" value={form.data} min={hojeISO()}
+            <Campo id="data" label={t("liberacoes.campos.data")} type="date" value={form.data} min={hojeISO()}
               onChange={(e) => set("data", e.target.value)} required />
             <div className="space-y-2">
               <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant ml-1">
-                Das <span className="text-red-500">*</span>
+                {t("liberacoes.campos.das")} <span className="text-red-500">*</span>
               </label>
               <input type="time" value={form.horaInicio} onChange={(e) => set("horaInicio", e.target.value)} className={INPUT} />
             </div>
             <div className="space-y-2">
               <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant ml-1">
-                Até <span className="text-red-500">*</span>
+                {t("liberacoes.campos.ate")} <span className="text-red-500">*</span>
               </label>
               <input type="time" value={form.horaFim} onChange={(e) => set("horaFim", e.target.value)} className={INPUT} />
             </div>
           </div>
 
-          <Campo id="motivo" label="Motivo" value={form.motivo}
+          <Campo id="motivo" label={t("liberacoes.campos.motivo")} value={form.motivo}
             onChange={(e) => set("motivo", e.target.value)}
-            placeholder="Ex.: manutenção emergencial do elevador" required />
+            placeholder={t("liberacoes.campos.motivoPlaceholder")} required />
 
           {erro && (
             <div className="bg-error/10 border border-error/25 rounded-xl p-3 flex gap-2 text-sm text-error">
@@ -929,10 +938,10 @@ function AbaLiberacoes({ quadro }) {
 
           <div className="flex flex-col-reverse sm:flex-row gap-3 sm:justify-end">
             <button type="button" onClick={() => { setCriando(false); setErro(""); setForm(LIB_INICIAL); }}
-              className="px-5 py-2.5 rounded-xl text-sm font-semibold text-on-surface-variant hover:bg-white/5 transition-all cursor-pointer">
-              Cancelar
+              className="px-5 py-2.5 rounded-xl text-sm font-semibold text-on-surface-variant hover:bg-veu/5 transition-all cursor-pointer">
+              {t("comum:acoes.cancelar")}
             </button>
-            <Botao type="submit" disabled={salvando}>{salvando ? "Criando…" : "Criar liberação"}</Botao>
+            <Botao type="submit" disabled={salvando}>{salvando ? t("liberacoes.criando") : t("liberacoes.criar")}</Botao>
           </div>
         </form>
       )}
@@ -944,7 +953,7 @@ function AbaLiberacoes({ quadro }) {
       ) : lista.length === 0 ? (
         <div className="glass-panel rounded-2xl py-14 flex flex-col items-center gap-3 text-center text-on-surface-variant px-4">
           <Icone name="lock_open" className="text-5xl opacity-30" />
-          <p className="text-sm max-w-md">Nenhuma liberação registrada.</p>
+          <p className="text-sm max-w-md">{t("liberacoes.vazio")}</p>
         </div>
       ) : (
         <div className="space-y-3">
@@ -960,15 +969,15 @@ function AbaLiberacoes({ quadro }) {
                     </p>
                     <p className="text-xs text-on-surface-variant mt-0.5">{l.motivo}</p>
                     <p className="text-xs text-on-surface-variant/70 mt-0.5">
-                      Autorizada por {l.autorizadoPorNome || "—"}
+                      {t("liberacoes.autorizadaPor", { nome: l.autorizadoPorNome || "—" })}
                     </p>
                   </div>
-                  <span className={`shrink-0 text-xs font-bold px-3 py-1 rounded-full ${cfg.cor}`}>{cfg.label}</span>
+                  <span className={`shrink-0 text-xs font-bold px-3 py-1 rounded-full ${cfg.cor}`}>{t(cfg.rotuloKey)}</span>
                 </div>
                 {l.status === "AGUARDANDO" && (
                   <button type="button" onClick={() => cancelar(l)} disabled={acao === l.id}
                     className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-error/10 text-error hover:bg-error/20 transition-all cursor-pointer disabled:opacity-50">
-                    {acao === l.id ? "Cancelando…" : "Cancelar"}
+                    {acao === l.id ? t("liberacoes.cancelando") : t("comum:acoes.cancelar")}
                   </button>
                 )}
               </div>

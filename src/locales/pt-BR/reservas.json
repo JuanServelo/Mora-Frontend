@@ -1,0 +1,235 @@
+{
+  "status": {
+    "pendente": "Pendente",
+    "aprovada": "Aprovada",
+    "recusada": "Recusada",
+    "expirada": "Expirada",
+    "cancelada": "Cancelada",
+    "concluida": "Concluída"
+  },
+  "periodo": "{{inicio}} até {{fim}}",
+  "cabecalho": {
+    "sobretitulo": "Reservas",
+    "titulo": "Áreas",
+    "tituloDestaque": "& Reservas",
+    "subtituloSelecionado": "Agenda do espaço selecionado.",
+    "subtituloEscolha": "Escolha um espaço para ver a agenda e reservar."
+  },
+  "abas": {
+    "agenda": "Agenda",
+    "minhas": "Minhas reservas",
+    "aprovacoes": "Aprovações",
+    "historico": "Histórico"
+  },
+  "erros": {
+    "carregarAreas": "Não foi possível carregar as áreas comuns.",
+    "carregarAgenda": "Não foi possível carregar a agenda deste espaço.",
+    "cancelar": "Não foi possível cancelar a reserva.",
+    "carregarMinhas": "Não foi possível carregar suas reservas.",
+    "aprovarLote": "Nao foi possivel aprovar as reservas selecionadas.",
+    "carregarHistorico": "Não foi possível carregar o histórico de reservas.",
+    "criar": "Não foi possível criar a reserva.",
+    "aprovar": "Nao foi possivel aprovar a reserva.",
+    "recusar": "Nao foi possivel recusar a reserva."
+  },
+  "cancelamento": {
+    "confirmar": "Cancelar a reserva de {{periodo}}?\n\nA reserva inteira será cancelada.",
+    "sucesso": "Reserva cancelada."
+  },
+  "minhas": {
+    "vazioTitulo": "Você ainda não reservou nenhum espaço",
+    "vazioDescricao": "Escolha um espaço na aba Agenda para fazer a primeira reserva.",
+    "espacoPadrao": "Espaço"
+  },
+  "aprovacoes": {
+    "vazio": "Nenhuma solicitação aguardando aprovação.",
+    "aguardando_one": "{{count}} solicitação aguardando decisão",
+    "aguardando_other": "{{count}} solicitações aguardando decisão",
+    "desmarcarTodas": "Desmarcar todas",
+    "selecionarTodas": "Selecionar todas",
+    "aprovar": "Aprovar",
+    "aprovarQtd": "Aprovar ({{n}})",
+    "selecionarReserva": "Selecionar reserva de {{nome}}",
+    "responsavelPadrao": "responsável",
+    "decidirAte": "Decidir até {{prazo}}",
+    "aprovadas_one": "{{count}} reserva aprovada.",
+    "aprovadas_other": "{{count}} reservas aprovadas."
+  },
+  "historico": {
+    "filtros": "Filtros",
+    "incluirFuturas": "Incluir reservas futuras",
+    "limparFiltros": "Limpar filtros",
+    "campos": {
+      "espaco": "Espaço",
+      "de": "De",
+      "ate": "Até",
+      "situacao": "Situação",
+      "responsavel": "Responsável"
+    },
+    "placeholderNome": "Nome…",
+    "vazio": "Nenhuma reserva registrada neste condomínio até o momento.",
+    "semResultado": "Nenhuma reserva encontrada para os filtros selecionados.",
+    "encontradas_one": "{{count}} reserva encontrada",
+    "encontradas_other": "{{count}} reservas encontradas",
+    "colunas": {
+      "espaco": "Espaço",
+      "responsavel": "Responsável",
+      "tipo": "Tipo",
+      "inicio": "Início",
+      "fim": "Fim",
+      "situacao": "Situação",
+      "decididoPor": "Decidido por"
+    },
+    "tipoEvento": "Evento",
+    "tipoMorador": "Morador",
+    "automatica": "Automática",
+    "prazoExpirado": "Prazo expirado"
+  },
+  "selecao": {
+    "vazio": "Nenhuma área comum disponível para reserva no momento.",
+    "pessoas_one": "{{count}} pessoa",
+    "pessoas_other": "{{count}} pessoas",
+    "capacidadeNaoInformada": "Capacidade não informada",
+    "localizacaoNaoInformada": "Localização não informada",
+    "verAgenda": "Ver agenda"
+  },
+  "nova": {
+    "titulo": "Nova reserva",
+    "tipoReserva": "Tipo de reserva",
+    "tipos": {
+      "morador": "Morador",
+      "evento": "Evento do condomínio"
+    },
+    "unidade": "Bloco / Apartamento",
+    "selecioneUnidade": "Selecione a unidade…",
+    "apto": "Apto {{numero}}",
+    "semMoradorAtivo": " — sem morador ativo",
+    "suaUnidade": "Sua unidade",
+    "vinculadaCadastro": "Vinculada ao seu cadastro",
+    "funcionarioResponsavel": "Funcionário responsável",
+    "moradorResponsavel": "Morador responsável",
+    "selecione": "Selecione…",
+    "unidadeSemMorador": "Esta unidade não possui morador ativo e não pode receber reserva.",
+    "descricaoEvento": "Descrição do evento",
+    "dataInicio": "Data de início",
+    "horaInicio": "Hora de início",
+    "dataFim": "Data de fim",
+    "horaFim": "Hora de fim",
+    "terminaDiaSeguinte": "Esta reserva termina no dia seguinte: {{inicio}} → {{fim}}",
+    "avisoFuncionamento": "Este espaço tem horário de funcionamento. Fora da janela, a reserva é recusada.",
+    "observacoes": "Observações",
+    "opcional": "(opcional)",
+    "criando": "Criando…",
+    "criar": "Criar reserva",
+    "erros": {
+      "horario": "Informe o horário de início e de fim.",
+      "fimAntesInicio": "O fim da reserva deve ser posterior ao início.",
+      "passado": "Não é possível reservar em data ou horário passado.",
+      "descricaoEvento": "Informe a descrição do evento.",
+      "unidade": "Selecione a unidade responsável.",
+      "funcionario": "Selecione o funcionário responsável.",
+      "morador": "Selecione o morador responsável."
+    },
+    "toast": {
+      "pendente": "Solicitação enviada. A reserva será confirmada após aprovação do síndico.",
+      "criada": "Reserva criada."
+    }
+  },
+  "detalhe": {
+    "tituloEvento": "Evento do condomínio",
+    "tituloMorador": "Reserva de morador",
+    "inicio": "Início:",
+    "fim": "Fim:",
+    "responsavel": "Responsável:",
+    "evento": "Evento:",
+    "confirmadaPor": "Confirmada por:",
+    "confirmacaoAutomatica": "confirmação automática",
+    "aguardandoAntes": "Aguardando aprovação do síndico. Sem decisão até",
+    "aguardandoDepois": ", a solicitação expira e o horário volta a ficar livre.",
+    "recusadaPor": "Recusada por:",
+    "canceladaPor": "Cancelada por:",
+    "historicoDecisoes": "Histórico de decisões",
+    "sistema": "sistema",
+    "motivoRecusa": "Motivo da recusa",
+    "motivoPlaceholder": "Ex.: espaço em manutenção nessa data.",
+    "motivoVisivel": "O motivo fica visível para quem solicitou.",
+    "cancelarReserva": "Cancelar reserva",
+    "confirmarRecusa": "Confirmar recusa",
+    "recusar": "Recusar",
+    "aprovar": "Aprovar",
+    "toast": {
+      "aprovada": "Reserva aprovada.",
+      "recusada": "Reserva recusada.",
+      "motivoObrigatorio": "Informe o motivo da recusa - ele fica visivel para quem solicitou."
+    }
+  },
+  "agenda": {
+    "hoje": "Hoje",
+    "periodoAnterior": "Período anterior",
+    "proximoPeriodo": "Próximo período",
+    "mes": "Mês",
+    "semana": "Semana",
+    "novaReserva": "Nova reserva",
+    "aguardandoAprovacao": "Aguardando aprovação",
+    "confirmada": "Confirmada",
+    "trocarEspaco": "Trocar de espaço",
+    "vazio": "Nenhuma reserva neste período.",
+    "fechado": "Fechado",
+    "diaTodo": "Dia todo · {{nome}}",
+    "mais": "+{{n}} mais",
+    "evento": "Evento",
+    "rotuloMes": "{{mes}} de {{ano}}",
+    "rotuloSemanaMesmoMes": "{{ini}}–{{fim}} de {{mes}} de {{ano}}",
+    "rotuloSemana": "{{ini}} de {{mesIni}} – {{fim}} de {{mesFim}} de {{ano}}",
+    "semRestricao": "Sem restrição de horário",
+    "fechadoTodosDias": "Fechado todos os dias",
+    "diasCurtos": {
+      "dom": "Dom",
+      "seg": "Seg",
+      "ter": "Ter",
+      "qua": "Qua",
+      "qui": "Qui",
+      "sex": "Sex",
+      "sab": "Sáb"
+    }
+  },
+  "funcionamento": {
+    "titulo": "Horário de funcionamento",
+    "dias": {
+      "domingo": "Domingo",
+      "segunda": "Segunda",
+      "terca": "Terça",
+      "quarta": "Quarta",
+      "quinta": "Quinta",
+      "sexta": "Sexta",
+      "sabado": "Sábado"
+    },
+    "migrado": "Este espaço foi migrado automaticamente para “sem restrição de horário”. Revise a configuração se ele tiver horário de funcionamento.",
+    "modos": {
+      "semRestricao": {
+        "titulo": "Sem restrição de horário",
+        "descricao": "Reservas 24h, todos os dias"
+      },
+      "horariosDefinidos": {
+        "titulo": "Horários definidos",
+        "descricao": "Janela por dia da semana"
+      }
+    },
+    "aplicarTodos": "Aplicar a todos os dias",
+    "aplicarUteis": "Aplicar aos dias úteis",
+    "fechado": "Fechado",
+    "ate": "até",
+    "viraDia": "vira o dia seguinte",
+    "explicacaoMeiaNoite": "Fechamento anterior à abertura significa que a janela atravessa a meia-noite — sábado 18:00 até 02:00 termina no domingo.",
+    "salvar": "Salvar funcionamento",
+    "erros": {
+      "carregar": "Não foi possível carregar o funcionamento.",
+      "umDiaAberto": "Ao menos um dia precisa estar aberto.",
+      "iguais": "Em {{dia}}, abertura e fechamento não podem ser iguais. Para 24 horas, use \"sem restrição de horário\".",
+      "salvar": "Não foi possível salvar o funcionamento."
+    },
+    "toast": {
+      "atualizado": "Funcionamento atualizado."
+    }
+  }
+}

@@ -1,3 +1,5 @@
+import i18n from '../i18n';
+
 /**
  * Perfis de acesso — espelho de services/auth-api/constants/perfis.js.
  * Modelo simplificado: 6 perfis em 3 camadas.
@@ -9,34 +11,69 @@ export const PERFIS = {
   MORADOR: 'MORADOR',
   DONO_ALUGUEL: 'DONO_ALUGUEL',
   CONVIDADO: 'CONVIDADO',
-  TERCEIRO: 'TERCEIRO',
 };
 
+/**
+ * Perfis que atuam como "funcionário responsável".
+ *
+ * Fonte única: vale para a aba Funcionários do registro de entrada e saída e
+ * para o responsável da reserva de evento do condomínio. Espelha
+ * PERFIS_FUNCIONARIO de services/auth-api/constants/perfis.js — duas listas
+ * paralelas divergiriam na primeira inclusão ou remoção de perfil.
+ */
+export const PERFIS_FUNCIONARIO = [PERFIS.PORTEIRO, PERFIS.ADMIN_SINDICO];
+
+/**
+ * Perfis que decidem sobre reservas pendentes.
+ *
+ * Espelha PERFIS_APROVAM de ReservaService.java: o porteiro registra reservas
+ * mas não aprova as dos outros, senão a exigência de aprovação do espaço
+ * deixaria de significar alguma coisa.
+ */
+export const PERFIS_APROVAM_RESERVA = [PERFIS.ADMIN_SINDICO, PERFIS.ADMIN_GERAL];
+
+export function podeAprovarReserva(perfil) {
+  return PERFIS_APROVAM_RESERVA.includes(perfil);
+}
+
+/**
+ * Opção de perfil para listas e selects. O `label` é um getter: o texto sai do
+ * i18n na hora da leitura, no idioma em uso, e não no carregamento do módulo.
+ */
+function opcaoPerfil(value) {
+  return {
+    value,
+    labelKey: `layout:perfis.${value}`,
+    get label() {
+      return i18n.t(`layout:perfis.${value}`);
+    },
+  };
+}
+
 export const TODOS_PERFIS = [
-  { value: PERFIS.ADMIN_GERAL, label: 'Admin Geral' },
-  { value: PERFIS.ADMIN_SINDICO, label: 'Admin Síndico' },
-  { value: PERFIS.PORTEIRO, label: 'Porteiro' },
-  { value: PERFIS.TERCEIRO, label: 'Terceiro' },
-  { value: PERFIS.MORADOR, label: 'Morador' },
-  { value: PERFIS.DONO_ALUGUEL, label: 'Dono Aluguel' },
-  { value: PERFIS.CONVIDADO, label: 'Visitante' },
+  opcaoPerfil(PERFIS.ADMIN_GERAL),
+  opcaoPerfil(PERFIS.ADMIN_SINDICO),
+  opcaoPerfil(PERFIS.PORTEIRO),
+  opcaoPerfil(PERFIS.MORADOR),
+  opcaoPerfil(PERFIS.DONO_ALUGUEL),
+  opcaoPerfil(PERFIS.CONVIDADO),
 ];
 
 /** Perfis oferecidos ao Admin Geral ao montar a gestão de um condomínio. */
 export const PERFIS_CADASTRO_PLATAFORMA = [
-  { value: PERFIS.ADMIN_SINDICO, label: 'Admin Síndico' },
+  opcaoPerfil(PERFIS.ADMIN_SINDICO),
 ];
 
 export const PERFIS_CADASTRO_CONDOMINIO = [
-  { value: PERFIS.ADMIN_SINDICO, label: 'Admin Síndico' },
-  { value: PERFIS.PORTEIRO, label: 'Porteiro' },
-  { value: PERFIS.MORADOR, label: 'Morador' },
-  { value: PERFIS.DONO_ALUGUEL, label: 'Dono Aluguel' },
+  opcaoPerfil(PERFIS.ADMIN_SINDICO),
+  opcaoPerfil(PERFIS.PORTEIRO),
+  opcaoPerfil(PERFIS.MORADOR),
+  opcaoPerfil(PERFIS.DONO_ALUGUEL),
 ];
 
 export const PERFIS_CADASTRO_UNIDADE = [
-  { value: PERFIS.MORADOR, label: 'Morador' },
-  { value: PERFIS.CONVIDADO, label: 'Visitante' },
+  opcaoPerfil(PERFIS.MORADOR),
+  opcaoPerfil(PERFIS.CONVIDADO),
 ];
 
 /** Matriz: perfil do ator → perfis que pode cadastrar via convite. */
@@ -45,14 +82,12 @@ export const PERMISSOES_CADASTRO = {
     PERFIS.ADMIN_GERAL,
     PERFIS.ADMIN_SINDICO,
     PERFIS.PORTEIRO,
-    PERFIS.TERCEIRO,
     PERFIS.MORADOR,
     PERFIS.DONO_ALUGUEL,
     PERFIS.CONVIDADO,
   ],
   [PERFIS.ADMIN_SINDICO]: [
     PERFIS.PORTEIRO,
-    PERFIS.TERCEIRO,
     PERFIS.MORADOR,
     PERFIS.DONO_ALUGUEL,
     PERFIS.CONVIDADO,
@@ -86,31 +121,7 @@ export const PERFIS_CONDOMINIO = [
   PERFIS.ADMIN_GERAL,
   PERFIS.ADMIN_SINDICO,
   PERFIS.PORTEIRO,
-  PERFIS.TERCEIRO,
 ];
-
-/**
- * Perfis que atuam como "funcionário responsável".
- *
- * Fonte única: vale para a aba Funcionários do registro de entrada e saída e
- * para o responsável da reserva de evento do condomínio. Espelha
- * PERFIS_FUNCIONARIO de services/auth-api/constants/perfis.js — duas listas
- * paralelas divergiriam na primeira inclusão ou remoção de perfil.
- */
-export const PERFIS_FUNCIONARIO = [PERFIS.PORTEIRO, PERFIS.ADMIN_SINDICO];
-
-/**
- * Perfis que decidem sobre reservas pendentes.
- *
- * Espelha PERFIS_APROVAM de ReservaService.java: o porteiro registra reservas
- * mas não aprova as dos outros, senão a exigência de aprovação do espaço
- * deixaria de significar alguma coisa.
- */
-export const PERFIS_APROVAM_RESERVA = [PERFIS.ADMIN_SINDICO, PERFIS.ADMIN_GERAL];
-
-export function podeAprovarReserva(perfil) {
-  return PERFIS_APROVAM_RESERVA.includes(perfil);
-}
 
 export const PERFIS_ACESSO_ADMIN = [
   PERFIS.ADMIN_GERAL,
@@ -134,13 +145,6 @@ export function podeAcessarAdmin(perfil) {
 
 export function podeAcessarPortaria(perfil) {
   return PERFIS_PORTARIA.includes(perfil);
-}
-
-/** Perfis que não acessam telas do sistema (acesso desabilitado por padrão). */
-export const PERFIS_SEM_ACESSO = [PERFIS.CONVIDADO, PERFIS.TERCEIRO];
-
-export function perfilTemAcessoSistema(perfil) {
-  return !PERFIS_SEM_ACESSO.includes(perfil);
 }
 
 export function isUsuarioRestrito(usuario) {

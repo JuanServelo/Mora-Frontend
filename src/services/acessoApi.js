@@ -8,7 +8,6 @@ export const acessoApi = {
   registrarEntrada: (userId) => api.post(`/api/portaria/entrada/${userId}`),
   registrarSaida: (userId) => api.post(`/api/portaria/saida/${userId}`),
   listarHistorico: (userId) => api.get(`/api/portaria/historico/${userId}`),
-  listarHistoricoAcesso: (params) => api.get('/api/portaria/historico-acesso', { params }),
 
   listarUsuariosCondominio: () => api.get("/api/portaria/usuarios-condominio"),
 
@@ -16,4 +15,5 @@ export const acessoApi = {
   listarMeusGuests: () => api.get("/api/portaria/meus-guests"),
   alterarPermissao: (guestId, permitir) =>
     api.patch(`/api/portaria/guests/${guestId}/permissao`, { permitir }),
+  listarHistoricoAcesso: (params) => api.get('/api/portaria/historico-acesso', { params }),
 };
