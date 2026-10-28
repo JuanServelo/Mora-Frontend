@@ -42,6 +42,7 @@ import { Avisos } from "../pages/usuario/Avisos";
 import { GerenciarComunicados } from "../pages/adm/GerenciarComunicados";
 import { GerenciarFuncionarios } from "../pages/adm/GerenciarFuncionarios";
 import { PainelCondominio } from "../pages/adm/PainelCondominio";
+import { AssistenteIA } from "../pages/adm/AssistenteIA";
 import { AppLayout } from "../layouts/AppLayout";
 import { ProtectedRoute } from "./ProtectedRoute";
 import { DoormanRoute } from "./DoormanRoute";
@@ -147,6 +148,7 @@ export const router = createBrowserRouter([
       { path: "/adm/estruturas", element: <AdminRoute><GerenciarEstruturas /></AdminRoute> },
       { path: "/adm/perfis", element: <AdminRoute><GerenciarPerfis /></AdminRoute> },
       { path: "/adm/painel", element: <AdminRoute><PainelCondominio /></AdminRoute> },
+      { path: "/adm/assistente", element: <AdminRoute><AssistenteIA /></AdminRoute> },
       { path: "/adm/meu-plano", element: <AdminRoute><MeuPlano /></AdminRoute> },
       { path: "/adm/financeiro", element: <AdminRoute><GerenciarFinanceiro /></AdminRoute> },
       { path: "/adm/comunicados", element: <AdminRoute><GerenciarComunicados /></AdminRoute> },

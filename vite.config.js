@@ -99,6 +99,12 @@ export default defineConfig({
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/comunicacao-api/, ""),
       },
+      // O ia-service (Python): previsão de inadimplência e assistente do síndico.
+      "/ia-api": {
+        target: "http://localhost:8000",
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/ia-api/, ""),
+      },
     },
   },
 });
