@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Icone } from "../icones/Icone";
 
 const ESTILOS = {
@@ -28,6 +29,7 @@ const ESTILOS = {
 };
 
 function ToastItem({ toast, onDismiss }) {
+  const { t } = useTranslation("layout");
   const estilo = ESTILOS[toast.tipo] || ESTILOS.info;
 
   return (
@@ -56,7 +58,7 @@ function ToastItem({ toast, onDismiss }) {
           type="button"
           onClick={() => onDismiss(toast.id)}
           className="text-on-surface-variant hover:text-on-surface shrink-0 cursor-pointer"
-          aria-label="Fechar"
+          aria-label={t("comum:acoes.fechar")}
         >
           <Icone name="close" className="text-lg" />
         </button>

@@ -1,0 +1,222 @@
+{
+  "categorias": {
+    "barulho": "Noise",
+    "infraestrutura": "Infrastructure",
+    "limpeza": "Cleaning",
+    "garagem": "Parking",
+    "animais": "Pets",
+    "elevadores": "Elevators",
+    "iluminacao": "Lighting",
+    "eletrica": "Electrical",
+    "hidraulica": "Plumbing",
+    "pintura": "Painting",
+    "jardinagem": "Landscaping",
+    "sugestaoMelhoria": "Improvement suggestion",
+    "outros": "Other"
+  },
+  "status": {
+    "reclamacao": {
+      "pendente": "Pending",
+      "emAnalise": "Under review",
+      "resolvido": "Resolved"
+    },
+    "os": {
+      "aberta": "Open",
+      "emExecucao": "In progress",
+      "atrasada": "Overdue",
+      "concluida": "Completed"
+    }
+  },
+  "prioridades": {
+    "baixa": "Low",
+    "media": "Medium",
+    "alta": "High",
+    "critica": "Critical"
+  },
+  "tempo": {
+    "menosDeUmaHora": "less than 1 hour",
+    "horas_one": "{{count}} hour",
+    "horas_other": "{{count}} hours",
+    "dias_one": "{{count}} day",
+    "dias_other": "{{count}} days",
+    "resolvidaEm": "Resolved in {{duracao}}",
+    "abertaHa": "Open for {{duracao}}"
+  },
+  "geral": {
+    "painelAdministrativo": "Admin Panel"
+  },
+  "detalhe": {
+    "morador": "Resident",
+    "usuarioId": "User {{id}}",
+    "protocolo": "Ticket number",
+    "registradaEm": "Submitted on",
+    "tempo": "Time",
+    "anexo": "Attachment",
+    "verArquivo": "View file",
+    "descricao": "Description",
+    "ordensServico": "Work orders",
+    "prazo": "due {{data}}"
+  },
+  "gestao": {
+    "cabecalho": {
+      "titulo": "Complaint",
+      "tituloDestaque": "Management"
+    },
+    "erroCarregar": "Couldn't load the complaints.",
+    "filtrandoPor": "Filtering by:",
+    "abrirOs": "Open work order",
+    "semOs": "No linked work orders.",
+    "vazio": "No complaints found.",
+    "historico": "Service history",
+    "atendimento": {
+      "justificativaObrigatoria": "Write the reason for the change.",
+      "respostaObrigatoria": "Write a reply.",
+      "sucesso": "Reply saved. The resident has been notified.",
+      "erro": "Couldn't save the reply.",
+      "tituloComStatus": "Reply and change status",
+      "titulo": "Reply",
+      "placeholderJustificativa": "Reason — the resident will see this text.",
+      "placeholderResposta": "Type your reply to the resident...",
+      "manterStatus": "Keep status ({{status}})",
+      "mudarPara": "Change to: {{status}}"
+    }
+  },
+  "minhas": {
+    "cabecalho": {
+      "area": "Resident Area",
+      "titulo": "My",
+      "tituloDestaque": "Complaints"
+    },
+    "abas": {
+      "nova": "File a Complaint",
+      "minhas": "My Complaints"
+    },
+    "nova": {
+      "titulo": "File a Complaint",
+      "subtitulo": "Describe the issue and our team will get back to you soon.",
+      "categoria": "Category",
+      "descricaoPlaceholder": "Describe the issue in as much detail as possible...",
+      "anexo": "Attachment URL (optional)",
+      "enviar": "Submit complaint",
+      "erro": "Couldn't submit the complaint."
+    },
+    "registrada": {
+      "titulo": "Complaint submitted!",
+      "texto": "Ticket <protocolo>{{protocolo}}</protocolo>. Track its progress in the <aba>My Complaints</aba> tab — you'll be notified when management replies.",
+      "outra": "File another complaint"
+    },
+    "vazio": "You haven't filed any complaints yet.",
+    "aguardando": "Waiting for a reply from management.",
+    "respostas": "Replies from management"
+  },
+  "ordensServico": {
+    "preventiva": "Preventive",
+    "abas": {
+      "ordens": "Work orders",
+      "fornecedores": "Vendors"
+    },
+    "cabecalho": {
+      "painel": "Admin Panel",
+      "titulo": "Work",
+      "tituloDestaque": "Orders",
+      "descricao": "Corrective maintenance, opened from a complaint, and preventive maintenance. Work orders past their due date are marked overdue every morning, and you get notified."
+    },
+    "kpis": {
+      "emAberto": "Open",
+      "emExecucao_one": "{{count}} in progress",
+      "emExecucao_other": "{{count}} in progress",
+      "atrasadas": "Overdue",
+      "criticasAtrasadas": "Critical overdue",
+      "concluidasNoPrazo": "Completed on time",
+      "deTotal": "{{parte}} of {{total}}"
+    },
+    "lista": {
+      "erroCarregar": "Couldn't load the work orders.",
+      "ocorrenciaNaoEncontrada": "Complaint not found.",
+      "novaPreventiva": "New preventive work order",
+      "vazio": "No work orders.",
+      "concluidaData": "Completed {{data}}",
+      "prazoData": "Due {{data}}"
+    },
+    "nova": {
+      "titulo": "New work order",
+      "aPartirDe": "From complaint",
+      "semOrigem": "Preventive maintenance, not linked to a complaint.",
+      "abrir": "Open work order",
+      "abrindo": "Opening…",
+      "campos": {
+        "descricao": "Service description",
+        "descricaoPlaceholder": "What needs to be done",
+        "prioridade": "Priority",
+        "prazo": "Due date",
+        "fornecedor": "Vendor (optional)",
+        "responsavel": "Assignee",
+        "responsavelPlaceholder": "Who will do the work",
+        "responsavelVazioFornecedor": "Leave blank to use the vendor"
+      },
+      "toast": {
+        "semResponsavel": "Enter an assignee or choose a vendor.",
+        "abertaComOrigem": "Work order opened. The resident has been notified.",
+        "preventivaAberta": "Preventive work order opened.",
+        "erroAbrir": "Couldn't open the work order."
+      }
+    },
+    "detalhe": {
+      "responsavel": "Assignee",
+      "origem": "Source",
+      "ocorrencia": "Complaint {{protocolo}}",
+      "abertaEm": "Opened on",
+      "prazo": "Due date",
+      "concluidaEm": "Completed on",
+      "noPrazo": "On time",
+      "foraDoPrazo": "Late (due {{prazo}})",
+      "descricao": "Description",
+      "custo": "Cost",
+      "custoReais": "Cost (R$)",
+      "custoPlaceholder": "0.00",
+      "observacoes": "Notes",
+      "observacoesPlaceholder": "What was done, parts replaced, warranty...",
+      "andamento": "Progress",
+      "sistema": "System",
+      "registrarAndamento": "Log progress",
+      "andamentoPlaceholderAberta": "The first update moves the work order to in progress",
+      "andamentoPlaceholder": "What was done",
+      "registrar": "Log",
+      "concluir": "Complete work order",
+      "encerramento": "Closing",
+      "concluindo": "Completing…",
+      "confirmarConclusao": "Confirm completion",
+      "toast": {
+        "erroCarregar": "Couldn't load the work order.",
+        "andamentoRegistrado": "Progress logged.",
+        "erroAndamento": "Couldn't log the progress.",
+        "concluida": "Work order completed.",
+        "erroConcluir": "Couldn't complete the work order."
+      }
+    }
+  },
+  "fornecedores": {
+    "vazio": "No vendors registered.",
+    "desativar": "Deactivate",
+    "reativar": "Reactivate",
+    "form": {
+      "editar": "Edit vendor",
+      "cadastrar": "Add vendor",
+      "nome": "Name",
+      "servico": "Service",
+      "servicoPlaceholder": "Electrical, elevators...",
+      "telefone": "Phone",
+      "email": "Email",
+      "documento": "Tax ID (CNPJ / CPF)"
+    },
+    "toast": {
+      "atualizado": "Vendor updated.",
+      "cadastrado": "Vendor added.",
+      "erroSalvar": "Couldn't save the vendor.",
+      "desativado": "Vendor deactivated.",
+      "reativado": "Vendor reactivated.",
+      "erroAlterar": "Couldn't update the vendor.",
+      "erroCarregar": "Couldn't load the vendors."
+    }
+  }
+}

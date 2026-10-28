@@ -1,0 +1,203 @@
+{
+  "cabecalho": {
+    "painelAdministrativo": "Painel Administrativo",
+    "condominio": "Condomínio",
+    "gestaoDe": "Gestão de",
+    "minhas": "Minhas",
+    "reunioes": "Reuniões",
+    "votacoes": "Votações"
+  },
+  "acoes": {
+    "salvando": "Salvando...",
+    "finalizar": "Finalizar",
+    "salvarAlteracoes": "Salvar Alterações"
+  },
+  "status": {
+    "reuniao": {
+      "agendada": "Agendada",
+      "cancelada": "Cancelada",
+      "finalizada": "Finalizada"
+    },
+    "votacao": {
+      "aberta": "Aberta",
+      "encerrada": "Encerrada",
+      "cancelada": "Cancelada"
+    },
+    "votacaoSigla": {
+      "aberta": "ABERTA",
+      "encerrada": "ENCERRADA",
+      "cancelada": "CANCELADA"
+    },
+    "presenca": {
+      "pendente": "Pendente",
+      "confirmado": "Confirmado",
+      "recusado": "Recusado"
+    }
+  },
+  "abas": {
+    "reunioes": "Reuniões",
+    "atas": "Atas"
+  },
+  "reunioes": {
+    "titulo": "Reuniões",
+    "nova": "Nova Reunião",
+    "editarId": "Editar Reunião #{{id}}",
+    "descartarEdicao": "Descartar Edição",
+    "form": {
+      "titulo": "Título",
+      "tituloPlaceholder": "Ex: Reunião de Condomínio",
+      "descricao": "Descrição",
+      "descricaoPlaceholder": "Descrição da reunião",
+      "inicio": "Início",
+      "fim": "Fim",
+      "organizador": "Organizador",
+      "voce": "Você ({{nome}})",
+      "carregando": "Carregando...",
+      "selecionarConvidados": "Selecionar Convidados",
+      "nenhumConvidado": "Nenhum convidado selecionado.",
+      "buscarMoradores": "Buscar moradores por nome, e-mail, bloco ou apt...",
+      "nenhumMorador": "Nenhum outro morador cadastrado.",
+      "nomeApt": "{{nome}} (Apt {{apt}})",
+      "blocoApt": "Bloco {{bloco}} · Apt {{apt}}",
+      "criar": "Criar Reunião"
+    },
+    "busca": {
+      "label": "Buscar reuniões por data",
+      "buscando": "Buscando...",
+      "encontradas": "Reuniões encontradas para o dia ({{data}})",
+      "nenhuma": "Nenhuma reunião encontrada para esta data.",
+      "erro": "Erro ao buscar reuniões."
+    },
+    "card": {
+      "id": "ID: #{{id}}",
+      "organizador": "Organizador",
+      "inicio": "Início: {{data}}",
+      "fim": "Fim: {{data}}",
+      "entrarMeet": "Entrar no Google Meet",
+      "suaPresenca": "Sua Presença",
+      "recusar": "Recusar",
+      "criarAta": "Criar Ata"
+    },
+    "detalhe": {
+      "googleMeet": "Google Meet",
+      "convidados": "Convidados e Presenças ({{total}})",
+      "nenhumConvidado": "Nenhum convidado nesta reunião.",
+      "usuarioId": "Usuário ID #{{id}}"
+    },
+    "ata": {
+      "carregando": "Carregando Ata...",
+      "titulo": "Ata da Reunião",
+      "editar": "Editar Ata",
+      "criar": "Criar Ata",
+      "topicos": "Tópicos Discutidos",
+      "topicosPlaceholder": "Liste os tópicos principais discutidos...",
+      "decisoes": "Decisões Tomadas",
+      "decisoesPlaceholder": "Liste as decisões e resoluções acordadas...",
+      "salvar": "Salvar Ata",
+      "presentes": "Presentes na Reunião",
+      "idPresente": "ID #{{id}}",
+      "publicadaEm": "Publicada em: {{data}}"
+    },
+    "semana": {
+      "titulo": "Minhas Reuniões da Semana",
+      "periodo": "Período: {{inicio}} a {{fim}}",
+      "atualizar": "Atualizar reuniões",
+      "carregando": "Carregando reuniões...",
+      "vazio": "Você não tem reuniões agendadas para esta semana."
+    },
+    "toast": {
+      "atualizada": "Reunião atualizada com sucesso!",
+      "agendada": "Reunião agendada com sucesso!",
+      "erroSalvar": "Erro ao salvar reunião.",
+      "ataAtualizada": "Ata atualizada com sucesso!",
+      "ataCriada": "Ata criada com sucesso!",
+      "erroSalvarAta": "Erro ao salvar ata: {{erro}}",
+      "erroCancelar": "Erro ao cancelar reunião.",
+      "erroFinalizar": "Erro ao finalizar reunião.",
+      "avaliacaoRegistrada": "Avaliação registrada!",
+      "erroAvaliar": "Erro ao avaliar.",
+      "respostaRegistrada": "Resposta registrada!",
+      "erroPresenca": "Erro ao responder presença.",
+      "erroAbrirAta": "Erro ao abrir ata.",
+      "erroDetalhes": "Erro ao carregar detalhes da reunião."
+    },
+    "confirmar": {
+      "cancelarTitulo": "Cancelar reunião",
+      "cancelarMensagem": "Deseja cancelar esta reunião?",
+      "cancelarBotao": "Cancelar reunião",
+      "finalizarTitulo": "Finalizar reunião",
+      "finalizarMensagem": "Deseja finalizar esta reunião?"
+    }
+  },
+  "atas": {
+    "titulo": "Atas de Reunião",
+    "idReuniao": "ID da Reunião",
+    "idPlaceholder": "Digite o ID da reunião",
+    "naoEncontrada": "Ata não encontrada para esta reunião. Você pode criar uma.",
+    "erroSalvar": "Erro ao salvar ata.",
+    "tituloId": "Ata da Reunião #{{id}}",
+    "presentesIds": "Presentes (IDs)",
+    "nova": "Nova Ata",
+    "editar": "Editar Ata",
+    "criar": "Criar Ata",
+    "topicosPlaceholder": "Liste os tópicos discutidos",
+    "decisoesPlaceholder": "Liste as decisões tomadas",
+    "registrar": "Registrar Ata"
+  },
+  "votacoes": {
+    "titulo": "Votações",
+    "nova": "Nova Votação",
+    "form": {
+      "titulo": "Título",
+      "tituloPlaceholder": "Ex: Aprovação do orçamento",
+      "descricao": "Descrição",
+      "descricaoPlaceholder": "Descrição da votação",
+      "dataEncerramento": "Data de Encerramento (opcional)",
+      "opcoes": "Opções (separadas por vírgula)",
+      "opcoesPlaceholder": "ex: Sim, Não, Abstenção",
+      "criar": "Criar Votação"
+    },
+    "buscarLabel": "Buscar votação por Título",
+    "buscarPlaceholder": "Digite o título da votação",
+    "doCondominio": "Votações do Condomínio",
+    "disponiveis": "Votações Disponíveis",
+    "buscando": "Buscando votações...",
+    "nenhuma": "Nenhuma votação encontrada no condomínio.",
+    "erroBuscar": "Erro ao buscar votações.",
+    "encerrar": "Encerrar",
+    "encerramento": "Encerramento:",
+    "opcoes": "Opções",
+    "resultado_one": "{{pct}}% ({{count}} voto)",
+    "resultado_other": "{{pct}}% ({{count}} votos)",
+    "jaVotou": "Você já registrou o seu voto nesta votação!",
+    "registrando": "Registrando...",
+    "confirmarVoto": "Confirmar Voto",
+    "toast": {
+      "criada": "Votação criada!",
+      "erroCriar": "Erro ao criar votação.",
+      "encerrada": "Votação encerrada!",
+      "erroEncerrar": "Erro ao encerrar votação.",
+      "votoRegistrado": "Voto registrado!",
+      "erroVoto": "Erro ao registrar voto."
+    },
+    "confirmar": {
+      "titulo": "Encerrar votação",
+      "mensagem": "Deseja encerrar esta votação?"
+    }
+  },
+  "minhas": {
+    "proximas": "Próximas Reuniões",
+    "vazio": "Nenhuma reunião agendada no momento.",
+    "erroCarregar": "Erro ao carregar suas reuniões.",
+    "id": "ID: {{id}}",
+    "semDescricao": "Sem descrição.",
+    "inicio": "Início",
+    "fimEstimado": "Fim Estimado",
+    "acesso": "Acesso à Reunião",
+    "entrarMeet": "Entrar no Google Meet",
+    "disponivelEm15": "Disponível 15 minutos antes do início",
+    "ataTitulo": "Ata da Reunião",
+    "topicos": "Tópicos Discutidos",
+    "decisoes": "Decisões Tomadas"
+  }
+}

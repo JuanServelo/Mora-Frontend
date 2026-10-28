@@ -1,0 +1,155 @@
+{
+  "sidebar": {
+    "links": {
+      "inicio": "Início",
+      "conversas": "Conversas",
+      "cobrancas": "Cobranças",
+      "espacos": "Espaços",
+      "entregas": "Entregas",
+      "reunioes": "Reuniões",
+      "reclamacoes": "Reclamações",
+      "comunicados": "Comunicados",
+      "conhecimento": "Conhecimento",
+      "votacoes": "Votações",
+      "veiculos": "Veículos",
+      "cadastros": "Cadastros",
+      "entradasSaidas": "Entradas e Saídas",
+      "chaves": "Chaves",
+      "usuariosCondominio": "Usuários do Condomínio",
+      "avisos": "Avisos"
+    },
+    "subtitulo": {
+      "portaria": "Portaria",
+      "plataforma": "Plataforma",
+      "administrativo": "Administrativo",
+      "condominio": "Condomínio"
+    },
+    "fecharMenu": "Fechar menu",
+    "painel": "Painel",
+    "notificacoes_one": "{{count}} notificação",
+    "notificacoes_other": "{{count}} notificações",
+    "usuarioPadrao": "Admin"
+  },
+  "menuAdmin": {
+    "painelGeral": {
+      "rotulo": "Painel Geral",
+      "descricao": "Indicadores da plataforma"
+    },
+    "clientes": {
+      "rotulo": "Clientes",
+      "descricao": "Gestão de condomínios contratantes"
+    },
+    "planos": {
+      "rotulo": "Planos",
+      "descricao": "Planos comerciais"
+    },
+    "usuarios": {
+      "rotulo": "Usuários",
+      "descricao": "Cadastro e convites"
+    },
+    "estruturas": {
+      "rotulo": "Estruturas",
+      "descricao": "Blocos, apartamentos e áreas comuns"
+    },
+    "perfis": {
+      "rotulo": "Perfis",
+      "descricao": "Permissões por perfil"
+    },
+    "painel": {
+      "rotulo": "Painel",
+      "descricao": "Indicadores operacionais e estratégicos"
+    },
+    "meuPlano": {
+      "rotulo": "Meu Plano",
+      "descricao": "Plano contratado e módulos disponíveis"
+    },
+    "reservas": {
+      "rotulo": "Reservas",
+      "descricao": "Agenda dos espaços e aprovações"
+    },
+    "financeiro": {
+      "rotulo": "Financeiro",
+      "descricao": "Taxas, rateio e cobranças"
+    },
+    "funcionarios": {
+      "rotulo": "Funcionários",
+      "descricao": "Situação funcional, turnos e liberações"
+    },
+    "reunioes": {
+      "rotulo": "Reuniões",
+      "descricao": "Assembleias e atas"
+    },
+    "votacoes": {
+      "rotulo": "Votações",
+      "descricao": "Votações e enquetes do condomínio"
+    },
+    "reclamacoes": {
+      "rotulo": "Reclamações",
+      "descricao": "Ocorrências dos moradores"
+    },
+    "ordensServico": {
+      "rotulo": "Ordens de Serviço",
+      "descricao": "Manutenção corretiva e preventiva"
+    },
+    "conversas": {
+      "rotulo": "Conversas",
+      "descricao": "Chamados dos moradores"
+    },
+    "comunicados": {
+      "rotulo": "Comunicados",
+      "descricao": "Quem confirmou a leitura dos avisos"
+    },
+    "conhecimento": {
+      "rotulo": "Conhecimento",
+      "descricao": "Base de conhecimento e FAQ"
+    }
+  },
+  "appLayout": {
+    "abrirMenu": "Abrir menu",
+    "titulos": {
+      "inicio": "Início",
+      "painel": "Painel",
+      "visaoGeral": "Visão Geral",
+      "clientes": "Clientes",
+      "planos": "Planos",
+      "usuarios": "Usuários",
+      "estruturas": "Estruturas",
+      "perfis": "Perfis",
+      "financeiro": "Financeiro",
+      "reunioes": "Reuniões",
+      "reclamacoes": "Reclamações",
+      "ordensServico": "Ordens de Serviço",
+      "comunicados": "Comunicados",
+      "conhecimento": "Conhecimento",
+      "meuPlano": "Meu Plano",
+      "entregas": "Entregas",
+      "conversas": "Conversas",
+      "avisos": "Avisos",
+      "entradasSaidas": "Entradas e Saídas",
+      "chaves": "Chaves"
+    }
+  },
+  "perfis": {
+    "ADMIN_GERAL": "Admin Geral",
+    "ADMIN_SINDICO": "Admin Síndico",
+    "PORTEIRO": "Porteiro",
+    "MORADOR": "Morador",
+    "DONO_ALUGUEL": "Dono Aluguel",
+    "CONVIDADO": "Convidado"
+  },
+  "origemNotificacao": {
+    "financeiro": "Financeiro",
+    "comunicacao": "Mensagens",
+    "portaria": "Portaria",
+    "gestao": "Gestão",
+    "ocorrencias": "Ocorrências",
+    "plataforma": "Mora"
+  },
+  "rota": {
+    "carregando": "Carregando..."
+  },
+  "foto": {
+    "alt": "Foto de {{nome}}",
+    "altPadrao": "Foto de perfil"
+  }
+}

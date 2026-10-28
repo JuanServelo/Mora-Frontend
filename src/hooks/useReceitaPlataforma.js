@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import i18n from "../i18n";
 import { gestaoApi } from "../services/gestaoApi";
 
 /**
@@ -25,7 +26,7 @@ export function useReceitaPlataforma(meses, plano) {
         setDados(r.data);
         setErro("");
       })
-      .catch(() => vivo && setErro("Não foi possível carregar a receita das assinaturas."));
+      .catch(() => vivo && setErro(i18n.t("paineis:geral.erroReceita")));
     return () => {
       vivo = false;
     };

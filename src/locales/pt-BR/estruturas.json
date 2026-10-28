@@ -1,0 +1,230 @@
+{
+  "unidade": {
+    "naoAtribuida": "Não atribuída",
+    "comBloco": "{{bloco}} - Apto {{numero}}",
+    "semBloco": "Apto {{numero}}"
+  },
+  "geral": {
+    "carregando": "Carregando..."
+  },
+  "acoes": {
+    "desativar": "Desativar",
+    "ativar": "Ativar",
+    "salvarAlteracoes": "Salvar alterações"
+  },
+  "status": {
+    "ativo": "ativo",
+    "inativo": "inativo",
+    "ativa": "ativa",
+    "inativa": "inativa"
+  },
+  "resumo": {
+    "total": "Total",
+    "ativos": "Ativos",
+    "inativos": "Inativos",
+    "ativas": "Ativas",
+    "inativas": "Inativas",
+    "apartamentos": "Apartamentos",
+    "reservaveis": "Reserváveis"
+  },
+  "pagina": {
+    "semCliente": "Nenhum cliente encontrado",
+    "semClienteAntes": "Crie um cliente em ",
+    "semClienteLink": "Clientes",
+    "semClienteDepois": " antes de gerenciar estruturas.",
+    "painel": "Painel Administrativo",
+    "estruturas": "Estruturas",
+    "fisicas": "Físicas",
+    "cliente": "Cliente"
+  },
+  "abas": {
+    "blocos": "Blocos & Apartamentos",
+    "areasComuns": "Áreas Comuns",
+    "vagas": "Vagas"
+  },
+  "campos": {
+    "nome": "Nome",
+    "sigla": "Sigla",
+    "descricao": "Descrição",
+    "andares": "Andares",
+    "aptsAndar": "Apts/Andar",
+    "aptosPorAndar": "Aptos por andar",
+    "bloco": "Bloco",
+    "numero": "Número",
+    "andar": "Andar",
+    "quartos": "Quartos",
+    "areaM2": "Área (m²)",
+    "areaTotal": "Área total (m²)",
+    "observacoes": "Observações",
+    "capacidade": "Capacidade",
+    "capacidadeMaxima": "Capacidade máxima (pessoas)",
+    "reservavel": "Reservável",
+    "aprovacao": "Aprovação",
+    "antecedencia": "Antecedência",
+    "antecedenciaMinima": "Antecedência mínima para reservar (horas)",
+    "tipo": "Tipo",
+    "localizacao": "Localização",
+    "apartamento": "Apartamento",
+    "condominio": "Condomínio",
+    "emailConvidado": "E-mail do convidado"
+  },
+  "placeholders": {
+    "blocoNome": "Ex: Bloco A",
+    "blocoSigla": "Ex: A",
+    "blocoDescricao": "Ex: Torre principal",
+    "andares": "Ex: 10",
+    "aptosPorAndar": "Ex: 4",
+    "emailConvidado": "pessoa@email.com",
+    "aptNumero": "Ex: 101",
+    "andar": "Ex: 1",
+    "quartos": "Ex: 2",
+    "areaApt": "Ex: 65.50",
+    "opcional": "Opcional",
+    "areaNome": "Ex: Piscina Principal",
+    "capacidade": "Ex: 50",
+    "areaComum": "Ex: 120.00",
+    "areaDescricao": "Descreva a área comum",
+    "areaLocalizacao": "Ex: Térreo, ao lado da portaria",
+    "areaObservacoes": "Informações adicionais",
+    "vagaNumero": "Ex: 12",
+    "vagaLocalizacao": "Ex: Setor A - Térreo"
+  },
+  "validacao": {
+    "nomeObrigatorio": "Nome é obrigatório.",
+    "andaresObrigatorio": "Quantidade de andares é obrigatória.",
+    "inteiroPositivo": "Informe um número inteiro maior que zero.",
+    "maxAndares": "O número máximo de andares permitido é {{max}}.",
+    "aptosPorAndarObrigatorio": "Apartamentos por andar é obrigatório.",
+    "maxAptosPorAndar": "O número máximo de apartamentos por andar é {{max}}.",
+    "numeroObrigatorio": "Número é obrigatório.",
+    "andarObrigatorio": "Andar é obrigatório.",
+    "quartosObrigatorio": "Quantidade de quartos é obrigatória.",
+    "quartosFaixa": "A quantidade de quartos deve estar entre {{min}} e {{max}}.",
+    "areaTotalObrigatoria": "Área total é obrigatória.",
+    "areaTotalFaixa": "A área total deve estar entre {{min}} e {{max}} m².",
+    "capacidadeObrigatoria": "Capacidade máxima é obrigatória.",
+    "capacidadeFaixa": "A capacidade máxima deve estar entre {{min}} e {{max}} pessoas.",
+    "antecedenciaFaixa": "Informe de 0 a {{max}} horas (0 = sem exigência).",
+    "areaObrigatoria": "Área é obrigatória.",
+    "areaFaixa": "A área deve estar entre {{min}} e {{max}} m²."
+  },
+  "antecedencia": {
+    "semExigencia": "Sem exigência: o morador pode reservar para qualquer horário futuro.",
+    "dias_one": "{{count}} dia",
+    "dias_other": "{{count}} dias",
+    "horas_one": "{{count}} hora",
+    "horas_other": "{{count}} horas",
+    "exige": "O morador precisa pedir com {{texto}} de antecedência. Síndico e admin não são barrados."
+  },
+  "blocos": {
+    "novo": "Novo Bloco",
+    "editar": "Editar bloco",
+    "cadastrar": "Cadastrar bloco",
+    "buscaPlaceholder": "Buscar por nome ou descrição...",
+    "vazio": "Nenhum bloco encontrado.",
+    "verApartamentos": "Ver apartamentos",
+    "toast": {
+      "criado": "Bloco criado com sucesso.",
+      "erroCriar": "Erro ao criar bloco.",
+      "atualizado": "Bloco atualizado.",
+      "erroAtualizar": "Erro ao atualizar bloco.",
+      "desativado": "Bloco desativado.",
+      "reativado": "Bloco reativado.",
+      "erroStatus": "Erro ao alterar status do bloco."
+    }
+  },
+  "apartamentos": {
+    "novo": "Novo Apartamento",
+    "novoEm": "Novo Apartamento em {{bloco}}",
+    "cadastrar": "Cadastrar apartamento",
+    "voltarBlocos": "Voltar para blocos",
+    "vazioBloco": "Nenhum apartamento neste bloco ainda.",
+    "vazio": "Nenhum apartamento encontrado.",
+    "buscaPlaceholder": "Buscar por número ou andar...",
+    "todosBlocos": "Todos os blocos",
+    "apt": "Apt {{numero}}",
+    "andarOrdinal": "{{andar}}º andar",
+    "quartos_one": "{{count}} quartos",
+    "quartos_other": "{{count}} quartos",
+    "maxPorAndar": "(máx. {{max}}/andar)",
+    "selecioneAndar": "Selecione o andar",
+    "lotado": "lotado",
+    "todosLotados": "Todos os andares deste bloco já atingiram o limite de apartamentos.",
+    "toast": {
+      "cadastrado": "Apartamento cadastrado.",
+      "atualizado": "Apartamento atualizado.",
+      "erroCriar": "Erro ao criar apartamento.",
+      "erroAtualizar": "Erro ao atualizar apartamento."
+    }
+  },
+  "convite": {
+    "semPermissao": "Seu perfil não pode emitir convites de morador para esta unidade.",
+    "titulo": "Convidar morador para esta unidade",
+    "tipoMorador": "Tipo de morador",
+    "gerar": "Gerar convite",
+    "gerando": "Gerando…",
+    "gerado": "Convite gerado para Apt {{numero}} · {{bloco}}",
+    "emailNaoConfigurado": "O e-mail automático não está configurado — copie e envie o link abaixo manualmente.",
+    "codigo": "Código",
+    "linkAtivacao": "Link de ativação",
+    "copiar": "Copiar",
+    "copiado": "Copiado",
+    "gerarOutro": "Gerar outro convite",
+    "toast": {
+      "semEmail": "Convite criado — envie o link manualmente.",
+      "codigo": "Código: {{codigo}}",
+      "enviado": "Convite enviado.",
+      "erro": "Erro ao gerar convite."
+    }
+  },
+  "areas": {
+    "nova": "Nova Área Comum",
+    "cadastrar": "Cadastrar área comum",
+    "buscaPlaceholder": "Buscar por nome ou localização...",
+    "todosTipos": "Todos os tipos",
+    "vazio": "Nenhuma área comum encontrada.",
+    "aprovacaoSindico": "Síndico",
+    "aprovacaoAutomatica": "Automática",
+    "horasCurto": "{{horas}}h",
+    "antecedenciaNenhuma": "Nenhuma",
+    "horarioFuncionamento": "Horário de funcionamento",
+    "permiteReservas": "Permite reservas",
+    "exigeAprovacao": "Exige aprovação do síndico",
+    "exigeAprovacaoDescricao": "As solicitações ficam pendentes até serem aprovadas e expiram 24h antes do início se ninguém decidir.",
+    "toast": {
+      "criada": "Área comum criada com sucesso.",
+      "erroCriar": "Erro ao criar área comum.",
+      "atualizada": "Área comum atualizada.",
+      "erroAtualizar": "Erro ao atualizar área comum.",
+      "desativada": "Área desativada.",
+      "reativada": "Área reativada.",
+      "erroStatus": "Erro ao alterar status da área comum."
+    }
+  },
+  "tiposArea": {
+    "PISCINA": "PISCINA",
+    "SALAO_FESTAS": "SALAO FESTAS",
+    "ACADEMIA": "ACADEMIA",
+    "CHURRASQUEIRA": "CHURRASQUEIRA",
+    "QUADRA": "QUADRA",
+    "PLAYGROUND": "PLAYGROUND",
+    "OUTRO": "OUTRO"
+  },
+  "vagas": {
+    "nova": "Nova Vaga",
+    "cadastrar": "Cadastrar vaga",
+    "buscaPlaceholder": "Buscar por número ou localização...",
+    "todos": "Todos",
+    "semApartamento": "Sem apartamento",
+    "vazio": "Nenhuma vaga encontrada.",
+    "vaga": "Vaga {{numero}}",
+    "selecioneTipo": "Selecione um tipo",
+    "tipos": {
+      "coberta": "Coberta",
+      "descoberta": "Descoberta"
+    },
+    "apartamentoOpcional": "Apartamento (opcional)",
+    "erroCriar": "Erro ao criar vaga.",
+    "erroAtualizar": "Erro ao atualizar vaga."
+  }
+}

@@ -7,6 +7,8 @@ import { useNotificacoes } from "../../contexts/NotificacoesContext";
 import { comunicacaoApi } from "../../services/comunicacaoApi";
 import { FotoUsuario } from "../../components/avatar/FotoUsuario";
 import { PERFIS } from "../../utils/perfis";
+import { useTranslation } from "react-i18next";
+import { idiomaAtual } from "../../i18n";
 
 const PERFIS_GESTAO = [PERFIS.ADMIN_GERAL, PERFIS.ADMIN_SINDICO];
 
@@ -53,6 +55,7 @@ function useAlturaRestante(ref) {
  * conversa a cada mensagem nova.
  */
 export function Conversas() {
+  const { t } = useTranslation("conversas");
   const { id } = useParams();
   const navigate = useNavigate();
   const { usuario } = useAuth();
@@ -75,11 +78,11 @@ export function Conversas() {
       setConversas(data.conversas ?? []);
       setErro("");
     } catch {
-      setErro("Não foi possível carregar as conversas.");
+      setErro(t("erroCarregar"));
     } finally {
       setCarregando(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => { carregar(); }, [carregar]);
 
@@ -114,12 +117,12 @@ export function Conversas() {
       <header className="flex items-center justify-between gap-4 shrink-0">
         <div className="min-w-0">
           <h1 className="font-headline text-2xl lg:text-3xl font-bold text-on-surface truncate">
-            Conversas
+            {t("titulo")}
           </h1>
           <p className="text-on-surface-variant text-xs lg:text-sm">
             {ehGestao
-              ? "Chamados dos moradores e conversas diretas"
-              : "Fale com a administração do condomínio"}
+              ? t("subtituloGestao")
+              : t("subtituloMorador")}
           </p>
         </div>
         <button
@@ -127,7 +130,7 @@ export function Conversas() {
           className="shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary text-on-primary font-semibold text-sm hover:bg-primary/90 transition cursor-pointer"
         >
           <Icone name="edit_square" className="text-lg" />
-          <span className="hidden sm:inline">Nova conversa</span>
+          <span className="hidden sm:inline">{t("nova")}</span>
         </button>
       </header>
 
@@ -158,7 +161,7 @@ export function Conversas() {
               <input
                 value={busca}
                 onChange={(e) => setBusca(e.target.value)}
-                placeholder="Buscar conversa"
+                placeholder={t("buscarPlaceholder")}
                 className="w-full bg-surface-container-highest/40 border-none rounded-xl pl-10 pr-3 py-2.5 text-sm text-on-surface placeholder:text-on-surface-variant/50 focus:outline-none focus:ring-2 focus:ring-primary/40"
               />
             </div>
@@ -209,8 +212,9 @@ export function Conversas() {
 /* ── lista ─────────────────────────────────────────────────────────────── */
 
 function Lista({ conversas, carregando, selecionada, ehGestao, temBusca, aoEscolher }) {
+  const { t } = useTranslation("conversas");
   if (carregando) {
-    return <p className="p-4 text-sm text-on-surface-variant">Carregando…</p>;
+    return <p className="p-4 text-sm text-on-surface-variant">{t("comum:estado.carregando")}</p>;
   }
 
   if (conversas.length === 0) {
@@ -219,10 +223,10 @@ function Lista({ conversas, carregando, selecionada, ehGestao, temBusca, aoEscol
         <Icone name={temBusca ? "search_off" : "forum"} className="text-3xl text-on-surface-variant/30" />
         <p className="text-sm text-on-surface-variant">
           {temBusca
-            ? "Nenhuma conversa com esse termo."
+            ? t("lista.semResultado")
             : ehGestao
-              ? "Nenhum chamado aberto."
-              : "Você ainda não abriu nenhuma conversa."}
+              ? t("lista.vazioGestao")
+              : t("lista.vazioMorador")}
         </p>
       </div>
     );
@@ -269,7 +273,7 @@ function Lista({ conversas, carregando, selecionada, ehGestao, temBusca, aoEscol
 
               <div className="flex items-center gap-2 mt-0.5">
                 <p className="flex-1 min-w-0 truncate text-xs text-on-surface-variant/80">
-                  {c.resumo ?? <span className="italic">sem mensagem visível</span>}
+                  {c.resumo ?? <span className="italic">{t("lista.semMensagem")}</span>}
                 </p>
                 {c.encerradaEm && (
                   <Icone name="lock" className="shrink-0 text-xs text-on-surface-variant/40" />
@@ -312,6 +316,7 @@ function Avatar({ tipo, pessoa, tamanho = "w-11 h-11" }) {
 }
 
 function Vazio({ ehGestao }) {
+  const { t } = useTranslation("conversas");
   return (
     <div className="flex-1 flex flex-col items-center justify-center gap-4 text-center px-8">
       <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center">
@@ -319,12 +324,12 @@ function Vazio({ ehGestao }) {
       </div>
       <div className="max-w-sm">
         <p className="font-headline text-lg font-bold text-on-surface mb-1">
-          Escolha uma conversa
+          {t("vazio.titulo")}
         </p>
         <p className="text-sm text-on-surface-variant leading-relaxed">
           {ehGestao
-            ? "Os chamados dos moradores chegam aqui sem ninguém precisar encaminhar."
-            : "Você fala com a administração, não com uma pessoa — a conversa continua mesmo se o síndico mudar."}
+            ? t("vazio.gestao")
+            : t("vazio.morador")}
         </p>
       </div>
     </div>
@@ -334,6 +339,7 @@ function Vazio({ ehGestao }) {
 /* ── conversa aberta ───────────────────────────────────────────────────── */
 
 function Thread({ conversaId, usuario, ehGestao, aoMudar, aoVoltar }) {
+  const { t } = useTranslation("conversas");
   const [dados, setDados] = useState(null);
   const [erro, setErro] = useState("");
   const [texto, setTexto] = useState("");
@@ -350,9 +356,9 @@ function Thread({ conversaId, usuario, ehGestao, aoMudar, aoVoltar }) {
       // estado que a própria busca acabou de escrever.
       aoMudar();
     } catch (e) {
-      setErro(e.response?.data?.mensagem ?? "Não foi possível abrir a conversa.");
+      setErro(e.response?.data?.mensagem ?? t("thread.erroAbrir"));
     }
-  }, [conversaId, aoMudar]);
+  }, [conversaId, aoMudar, t]);
 
   useEffect(() => { carregar(); }, [carregar]);
 
@@ -369,7 +375,7 @@ function Thread({ conversaId, usuario, ehGestao, aoMudar, aoVoltar }) {
       setTexto("");
       await carregar();
     } catch (err) {
-      setErro(err.response?.data?.mensagem ?? "Não foi possível enviar.");
+      setErro(err.response?.data?.mensagem ?? t("thread.erroEnviar"));
     } finally {
       setEnviando(false);
     }
@@ -380,7 +386,7 @@ function Thread({ conversaId, usuario, ehGestao, aoMudar, aoVoltar }) {
       await comunicacaoApi.encerrarConversa(conversaId);
       await carregar();
     } catch (err) {
-      setErro(err.response?.data?.mensagem ?? "Não foi possível encerrar.");
+      setErro(err.response?.data?.mensagem ?? t("thread.erroEncerrar"));
     }
   }
 
@@ -394,12 +400,12 @@ function Thread({ conversaId, usuario, ehGestao, aoMudar, aoVoltar }) {
   }
 
   if (!dados) {
-    return <p className="flex-1 flex items-center justify-center text-sm text-on-surface-variant">Carregando…</p>;
+    return <p className="flex-1 flex items-center justify-center text-sm text-on-surface-variant">{t("comum:estado.carregando")}</p>;
   }
 
   const { conversa, mensagens } = dados;
   const encerrada = Boolean(conversa.encerradaEm);
-  const blocos = agruparPorDia(mensagens);
+  const blocos = agruparPorDia(mensagens, t);
   const outro = conversa.contraparte;
 
   return (
@@ -407,7 +413,7 @@ function Thread({ conversaId, usuario, ehGestao, aoMudar, aoVoltar }) {
       <header className="shrink-0 flex items-center gap-3 px-3 lg:px-5 py-3 border-b border-veu/8 bg-surface-container-low/70">
         <button
           onClick={aoVoltar}
-          aria-label="Voltar para a lista"
+          aria-label={t("thread.voltarLista")}
           className="lg:hidden -ml-1 p-1.5 rounded-lg text-on-surface-variant hover:bg-veu/5 cursor-pointer"
         >
           <Icone name="arrow_back" />
@@ -426,9 +432,9 @@ function Thread({ conversaId, usuario, ehGestao, aoMudar, aoVoltar }) {
             {outro
               ? [outro.unidade, conversa.assunto].filter(Boolean).join(" · ")
               : conversa.tipo === "ADMINISTRACAO"
-                ? "Com a administração"
-                : "Conversa direta"}
-            {encerrada && " · encerrada"}
+                ? t("thread.comAdministracao")
+                : t("thread.direta")}
+            {encerrada && t("thread.encerradaSufixo")}
           </p>
         </div>
 
@@ -438,7 +444,7 @@ function Thread({ conversaId, usuario, ehGestao, aoMudar, aoVoltar }) {
             className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-on-surface-variant hover:text-error hover:bg-error/10 transition cursor-pointer"
           >
             <Icone name="lock" className="text-sm" />
-            <span className="hidden sm:inline">Encerrar</span>
+            <span className="hidden sm:inline">{t("thread.encerrar")}</span>
           </button>
         )}
       </header>
@@ -481,7 +487,7 @@ function Thread({ conversaId, usuario, ehGestao, aoMudar, aoVoltar }) {
       {encerrada ? (
         <p className="shrink-0 px-5 py-4 border-t border-veu/8 text-xs text-on-surface-variant text-center bg-surface-container-low/70 flex items-center justify-center gap-2">
           <Icone name="lock" className="text-sm" />
-          Esta conversa foi encerrada pela administração.
+          {t("thread.encerradaAviso")}
         </p>
       ) : (
         <form
@@ -497,13 +503,13 @@ function Thread({ conversaId, usuario, ehGestao, aoMudar, aoVoltar }) {
             }}
             rows={1}
             maxLength={4000}
-            placeholder="Escreva sua mensagem…"
+            placeholder={t("thread.placeholder")}
             className="flex-1 resize-none max-h-32 bg-surface-container-highest/50 border-none rounded-2xl px-4 py-3 text-sm text-on-surface placeholder:text-on-surface-variant/50 focus:outline-none focus:ring-2 focus:ring-primary/40"
           />
           <button
             type="submit"
             disabled={!texto.trim() || enviando}
-            aria-label="Enviar"
+            aria-label={t("thread.enviar")}
             className="shrink-0 w-11 h-11 rounded-full bg-primary text-on-primary flex items-center justify-center hover:bg-primary/90 transition disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
           >
             <Icone name={enviando ? "progress_activity" : "send"} className={enviando ? "animate-spin" : ""} />
@@ -517,12 +523,13 @@ function Thread({ conversaId, usuario, ehGestao, aoMudar, aoVoltar }) {
 }
 
 function Balao({ mensagem, meu, mostrarAutor }) {
+  const { t } = useTranslation("conversas");
   if (mensagem.removida) {
     return (
       <div className={`flex ${meu ? "justify-end" : "justify-start"}`}>
         <p className="flex items-center gap-1.5 text-xs italic text-on-surface-variant/50 px-3 py-1.5">
           <Icone name="block" className="text-sm" />
-          mensagem removida
+          {t("balao.removida")}
         </p>
       </div>
     );
@@ -549,7 +556,7 @@ function Balao({ mensagem, meu, mostrarAutor }) {
                 mensagem é o que sobra — e ele vale mais que um nome ausente:
                 diz em que posição a pessoa falou, mesmo que ela tenha deixado
                 a administração depois. */}
-            {mensagem.autor?.nome ?? (daGestao ? "Administração" : "Morador")}
+            {mensagem.autor?.nome ?? (daGestao ? t("balao.administracao") : t("balao.morador"))}
           </p>
         )}
         <p className="text-sm text-on-surface leading-relaxed whitespace-pre-wrap break-words">
@@ -566,6 +573,7 @@ function Balao({ mensagem, meu, mostrarAutor }) {
 /* ── nova conversa ─────────────────────────────────────────────────────── */
 
 function ModalNova({ ehGestao, aoFechar, aoCriar }) {
+  const { t } = useTranslation("conversas");
   const [tipo, setTipo] = useState(ehGestao ? "DIRETA" : "ADMINISTRACAO");
   const [assunto, setAssunto] = useState("");
   const [corpo, setCorpo] = useState("");
@@ -597,7 +605,7 @@ function ModalNova({ ehGestao, aoFechar, aoCriar }) {
       });
       aoCriar(data.conversa);
     } catch (err) {
-      setErro(err.response?.data?.mensagem ?? "Não foi possível abrir a conversa.");
+      setErro(err.response?.data?.mensagem ?? t("modal.erroAbrir"));
     } finally {
       setEnviando(false);
     }
@@ -613,13 +621,13 @@ function ModalNova({ ehGestao, aoFechar, aoCriar }) {
         onSubmit={enviar}
         className="glass-panel rounded-3xl w-full max-w-lg p-6 space-y-4 max-h-[90dvh] overflow-y-auto"
       >
-        <h2 className="font-headline text-xl font-bold text-on-surface">Nova conversa</h2>
+        <h2 className="font-headline text-xl font-bold text-on-surface">{t("modal.titulo")}</h2>
 
         {ehGestao && (
           <div className="flex gap-2">
             {[
-              { v: "DIRETA", r: "Com uma pessoa" },
-              { v: "ADMINISTRACAO", r: "Aberta à administração" },
+              { v: "DIRETA", r: "modal.comPessoa" },
+              { v: "ADMINISTRACAO", r: "modal.abertaAdministracao" },
             ].map((o) => (
               <button
                 key={o.v}
@@ -629,7 +637,7 @@ function ModalNova({ ehGestao, aoFechar, aoCriar }) {
                   tipo === o.v ? "bg-primary/15 text-primary" : "text-on-surface-variant hover:bg-veu/5"
                 }`}
               >
-                {o.r}
+                {t(o.r)}
               </button>
             ))}
           </div>
@@ -637,14 +645,14 @@ function ModalNova({ ehGestao, aoFechar, aoCriar }) {
 
         {tipo === "DIRETA" && (
           <label className="block">
-            <span className="text-xs font-semibold text-on-surface-variant">Para</span>
+            <span className="text-xs font-semibold text-on-surface-variant">{t("modal.para")}</span>
             <select
               required
               value={destinatarioId}
               onChange={(e) => setDestinatarioId(e.target.value)}
               className="mt-1 w-full bg-surface-container-highest/40 border-none rounded-xl px-4 py-2.5 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/50 cursor-pointer"
             >
-              <option value="">Escolha o destinatário</option>
+              <option value="">{t("modal.escolhaDestinatario")}</option>
               {contatos.map((c) => (
                 <option key={c.id} value={c.id}>
                   {c.nome} — {c.perfil.replace("_", " ").toLowerCase()}
@@ -656,32 +664,31 @@ function ModalNova({ ehGestao, aoFechar, aoCriar }) {
 
         {!ehGestao && (
           <p className="text-xs text-on-surface-variant bg-veu/5 rounded-xl px-4 py-3">
-            Sua mensagem vai para a administração do condomínio. Quem estiver
-            respondendo a atende — e a conversa continua mesmo se o síndico mudar.
+            {t("modal.avisoMorador")}
           </p>
         )}
 
         <label className="block">
-          <span className="text-xs font-semibold text-on-surface-variant">Assunto</span>
+          <span className="text-xs font-semibold text-on-surface-variant">{t("modal.assunto")}</span>
           <input
             required
             maxLength={150}
             value={assunto}
             onChange={(e) => setAssunto(e.target.value)}
-            placeholder="Ex.: Infiltração na garagem"
+            placeholder={t("modal.assuntoPlaceholder")}
             className="mt-1 w-full bg-surface-container-highest/40 border-none rounded-xl px-4 py-2.5 text-sm text-on-surface placeholder:text-on-surface-variant/50 focus:outline-none focus:ring-2 focus:ring-primary/50"
           />
         </label>
 
         <label className="block">
-          <span className="text-xs font-semibold text-on-surface-variant">Mensagem</span>
+          <span className="text-xs font-semibold text-on-surface-variant">{t("modal.mensagem")}</span>
           <textarea
             required
             rows={4}
             maxLength={4000}
             value={corpo}
             onChange={(e) => setCorpo(e.target.value)}
-            placeholder="Descreva o que está acontecendo…"
+            placeholder={t("modal.mensagemPlaceholder")}
             className="mt-1 w-full resize-none bg-surface-container-highest/40 border-none rounded-xl px-4 py-2.5 text-sm text-on-surface placeholder:text-on-surface-variant/50 focus:outline-none focus:ring-2 focus:ring-primary/50"
           />
         </label>
@@ -694,14 +701,14 @@ function ModalNova({ ehGestao, aoFechar, aoCriar }) {
             onClick={aoFechar}
             className="px-4 py-2.5 rounded-xl text-sm font-semibold text-on-surface-variant hover:bg-veu/5 transition cursor-pointer"
           >
-            Cancelar
+            {t("comum:acoes.cancelar")}
           </button>
           <button
             type="submit"
             disabled={enviando}
             className="px-5 py-2.5 rounded-xl bg-primary text-on-primary text-sm font-semibold hover:bg-primary/90 transition disabled:opacity-50 cursor-pointer"
           >
-            {enviando ? "Enviando…" : "Enviar"}
+            {enviando ? t("comum:acoes.enviando") : t("comum:acoes.enviar")}
           </button>
         </div>
       </form>
@@ -714,7 +721,7 @@ function ModalNova({ ehGestao, aoFechar, aoCriar }) {
 /** Sempre a hora. Usada no balão, onde o dia já vem no separador acima. */
 function apenasHora(iso) {
   if (!iso) return "";
-  return new Date(iso).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+  return new Date(iso).toLocaleTimeString(idiomaAtual(), { hour: "2-digit", minute: "2-digit" });
 }
 
 /** `14:32` para hoje, `12/09` para os dias anteriores. Usada na lista. */
@@ -728,8 +735,8 @@ function horaCurta(iso) {
     d.getFullYear() === hoje.getFullYear();
 
   return mesmoDia
-    ? d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })
-    : d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
+    ? d.toLocaleTimeString(idiomaAtual(), { hour: "2-digit", minute: "2-digit" })
+    : d.toLocaleDateString(idiomaAtual(), { day: "2-digit", month: "2-digit" });
 }
 
 /**
@@ -738,7 +745,7 @@ function horaCurta(iso) {
  * Sem a separação, uma conversa que atravessa semanas vira um bloco contínuo e
  * a hora em cada balão deixa de situar quem lê.
  */
-function agruparPorDia(mensagens) {
+function agruparPorDia(mensagens, t) {
   const hoje = new Date();
   const ontem = new Date(hoje);
   ontem.setDate(hoje.getDate() - 1);
@@ -747,10 +754,10 @@ function agruparPorDia(mensagens) {
   for (const m of mensagens) {
     const d = new Date(m.criadaEm);
     const rotulo = mesmoDia(d, hoje)
-      ? "Hoje"
+      ? t("comum:tempo.hoje")
       : mesmoDia(d, ontem)
-        ? "Ontem"
-        : d.toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" });
+        ? t("comum:tempo.ontem")
+        : d.toLocaleDateString(idiomaAtual(), { day: "2-digit", month: "long", year: "numeric" });
 
     const ultimo = blocos.at(-1);
     if (ultimo?.rotulo === rotulo) ultimo.itens.push(m);

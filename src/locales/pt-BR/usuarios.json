@@ -1,0 +1,150 @@
+{
+  "gerenciar": {
+    "cabecalho": {
+      "painel": "Painel Administrativo",
+      "gerenciar": "Gerenciar",
+      "usuarios": "Usuários"
+    },
+    "novoUsuario": "Novo Usuário",
+    "resumo": {
+      "total": "Total",
+      "ativos": "Ativos",
+      "pendentes": "Pendentes"
+    },
+    "abas": {
+      "gerenciamento": "Gerenciamento",
+      "financeiro": "Financeiro"
+    },
+    "buscaPlaceholder": "Buscar por nome, e-mail, bloco ou apt...",
+    "vazio": "Nenhum usuário encontrado.",
+    "selecione": "— Selecione —",
+    "colunas": {
+      "bloco": "Bloco",
+      "apt": "Apt",
+      "vaga": "Vaga"
+    },
+    "status": {
+      "ativo": "ativo",
+      "pendente": "pendente",
+      "inativo": "inativo",
+      "expirado": "expirado"
+    },
+    "badgeFinanceiro": "Financeiro",
+    "financeiro": {
+      "titulo": "Financeiro",
+      "descricao": "Valores de condomínio e status de pagamento serão carregados aqui após integração com o módulo de cobranças. Esta sprint não utiliza valores financeiros fictícios no código do frontend."
+    },
+    "detalhes": {
+      "perfil": "Perfil:",
+      "responsavelFinanceiro": "Responsável financeiro",
+      "loginsApartamento": "Logins vinculados ao apartamento",
+      "bloco": "Bloco",
+      "apartamento": "Apartamento",
+      "vaga": "Vaga",
+      "vagaNaoVinculada": "Não vinculada",
+      "status": "Status",
+      "unidadeId": "Unidade ID"
+    },
+    "acoes": {
+      "reenviarConvite": "Reenviar convite",
+      "desativar": "Desativar",
+      "editarVinculacoes": "Editar vinculações"
+    },
+    "confirmarDesativar": {
+      "titulo": "Desativar usuário",
+      "mensagem": "Esta ação revoga o acesso imediatamente. Deseja continuar?"
+    },
+    "toast": {
+      "atualizado": "Usuário atualizado.",
+      "conviteCriadoSemEmail": "Convite criado, mas o e-mail não pôde ser enviado.",
+      "codigoConvite": "Código do convite: {{codigo}}",
+      "conviteEnviado": "Convite enviado com sucesso.",
+      "erroEnviarConvite": "Erro ao enviar convite.",
+      "conviteReenviadoSemEmail": "Convite reenviado, mas o e-mail não pôde ser enviado.",
+      "conviteReenviado": "Convite reenviado com sucesso.",
+      "erroReenviarConvite": "Erro ao reenviar convite.",
+      "desativado": "Usuário desativado.",
+      "erroDesativar": "Erro ao desativar usuário."
+    },
+    "erros": {
+      "respostaInvalida": "Resposta da API inválida"
+    },
+    "edicao": {
+      "semAlteracoes": "Nenhuma alteração foi realizada.",
+      "erroSalvar": "Erro ao salvar.",
+      "erroStatus": "Erro {{status}}",
+      "semResposta": "Servidor não respondeu.",
+      "bloco": "Bloco",
+      "semVinculo": "— Sem vínculo —",
+      "apartamento": "Apartamento",
+      "apto": "Apto {{numero}}",
+      "andar": "{{andar}}º andar",
+      "semApartamentos": "Nenhum apartamento neste bloco",
+      "vaga": "Vaga",
+      "semVaga": "— Sem vaga —",
+      "vagaNumero": "Vaga {{numero}}",
+      "semVagas": "Nenhuma vaga neste apartamento",
+      "statusUsuario": "Status do usuário",
+      "loginsVinculados": "Logins vinculados",
+      "novoLoginPlaceholder": "adicionar@email.com",
+      "salvarAlteracoes": "Salvar Alterações"
+    },
+    "novo": {
+      "cpfInvalido": "CPF inválido. Verifique o número informado.",
+      "avisoConvidados": "Convidados (Guest) devem ser cadastrados no perfil da unidade — sem convite por e-mail.",
+      "condominio": "Condomínio *",
+      "selecioneCondominio": "— Selecione o condomínio —",
+      "condominioRotulo": "Condomínio:",
+      "email": "E-mail *",
+      "emailPlaceholder": "usuario@mora.com",
+      "perfil": "Perfil *",
+      "nomeCompleto": "Nome completo *",
+      "nomePlaceholder": "Nome do convidado",
+      "cpf": "CPF *",
+      "bloco": "Bloco *",
+      "semBlocos": "Nenhum bloco cadastrado para este condomínio",
+      "apartamento": "Apartamento *",
+      "infoConvite": "Um código de convite será enviado por e-mail (validade 48h). O usuário ativa a conta informando o código.",
+      "enviarConvite": "Enviar convite"
+    }
+  },
+  "condominio": {
+    "cabecalho": {
+      "portaria": "Portaria",
+      "titulo": "Usuários do Condomínio"
+    },
+    "total": "Total",
+    "buscaPlaceholder": "Buscar por nome, e-mail ou CPF...",
+    "carregando": "Carregando...",
+    "semResultados": "Nenhum resultado encontrado.",
+    "vazio": "Nenhum usuário cadastrado neste condomínio.",
+    "status": {
+      "ativo": "Ativo",
+      "pendente": "Pendente",
+      "inativo": "Inativo"
+    },
+    "toast": {
+      "erroCarregar": "Erro ao carregar usuários do condomínio."
+    },
+    "detalhe": {
+      "email": "E-mail",
+      "cpf": "CPF",
+      "telefone": "Telefone",
+      "unidade": "Unidade",
+      "donoNaoResidente": "Dono não residente — proprietário do imóvel",
+      "tipo": "Tipo",
+      "visitantePreAutorizado": "Visitante pré-autorizado",
+      "responsavelFinanceiro": "Responsável financeiro da unidade",
+      "funcao": "Função",
+      "funcoes": {
+        "porteiro": "Operador de portaria",
+        "adminSindico": "Administrador do condomínio",
+        "adminGeral": "Administrador geral da plataforma"
+      },
+      "empresa": "Empresa",
+      "prestadorServico": "Prestador de serviço",
+      "semAcesso": "Sem acesso ao sistema",
+      "comAcesso": "Com acesso ao sistema"
+    }
+  }
+}

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import {
   Bar,
   BarChart,
@@ -30,8 +31,8 @@ import { CORES, EIXO_STYLE, TOOLTIP_STYLE, rotuloMes } from "../../utils/chartTh
 const ROSCA_OU_BARRAS = {
   tipos: ["rosca", "barras"],
   rotulosTipo: {
-    rosca: { rotulo: "Rosca", icone: "donut_large" },
-    barras: { rotulo: "Barras", icone: "bar_chart" },
+    rosca: { rotuloKey: "tiposSerie.rosca", icone: "donut_large" },
+    barras: { rotuloKey: "tiposSerie.barras", icone: "bar_chart" },
   },
 };
 
@@ -63,6 +64,7 @@ function GraficoDistribuicao({ tipo, dados, chave, nome, paleta, formatarTooltip
 }
 
 export function IndexAdminGeral() {
+  const { t } = useTranslation("paineis");
   const navigate = useNavigate();
   const [dados, setDados] = useState(null);
   const [carregando, setCarregando] = useState(true);
@@ -81,9 +83,9 @@ export function IndexAdminGeral() {
         setDados(res.data);
         setErro("");
       })
-      .catch(() => setErro("Não foi possível carregar os indicadores da plataforma."))
+      .catch(() => setErro(t("geral.erroCarregar")))
       .finally(() => setCarregando(false));
-  }, [filtros]);
+  }, [filtros, t]);
 
   // Derivado, não um estado à parte: o backend ecoa o filtro que aplicou, então
   // "os números na tela ainda são de outro filtro" é uma comparação, não algo a
@@ -183,7 +185,7 @@ export function IndexAdminGeral() {
       style={altura ? { minHeight: altura } : undefined}
     >
       <Icone name={receita.erro ? "error" : "progress_activity"} className={receita.erro ? "text-error" : "animate-spin"} />
-      {receita.erro || "Carregando receita…"}
+      {receita.erro || t("geral.carregandoReceita")}
     </div>
   );
   const reais = (v) => formatarBRL(Math.round(v * 100));
@@ -192,13 +194,13 @@ export function IndexAdminGeral() {
   // a ordem, o tamanho, o formato e a cor, e a escolha fica salva para ele.
   const definicoes = [
     {
-      id: "condominios-ativos", titulo: "Condomínios ativos", tamanho: "kpi",
+      id: "condominios-ativos", titulo: t("geral.blocos.condominiosAtivos"), tamanho: "kpi",
       render: ({ cor }) => (
         <CartaoKpi
           cor={cor}
           valor={condominios.ativos}
-          label="Condomínios ativos"
-          sub={`de ${condominios.total} cadastrados`}
+          label={t("geral.blocos.condominiosAtivos")}
+          sub={t("geral.blocos.condominiosCadastrados", { total: condominios.total })}
           tom="primary"
           icone="domain"
           onClick={() => navigate("/adm/condominios")}
@@ -206,31 +208,31 @@ export function IndexAdminGeral() {
       ),
     },
     {
-      id: "novos-30", titulo: "Novos em 30 dias", tamanho: "kpi",
-      render: ({ cor }) => <CartaoKpi cor={cor} valor={condominios.novosUltimos30} label="Novos em 30 dias" tom="tertiary" icone="trending_up" />,
+      id: "novos-30", titulo: t("geral.blocos.novos30"), tamanho: "kpi",
+      render: ({ cor }) => <CartaoKpi cor={cor} valor={condominios.novosUltimos30} label={t("geral.blocos.novos30")} tom="tertiary" icone="trending_up" />,
     },
     {
-      id: "usuarios-ativos", titulo: "Usuários ativos", tamanho: "kpi",
+      id: "usuarios-ativos", titulo: t("geral.blocos.usuariosAtivos"), tamanho: "kpi",
       render: ({ cor }) => (
-        <CartaoKpi cor={cor} valor={usuarios.ativos} label="Usuários ativos" sub={`de ${usuarios.total} na plataforma`} tom="primary" icone="group" />
+        <CartaoKpi cor={cor} valor={usuarios.ativos} label={t("geral.blocos.usuariosAtivos")} sub={t("geral.blocos.usuariosNaPlataforma", { total: usuarios.total })} tom="primary" icone="group" />
       ),
     },
     {
-      id: "media-usuarios", titulo: "Média por condomínio", tamanho: "kpi",
-      render: ({ cor }) => <CartaoKpi cor={cor} valor={mediaUsuarios} label="Média por condomínio" tom="neutro" icone="analytics" />,
+      id: "media-usuarios", titulo: t("geral.blocos.mediaPorCondominio"), tamanho: "kpi",
+      render: ({ cor }) => <CartaoKpi cor={cor} valor={mediaUsuarios} label={t("geral.blocos.mediaPorCondominio")} tom="neutro" icone="analytics" />,
     },
     {
-      id: "convites", titulo: "Convites pendentes", tamanho: "kpi",
-      render: ({ cor }) => <CartaoKpi cor={cor} valor={usuarios.convitesPendentes} label="Convites pendentes" tom="secondary" icone="mail" />,
+      id: "convites", titulo: t("geral.blocos.convitesPendentes"), tamanho: "kpi",
+      render: ({ cor }) => <CartaoKpi cor={cor} valor={usuarios.convitesPendentes} label={t("geral.blocos.convitesPendentes")} tom="secondary" icone="mail" />,
     },
     {
-      id: "ocorrencias", titulo: "Ocorrências abertas", tamanho: "kpi",
+      id: "ocorrencias", titulo: t("geral.blocos.ocorrenciasAbertas"), tamanho: "kpi",
       render: ({ cor }) => (
         <CartaoKpi
           cor={cor}
           valor={ocorrencias?.abertas ?? "—"}
-          label="Ocorrências abertas"
-          sub={ocorrencias ? `de ${ocorrencias.total} registradas` : "ocorrencias-service indisponível"}
+          label={t("geral.blocos.ocorrenciasAbertas")}
+          sub={ocorrencias ? t("geral.blocos.ocorrenciasRegistradas", { total: ocorrencias.total }) : t("geral.blocos.ocorrenciasIndisponivel")}
           tom={ocorrencias?.abertas > 0 ? "error" : "neutro"}
           icone="report"
         />
@@ -239,16 +241,16 @@ export function IndexAdminGeral() {
 
     // ── Receita das assinaturas ─────────────────────────────────────────
     {
-      id: "receita-mensal", titulo: "Receita mensal", tamanho: "kpi",
+      id: "receita-mensal", titulo: t("geral.blocos.receitaMensal"), tamanho: "kpi",
       render: ({ cor }) => (k ? (
         <CartaoKpi
           cor={cor}
           valor={formatarBRL(k.mrrCentavos)}
-          label="Receita mensal"
+          label={t("geral.blocos.receitaMensal")}
           sub={
             variacao === null
-              ? `${k.clientesAtivos} assinatura${k.clientesAtivos !== 1 ? "s" : ""} ativa${k.clientesAtivos !== 1 ? "s" : ""}`
-              : `${variacao >= 0 ? "+" : ""}${variacao}% vs. mês anterior`
+              ? t(k.clientesAtivos !== 1 ? "geral.blocos.assinaturasAtivas" : "geral.blocos.assinaturaAtiva", { n: k.clientesAtivos })
+              : t("geral.blocos.variacaoMesAnterior", { variacao: `${variacao >= 0 ? "+" : ""}${variacao}` })
           }
           tom="primary"
           icone="account_balance_wallet"
@@ -256,27 +258,27 @@ export function IndexAdminGeral() {
       ) : semReceita()),
     },
     {
-      id: "projecao-anual", titulo: "Projeção anual", tamanho: "kpi",
+      id: "projecao-anual", titulo: t("geral.blocos.projecaoAnual"), tamanho: "kpi",
       render: ({ cor }) => (k ? (
-        <CartaoKpi cor={cor} valor={formatarBRL(k.arrCentavos)} label="Projeção anual" sub="Receita mensal × 12" tom="tertiary" icone="trending_up" />
+        <CartaoKpi cor={cor} valor={formatarBRL(k.arrCentavos)} label={t("geral.blocos.projecaoAnual")} sub={t("geral.blocos.projecaoSub")} tom="tertiary" icone="trending_up" />
       ) : semReceita()),
     },
     {
-      id: "ticket-medio", titulo: "Ticket médio", tamanho: "kpi",
+      id: "ticket-medio", titulo: t("geral.blocos.ticketMedio"), tamanho: "kpi",
       render: ({ cor }) => (k ? (
-        <CartaoKpi cor={cor} valor={formatarBRL(k.ticketMedioCentavos)} label="Ticket médio" sub="Por cliente ativo" tom="neutro" icone="analytics" />
+        <CartaoKpi cor={cor} valor={formatarBRL(k.ticketMedioCentavos)} label={t("geral.blocos.ticketMedio")} sub={t("geral.blocos.ticketSub")} tom="neutro" icone="analytics" />
       ) : semReceita()),
     },
     {
       // Cliente sem plano é receita que existe e não está sendo cobrada — por
       // isso o tom automático é de alerta.
-      id: "sem-plano", titulo: "Clientes sem plano", tamanho: "kpi",
+      id: "sem-plano", titulo: t("geral.blocos.semPlano"), tamanho: "kpi",
       render: ({ cor }) => (k ? (
         <CartaoKpi
           cor={cor}
           valor={k.clientesSemAssinatura}
-          label="Clientes sem plano"
-          sub={k.clientesSemAssinatura > 0 ? "Não estão sendo cobrados" : "Todos com assinatura"}
+          label={t("geral.blocos.semPlano")}
+          sub={k.clientesSemAssinatura > 0 ? t("geral.blocos.semPlanoSub") : t("geral.blocos.todosComAssinatura")}
           tom={k.clientesSemAssinatura > 0 ? "error" : "neutro"}
           icone="money_off"
           onClick={() => navigate("/adm/condominios")}
@@ -284,14 +286,14 @@ export function IndexAdminGeral() {
       ) : semReceita()),
     },
     {
-      id: "evolucao-receita", titulo: "Evolução da receita", tamanho: "grafico",
+      id: "evolucao-receita", titulo: t("geral.blocos.evolucaoReceita"), tamanho: "grafico",
       tipos: ["area", "linhas", "barras"],
       render: ({ tipo, cor, altura }) => (r ? (
         <CartaoGrafico
-          titulo="Evolução da receita"
-          descricao={`Receita mensal recorrente nos últimos ${r.filtros?.meses ?? filtros.meses} meses`}
+          titulo={t("geral.blocos.evolucaoReceita")}
+          descricao={t("geral.blocos.evolucaoDescricao", { meses: r.filtros?.meses ?? filtros.meses })}
           vazio={serieReceita.every((p) => p.receita === 0)}
-          mensagemVazio="Nenhuma assinatura ativa no período."
+          mensagemVazio={t("geral.blocos.evolucaoVazio")}
           altura={altura}
         >
           <GraficoMensal
@@ -299,20 +301,20 @@ export function IndexAdminGeral() {
             cor={cor}
             dados={serieReceita}
             eixoX="mes"
-            series={[{ chave: "receita", nome: "Receita", cor: CORES.primary }]}
+            series={[{ chave: "receita", nome: t("geral.blocos.serieReceita"), cor: CORES.primary }]}
             formatarTooltip={reais}
           />
         </CartaoGrafico>
       ) : semReceita(altura)),
     },
     {
-      id: "receita-por-plano", titulo: "Receita por plano", tamanho: "grafico", ...ROSCA_OU_BARRAS,
+      id: "receita-por-plano", titulo: t("geral.blocos.receitaPorPlano"), tamanho: "grafico", ...ROSCA_OU_BARRAS,
       render: ({ tipo, paleta, altura }) => (r ? (
         <CartaoGrafico
-          titulo="Receita por plano"
-          descricao="Quanto cada plano representa do total"
+          titulo={t("geral.blocos.receitaPorPlano")}
+          descricao={t("geral.blocos.receitaPorPlanoDescricao")}
           vazio={receitaPorPlano.length === 0}
-          mensagemVazio="Nenhuma assinatura ativa."
+          mensagemVazio={t("geral.blocos.receitaPorPlanoVazio")}
           altura={altura}
         >
           <GraficoDistribuicao
@@ -321,26 +323,26 @@ export function IndexAdminGeral() {
             chave="valor"
             nome="nome"
             paleta={paleta}
-            formatarTooltip={(v, _nome, item) => [`${reais(v)} · ${item.payload.assinaturas} assinatura(s)`, item.payload.nome]}
+            formatarTooltip={(v, _nome, item) => [t("geral.blocos.tooltipAssinaturas", { valor: reais(v), n: item.payload.assinaturas }), item.payload.nome]}
           />
         </CartaoGrafico>
       ) : semReceita(altura)),
     },
     {
-      id: "receita-por-cliente", titulo: "Receita por cliente", tamanho: "grafico", larguraPadrao: "inteira", semAltura: true,
+      id: "receita-por-cliente", titulo: t("geral.blocos.receitaPorCliente"), tamanho: "grafico", larguraPadrao: "inteira", semAltura: true,
       render: ({ cor }) => (r ? <TabelaReceitaClientes dados={r} cor={cor} /> : semReceita()),
     },
 
     // ── Carteira e usuários ─────────────────────────────────────────────
     {
-      id: "crescimento", titulo: "Crescimento da carteira", tamanho: "grafico", larguraPadrao: "inteira",
+      id: "crescimento", titulo: t("geral.blocos.crescimento"), tamanho: "grafico", larguraPadrao: "inteira",
       tipos: ["combinado", "barras", "linhas", "area"],
       render: ({ tipo, cor, altura }) => (
         <CartaoGrafico
-          titulo="Crescimento da carteira"
-          descricao="Condomínios criados por mês e total acumulado"
+          titulo={t("geral.blocos.crescimento")}
+          descricao={t("geral.blocos.crescimentoDescricao")}
           vazio={serieCondominios.every((p) => p.criados === 0)}
-          mensagemVazio="Nenhum condomínio criado no período."
+          mensagemVazio={t("geral.blocos.crescimentoVazio")}
           altura={altura}
         >
           <GraficoMensal
@@ -349,29 +351,29 @@ export function IndexAdminGeral() {
             dados={serieCondominios}
             eixoX="mes"
             series={[
-              { chave: "criados", nome: "Criados no mês", cor: CORES.primary },
-              { chave: "acumulado", nome: "Acumulado", cor: CORES.secondary },
+              { chave: "criados", nome: t("geral.blocos.serieCriados"), cor: CORES.primary },
+              { chave: "acumulado", nome: t("geral.blocos.serieAcumulado"), cor: CORES.secondary },
             ]}
           />
         </CartaoGrafico>
       ),
     },
     {
-      id: "por-perfil", titulo: "Usuários por perfil", tamanho: "grafico", ...ROSCA_OU_BARRAS,
+      id: "por-perfil", titulo: t("geral.blocos.porPerfil"), tamanho: "grafico", ...ROSCA_OU_BARRAS,
       render: ({ tipo, paleta, altura }) => (
-        <CartaoGrafico titulo="Usuários por perfil" descricao="Distribuição entre os perfis" vazio={porPerfil.length === 0} altura={altura}>
+        <CartaoGrafico titulo={t("geral.blocos.porPerfil")} descricao={t("geral.blocos.porPerfilDescricao")} vazio={porPerfil.length === 0} altura={altura}>
           <GraficoDistribuicao tipo={tipo} dados={porPerfil} chave="total" nome="nome" paleta={paleta} />
         </CartaoGrafico>
       ),
     },
     {
-      id: "por-condominio", titulo: "Usuários por condomínio", tamanho: "grafico",
+      id: "por-condominio", titulo: t("geral.blocos.porCondominio"), tamanho: "grafico",
       render: ({ cor, altura }) => (
         <CartaoGrafico
-          titulo="Usuários por condomínio"
-          descricao="Dez maiores — clique para abrir o cliente"
+          titulo={t("geral.blocos.porCondominio")}
+          descricao={t("geral.blocos.porCondominioDescricao")}
           vazio={porCondominio.length === 0}
-          mensagemVazio="Nenhum usuário vinculado a condomínio ainda."
+          mensagemVazio={t("geral.blocos.porCondominioVazio")}
           altura={altura}
         >
           <ResponsiveContainer width="100%" height="100%">
@@ -382,7 +384,7 @@ export function IndexAdminGeral() {
               <Tooltip {...TOOLTIP_STYLE} />
               <Bar
                 dataKey="total"
-                name="Usuários"
+                name={t("geral.blocos.serieUsuarios")}
                 fill={cor ?? CORES.tertiary}
                 radius={[0, 6, 6, 0]}
                 cursor="pointer"
@@ -404,16 +406,16 @@ export function IndexAdminGeral() {
         <header className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
             <p className="text-on-surface-variant text-xs font-semibold uppercase tracking-widest mb-1">
-              Painel Administrativo
+              {t("geral.cabecalho.sobretitulo")}
             </p>
             <h1 className="font-headline text-3xl sm:text-4xl font-extrabold tracking-tight text-on-surface">
-              Visão{" "}
+              {t("geral.cabecalho.titulo")}{" "}
               <span className="bg-gradient-to-r from-primary to-tertiary bg-clip-text text-transparent">
-                Geral
+                {t("geral.cabecalho.tituloDestaque")}
               </span>
             </h1>
             <p className="text-on-surface-variant text-sm mt-1">
-              Indicadores de todos os condomínios da plataforma.
+              {t("geral.cabecalho.subtitulo")}
             </p>
           </div>
           <button
@@ -422,7 +424,7 @@ export function IndexAdminGeral() {
             className="px-5 py-3 rounded-2xl border border-primary/30 text-primary hover:bg-primary/10 transition flex items-center gap-2 font-medium"
           >
             <Icone name="domain" />
-            Gerenciar clientes
+            {t("geral.cabecalho.gerenciarClientes")}
           </button>
         </header>
 

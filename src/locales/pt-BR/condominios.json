@@ -1,0 +1,130 @@
+{
+  "status": {
+    "ativo": "ativo",
+    "inativo": "inativo"
+  },
+  "seletor": {
+    "rotulo": "Condomínio:",
+    "placeholder": "— Selecione o condomínio —"
+  },
+  "form": {
+    "campos": {
+      "id": "ID / Slug *",
+      "nome": "Nome do Cliente *",
+      "email": "E-mail",
+      "telefone": "Telefone",
+      "endereco": "Endereço"
+    },
+    "placeholders": {
+      "id": "ex: cond-jardim-europa",
+      "nome": "Condomínio Jardim Europa",
+      "email": "contato@condominio.com",
+      "endereco": "Rua das Flores, 100 — São Paulo, SP"
+    },
+    "erros": {
+      "idObrigatorio": "ID é obrigatório.",
+      "nomeObrigatorio": "Nome é obrigatório.",
+      "cnpjIncompleto": "CNPJ incompleto (14 dígitos).",
+      "cnpjInvalido": "CNPJ inválido.",
+      "telefoneInvalido": "Telefone inválido (10 ou 11 dígitos)."
+    },
+    "botoes": {
+      "criar": "Criar Cliente",
+      "salvarAlteracoes": "Salvar Alterações"
+    }
+  },
+  "lista": {
+    "cabecalho": {
+      "painel": "Painel Administrativo",
+      "gerenciar": "Gerenciar",
+      "clientes": "Clientes"
+    },
+    "novoCliente": "Novo Cliente",
+    "resumo": {
+      "total": "Total",
+      "ativos": "Ativos"
+    },
+    "kpi": {
+      "receitaMensal": "Receita mensal",
+      "clientesComPlano_one": "{{count}} cliente(s) com plano",
+      "clientesComPlano_other": "{{count}} cliente(s) com plano",
+      "projecaoAnual": "Projeção anual",
+      "projecaoAnualSub": "Receita mensal × 12",
+      "ticketMedio": "Ticket médio",
+      "ticketMedioSub": "Por cliente ativo",
+      "semPlano": "Sem plano",
+      "naoCobrados": "Não estão sendo cobrados",
+      "todosComAssinatura": "Todos com assinatura"
+    },
+    "buscaPlaceholder": "Buscar por nome, ID ou CNPJ...",
+    "vazio": "Nenhum cliente encontrado.",
+    "colunas": {
+      "plano": "Plano",
+      "semPlano": "sem plano",
+      "mensalidade": "Mensalidade",
+      "email": "E-mail"
+    },
+    "toast": {
+      "erroCarregar": "Erro ao carregar clientes.",
+      "criado": "Cliente criado com sucesso.",
+      "erroCriar": "Erro ao criar cliente."
+    }
+  },
+  "detalhe": {
+    "abas": {
+      "dados": "Dados",
+      "plano": "Plano",
+      "usuarios": "Usuários",
+      "resumo": "Resumo"
+    },
+    "status": {
+      "ativo": "ATIVO",
+      "inativo": "INATIVO"
+    },
+    "acoes": {
+      "desativar": "Desativar",
+      "reativar": "Reativar"
+    },
+    "confirmar": {
+      "desativarTitulo": "Desativar cliente",
+      "reativarTitulo": "Reativar cliente",
+      "desativarMensagem": "Desativar \"{{nome}}\"? Os dados são preservados e o acesso é suspenso.",
+      "reativarMensagem": "Reativar \"{{nome}}\"?"
+    },
+    "toast": {
+      "atualizado": "Cliente atualizado.",
+      "erroSalvar": "Erro ao salvar.",
+      "desativado": "Cliente desativado.",
+      "reativado": "Cliente reativado."
+    },
+    "erros": {
+      "carregar": "Não foi possível carregar este cliente.",
+      "carregarUsuarios": "Não foi possível carregar os usuários.",
+      "alterarStatus": "Não foi possível alterar o status.",
+      "naoEncontrado": "Cliente não encontrado."
+    },
+    "voltarLista": "Voltar para a lista",
+    "kpi": {
+      "usuarios": "Usuários",
+      "ativos": "Ativos",
+      "convitesPendentes": "Convites pendentes",
+      "ocorrencias": "Ocorrências"
+    },
+    "dados": {
+      "nome": "Nome",
+      "identificador": "Identificador",
+      "cnpj": "CNPJ",
+      "email": "E-mail",
+      "telefone": "Telefone",
+      "endereco": "Endereço"
+    },
+    "usuarios": {
+      "vazio": "Nenhum usuário vinculado a este cliente."
+    },
+    "resumo": {
+      "porPerfil": "Usuários por perfil",
+      "porSituacao": "Usuários por situação",
+      "indisponivel": "Resumo indisponível no momento."
+    }
+  }
+}

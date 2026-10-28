@@ -1,5 +1,6 @@
 // src/pages/adm/GerenciarVagas.jsx
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { vagaApi, apartamentoApi } from "../../services/estruturasApi";
 import { Icone } from "../../components/icones/Icone";
 import { Campo } from "../../components/campos/Campo";
@@ -8,12 +9,12 @@ import { Botao } from "../../components/botoes/Botao";
 // ─── enums / helpers ────────────────────────────────
 const statusConfig = {
   true: {
-    label: "Ativa",
+    rotuloKey: "vagas.status.ativa",
     color: "bg-primary/10 text-primary",
     icon: "check_circle",
   },
   false: {
-    label: "Inativa",
+    rotuloKey: "vagas.status.inativa",
     color: "bg-error/10 text-error",
     icon: "block",
   },
@@ -21,6 +22,7 @@ const statusConfig = {
 
 // ════════════════════════════════════════════
 export function GerenciarVagas() {
+  const { t } = useTranslation("veiculos");
   const [vagas, setVagas] = useState([]);
   const [apartamentos, setApartamentos] = useState([]);
   const [carregando, setCarregando] = useState(true);
@@ -66,7 +68,7 @@ export function GerenciarVagas() {
       setCriando(false);
       setForm({ numero: "", localizacao: "", tipo: "", apartamentoId: "" });
     } catch (err) {
-      setErro(err.response?.data?.mensagem ?? err.response?.data?.message ?? "Erro ao cadastrar vaga. Tente novamente.");
+      setErro(err.response?.data?.mensagem ?? err.response?.data?.message ?? t("vagas.form.erroCadastrar"));
     } finally {
       setSalvando(false);
     }
@@ -108,19 +110,19 @@ export function GerenciarVagas() {
         <header className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
             <p className="text-on-surface-variant text-xs font-semibold uppercase tracking-widest mb-1">
-              Painel Administrativo
+              {t("vagas.cabecalho.sobretitulo")}
             </p>
             <h1 className="font-headline text-4xl font-extrabold tracking-tight text-on-surface">
-              Vagas de{" "}
+              {t("vagas.cabecalho.titulo")}{" "}
               <span className="bg-gradient-to-r from-primary to-tertiary bg-clip-text text-transparent">
-                Garagem
+                {t("vagas.cabecalho.tituloDestaque")}
               </span>
             </h1>
           </div>
           {!criando && (
             <Botao onClick={() => { setCriando(true); setErro(null); }}>
               <span className="flex items-center gap-2">
-                <Icone name="add" className="text-lg" /> Nova Vaga
+                <Icone name="add" className="text-lg" /> {t("vagas.cabecalho.novaVaga")}
               </span>
             </Botao>
           )}
@@ -129,8 +131,8 @@ export function GerenciarVagas() {
         {/* Cards resumo */}
         <div className="grid grid-cols-2 md:grid-cols-2 gap-4">
           {[
-            { id: "ativa", label: "Ativas", color: "primary", icon: "check_circle" },
-            { id: "inativa", label: "Inativas", color: "error", icon: "block" },
+            { id: "ativa", label: t("vagas.resumo.ativas"), color: "primary", icon: "check_circle" },
+            { id: "inativa", label: t("vagas.resumo.inativas"), color: "error", icon: "block" },
           ].map((s) => {
             return (
               <button
@@ -157,29 +159,29 @@ export function GerenciarVagas() {
         {/* Formulário criar */}
         {criando && (
           <div className="glass-panel rounded-2xl p-6 space-y-5">
-            <h2 className="font-headline text-xl font-bold text-on-surface">Cadastrar Nova Vaga</h2>
+            <h2 className="font-headline text-xl font-bold text-on-surface">{t("vagas.form.titulo")}</h2>
             <form onSubmit={criarVaga} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Campo
-                  label="Número da vaga"
+                  label={t("vagas.form.numero")}
                   name="numero"
                   value={form.numero}
                   onChange={handleForm}
-                  placeholder="Ex: 12"
+                  placeholder={t("vagas.form.numeroPlaceholder")}
                   required
                 />
                 <Campo
-                  label="Localização"
+                  label={t("vagas.form.localizacao")}
                   name="localizacao"
                   value={form.localizacao}
                   onChange={handleForm}
-                  placeholder="Ex: Setor A - Térreo"
+                  placeholder={t("vagas.form.localizacaoPlaceholder")}
                 />
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant ml-1">
-                    Tipo
+                    {t("vagas.form.tipo")}
                   </label>
                   <select
                     name="tipo"
@@ -187,15 +189,15 @@ export function GerenciarVagas() {
                     onChange={handleForm}
                     className="appearance-none bg-surface-container-highest/50 border border-veu/10 rounded-xl py-3 pl-4 pr-10 text-on-surface focus:ring-2 focus:ring-primary/50 focus:outline-none transition-all cursor-pointer"
                   >
-                    <option value="">Selecione um tipo</option>
-                    <option value="Coberta">Coberta</option>
-                    <option value="Descoberta">Descoberta</option>
+                    <option value="">{t("vagas.form.selecioneTipo")}</option>
+                    <option value="Coberta">{t("vagas.form.tipos.coberta")}</option>
+                    <option value="Descoberta">{t("vagas.form.tipos.descoberta")}</option>
                   </select>
                   <Icone name="expand_more" className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-lg" />
                 </div>
                 <div className="space-y-2">
                   <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant ml-1">
-                    Apartamento (opcional)
+                    {t("vagas.form.apartamento")}
                   </label>
                   <select
                     name="apartamentoId"
@@ -203,9 +205,9 @@ export function GerenciarVagas() {
                     onChange={handleForm}
                     className="appearance-none bg-surface-container-highest/50 border border-veu/10 rounded-xl py-3 pl-4 pr-10 text-on-surface focus:ring-2 focus:ring-primary/50 focus:outline-none transition-all cursor-pointer"
                   >
-                    <option value="">Nenhum apartamento</option>
+                    <option value="">{t("vagas.form.nenhumApartamento")}</option>
                     {apartamentos.map((apt) => (
-                      <option key={apt.id} value={apt.id}>{apt.numero} - Bloco {apt.blocoNome}</option>
+                      <option key={apt.id} value={apt.id}>{t("vagas.form.opcaoApartamento", { numero: apt.numero, bloco: apt.blocoNome })}</option>
                     ))}
                   </select>
                 </div>
@@ -219,10 +221,10 @@ export function GerenciarVagas() {
                   onClick={() => { setCriando(false); setErro(null); }}
                   className="px-5 py-2.5 rounded-xl text-sm font-semibold text-on-surface-variant hover:bg-veu/5 transition-all cursor-pointer"
                 >
-                  Cancelar
+                  {t("comum:acoes.cancelar")}
                 </button>
                 <Botao type="submit" disabled={salvando}>
-                  {salvando ? "Cadastrando..." : "Cadastrar vaga"}
+                  {salvando ? t("vagas.form.cadastrando") : t("vagas.form.cadastrar")}
                 </Botao>
               </div>
             </form>
@@ -235,7 +237,7 @@ export function GerenciarVagas() {
             <Icone name="search" className="absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant text-lg pointer-events-none" />
             <input
               type="text"
-              placeholder="Buscar por identificador ou unidade..."
+              placeholder={t("vagas.buscaPlaceholder")}
               value={busca}
               onChange={(e) => setBusca(e.target.value)}
               className="w-full pl-11 pr-4 py-2.5 bg-surface-container-highest/40 border border-veu/10 rounded-xl text-on-surface placeholder:text-outline-variant focus:ring-2 focus:ring-primary/50 focus:outline-none transition-all text-sm"
@@ -247,7 +249,7 @@ export function GerenciarVagas() {
               className="flex items-center gap-1.5 text-xs font-semibold px-3 py-2 rounded-xl bg-surface-container-highest/40 text-on-surface-variant hover:text-on-surface transition-all cursor-pointer"
             >
               <span className={`w-2 h-2 rounded-full ${statusConfig[filtroStatus].color.split(" ")[0]}`} />
-              {statusConfig[filtroStatus].label}
+              {t(statusConfig[filtroStatus].rotuloKey)}
               <Icone name="close" className="text-sm" />
             </button>
           )}
@@ -266,13 +268,13 @@ export function GerenciarVagas() {
                     <Icone name={cfg.icon} className="text-xl" />
                   </div>
                   <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${cfg.color}`}>
-                    {cfg.label}
+                    {t(cfg.rotuloKey)}
                   </span>
                 </div>
 
                 {/* Infos */}
                 <div>
-                  <p className="font-semibold text-on-surface text-sm leading-tight">Vaga {vaga.numero}</p>
+                  <p className="font-semibold text-on-surface text-sm leading-tight">{t("vagas.cartao.vagaNumero", { numero: vaga.numero })}</p>
                   <p className="text-xs text-on-surface-variant mt-1">{vaga.localizacao}</p>
                   {vaga.tipo && (
                     <p className="text-xs text-on-surface-variant">{vaga.tipo}</p>
@@ -280,23 +282,23 @@ export function GerenciarVagas() {
                   {apartamento ? (
                     <p className="text-xs text-primary mt-2 font-semibold">
                       <Icone name="home" className="text-xs mr-1 inline" />
-                      Apt {apartamento.numero}
+                      {t("vagas.cartao.apt", { numero: apartamento.numero })}
                     </p>
                   ) : (
-                    <p className="text-xs text-on-surface-variant mt-2 opacity-50">Sem apartamento</p>
+                    <p className="text-xs text-on-surface-variant mt-2 opacity-50">{t("vagas.cartao.semApartamento")}</p>
                   )}
                 </div>
 
                 {/* Ações de status */}
                 <div className="mt-auto pt-2 border-t border-veu/5">
-                  <p className="text-xs text-on-surface-variant mb-2">Mudar status:</p>
+                  <p className="text-xs text-on-surface-variant mb-2">{t("vagas.cartao.mudarStatus")}</p>
                   <div className="flex gap-2">
                     <button
                       onClick={() => mudarStatus(vaga.id, !vaga.ativa)}
                       className={`text-xs font-semibold px-2.5 py-1 rounded-lg border transition-all cursor-pointer hover:opacity-80 ${statusConfig[!vaga.ativa].color} border-current/10`}
-                      title={`Marcar como ${statusConfig[!vaga.ativa].label}`}
+                      title={t("vagas.cartao.marcarComo", { status: t(statusConfig[!vaga.ativa].rotuloKey) })}
                     >
-                      {statusConfig[!vaga.ativa].label}
+                      {t(statusConfig[!vaga.ativa].rotuloKey)}
                     </button>
                   </div>
                 </div>
@@ -308,7 +310,7 @@ export function GerenciarVagas() {
         {vagasFiltradas.length === 0 && !carregando && (
           <div className="glass-panel rounded-2xl py-16 flex flex-col items-center gap-3 text-on-surface-variant">
             <Icone name="local_parking" className="text-5xl opacity-30" />
-            <p className="text-sm">Nenhuma vaga encontrada.</p>
+            <p className="text-sm">{t("vagas.vazio")}</p>
           </div>
         )}
       </div>

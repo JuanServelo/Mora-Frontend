@@ -1,0 +1,626 @@
+{
+  "geral": {
+    "carregando": "Loading...",
+    "salvando": "Saving..."
+  },
+  "tela": {
+    "sobretitulo": "Building manager",
+    "titulo": "Financial",
+    "tituloDestaque": "Settings",
+    "descricao": "What the system needs to know before issuing the first invoice."
+  },
+  "abas": {
+    "config": {
+      "rotulo": "Rules",
+      "descricao": "How the fee is split and when it's due"
+    },
+    "taxas": {
+      "rotulo": "Fees",
+      "descricao": "What is charged every month"
+    },
+    "fracoes": {
+      "rotulo": "Ideal fraction",
+      "descricao": "Each unit's share"
+    },
+    "contas": {
+      "rotulo": "Bills",
+      "descricao": "Water, power, gas and other building bills"
+    },
+    "faturas": {
+      "rotulo": "Invoices",
+      "descricao": "Invoices issued to units — tracking and manual settlement"
+    },
+    "multas": {
+      "rotulo": "Fines",
+      "descricao": "Issuing, resident appeals and billing on the invoice"
+    },
+    "contratos": {
+      "rotulo": "Contracts",
+      "descricao": "Lease contracts between owner and tenant"
+    },
+    "prestacao": {
+      "rotulo": "Financial report",
+      "descricao": "Monthly income and expenses, published to residents"
+    },
+    "gateway": {
+      "rotulo": "Payment test",
+      "descricao": "Issues a sandbox charge to check the integration"
+    }
+  },
+  "config": {
+    "toast": {
+      "erroCarregar": "Couldn't load the financial settings.",
+      "salva": "Settings saved.",
+      "erroSalvar": "Error saving the settings."
+    },
+    "divisao": {
+      "titulo": "How the fee is split"
+    },
+    "modos": {
+      "fixo": {
+        "titulo": "Fixed amount per unit",
+        "descricao": "Every apartment pays the same. Simple, and what most small buildings use."
+      },
+      "fracaoIdeal": {
+        "titulo": "Proportional to ideal fraction",
+        "descricao": "Each unit pays according to its fraction in the bylaws. Requires every unit's fraction to be registered."
+      }
+    },
+    "calendario": {
+      "titulo": "Billing calendar",
+      "diaFechamento": "Closing day",
+      "diaFechamentoAjuda": "When the month's invoices are generated",
+      "diaVencimento": "Due day",
+      "diaVencimentoAjuda": "Residents' payment deadline",
+      "prazoRecurso": "Appeal period",
+      "prazoRecursoAjuda": "Days a resident has to appeal a fine",
+      "limiteDias": "Days go up to 28 so the rule works every month, February included.",
+      "dia": "Day {{dia}}"
+    },
+    "salvar": "Save settings"
+  },
+  "taxas": {
+    "bases": {
+      "porUnidade": "per unit",
+      "totalCondominio": "total to split"
+    },
+    "toast": {
+      "erroCarregar": "Error loading fees.",
+      "atualizada": "Fee updated.",
+      "criada": "Fee created.",
+      "erroSalvar": "Error saving the fee.",
+      "desativada": "Fee deactivated.",
+      "erroDesativar": "Error deactivating the fee."
+    },
+    "desativar": {
+      "titulo": "Deactivate fee",
+      "mensagem": "\"{{nome}}\" will no longer be included in upcoming closings. Invoices already issued stay as they are.",
+      "confirmar": "Deactivate"
+    },
+    "lista": {
+      "contagem_one": "{{count}} active fee",
+      "contagem_other": "{{count}} active fees",
+      "vazio": "No fees registered yet.",
+      "vazioAjuda": "Without at least one active fee, the monthly closing has nothing to charge.",
+      "semDescricao": "No description"
+    },
+    "nova": "New fee",
+    "periodicidade": {
+      "MENSAL": "monthly",
+      "ANUAL": "yearly",
+      "UNICA": "one-time"
+    },
+    "form": {
+      "tituloEditar": "Edit fee",
+      "nome": "Name",
+      "nomePlaceholder": "Condo fee",
+      "valor": "Amount (R$)",
+      "descricao": "Description",
+      "descricaoPlaceholder": "What this fee covers",
+      "baseCalculo": "The amount entered is",
+      "baseTotalOpcao": "the building total, to be split",
+      "basePorUnidadeAjuda": "Each unit is charged this amount.",
+      "baseTotalAjuda": "This amount is split among the units.",
+      "periodicidade": "Frequency",
+      "extraordinaria": "Special assessment",
+      "parcelas": "Installments",
+      "parcelasAjuda": "Only special assessments can be paid in installments."
+    }
+  },
+  "fracoes": {
+    "toast": {
+      "erroCarregar": "Couldn't load the units.",
+      "propostaCalculada": "Proposal calculated. Review it before applying.",
+      "erroProposta": "Error calculating the proposal.",
+      "salvas_one": "{{count}} fraction saved.",
+      "salvas_other": "{{count}} fractions saved.",
+      "erroSalvar": "Error saving the fractions."
+    },
+    "carregando": "Loading units…",
+    "vazio": {
+      "titulo": "No units registered in this building.",
+      "ajuda": "The ideal fraction is per apartment. Register blocks and apartments under Structures before setting up proportional splitting."
+    },
+    "avisoFixo": {
+      "antes": "This building's split is set to",
+      "destaque": "fixed amount per unit",
+      "depois": ", which doesn't use the ideal fraction. What you enter here is kept for when you switch to proportional."
+    },
+    "indicadores": {
+      "unidades": "Units",
+      "comFracao": "With fraction",
+      "comFracaoValor": "{{com}} of {{total}}",
+      "soma": "Total"
+    },
+    "sugerir": "Suggest from area",
+    "sugerirAjuda": "Calculates a proposal based on each apartment's area",
+    "somaNaoFecha": "Fractions must add up to {{esperado}} thousandths for the proportional closing to run. {{faltam}} thousandths missing.",
+    "tabela": {
+      "unidade": "Unit",
+      "bloco": "Block",
+      "area": "Area",
+      "milesimos": "Thousandths",
+      "equivale": "Equals"
+    }
+  },
+  "gateway": {
+    "toast": {
+      "criada": "Test charge created in the sandbox.",
+      "erroGateway": "Error talking to the gateway.",
+      "status": "Status: {{status}}",
+      "statusPago": "Status: {{status}} · paid on {{pagoEm}}",
+      "erroConsultar": "Couldn't check the charge.",
+      "cancelada": "Test charge canceled.",
+      "erroCancelar": "Couldn't cancel the charge.",
+      "copiado": "{{rotulo}} copied.",
+      "erroCopiar": "Couldn't copy."
+    },
+    "verificando": "Checking the gateway…",
+    "semCredencial": {
+      "titulo": "No gateway credentials configured.",
+      "antes": "Set",
+      "depois": "in the service environment to enable charges."
+    },
+    "ambiente": "Environment",
+    "sandbox": "Sandbox",
+    "producao": "PRODUCTION",
+    "chave": "Key",
+    "avisoSandbox": "Charges created here are fake and don't move any money.",
+    "avisoProducao": "Outside the sandbox this screen doesn't issue charges.",
+    "formaPagamento": "Payment method",
+    "boleto": "Bank slip",
+    "valor": "Amount (R$)",
+    "emitindo": "Issuing…",
+    "gerar": "Create charge",
+    "vence": "due {{data}}",
+    "conferirStatus": "Check status",
+    "qrAlt": "Test PIX QR code",
+    "pixCopiaCola": "PIX copy and paste",
+    "codigoPix": "PIX code",
+    "copiarCodigo": "Copy code",
+    "linhaDigitavel": "Payment slip number",
+    "copiarLinha": "Copy number",
+    "abrirBoleto": "Open bank slip",
+    "paginaPagamento": "Gateway payment page"
+  },
+  "contas": {
+    "tipos": {
+      "AGUA": "Water",
+      "LUZ": "Electricity",
+      "GAS": "Gas",
+      "INTERNET": "Internet",
+      "OUTRO": "Other"
+    },
+    "modos": {
+      "FRACAO_IDEAL": "Ideal fraction (proportional to the unit)",
+      "FIXO_POR_UNIDADE": "Fixed per unit (same for all)"
+    },
+    "status": {
+      "PENDENTE": "PENDING",
+      "RATEADA": "SPLIT",
+      "CANCELADA": "CANCELED"
+    },
+    "toast": {
+      "erroCarregar": "Couldn't load the bills.",
+      "preencha": "Fill in the amount and due date.",
+      "atualizada": "Bill updated.",
+      "criada": "Bill created.",
+      "erroSalvar": "Error saving the bill.",
+      "cancelada": "Bill canceled.",
+      "erroCancelar": "Error canceling.",
+      "rateada": "Bill split across {{unidades}} units.",
+      "erroRatear": "Error splitting.",
+      "fechado_one": "Closing done. {{count}} invoice created.",
+      "fechado_other": "Closing done. {{count}} invoices created.",
+      "erroFechar": "Error closing the billing period."
+    },
+    "cancelar": {
+      "titulo": "Cancel bill",
+      "mensagem": "The bill will be marked as canceled. This can't be undone."
+    },
+    "ratear": {
+      "titulo": "Split bill",
+      "mensagem": "The amount will be split among units with a registered ideal fraction. Continue?",
+      "confirmar": "Split"
+    },
+    "fechar": {
+      "titulo": "Close billing period",
+      "mensagem": "Invoices will be generated for every unit for the {{competencia}} billing period. Units that already have an invoice won't be duplicated. Continue?",
+      "fechando": "Closing...",
+      "botao": "Close Billing Period"
+    },
+    "competencia": "Billing period",
+    "nova": "New Bill",
+    "preview": {
+      "unidades": "Units",
+      "faturasNovas": "New invoices",
+      "contasPendentes": "Pending bills",
+      "multas": "Fines",
+      "estornos_one": "{{count}} reversal",
+      "estornos_other": "{{count}} reversals"
+    },
+    "plano": {
+      "titulo": "Mora Platform — {{plano}}",
+      "descricao": "Plan subscription • generated automatically",
+      "porMes": "/month"
+    },
+    "carregando": "Loading bills...",
+    "vazio": "No bills registered for {{competencia}}.",
+    "lista": {
+      "fracaoIdeal": "Ideal fraction",
+      "fixoPorUnidade": "Fixed per unit",
+      "vencimento": "Due {{data}}",
+      "ratear": "Split among units"
+    },
+    "form": {
+      "tituloEditar": "Edit Bill",
+      "tituloNova": "New Utility Bill",
+      "descricao": "Description (optional)",
+      "descricaoPlaceholder": "E.g. November bill",
+      "vencimento": "Due date",
+      "valorTotal": "Total amount (R$)",
+      "modoRateio": "Split method"
+    }
+  },
+  "faturas": {
+    "status": {
+      "ABERTA": "Open",
+      "PAGA": "Paid",
+      "EM_ATRASO": "Overdue",
+      "CANCELADA": "Canceled"
+    },
+    "apt": "Apt {{numero}}",
+    "toast": {
+      "erroCarregar": "Couldn't load the invoices.",
+      "baixaRegistrada": "Manual payment recorded.",
+      "erroBaixa": "Error recording the payment."
+    },
+    "kpis": {
+      "totalEmitido": "Total issued",
+      "pagas": "Paid",
+      "emAberto": "Open",
+      "emAtraso": "Overdue"
+    },
+    "filtroStatus": "Status",
+    "filtroCanceladas": "Canceled",
+    "carregando": "Loading invoices...",
+    "vazio": "No invoices found for the selected filters.",
+    "tabela": {
+      "unidade": "Unit",
+      "vencimento": "Due date",
+      "valor": "Amount",
+      "acoes": "Actions"
+    },
+    "baixa": {
+      "botao": "Mark as paid",
+      "titulo": "Manual Payment",
+      "descricao": "Records payment of this invoice without going through the payment gateway.",
+      "dataPagamento": "Payment date",
+      "valorPago": "Amount paid (cents)",
+      "confirmar": "Confirm Payment"
+    }
+  },
+  "multas": {
+    "filtros": {
+      "todas": "All",
+      "emRecurso": "Under appeal",
+      "aplicadas": "Issued",
+      "canceladas": "Canceled"
+    },
+    "situacao": {
+      "canceladaEstornada": "Canceled · refunded",
+      "canceladaEstornoProximo": "Canceled · refund in next closing",
+      "cancelada": "Canceled",
+      "recursoParaJulgar": "Appeal to review",
+      "cobrada": "Billed",
+      "proximoFechamento": "Goes into the next closing",
+      "prazoRecurso": "Appeal period until {{data}}"
+    },
+    "toast": {
+      "erroCarregar": "Couldn't load the fines.",
+      "aplicada": "Fine issued. The resident sees it in their finances and can appeal within the deadline.",
+      "erroAplicar": "Couldn't issue the fine.",
+      "canceladaComEstorno": "Fine canceled. Since it was already billed, the refund goes into the next closing.",
+      "cancelada": "Fine canceled.",
+      "recursoAceito": "Appeal accepted: fine canceled.",
+      "recursoRecusado": "Appeal rejected: fine upheld.",
+      "erroDecisao": "Couldn't record the decision."
+    },
+    "apto": "Apt {{numero}}",
+    "unidade": "Unit",
+    "aplicarMulta": "Issue fine",
+    "recursosPendentes_one": "{{count}} appeal awaiting review. Until it's reviewed, the fine isn't billed.",
+    "recursosPendentes_other": "{{count}} appeals awaiting review. Until reviewed, fines aren't billed.",
+    "carregando": "Loading fines...",
+    "vazioFiltro": "No fines with this status.",
+    "vazio": "No fines issued.",
+    "infracaoEm": "violation on {{data}}",
+    "recursoDoMorador": "Resident's appeal",
+    "decisao": "Decision: {{texto}}",
+    "acoes": {
+      "recusar": "Reject appeal",
+      "aceitar": "Accept appeal",
+      "cancelar": "Cancel fine"
+    },
+    "form": {
+      "unidade": "Unit",
+      "selecione": "Select",
+      "morador": "Resident (optional)",
+      "daUnidade": "The violation is the unit's",
+      "valor": "Amount (R$)",
+      "dataInfracao": "Violation date",
+      "motivo": "Reason",
+      "motivoPlaceholder": "What happened and which house rule was broken",
+      "aviso": "The resident is notified and can appeal within the period set in the financial rules. The fine is only added to the invoice after that period ends.",
+      "aplicando": "Issuing...",
+      "aplicar": "Issue"
+    },
+    "decisaoModal": {
+      "aceitar": "The fine will be canceled and won't be billed.",
+      "recusar": "The fine stands and goes into the next closing after the deadline.",
+      "cancelarCobrada": "The fine was already billed: the amount will be refunded in the next closing.",
+      "cancelar": "The fine is voided and won't be billed.",
+      "justificativa": "Justification",
+      "justificativaPlaceholder": "The resident will see this explanation"
+    }
+  },
+  "contratos": {
+    "divergencia": {
+      "semConferir": "Couldn't check who receives this unit's invoice right now.",
+      "texto": "Under the contract, the fee is paid by <b>{{esperado}}</b>, but the invoice is going to <b>{{atual}}</b>. To change it, use the unit's financial responsibility transfer.",
+      "ninguem": "no one"
+    },
+    "toast": {
+      "erroCarregar": "Couldn't load the contracts.",
+      "cadastrado": "Contract registered.",
+      "erroCadastrar": "Couldn't register the contract.",
+      "encerrado": "Contract ended.",
+      "erroEncerrar": "Couldn't end the contract."
+    },
+    "usuario": "User {{id}}",
+    "encerrar": {
+      "titulo": "End contract",
+      "mensagem": "The contract for {{unidade}} stops being active today.",
+      "botao": "End"
+    },
+    "descricao": "A record of what owner and tenant agreed. Who receives the invoice is still set by the unit's financial responsibility.",
+    "novo": "New contract",
+    "carregando": "Loading contracts...",
+    "vazio": "No lease contracts registered.",
+    "lista": {
+      "partes": "Owner: {{proprietario}} · Tenant: {{inquilino}}",
+      "periodo": "{{inicio}} to {{fim}}",
+      "semFim": "no end date",
+      "aluguel": "rent {{valor}}",
+      "taxaInquilino": "fee paid by the tenant",
+      "taxaProprietario": "fee paid by the owner",
+      "vigente": "Active",
+      "encerrado": "Ended"
+    },
+    "form": {
+      "titulo": "New lease contract",
+      "proprietario": "Owner",
+      "inquilino": "Tenant",
+      "semMoradores": "This unit has no linked residents. Link the owner and tenant under Users first.",
+      "inicio": "Start",
+      "fim": "End (optional)",
+      "aluguel": "Rent (R$, optional)",
+      "quemPaga": "Who pays the fee",
+      "cadastrar": "Register"
+    }
+  },
+  "prestacao": {
+    "categorias": {
+      "limpeza": "Cleaning",
+      "manutencao": "Maintenance",
+      "agua": "Water",
+      "energia": "Electricity",
+      "portaria": "Front desk",
+      "jardinagem": "Gardening",
+      "seguro": "Insurance",
+      "administracao": "Administration",
+      "aluguelEspaco": "Space rental",
+      "multasRecebidas": "Fines received",
+      "rendimentos": "Investment income",
+      "outros": "Other"
+    },
+    "resumo": {
+      "receitas": "Income",
+      "despesas": "Expenses",
+      "saldo": "Monthly balance",
+      "porCategoria": "By category",
+      "automatica": "automatic"
+    },
+    "toast": {
+      "erroCarregar": "Couldn't load the financial report.",
+      "lancado": "Entry recorded.",
+      "erroLancar": "Couldn't record the entry.",
+      "erroExcluir": "Couldn't delete.",
+      "publicada": "Financial report published to residents.",
+      "erroPublicar": "Couldn't publish."
+    },
+    "excluir": "Delete entry",
+    "publicar": {
+      "titulo": "Publish financial report",
+      "mensagem": "Residents will be able to see the report for {{competencia}}. Once published, it no longer accepts new entries or deletions.",
+      "confirmar": "Publish",
+      "botao": "Publish to residents"
+    },
+    "publicadaEm": "Published {{quando}}",
+    "rascunho": "Draft",
+    "carregando": "Loading financial report...",
+    "receitaTaxasAviso": "Fee income comes from this period's paid invoices and is added automatically.",
+    "form": {
+      "titulo": "New entry",
+      "tipo": "Type",
+      "despesa": "Expense",
+      "receita": "Income",
+      "categoria": "Category",
+      "categoriaPlaceholder": "E.g. Cleaning",
+      "data": "Date",
+      "descricao": "Description",
+      "descricaoPlaceholder": "E.g. Cleaning supplies for the month",
+      "comprovante": "Receipt link (optional)",
+      "lancando": "Recording...",
+      "lancar": "Record"
+    },
+    "lista": {
+      "vazio": "No entries in this period.",
+      "titulo": "Entries",
+      "comprovante": "receipt"
+    }
+  },
+  "abaContrato": {
+    "toast": {
+      "erroCarregar": "Couldn't load the contract.",
+      "erroEncerrar": "Couldn't end it."
+    },
+    "outraPessoa": "someone else",
+    "encerrarMensagem": "The contract stops being active today.",
+    "cadastrar": "Register contract",
+    "vazio": "No lease contract registered for this unit.",
+    "aluguel": "Rent {{valor}}",
+    "taxaInquilino": "Condo fee paid by the tenant",
+    "taxaProprietario": "Condo fee paid by the owner",
+    "semInquilinos": "Add the tenant as an occupant of the unit in your profile first.",
+    "euProprietario": "Me, the owner",
+    "aviso": "The contract records what was agreed. Who receives the condo invoice is still set by the unit's financial responsibility transfer."
+  },
+  "minhasMultas": {
+    "situacao": {
+      "cancelada": "Canceled",
+      "canceladaDevolvida": "Canceled · amount refunded on an invoice",
+      "canceladaProxima": "Canceled · amount refunded on the next invoice",
+      "emAnalise": "Appeal under review",
+      "cobrada": "Billed on invoice",
+      "podeRecorrer": "You can appeal until {{data}}",
+      "seraCobrada": "Will be billed on the next invoice"
+    },
+    "toast": {
+      "enviado": "Appeal sent. Until the building manager decides, the fine isn't billed.",
+      "erroEnviar": "Couldn't send the appeal."
+    },
+    "vazio": "No fines for your unit.",
+    "datas": "Violation on {{infracao}} · issued {{aplicada}}",
+    "seuRecurso": "Your appeal",
+    "resposta": "Building manager's reply: {{texto}}",
+    "recorrer": "Appeal",
+    "modal": {
+      "titulo": "Appeal fine",
+      "aviso": "You get one appeal: once reviewed, the decision is final.",
+      "motivo": "Why the fine is unfair",
+      "motivoPlaceholder": "Tell us what happened. If you can prove it, say how.",
+      "enviando": "Sending...",
+      "enviar": "Send appeal"
+    }
+  },
+  "prestacaoMorador": {
+    "erroAbrir": "Couldn't open this month.",
+    "vazio": "The building manager hasn't published any financial report yet.",
+    "saldo": "balance {{valor}}"
+  },
+  "cobrancas": {
+    "titulo": "My charges",
+    "vazio": "No invoices found.",
+    "vazioAjuda": "Invoices will show up here once the building manager closes the billing period.",
+    "venceEm": "Due {{data}}",
+    "verDetalhes": "View details →",
+    "detalhe": {
+      "titulo": "Invoice {{competencia}}",
+      "carregando": "Loading invoice...",
+      "erro": "Couldn't load the details.",
+      "total": "Total",
+      "composicao": "Breakdown",
+      "pagamentoConfirmado": "Payment confirmed",
+      "pagoEm": "on {{data}}",
+      "gateway": "Gateway",
+      "pagarPix": "Pay with PIX",
+      "qrAlt": "PIX QR code",
+      "copiaECola": "Copy-and-paste code:",
+      "copiar": "Copy",
+      "processando": "Charge being processed",
+      "processandoAjuda": "Wait a moment and reload the page to see the payment options."
+    }
+  },
+  "minhas": {
+    "titulo": "Finances",
+    "subtitulo": "Invoices, spending, fines and the building's financial report",
+    "abas": {
+      "faturas": "Invoices",
+      "gastos": "Spending",
+      "multas": "Fines",
+      "prestacao": "Financial report",
+      "contrato": "Contract"
+    },
+    "categorias": {
+      "TODOS": "All",
+      "CONDOMINIO": "Condo",
+      "AGUA": "Water",
+      "LUZ": "Electricity",
+      "GAS": "Gas",
+      "INTERNET": "Internet",
+      "PLATAFORMA": "Platform",
+      "OUTRO": "Other"
+    },
+    "detalhe": {
+      "erroGerar": "Error creating the charge.",
+      "erroGerarTente": "Error creating the charge. Please try again.",
+      "valorTotal": "Total amount",
+      "composicao": "Invoice breakdown",
+      "viaGateway": "Via gateway",
+      "gerandoPix": "Generating PIX QR code...",
+      "gerandoBoleto": "Generating bank slip...",
+      "gerarPix": "Generate PIX QR code",
+      "gerarBoleto": "Generate bank slip",
+      "copiaECola": "Copy-and-paste code",
+      "copiado": "Copied!",
+      "preferoBoleto": "I'd rather pay by bank slip →",
+      "preferoPix": "I'd rather pay with PIX →",
+      "abrirBoleto": "Open bank slip to print"
+    },
+    "gastos": {
+      "resumo": "Yearly spending summary",
+      "anoAnterior": "Previous year",
+      "proximoAno": "Next year",
+      "carregando": "Loading spending...",
+      "vazio": "No spending in {{ano}}",
+      "vazioAjuda": "Spending will show up here once billing periods are closed.",
+      "totalAno": "Total {{ano}}",
+      "mediaMes": "Avg/month",
+      "mesMaior": "Top month",
+      "categoria": "Category",
+      "distribuicao": "Breakdown",
+      "distribuicaoDescricao": "By category for the year",
+      "evolucao": "Monthly trend",
+      "evolucaoDescricao": "Total spending per month",
+      "totalGastoAno": "Total spent this year",
+      "totalCategoria": "Total {{categoria}}",
+      "vazioFiltro": "No spending for this filter."
+    },
+    "faturas": {
+      "vazio": "No invoices yet",
+      "vazioAjuda": "Invoices show up here after the building manager closes the monthly billing period.",
+      "vazioFiltro": "No invoices for this filter."
+    }
+  }
+}

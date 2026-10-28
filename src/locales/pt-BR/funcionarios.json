@@ -1,0 +1,141 @@
+{
+  "cabecalho": {
+    "administrativo": "Administrativo",
+    "funcionarios": "Funcionários",
+    "turnos": "& Turnos",
+    "descricao": "Situação funcional, jornada e liberações excepcionais da equipe."
+  },
+  "abas": {
+    "quadro": "Quadro",
+    "acompanhamento": "Acompanhamento",
+    "liberacoes": "Liberações"
+  },
+  "erros": {
+    "carregarQuadro": "Não foi possível carregar o quadro de funcionários."
+  },
+  "toast": {
+    "jornadaAtualizada": "Jornada atualizada."
+  },
+  "diasSemana": {
+    "domingo": "Domingo",
+    "segunda": "Segunda",
+    "terca": "Terça",
+    "quarta": "Quarta",
+    "quinta": "Quinta",
+    "sexta": "Sexta",
+    "sabado": "Sábado"
+  },
+  "situacoes": {
+    "ativo": "Ativo",
+    "suspenso": "Suspenso",
+    "afastado": "Afastado",
+    "demitido": "Demitido"
+  },
+  "quadro": {
+    "vazio": "Nenhum funcionário no condomínio. Cadastre porteiros e síndicos em Usuários.",
+    "escalaDias_one": "Escala {{count}} dias",
+    "escalaDias_other": "Escala {{count}} dias",
+    "jornadaSemanal": "Jornada semanal",
+    "semJornada": "Sem jornada",
+    "naoConfigurado": "Não configurado",
+    "configurar": "Configurar",
+    "proximosPlantoes": "Próximos plantões",
+    "semPlantoes": "Nenhum plantão nos próximos 14 dias."
+  },
+  "modal": {
+    "titulo": "Situação e jornada",
+    "situacao": "Situação",
+    "avisoSituacao": "Esta situação bloqueia o registro de entrada. A saída continua permitida.",
+    "tipoJornada": "Tipo de jornada",
+    "tipos": {
+      "semanalFixa": "Semanal fixa",
+      "semanalFixaDescricao": "Horário por dia da semana",
+      "escala": "Escala",
+      "escalaDescricao": "Ciclo rotativo: 12x36, 24x48, 6x1"
+    },
+    "folga": "Folga",
+    "ate": "até",
+    "viraODia": "vira o dia",
+    "modelos": {
+      "noturno12x36": "12x36 noturno"
+    },
+    "inicioCiclo": "Início do ciclo",
+    "tamanhoCiclo": "Tamanho do ciclo (dias)",
+    "dia": "Dia {{n}}",
+    "verPrevia": "Ver próximos plantões com esta configuração",
+    "observacoes": "Observações",
+    "salvar": "Salvar jornada",
+    "erros": {
+      "previa": "Não foi possível gerar a prévia.",
+      "salvar": "Não foi possível salvar a jornada."
+    }
+  },
+  "acompanhamento": {
+    "erroCarregar": "Não foi possível carregar o acompanhamento.",
+    "indicadores": {
+      "noCondominio": "No condomínio agora",
+      "semEntradaHoje": "Sem entrada hoje",
+      "porLiberacao": "Por liberação"
+    },
+    "presencaAtual": "Presença atual",
+    "semPresentes": "Nenhum funcionário no condomínio neste momento.",
+    "entradaHa": "entrada {{entrada}} · há {{duracao}}",
+    "turno": "turno {{turno}}",
+    "liberacaoExcepcional": "Liberação excepcional",
+    "semRegistroHoje": "Sem registro de entrada hoje",
+    "semRegistroAviso": "Considera funcionários ativos; quem está de folga hoje aparece aqui e não é necessariamente uma ausência.",
+    "historico": "Histórico de acessos",
+    "todosFuncionarios": "Todos os funcionários",
+    "semRegistros": "Nenhum registro de acesso da equipe no período.",
+    "colunas": {
+      "funcionario": "Funcionário",
+      "entrada": "Entrada",
+      "saida": "Saída",
+      "status": "Status",
+      "turnoPrevisto": "Turno previsto",
+      "observacao": "Observação",
+      "registradoPor": "Registrado por"
+    },
+    "dentro": "Dentro",
+    "saiu": "Saiu",
+    "foraDoTurno": "Fora do turno — liberação excepcional"
+  },
+  "liberacoes": {
+    "status": {
+      "aguardando": "Aguardando",
+      "utilizada": "Utilizada",
+      "expirada": "Expirada",
+      "cancelada": "Cancelada"
+    },
+    "erros": {
+      "selecioneFuncionario": "Selecione o funcionário.",
+      "informeJanela": "Informe a janela de horário.",
+      "informeMotivo": "Informe o motivo da liberação.",
+      "criar": "Não foi possível criar a liberação.",
+      "cancelar": "Não foi possível cancelar."
+    },
+    "toast": {
+      "criada": "Liberação criada.",
+      "cancelada": "Liberação cancelada."
+    },
+    "confirmarCancelar": "Cancelar a liberação de {{nome}}?",
+    "info": "A liberação autoriza a entrada fora do turno habitual, apenas na data e janela informadas. Ela não contorna suspensão, afastamento nem demissão.",
+    "nova": "Nova liberação",
+    "novaTitulo": "Nova liberação excepcional",
+    "campos": {
+      "funcionario": "Funcionário",
+      "data": "Data",
+      "das": "Das",
+      "ate": "Até",
+      "motivo": "Motivo",
+      "motivoPlaceholder": "Ex.: manutenção emergencial do elevador"
+    },
+    "semElegiveis": "Nenhum funcionário ativo com jornada",
+    "selecione": "Selecione…",
+    "criando": "Criando…",
+    "criar": "Criar liberação",
+    "vazio": "Nenhuma liberação registrada.",
+    "autorizadaPor": "Autorizada por {{nome}}",
+    "cancelando": "Cancelando…"
+  }
+}

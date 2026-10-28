@@ -1,0 +1,222 @@
+{
+  "categorias": {
+    "barulho": "Barulho",
+    "infraestrutura": "Infraestrutura",
+    "limpeza": "Limpeza",
+    "garagem": "Garagem",
+    "animais": "Animais",
+    "elevadores": "Elevadores",
+    "iluminacao": "Iluminação",
+    "eletrica": "Elétrica",
+    "hidraulica": "Hidráulica",
+    "pintura": "Pintura",
+    "jardinagem": "Jardinagem",
+    "sugestaoMelhoria": "Sugestão de melhoria",
+    "outros": "Outros"
+  },
+  "status": {
+    "reclamacao": {
+      "pendente": "Pendente",
+      "emAnalise": "Em análise",
+      "resolvido": "Resolvida"
+    },
+    "os": {
+      "aberta": "Aberta",
+      "emExecucao": "Em execução",
+      "atrasada": "Atrasada",
+      "concluida": "Concluída"
+    }
+  },
+  "prioridades": {
+    "baixa": "Baixa",
+    "media": "Média",
+    "alta": "Alta",
+    "critica": "Crítica"
+  },
+  "tempo": {
+    "menosDeUmaHora": "menos de 1 hora",
+    "horas_one": "{{count}} hora",
+    "horas_other": "{{count}} horas",
+    "dias_one": "{{count}} dia",
+    "dias_other": "{{count}} dias",
+    "resolvidaEm": "Resolvida em {{duracao}}",
+    "abertaHa": "Aberta há {{duracao}}"
+  },
+  "geral": {
+    "painelAdministrativo": "Painel Administrativo"
+  },
+  "detalhe": {
+    "morador": "Morador",
+    "usuarioId": "Usuário {{id}}",
+    "protocolo": "Protocolo",
+    "registradaEm": "Registrada em",
+    "tempo": "Tempo",
+    "anexo": "Anexo",
+    "verArquivo": "Ver arquivo",
+    "descricao": "Descrição",
+    "ordensServico": "Ordens de serviço",
+    "prazo": "prazo {{data}}"
+  },
+  "gestao": {
+    "cabecalho": {
+      "titulo": "Gestão de",
+      "tituloDestaque": "Reclamações"
+    },
+    "erroCarregar": "Não foi possível carregar as ocorrências.",
+    "filtrandoPor": "Filtrando por:",
+    "abrirOs": "Abrir ordem de serviço",
+    "semOs": "Nenhuma ordem de serviço vinculada.",
+    "vazio": "Nenhuma reclamação encontrada.",
+    "historico": "Histórico de atendimento",
+    "atendimento": {
+      "justificativaObrigatoria": "Escreva a justificativa da mudança.",
+      "respostaObrigatoria": "Escreva a resposta.",
+      "sucesso": "Resposta registrada. O morador foi avisado.",
+      "erro": "Não foi possível registrar a resposta.",
+      "tituloComStatus": "Responder e mudar o status",
+      "titulo": "Responder",
+      "placeholderJustificativa": "Justificativa — o morador vê este texto.",
+      "placeholderResposta": "Digite a resposta para o morador...",
+      "manterStatus": "Manter status ({{status}})",
+      "mudarPara": "Mudar para: {{status}}"
+    }
+  },
+  "minhas": {
+    "cabecalho": {
+      "area": "Área do Morador",
+      "titulo": "Minhas",
+      "tituloDestaque": "Reclamações"
+    },
+    "abas": {
+      "nova": "Abrir Reclamação",
+      "minhas": "Minhas Reclamações"
+    },
+    "nova": {
+      "titulo": "Abrir Reclamação",
+      "subtitulo": "Descreva o problema e nossa equipe responderá em breve.",
+      "categoria": "Categoria",
+      "descricaoPlaceholder": "Descreva o problema com o máximo de detalhes possível...",
+      "anexo": "URL do Anexo (opcional)",
+      "enviar": "Enviar reclamação",
+      "erro": "Não foi possível enviar a reclamação."
+    },
+    "registrada": {
+      "titulo": "Reclamação registrada!",
+      "texto": "Protocolo <protocolo>{{protocolo}}</protocolo>. Acompanhe o andamento pela aba <aba>Minhas Reclamações</aba> — você é avisado quando a administração responder.",
+      "outra": "Abrir outra reclamação"
+    },
+    "vazio": "Você ainda não abriu nenhuma reclamação.",
+    "aguardando": "Aguardando resposta da administração.",
+    "respostas": "Respostas da administração"
+  },
+  "ordensServico": {
+    "preventiva": "Preventiva",
+    "abas": {
+      "ordens": "Ordens de serviço",
+      "fornecedores": "Fornecedores"
+    },
+    "cabecalho": {
+      "painel": "Painel Administrativo",
+      "titulo": "Ordens de",
+      "tituloDestaque": "Serviço",
+      "descricao": "Manutenção corretiva, aberta a partir de uma ocorrência, e preventiva. OS com prazo vencido passam a atrasadas todo dia de manhã, e você é avisado."
+    },
+    "kpis": {
+      "emAberto": "Em aberto",
+      "emExecucao_one": "{{count}} em execução",
+      "emExecucao_other": "{{count}} em execução",
+      "atrasadas": "Atrasadas",
+      "criticasAtrasadas": "Críticas atrasadas",
+      "concluidasNoPrazo": "Concluídas no prazo",
+      "deTotal": "{{parte}} de {{total}}"
+    },
+    "lista": {
+      "erroCarregar": "Não foi possível carregar as ordens de serviço.",
+      "ocorrenciaNaoEncontrada": "Ocorrência não encontrada.",
+      "novaPreventiva": "Nova OS preventiva",
+      "vazio": "Nenhuma ordem de serviço.",
+      "concluidaData": "Concluída {{data}}",
+      "prazoData": "Prazo {{data}}"
+    },
+    "nova": {
+      "titulo": "Nova ordem de serviço",
+      "aPartirDe": "A partir da ocorrência",
+      "semOrigem": "Manutenção preventiva, sem ocorrência de origem.",
+      "abrir": "Abrir ordem de serviço",
+      "abrindo": "Abrindo…",
+      "campos": {
+        "descricao": "Descrição do serviço",
+        "descricaoPlaceholder": "O que precisa ser feito",
+        "prioridade": "Prioridade",
+        "prazo": "Prazo",
+        "fornecedor": "Fornecedor (opcional)",
+        "responsavel": "Responsável",
+        "responsavelPlaceholder": "Quem executa",
+        "responsavelVazioFornecedor": "Vazio = o fornecedor"
+      },
+      "toast": {
+        "semResponsavel": "Informe o responsável ou escolha um fornecedor.",
+        "abertaComOrigem": "OS aberta. O morador foi avisado.",
+        "preventivaAberta": "OS preventiva aberta.",
+        "erroAbrir": "Não foi possível abrir a OS."
+      }
+    },
+    "detalhe": {
+      "responsavel": "Responsável",
+      "origem": "Origem",
+      "ocorrencia": "Ocorrência {{protocolo}}",
+      "abertaEm": "Aberta em",
+      "prazo": "Prazo",
+      "concluidaEm": "Concluída em",
+      "noPrazo": "No prazo",
+      "foraDoPrazo": "Fora do prazo ({{prazo}})",
+      "descricao": "Descrição",
+      "custo": "Custo",
+      "custoReais": "Custo (R$)",
+      "custoPlaceholder": "0,00",
+      "observacoes": "Observações",
+      "observacoesPlaceholder": "O que foi feito, peças trocadas, garantia...",
+      "andamento": "Andamento",
+      "sistema": "Sistema",
+      "registrarAndamento": "Registrar andamento",
+      "andamentoPlaceholderAberta": "O primeiro andamento põe a OS em execução",
+      "andamentoPlaceholder": "O que foi feito",
+      "registrar": "Registrar",
+      "concluir": "Concluir OS",
+      "encerramento": "Encerramento",
+      "concluindo": "Concluindo…",
+      "confirmarConclusao": "Confirmar conclusão",
+      "toast": {
+        "erroCarregar": "Não foi possível carregar a OS.",
+        "andamentoRegistrado": "Andamento registrado.",
+        "erroAndamento": "Não foi possível registrar o andamento.",
+        "concluida": "OS concluída.",
+        "erroConcluir": "Não foi possível concluir a OS."
+      }
+    }
+  },
+  "fornecedores": {
+    "vazio": "Nenhum fornecedor cadastrado.",
+    "desativar": "Desativar",
+    "reativar": "Reativar",
+    "form": {
+      "editar": "Editar fornecedor",
+      "cadastrar": "Cadastrar fornecedor",
+      "nome": "Nome",
+      "servico": "Serviço",
+      "servicoPlaceholder": "Elétrica, elevadores...",
+      "telefone": "Telefone",
+      "email": "E-mail",
+      "documento": "CNPJ / CPF"
+    },
+    "toast": {
+      "atualizado": "Fornecedor atualizado.",
+      "cadastrado": "Fornecedor cadastrado.",
+      "erroSalvar": "Não foi possível salvar o fornecedor.",
+      "desativado": "Fornecedor desativado.",
+      "reativado": "Fornecedor reativado.",
+      "erroAlterar": "Não foi possível alterar o fornecedor.",
+      "erroCarregar": "Não foi possível carregar os fornecedores."
+    }
+  }
+}

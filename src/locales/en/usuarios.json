@@ -1,0 +1,150 @@
+{
+  "gerenciar": {
+    "cabecalho": {
+      "painel": "Admin Panel",
+      "gerenciar": "Manage",
+      "usuarios": "Users"
+    },
+    "novoUsuario": "New user",
+    "resumo": {
+      "total": "Total",
+      "ativos": "Active",
+      "pendentes": "Pending"
+    },
+    "abas": {
+      "gerenciamento": "Management",
+      "financeiro": "Billing"
+    },
+    "buscaPlaceholder": "Search by name, email, block or unit...",
+    "vazio": "No users found.",
+    "selecione": "— Select —",
+    "colunas": {
+      "bloco": "Block",
+      "apt": "Unit",
+      "vaga": "Spot"
+    },
+    "status": {
+      "ativo": "active",
+      "pendente": "pending",
+      "inativo": "inactive",
+      "expirado": "expired"
+    },
+    "badgeFinanceiro": "Billing",
+    "financeiro": {
+      "titulo": "Billing",
+      "descricao": "Condominium fees and payment status will be loaded here once the billing module is integrated. This sprint does not use mock financial values in the frontend code."
+    },
+    "detalhes": {
+      "perfil": "Role:",
+      "responsavelFinanceiro": "Financially responsible",
+      "loginsApartamento": "Logins linked to the unit",
+      "bloco": "Block",
+      "apartamento": "Unit",
+      "vaga": "Parking spot",
+      "vagaNaoVinculada": "Not linked",
+      "status": "Status",
+      "unidadeId": "Unit ID"
+    },
+    "acoes": {
+      "reenviarConvite": "Resend invite",
+      "desativar": "Deactivate",
+      "editarVinculacoes": "Edit links"
+    },
+    "confirmarDesativar": {
+      "titulo": "Deactivate user",
+      "mensagem": "This revokes access immediately. Do you want to continue?"
+    },
+    "toast": {
+      "atualizado": "User updated.",
+      "conviteCriadoSemEmail": "Invite created, but the email couldn't be sent.",
+      "codigoConvite": "Invite code: {{codigo}}",
+      "conviteEnviado": "Invite sent successfully.",
+      "erroEnviarConvite": "Failed to send invite.",
+      "conviteReenviadoSemEmail": "Invite resent, but the email couldn't be sent.",
+      "conviteReenviado": "Invite resent successfully.",
+      "erroReenviarConvite": "Failed to resend invite.",
+      "desativado": "User deactivated.",
+      "erroDesativar": "Failed to deactivate user."
+    },
+    "erros": {
+      "respostaInvalida": "Invalid API response"
+    },
+    "edicao": {
+      "semAlteracoes": "No changes were made.",
+      "erroSalvar": "Failed to save.",
+      "erroStatus": "Error {{status}}",
+      "semResposta": "The server didn't respond.",
+      "bloco": "Block",
+      "semVinculo": "— Not linked —",
+      "apartamento": "Unit",
+      "apto": "Unit {{numero}}",
+      "andar": "floor {{andar}}",
+      "semApartamentos": "No units in this block",
+      "vaga": "Parking spot",
+      "semVaga": "— No spot —",
+      "vagaNumero": "Spot {{numero}}",
+      "semVagas": "No parking spots for this unit",
+      "statusUsuario": "User status",
+      "loginsVinculados": "Linked logins",
+      "novoLoginPlaceholder": "add@email.com",
+      "salvarAlteracoes": "Save changes"
+    },
+    "novo": {
+      "cpfInvalido": "Invalid CPF. Check the number entered.",
+      "avisoConvidados": "Guests must be registered from the unit's profile — no email invite.",
+      "condominio": "Condominium *",
+      "selecioneCondominio": "— Select a condominium —",
+      "condominioRotulo": "Condominium:",
+      "email": "Email *",
+      "emailPlaceholder": "user@mora.com",
+      "perfil": "Role *",
+      "nomeCompleto": "Full name *",
+      "nomePlaceholder": "Guest's name",
+      "cpf": "CPF *",
+      "bloco": "Block *",
+      "semBlocos": "No blocks registered for this condominium",
+      "apartamento": "Unit *",
+      "infoConvite": "An invite code will be sent by email (valid for 48h). The user activates the account by entering the code.",
+      "enviarConvite": "Send invite"
+    }
+  },
+  "condominio": {
+    "cabecalho": {
+      "portaria": "Front desk",
+      "titulo": "Condominium Users"
+    },
+    "total": "Total",
+    "buscaPlaceholder": "Search by name, email or CPF...",
+    "carregando": "Loading...",
+    "semResultados": "No results found.",
+    "vazio": "No users registered in this condominium.",
+    "status": {
+      "ativo": "Active",
+      "pendente": "Pending",
+      "inativo": "Inactive"
+    },
+    "toast": {
+      "erroCarregar": "Failed to load condominium users."
+    },
+    "detalhe": {
+      "email": "Email",
+      "cpf": "CPF",
+      "telefone": "Phone",
+      "unidade": "Unit",
+      "donoNaoResidente": "Non-resident owner — owns the property",
+      "tipo": "Type",
+      "visitantePreAutorizado": "Pre-authorized visitor",
+      "responsavelFinanceiro": "Financially responsible for the unit",
+      "funcao": "Role",
+      "funcoes": {
+        "porteiro": "Front desk operator",
+        "adminSindico": "Condominium administrator",
+        "adminGeral": "Platform administrator"
+      },
+      "empresa": "Company",
+      "prestadorServico": "Service provider",
+      "semAcesso": "No system access",
+      "comAcesso": "Has system access"
+    }
+  }
+}

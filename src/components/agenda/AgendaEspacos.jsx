@@ -1,15 +1,19 @@
 // src/components/agenda/AgendaEspacos.jsx
 import { useMemo, useRef, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { Icone } from "../icones/Icone";
+import { idiomaAtual } from "../../i18n";
 
 // ── datas ────────────────────────────────────────────────────────────────────
 
 const DOW_API = ["SUNDAY", "MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY"];
-const DOW_CURTO = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
-const MESES = [
-  "janeiro", "fevereiro", "março", "abril", "maio", "junho",
-  "julho", "agosto", "setembro", "outubro", "novembro", "dezembro",
-];
+// Chaves de `agenda.diasCurtos`; o texto sai na renderização.
+const DOW_CURTO = ["dom", "seg", "ter", "qua", "qui", "sex", "sab"];
+
+/** Nome do mês por extenso no idioma atual ("janeiro", "January"). */
+function nomeMes(d) {
+  return d.toLocaleString(idiomaAtual(), { month: "long" });
+}
 
 function zerar(d) { const x = new Date(d); x.setHours(0, 0, 0, 0); return x; }
 function inicioSemana(d) { const x = zerar(d); x.setDate(x.getDate() - x.getDay()); return x; }
@@ -140,11 +144,11 @@ function segmentosDaReserva(reserva, funcionamento) {
   }];
 }
 
-function periodoCompleto(r) {
+function periodoCompleto(r, t) {
   const i = new Date(r.inicio);
   const f = new Date(r.fim);
-  const dm = (d) => `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}`;
-  return `${dm(i)} ${hhmm(i)} até ${dm(f)} ${hhmm(f)}`;
+  const dm = (d) => d.toLocaleDateString(idiomaAtual(), { day: "2-digit", month: "2-digit" });
+  return t("periodo", { inicio: `${dm(i)} ${hhmm(i)}`, fim: `${dm(f)} ${hhmm(f)}` });
 }
 
 function multiDia(r) {
@@ -178,13 +182,14 @@ function estiloDe(reserva, visao) {
 }
 
 /** Resumo textual do funcionamento, para o cabeçalho do mês (critério 49). */
-function resumoFuncionamento(funcionamento) {
-  if (semRestricao(funcionamento)) return "Sem restrição de horário";
+function resumoFuncionamento(funcionamento, t) {
+  if (semRestricao(funcionamento)) return t("agenda.semRestricao");
+  const fechado = t("agenda.fechado");
   const porDia = DOW_API.map((api, idx) => {
     const h = funcionamento.horarios.find((x) => x.diaSemana === api);
     return {
-      curto: DOW_CURTO[idx],
-      txt: !h || h.fechado ? "Fechado" : `${h.abertura.slice(0, 5)}–${h.fechamento.slice(0, 5)}`,
+      curto: t(`agenda.diasCurtos.${DOW_CURTO[idx]}`),
+      txt: !h || h.fechado ? fechado : `${h.abertura.slice(0, 5)}–${h.fechamento.slice(0, 5)}`,
     };
   });
   // Agrupa dias consecutivos com o mesmo horário: "Seg–Sex 10:00–20:00".
@@ -195,9 +200,9 @@ function resumoFuncionamento(funcionamento) {
     else grupos.push({ ini: d.curto, fim: d.curto, txt: d.txt });
   }
   return grupos
-    .filter((g) => g.txt !== "Fechado")
+    .filter((g) => g.txt !== fechado)
     .map((g) => `${g.ini}${g.fim !== g.ini ? `–${g.fim}` : ""} ${g.txt}`)
-    .join(" · ") || "Fechado todos os dias";
+    .join(" · ") || t("agenda.fechadoTodosDias");
 }
 
 // ── componente ───────────────────────────────────────────────────────────────
@@ -218,19 +223,20 @@ export function AgendaEspacos({
   onAbrirReserva,
   onTrocarEspaco,
 }) {
+  const { t } = useTranslation("reservas");
   const ehMes = visualizacao === "mes";
   const hoje = new Date();
 
   const rotulo = useMemo(() => {
-    if (ehMes) return `${MESES[referencia.getMonth()]} de ${referencia.getFullYear()}`;
+    if (ehMes) return t("agenda.rotuloMes", { mes: nomeMes(referencia), ano: referencia.getFullYear() });
     const ini = inicioSemana(referencia);
     const fim = somarDias(ini, 6);
-    const mesIni = MESES[ini.getMonth()];
-    const mesFim = MESES[fim.getMonth()];
+    const mesIni = nomeMes(ini);
+    const mesFim = nomeMes(fim);
     return ini.getMonth() === fim.getMonth()
-      ? `${ini.getDate()}–${fim.getDate()} de ${mesIni} de ${fim.getFullYear()}`
-      : `${ini.getDate()} de ${mesIni} – ${fim.getDate()} de ${mesFim} de ${fim.getFullYear()}`;
-  }, [ehMes, referencia]);
+      ? t("agenda.rotuloSemanaMesmoMes", { ini: ini.getDate(), fim: fim.getDate(), mes: mesIni, ano: fim.getFullYear() })
+      : t("agenda.rotuloSemana", { ini: ini.getDate(), mesIni, fim: fim.getDate(), mesFim, ano: fim.getFullYear() });
+  }, [ehMes, referencia, t]);
 
   function navegar(passo) {
     const d = new Date(referencia);
@@ -266,14 +272,14 @@ export function AgendaEspacos({
           onClick={() => onReferencia(new Date())}
           className="px-3 py-1.5 rounded-xl text-sm font-semibold border border-outline-variant/30 text-on-surface-variant hover:bg-veu/5 transition-all cursor-pointer"
         >
-          Hoje
+          {t("agenda.hoje")}
         </button>
         <div className="flex items-center gap-0.5">
-          <button type="button" onClick={() => navegar(-1)} aria-label="Período anterior"
+          <button type="button" onClick={() => navegar(-1)} aria-label={t("agenda.periodoAnterior")}
             className="w-8 h-8 rounded-lg flex items-center justify-center text-on-surface-variant hover:text-primary hover:bg-primary/10 transition-all cursor-pointer">
             <Icone name="chevron_left" className="text-xl" />
           </button>
-          <button type="button" onClick={() => navegar(1)} aria-label="Próximo período"
+          <button type="button" onClick={() => navegar(1)} aria-label={t("agenda.proximoPeriodo")}
             className="w-8 h-8 rounded-lg flex items-center justify-center text-on-surface-variant hover:text-primary hover:bg-primary/10 transition-all cursor-pointer">
             <Icone name="chevron_right" className="text-xl" />
           </button>
@@ -284,7 +290,7 @@ export function AgendaEspacos({
         </p>
 
         <div className="flex rounded-xl bg-surface-container-highest/30 p-0.5">
-          {[{ id: "mes", label: "Mês" }, { id: "semana", label: "Semana" }].map((v) => (
+          {[{ id: "mes", label: t("agenda.mes") }, { id: "semana", label: t("agenda.semana") }].map((v) => (
             <button key={v.id} type="button" onClick={() => onVisualizacao(v.id)}
               className={`px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
                 visualizacao === v.id ? "bg-primary/15 text-primary" : "text-on-surface-variant hover:text-on-surface"
@@ -296,7 +302,7 @@ export function AgendaEspacos({
 
         <button type="button" onClick={onNovaReserva}
           className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-primary text-on-primary text-sm font-semibold hover:opacity-90 transition-opacity cursor-pointer">
-          <Icone name="add" className="text-base" />Nova reserva
+          <Icone name="add" className="text-base" />{t("agenda.novaReserva")}
         </button>
       </div>
 
@@ -304,23 +310,23 @@ export function AgendaEspacos({
       <div className="flex flex-wrap items-center justify-between gap-2 px-1">
         <div className="min-w-0">
           <p className="font-semibold text-on-surface text-sm truncate">{area?.nome}</p>
-          <p className="text-xs text-on-surface-variant">{resumoFuncionamento(funcionamento)}</p>
+          <p className="text-xs text-on-surface-variant">{resumoFuncionamento(funcionamento, t)}</p>
         </div>
         <div className="flex items-center gap-3 shrink-0 flex-wrap">
           {/* Legenda: sem ela a cor não diz nada a quem abre a tela pela 1ª vez */}
           <div className="flex items-center gap-3 text-xs text-on-surface-variant">
             <span className="inline-flex items-center gap-1.5">
               <Icone name="hourglass_top" className="text-sm text-amber-600 dark:text-amber-400" />
-              Aguardando aprovação
+              {t("agenda.aguardandoAprovacao")}
             </span>
             <span className="inline-flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-sm bg-blue-500/60" />Confirmada
+              <span className="w-2.5 h-2.5 rounded-sm bg-blue-500/60" />{t("agenda.confirmada")}
             </span>
           </div>
           {onTrocarEspaco && (
             <button type="button" onClick={onTrocarEspaco}
               className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline cursor-pointer">
-              <Icone name="swap_horiz" className="text-base" />Trocar de espaço
+              <Icone name="swap_horiz" className="text-base" />{t("agenda.trocarEspaco")}
             </button>
           )}
         </div>
@@ -350,7 +356,7 @@ export function AgendaEspacos({
 
       {!carregando && !erro && reservas.length === 0 && (
         <p className="text-center text-sm text-on-surface-variant py-2">
-          Nenhuma reserva neste período.
+          {t("agenda.vazio")}
         </p>
       )}
     </div>
@@ -360,6 +366,7 @@ export function AgendaEspacos({
 // ── Visualização: mês ────────────────────────────────────────────────────────
 
 function VisaoMes({ referencia, hoje, porDia, funcionamento, onAbrirReserva, onVerDia }) {
+  const { t } = useTranslation("reservas");
   const dias = gradeDoMes(referencia);
   const mesAtual = referencia.getMonth();
 
@@ -368,7 +375,7 @@ function VisaoMes({ referencia, hoje, porDia, funcionamento, onAbrirReserva, onV
       <div className="grid grid-cols-7 border-b border-outline-variant/15 bg-surface-variant/10">
         {DOW_CURTO.map((d) => (
           <div key={d} className="px-2 py-2 text-center text-xs font-semibold text-on-surface-variant uppercase tracking-wide">
-            {d}
+            {t(`agenda.diasCurtos.${d}`)}
           </div>
         ))}
       </div>
@@ -393,7 +400,7 @@ function VisaoMes({ referencia, hoje, porDia, funcionamento, onAbrirReserva, onV
                   {dia.getDate()}
                 </span>
                 {fechado && !foraDoMes && (
-                  <span className="text-[10px] font-semibold text-on-surface-variant/60 uppercase">Fechado</span>
+                  <span className="text-[10px] font-semibold text-on-surface-variant/60 uppercase">{t("agenda.fechado")}</span>
                 )}
               </div>
 
@@ -405,19 +412,19 @@ function VisaoMes({ referencia, hoje, porDia, funcionamento, onAbrirReserva, onV
                 return (
                   <button key={`${r.id}-${s.dia.getTime()}`} type="button"
                     onClick={() => onAbrirReserva(r)}
-                    title={corrido ? `${r.responsavelNome || "—"} · ${periodoCompleto(r)}` : undefined}
+                    title={corrido ? `${r.responsavelNome || "—"} · ${periodoCompleto(r, t)}` : undefined}
                     className={`w-full flex items-center gap-0.5 px-1.5 py-1 text-[11px] leading-tight truncate cursor-pointer transition-colors ${cantos} ${estiloDe(r, "mes")} ${
                       s.foraDoFuncionamento ? "opacity-70 border border-dashed border-current" : ""
                     }`}>
                     {!s.primeiro && <span aria-hidden>←</span>}
                     {r.status === "PENDENTE" && (
                       <Icone name="hourglass_top" className="text-[12px] shrink-0"
-                        title="Aguardando aprovação" />
+                        title={t("agenda.aguardandoAprovacao")} />
                     )}
                     <span className="truncate flex-1 text-left">
                       {s.primeiro || s.ultimo
                         ? <><span className="font-semibold">{hhmm(s.inicio)}</span> {r.responsavelNome || "—"}</>
-                        : <>Dia todo · {r.responsavelNome || "—"}</>}
+                        : <>{t("agenda.diaTodo", { nome: r.responsavelNome || "—" })}</>}
                     </span>
                     {!s.ultimo && <span aria-hidden>→</span>}
                   </button>
@@ -427,7 +434,7 @@ function VisaoMes({ referencia, hoje, porDia, funcionamento, onAbrirReserva, onV
               {restantes > 0 && (
                 <button type="button" onClick={() => onVerDia(dia)}
                   className="w-full text-left px-1.5 text-[11px] font-semibold text-on-surface-variant hover:text-primary cursor-pointer">
-                  +{restantes} mais
+                  {t("agenda.mais", { n: restantes })}
                 </button>
               )}
             </div>
@@ -441,6 +448,7 @@ function VisaoMes({ referencia, hoje, porDia, funcionamento, onAbrirReserva, onV
 // ── Visualização: semana ─────────────────────────────────────────────────────
 
 function VisaoSemana({ referencia, hoje, porDia, funcionamento, onAbrirReserva }) {
+  const { t } = useTranslation("reservas");
   const ini = inicioSemana(referencia);
   const dias = Array.from({ length: 7 }, (_, i) => somarDias(ini, i));
   const horas = Array.from({ length: 24 }, (_, i) => i);
@@ -468,7 +476,7 @@ function VisaoSemana({ referencia, hoje, porDia, funcionamento, onAbrirReserva }
               return (
                 <div key={d.toISOString()} className="px-1 py-2 text-center">
                   <p className="text-[11px] uppercase tracking-wide text-on-surface-variant">
-                    {DOW_CURTO[d.getDay()]}
+                    {t(`agenda.diasCurtos.${DOW_CURTO[d.getDay()]}`)}
                   </p>
                   <p className={`text-sm font-bold mx-auto w-7 h-7 flex items-center justify-center rounded-full ${
                     ehHoje ? "bg-primary text-on-primary" : "text-on-surface"
@@ -476,7 +484,7 @@ function VisaoSemana({ referencia, hoje, porDia, funcionamento, onAbrirReserva }
                     {d.getDate()}
                   </p>
                   {fechado && (
-                    <p className="text-[10px] font-semibold text-on-surface-variant/60 uppercase">Fechado</p>
+                    <p className="text-[10px] font-semibold text-on-surface-variant/60 uppercase">{t("agenda.fechado")}</p>
                   )}
                 </div>
               );
@@ -532,7 +540,7 @@ function VisaoSemana({ referencia, hoje, porDia, funcionamento, onAbrirReserva }
                       return (
                         <button key={`${r.id}-${s.dia.getTime()}`} type="button"
                           onClick={() => onAbrirReserva(r)}
-                          title={corrido ? `${r.responsavelNome || "—"} · ${periodoCompleto(r)}` : undefined}
+                          title={corrido ? `${r.responsavelNome || "—"} · ${periodoCompleto(r, t)}` : undefined}
                           style={{ top, height: altura }}
                           className={`absolute left-1 right-1 px-1.5 py-1 text-left text-[11px] leading-tight overflow-hidden cursor-pointer transition-colors z-20 ${cantos} ${estiloDe(r, "semana")} ${
                             s.foraDoFuncionamento ? "border border-dashed opacity-80" : "border"
@@ -541,14 +549,14 @@ function VisaoSemana({ referencia, hoje, porDia, funcionamento, onAbrirReserva }
                             {!s.primeiro && <span aria-hidden>←</span>}
                             {r.status === "PENDENTE" && (
                               <Icone name="hourglass_top" className="text-[12px] shrink-0"
-                                title="Aguardando aprovação" />
+                                title={t("agenda.aguardandoAprovacao")} />
                             )}
                             {hhmm(s.inicio)}–{s.fim - base >= 1440 * 60000 ? "24:00" : hhmm(s.fim)}
                             {!s.ultimo && <span aria-hidden>→</span>}
                           </p>
                           <p className="truncate">{r.responsavelNome || "—"}</p>
-                          {corrido && <p className="truncate opacity-80">{periodoCompleto(r)}</p>}
-                          {evento && !corrido && <p className="truncate opacity-80">Evento</p>}
+                          {corrido && <p className="truncate opacity-80">{periodoCompleto(r, t)}</p>}
+                          {evento && !corrido && <p className="truncate opacity-80">{t("agenda.evento")}</p>}
                         </button>
                       );
                     })}

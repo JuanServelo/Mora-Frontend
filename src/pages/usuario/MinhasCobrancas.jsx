@@ -1,5 +1,6 @@
 // src/pages/usuario/MinhasCobrancas.jsx
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router-dom";
 import {
   PieChart, Pie, Cell,
@@ -10,7 +11,7 @@ import { Icone } from "../../components/icones/Icone";
 import { CartaoGrafico } from "../../components/charts/CartaoGrafico";
 import { financeiroApi } from "../../services/financeiroApi";
 import { formatarBRL } from "../../utils/dinheiro";
-import { formatarData, formatarDataHora } from "../../utils/datas";
+import { formatarData, formatarDataHora, formatarCompetencia } from "../../utils/datas";
 import { CORES, PALETA, TOOLTIP_STYLE, EIXO_STYLE, rotuloMes } from "../../utils/chartTheme";
 import { useAuth } from "../../contexts/AuthContext";
 import { PERFIS } from "../../utils/perfis";
@@ -18,24 +19,21 @@ import { AbaMinhasMultas } from "../../components/financeiro/AbaMinhasMultas";
 import { AbaPrestacaoMorador } from "../../components/financeiro/AbaPrestacaoMorador";
 import { AbaContrato } from "../../components/financeiro/AbaContrato";
 
-const MESES = ["jan", "fev", "mar", "abr", "mai", "jun",
-  "jul", "ago", "set", "out", "nov", "dez"];
-
 function labelCompetencia(dateStr) {
   if (!dateStr) return "";
-  const [ano, mes] = String(dateStr).split("-");
-  return `${MESES[Number(mes) - 1]}/${ano}`;
+  return formatarCompetencia(dateStr);
 }
 
 const STATUS_CFG = {
-  ABERTA:    { cor: "bg-blue-500/15 text-blue-400 border-blue-500/25",   label: "Em aberto",  icone: "schedule" },
-  PAGA:      { cor: "bg-green-500/15 text-green-400 border-green-500/25", label: "Paga",       icone: "check_circle" },
-  EM_ATRASO: { cor: "bg-error/15 text-error border-error/25",             label: "Em atraso",  icone: "warning" },
-  CANCELADA: { cor: "bg-veu/5 text-on-surface-variant border-veu/10", label: "Cancelada",  icone: "cancel" },
+  ABERTA:    { cor: "bg-blue-500/15 text-blue-400 border-blue-500/25",   label: "faturas.status.ABERTA",  icone: "schedule" },
+  PAGA:      { cor: "bg-green-500/15 text-green-400 border-green-500/25", label: "faturas.status.PAGA",       icone: "check_circle" },
+  EM_ATRASO: { cor: "bg-error/15 text-error border-error/25",             label: "faturas.status.EM_ATRASO",  icone: "warning" },
+  CANCELADA: { cor: "bg-veu/5 text-on-surface-variant border-veu/10", label: "faturas.status.CANCELADA",  icone: "cancel" },
 };
 
 /* ─── Modal de detalhes ────────────────────────────────────────────────── */
 function DetalhesFatura({ faturaId, onFechar }) {
+  const { t } = useTranslation("financeiro");
   const [dados, setDados] = useState(null);
   const [carregando, setCarregando] = useState(true);
   const [cobranca, setCobranca] = useState(null);
@@ -63,9 +61,9 @@ function DetalhesFatura({ faturaId, onFechar }) {
     try {
       const { data } = await financeiroApi.gerarCobranca(faturaId, forma);
       if (data?.sucesso) setCobranca(data.cobranca);
-      else setErroGateway(data?.mensagem ?? "Erro ao gerar cobrança.");
+      else setErroGateway(data?.mensagem ?? t("minhas.detalhe.erroGerar"));
     } catch (e) {
-      setErroGateway(e.response?.data?.mensagem ?? "Erro ao gerar cobrança. Tente novamente.");
+      setErroGateway(e.response?.data?.mensagem ?? t("minhas.detalhe.erroGerarTente"));
     } finally {
       setGerando(false);
     }
@@ -92,9 +90,9 @@ function DetalhesFatura({ faturaId, onFechar }) {
         <div className="sticky top-0 flex items-center justify-between px-6 py-4 border-b border-veu/8"
           style={{ background: "rgba(18,18,28,0.98)", backdropFilter: "blur(32px)" }}>
           <h3 className="font-headline text-lg font-bold text-on-surface">
-            {carregando ? "Carregando..." : `Fatura ${labelCompetencia(dados?.fatura?.competencia)}`}
+            {carregando ? t("geral.carregando") : t("cobrancas.detalhe.titulo", { competencia: labelCompetencia(dados?.fatura?.competencia) })}
           </h3>
-          <button onClick={onFechar} className="w-8 h-8 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-veu/10 transition cursor-pointer">
+          <button onClick={onFechar} aria-label={t("comum:acoes.fechar")} className="w-8 h-8 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-veu/10 transition cursor-pointer">
             <Icone name="close" className="text-lg" />
           </button>
         </div>
@@ -103,11 +101,11 @@ function DetalhesFatura({ faturaId, onFechar }) {
         {carregando ? (
           <div className="flex flex-col items-center justify-center py-20 gap-4 text-on-surface-variant">
             <div className="w-12 h-12 rounded-full border-2 border-primary/20 border-t-primary animate-spin" />
-            <span className="text-sm">Carregando fatura...</span>
+            <span className="text-sm">{t("cobrancas.detalhe.carregando")}</span>
           </div>
         ) : !dados?.fatura ? (
           <div className="p-8 text-center text-on-surface-variant text-sm">
-            Não foi possível carregar os detalhes.
+            {t("cobrancas.detalhe.erro")}
           </div>
         ) : (
           <div className="p-6 space-y-6">
@@ -115,13 +113,13 @@ function DetalhesFatura({ faturaId, onFechar }) {
             {/* Valor + status */}
             <div className="flex items-start justify-between gap-4">
               <div>
-                <p className="text-xs text-on-surface-variant uppercase tracking-wider mb-1">Valor total</p>
+                <p className="text-xs text-on-surface-variant uppercase tracking-wider mb-1">{t("minhas.detalhe.valorTotal")}</p>
                 <p className="text-4xl font-bold text-on-surface">{formatarBRL(dados.fatura.valorCentavos)}</p>
-                <p className="text-sm text-on-surface-variant mt-1">Vence em {formatarData(dados.fatura.vencimento)}</p>
+                <p className="text-sm text-on-surface-variant mt-1">{t("cobrancas.venceEm", { data: formatarData(dados.fatura.vencimento) })}</p>
               </div>
               <span className={`shrink-0 flex items-center gap-1.5 text-sm font-semibold px-3 py-1.5 rounded-full border ${sc.cor}`}>
                 <Icone name={sc.icone} className="text-base" />
-                {sc.label}
+                {t(sc.label)}
               </span>
             </div>
 
@@ -129,7 +127,7 @@ function DetalhesFatura({ faturaId, onFechar }) {
             {dados.itens?.length > 0 && (
               <div>
                 <p className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant mb-3">
-                  Composição da fatura
+                  {t("minhas.detalhe.composicao")}
                 </p>
                 <div className="rounded-2xl overflow-hidden border border-veu/8">
                   {dados.itens.map((item, i) => (
@@ -151,10 +149,10 @@ function DetalhesFatura({ faturaId, onFechar }) {
                   <Icone name="check_circle" className="text-green-400 text-2xl" />
                 </div>
                 <div>
-                  <p className="text-green-400 font-semibold">Pagamento confirmado</p>
+                  <p className="text-green-400 font-semibold">{t("cobrancas.detalhe.pagamentoConfirmado")}</p>
                   {dados.fatura.pagoEm && (
                     <p className="text-on-surface-variant text-xs mt-0.5">
-                      {formatarDataHora(dados.fatura.pagoEm)} · {dados.fatura.formaBaixa === "MANUAL" ? "Baixa manual" : "Via gateway"}
+                      {formatarDataHora(dados.fatura.pagoEm)} · {dados.fatura.formaBaixa === "MANUAL" ? t("faturas.baixa.botao") : t("minhas.detalhe.viaGateway")}
                     </p>
                   )}
                 </div>
@@ -165,7 +163,7 @@ function DetalhesFatura({ faturaId, onFechar }) {
             {podePagar && (
               <div className="space-y-4">
                 <p className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant">
-                  Forma de pagamento
+                  {t("gateway.formaPagamento")}
                 </p>
 
                 {/* Seletor PIX / Boleto */}
@@ -182,7 +180,7 @@ function DetalhesFatura({ faturaId, onFechar }) {
                         }`}
                       >
                         <Icone name={f === "PIX" ? "qr_code_2" : "receipt"} className="text-xl" />
-                        {f === "PIX" ? "PIX" : "Boleto"}
+                        {f === "PIX" ? "PIX" : t("gateway.boleto")}
                       </button>
                     ))}
                   </div>
@@ -198,12 +196,12 @@ function DetalhesFatura({ faturaId, onFechar }) {
                     {gerando ? (
                       <>
                         <div className="w-4 h-4 rounded-full border-2 border-veu/30 border-t-white animate-spin" />
-                        Gerando {forma === "PIX" ? "QR Code PIX" : "Boleto"}...
+                        {forma === "PIX" ? t("minhas.detalhe.gerandoPix") : t("minhas.detalhe.gerandoBoleto")}
                       </>
                     ) : (
                       <>
                         <Icone name={forma === "PIX" ? "qr_code_2" : "receipt"} className="text-lg" />
-                        Gerar {forma === "PIX" ? "QR Code PIX" : "Boleto Bancário"}
+                        {forma === "PIX" ? t("minhas.detalhe.gerarPix") : t("minhas.detalhe.gerarBoleto")}
                       </>
                     )}
                   </button>
@@ -222,32 +220,33 @@ function DetalhesFatura({ faturaId, onFechar }) {
                     {cobranca.pixQrcode && (
                       <div className="flex justify-center">
                         <div className="p-3 bg-white rounded-2xl">
-                          <img src={`data:image/png;base64,${cobranca.pixQrcode}`} alt="QR Code PIX" className="w-44 h-44" />
+                          <img src={`data:image/png;base64,${cobranca.pixQrcode}`} alt={t("cobrancas.detalhe.qrAlt")} className="w-44 h-44" />
                         </div>
                       </div>
                     )}
                     {cobranca.pixPayload && (
                       <div>
-                        <p className="text-xs text-on-surface-variant mb-2">Código copia e cola</p>
+                        <p className="text-xs text-on-surface-variant mb-2">{t("minhas.detalhe.copiaECola")}</p>
                         <div className="flex gap-2 items-center p-3 rounded-xl border border-veu/10 bg-veu/5">
                           <code className="flex-1 text-xs text-on-surface-variant break-all font-mono line-clamp-2">
                             {cobranca.pixPayload}
                           </code>
                           <button
                             onClick={() => copiar(cobranca.pixPayload)}
+                            title={t("cobrancas.detalhe.copiar")}
                             className="shrink-0 w-10 h-10 rounded-xl bg-primary/15 text-primary flex items-center justify-center hover:bg-primary/25 transition cursor-pointer"
                           >
                             <Icone name={copiado ? "check" : "content_copy"} className="text-lg" />
                           </button>
                         </div>
-                        {copiado && <p className="text-xs text-green-400 mt-1">Copiado!</p>}
+                        {copiado && <p className="text-xs text-green-400 mt-1">{t("minhas.detalhe.copiado")}</p>}
                       </div>
                     )}
                     <button
                       onClick={() => { setCobranca(null); setForma("BOLETO"); }}
                       className="w-full text-xs text-on-surface-variant hover:text-primary transition text-center cursor-pointer"
                     >
-                      Prefiro pagar via boleto →
+                      {t("minhas.detalhe.preferoBoleto")}
                     </button>
                   </div>
                 )}
@@ -257,19 +256,20 @@ function DetalhesFatura({ faturaId, onFechar }) {
                   <div className="space-y-3">
                     {cobranca.pixPayload && (
                       <div>
-                        <p className="text-xs text-on-surface-variant mb-2">Linha digitável</p>
+                        <p className="text-xs text-on-surface-variant mb-2">{t("gateway.linhaDigitavel")}</p>
                         <div className="flex gap-2 items-center p-3 rounded-xl border border-veu/10 bg-veu/5">
                           <code className="flex-1 text-xs text-on-surface-variant break-all font-mono">
                             {cobranca.pixPayload}
                           </code>
                           <button
                             onClick={() => copiar(cobranca.pixPayload)}
+                            title={t("cobrancas.detalhe.copiar")}
                             className="shrink-0 w-10 h-10 rounded-xl bg-primary/15 text-primary flex items-center justify-center hover:bg-primary/25 transition cursor-pointer"
                           >
                             <Icone name={copiado ? "check" : "content_copy"} className="text-lg" />
                           </button>
                         </div>
-                        {copiado && <p className="text-xs text-green-400 mt-1">Copiado!</p>}
+                        {copiado && <p className="text-xs text-green-400 mt-1">{t("minhas.detalhe.copiado")}</p>}
                       </div>
                     )}
                     {cobranca.urlBoleto && (
@@ -280,14 +280,14 @@ function DetalhesFatura({ faturaId, onFechar }) {
                         className="flex items-center justify-center gap-2 w-full py-3 rounded-2xl border border-primary/30 text-primary text-sm font-semibold hover:bg-primary/10 transition"
                       >
                         <Icone name="open_in_new" className="text-base" />
-                        Abrir boleto para imprimir
+                        {t("minhas.detalhe.abrirBoleto")}
                       </a>
                     )}
                     <button
                       onClick={() => { setCobranca(null); setForma("PIX"); }}
                       className="w-full text-xs text-on-surface-variant hover:text-primary transition text-center cursor-pointer"
                     >
-                      Prefiro pagar via PIX →
+                      {t("minhas.detalhe.preferoPix")}
                     </button>
                   </div>
                 )}
@@ -303,14 +303,14 @@ function DetalhesFatura({ faturaId, onFechar }) {
 
 /* ─── Config de categorias ─────────────────────────────────────────────── */
 const CAT = {
-  TODOS:      { label: "Todos",       icone: "category",              cor: "text-on-surface-variant", bg: "bg-veu/10" },
-  CONDOMINIO: { label: "Condomínio",  icone: "apartment",             cor: "text-primary",            bg: "bg-primary/15" },
-  AGUA:       { label: "Água",        icone: "water_drop",            cor: "text-blue-400",           bg: "bg-blue-500/15" },
-  LUZ:        { label: "Luz",         icone: "bolt",                  cor: "text-yellow-400",         bg: "bg-yellow-500/15" },
-  GAS:        { label: "Gás",         icone: "local_fire_department", cor: "text-orange-400",         bg: "bg-orange-500/15" },
-  INTERNET:   { label: "Internet",    icone: "wifi",                  cor: "text-purple-400",         bg: "bg-purple-500/15" },
-  PLATAFORMA: { label: "Plataforma",  icone: "deployed_code",         cor: "text-teal-400",           bg: "bg-teal-500/15" },
-  OUTRO:      { label: "Outro",       icone: "more_horiz",            cor: "text-on-surface-variant", bg: "bg-veu/10" },
+  TODOS:      { label: "minhas.categorias.TODOS",       icone: "category",              cor: "text-on-surface-variant", bg: "bg-veu/10" },
+  CONDOMINIO: { label: "minhas.categorias.CONDOMINIO",  icone: "apartment",             cor: "text-primary",            bg: "bg-primary/15" },
+  AGUA:       { label: "minhas.categorias.AGUA",        icone: "water_drop",            cor: "text-blue-400",           bg: "bg-blue-500/15" },
+  LUZ:        { label: "minhas.categorias.LUZ",         icone: "bolt",                  cor: "text-yellow-400",         bg: "bg-yellow-500/15" },
+  GAS:        { label: "minhas.categorias.GAS",         icone: "local_fire_department", cor: "text-orange-400",         bg: "bg-orange-500/15" },
+  INTERNET:   { label: "minhas.categorias.INTERNET",    icone: "wifi",                  cor: "text-purple-400",         bg: "bg-purple-500/15" },
+  PLATAFORMA: { label: "minhas.categorias.PLATAFORMA",  icone: "deployed_code",         cor: "text-teal-400",           bg: "bg-teal-500/15" },
+  OUTRO:      { label: "minhas.categorias.OUTRO",       icone: "more_horiz",            cor: "text-on-surface-variant", bg: "bg-veu/10" },
 };
 
 function categorizar(item) {
@@ -336,6 +336,7 @@ const CAT_COR = {
 
 /* ─── Aba Gastos ───────────────────────────────────────────────────────── */
 function AbaGastos() {
+  const { t } = useTranslation("financeiro");
   const anoAtual = new Date().getFullYear();
   const [ano, setAno] = useState(anoAtual);
   const [itens, setItens] = useState([]);
@@ -370,12 +371,12 @@ function AbaGastos() {
     ? rotuloMes(Object.entries(totaisPorMes).sort(([, a], [, b]) => b - a)[0][0])
     : "–";
   const catPrincipal = catsComGasto.length > 0
-    ? CAT[catsComGasto.reduce((a, b) => (totais[a] ?? 0) >= (totais[b] ?? 0) ? a : b)].label
+    ? t(CAT[catsComGasto.reduce((a, b) => (totais[a] ?? 0) >= (totais[b] ?? 0) ? a : b)].label)
     : "–";
 
   // Dados para donut
   const dadosPie = catsComGasto.map(cat => ({
-    name: CAT[cat].label,
+    name: t(CAT[cat].label),
     value: totais[cat],
     color: CAT_COR[cat],
     pct: totalGeral > 0 ? Math.round((totais[cat] / totalGeral) * 100) : 0,
@@ -407,10 +408,11 @@ function AbaGastos() {
     <div className="space-y-6">
       {/* Seletor de ano */}
       <div className="flex items-center justify-between">
-        <p className="text-sm text-on-surface-variant">Resumo de gastos do ano</p>
+        <p className="text-sm text-on-surface-variant">{t("minhas.gastos.resumo")}</p>
         <div className="flex items-center gap-1 glass-panel rounded-full px-1 py-1">
           <button
             onClick={() => setAno(a => a - 1)}
+            aria-label={t("minhas.gastos.anoAnterior")}
             className="w-7 h-7 rounded-full flex items-center justify-center text-on-surface-variant hover:text-primary hover:bg-primary/10 transition cursor-pointer"
           >
             <Icone name="chevron_left" className="text-lg" />
@@ -418,6 +420,7 @@ function AbaGastos() {
           <span className="text-sm font-bold text-on-surface px-2">{ano}</span>
           <button
             onClick={() => setAno(a => a + 1)}
+            aria-label={t("minhas.gastos.proximoAno")}
             disabled={ano >= anoAtual}
             className="w-7 h-7 rounded-full flex items-center justify-center text-on-surface-variant hover:text-primary hover:bg-primary/10 transition cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
           >
@@ -429,7 +432,7 @@ function AbaGastos() {
       {carregando ? (
         <div className="flex flex-col items-center justify-center py-20 gap-4 text-on-surface-variant">
           <div className="w-10 h-10 rounded-full border-2 border-primary/20 border-t-primary animate-spin" />
-          <span className="text-sm">Carregando gastos...</span>
+          <span className="text-sm">{t("minhas.gastos.carregando")}</span>
         </div>
       ) : itens.length === 0 ? (
         <div className="glass-panel rounded-3xl py-16 flex flex-col items-center gap-4 text-center px-6">
@@ -437,8 +440,8 @@ function AbaGastos() {
             <Icone name="bar_chart" className="text-primary text-2xl" />
           </div>
           <div>
-            <p className="font-semibold text-on-surface mb-1">Sem gastos em {ano}</p>
-            <p className="text-xs text-on-surface-variant">Os gastos aparecerão aqui após o fechamento de competências.</p>
+            <p className="font-semibold text-on-surface mb-1">{t("minhas.gastos.vazio", { ano })}</p>
+            <p className="text-xs text-on-surface-variant">{t("minhas.gastos.vazioAjuda")}</p>
           </div>
         </div>
       ) : (
@@ -446,19 +449,19 @@ function AbaGastos() {
           {/* KPIs */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             <div className="glass-panel rounded-2xl p-4">
-              <p className="text-xs text-on-surface-variant uppercase tracking-wider mb-1">Total {ano}</p>
+              <p className="text-xs text-on-surface-variant uppercase tracking-wider mb-1">{t("minhas.gastos.totalAno", { ano })}</p>
               <p className="text-lg font-bold text-on-surface">{formatarBRL(totalGeral)}</p>
             </div>
             <div className="glass-panel rounded-2xl p-4">
-              <p className="text-xs text-on-surface-variant uppercase tracking-wider mb-1">Média/mês</p>
+              <p className="text-xs text-on-surface-variant uppercase tracking-wider mb-1">{t("minhas.gastos.mediaMes")}</p>
               <p className="text-lg font-bold text-on-surface">{formatarBRL(mediaMensal)}</p>
             </div>
             <div className="glass-panel rounded-2xl p-4">
-              <p className="text-xs text-on-surface-variant uppercase tracking-wider mb-1">Mês maior</p>
+              <p className="text-xs text-on-surface-variant uppercase tracking-wider mb-1">{t("minhas.gastos.mesMaior")}</p>
               <p className="text-lg font-bold text-primary">{mesMaior}</p>
             </div>
             <div className="glass-panel rounded-2xl p-4">
-              <p className="text-xs text-on-surface-variant uppercase tracking-wider mb-1">Categoria</p>
+              <p className="text-xs text-on-surface-variant uppercase tracking-wider mb-1">{t("minhas.gastos.categoria")}</p>
               <p className="text-lg font-bold text-on-surface truncate">{catPrincipal}</p>
             </div>
           </div>
@@ -466,7 +469,7 @@ function AbaGastos() {
           {/* Gráficos */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Donut por categoria */}
-            <CartaoGrafico titulo="Distribuição" descricao="Por categoria no ano" altura={300}>
+            <CartaoGrafico titulo={t("minhas.gastos.distribuicao")} descricao={t("minhas.gastos.distribuicaoDescricao")} altura={300}>
               <div className="flex flex-col h-full">
                 <div className="flex-1 min-h-0">
                   <ResponsiveContainer width="100%" height="100%">
@@ -497,18 +500,18 @@ function AbaGastos() {
             </CartaoGrafico>
 
             {/* Barras mensais empilhadas */}
-            <CartaoGrafico titulo="Evolução mensal" descricao="Gasto total por mês" altura={300}>
+            <CartaoGrafico titulo={t("minhas.gastos.evolucao")} descricao={t("minhas.gastos.evolucaoDescricao")} altura={300}>
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={dadosBar} margin={{ top: 8, right: 8, bottom: 0, left: -20 }}>
                   <CartesianGrid stroke={CORES.grid} vertical={false} />
                   <XAxis dataKey="mes" {...EIXO_STYLE} />
-                  <YAxis tickFormatter={v => `R$${(v / 100).toFixed(0)}`} {...EIXO_STYLE} />
+                  <YAxis tickFormatter={v => formatarBRL(v, { dolar: false, casas: 0 })} {...EIXO_STYLE} />
                   <Tooltip {...TOOLTIP_STYLE} formatter={v => formatarBRL(v)} />
                   {catsComGasto.map((cat, i) => (
                     <Bar
                       key={cat}
                       dataKey={cat}
-                      name={CAT[cat].label}
+                      name={t(CAT[cat].label)}
                       stackId="a"
                       fill={CAT_COR[cat]}
                       radius={i === catsComGasto.length - 1 ? [4, 4, 0, 0] : [0, 0, 0, 0]}
@@ -535,7 +538,7 @@ function AbaGastos() {
                   }`}
                 >
                   <Icone name={cfg.icone} className="text-sm" />
-                  {cfg.label}
+                  {t(cfg.label)}
                   {cat !== "TODOS" && (
                     <span className="opacity-60">{formatarBRL(totais[cat] ?? 0)}</span>
                   )}
@@ -547,7 +550,7 @@ function AbaGastos() {
           {/* Total filtrado */}
           <div className="flex items-baseline justify-between px-1">
             <p className="text-xs text-on-surface-variant uppercase tracking-wider">
-              {categoriaSel === "TODOS" ? "Total gasto no ano" : `Total ${CAT[categoriaSel].label}`}
+              {categoriaSel === "TODOS" ? t("minhas.gastos.totalGastoAno") : t("minhas.gastos.totalCategoria", { categoria: t(CAT[categoriaSel].label) })}
             </p>
             <p className="text-xl font-bold text-on-surface">
               {formatarBRL(categoriaSel === "TODOS" ? totalGeral : (totais[categoriaSel] ?? 0))}
@@ -557,7 +560,7 @@ function AbaGastos() {
           {/* Histórico por mês */}
           {meses.length === 0 ? (
             <div className="py-8 text-center text-on-surface-variant text-sm">
-              Nenhum gasto com este filtro.
+              {t("minhas.gastos.vazioFiltro")}
             </div>
           ) : (
             <div className="space-y-3">
@@ -593,6 +596,7 @@ function AbaGastos() {
 
 /* ─── Aba Faturas ──────────────────────────────────────────────────────── */
 function AbaFaturas({ onVerDetalhe }) {
+  const { t } = useTranslation("financeiro");
   const [faturas, setFaturas] = useState([]);
   const [carregando, setCarregando] = useState(true);
   const [filtro, setFiltro] = useState("TODAS");
@@ -612,10 +616,10 @@ function AbaFaturas({ onVerDetalhe }) {
   };
 
   const FILTROS = [
-    { id: "TODAS",     label: "Todas",     count: faturas.length },
-    { id: "ABERTA",    label: "Em aberto", count: kpis.abertas },
-    { id: "EM_ATRASO", label: "Em atraso", count: kpis.emAtraso },
-    { id: "PAGA",      label: "Pagas",     count: kpis.pagas },
+    { id: "TODAS",     label: t("comum:estado.todas"),     count: faturas.length },
+    { id: "ABERTA",    label: t("faturas.kpis.emAberto"), count: kpis.abertas },
+    { id: "EM_ATRASO", label: t("faturas.kpis.emAtraso"), count: kpis.emAtraso },
+    { id: "PAGA",      label: t("faturas.kpis.pagas"),     count: kpis.pagas },
   ];
 
   const visíveis = filtro === "TODAS" ? faturas : faturas.filter(f => f.status === filtro);
@@ -623,7 +627,7 @@ function AbaFaturas({ onVerDetalhe }) {
   if (carregando) return (
     <div className="flex flex-col items-center justify-center py-20 gap-4 text-on-surface-variant">
       <div className="w-10 h-10 rounded-full border-2 border-primary/20 border-t-primary animate-spin" />
-      <span className="text-sm">Carregando faturas...</span>
+      <span className="text-sm">{t("faturas.carregando")}</span>
     </div>
   );
 
@@ -632,8 +636,8 @@ function AbaFaturas({ onVerDetalhe }) {
       <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center">
         <Icone name="receipt_long" className="text-primary text-3xl" />
       </div>
-      <p className="font-semibold text-on-surface">Nenhuma fatura ainda</p>
-      <p className="text-xs text-on-surface-variant">As faturas aparecem aqui após o síndico fechar a competência mensal.</p>
+      <p className="font-semibold text-on-surface">{t("minhas.faturas.vazio")}</p>
+      <p className="text-xs text-on-surface-variant">{t("minhas.faturas.vazioAjuda")}</p>
     </div>
   );
 
@@ -642,19 +646,19 @@ function AbaFaturas({ onVerDetalhe }) {
       {/* KPIs */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <div className="glass-panel rounded-2xl p-4 text-center">
-          <p className="text-xs text-on-surface-variant uppercase tracking-wider mb-1">Total</p>
+          <p className="text-xs text-on-surface-variant uppercase tracking-wider mb-1">{t("cobrancas.detalhe.total")}</p>
           <p className="text-base font-bold text-on-surface">{formatarBRL(kpis.total)}</p>
         </div>
         <div className="glass-panel rounded-2xl p-4 text-center">
-          <p className="text-xs text-on-surface-variant uppercase tracking-wider mb-1">Em aberto</p>
+          <p className="text-xs text-on-surface-variant uppercase tracking-wider mb-1">{t("faturas.kpis.emAberto")}</p>
           <p className="text-base font-bold text-blue-400">{kpis.abertas}</p>
         </div>
         <div className="glass-panel rounded-2xl p-4 text-center">
-          <p className="text-xs text-on-surface-variant uppercase tracking-wider mb-1">Em atraso</p>
+          <p className="text-xs text-on-surface-variant uppercase tracking-wider mb-1">{t("faturas.kpis.emAtraso")}</p>
           <p className={`text-base font-bold ${kpis.emAtraso > 0 ? "text-error" : "text-on-surface-variant"}`}>{kpis.emAtraso}</p>
         </div>
         <div className="glass-panel rounded-2xl p-4 text-center">
-          <p className="text-xs text-on-surface-variant uppercase tracking-wider mb-1">Pagas</p>
+          <p className="text-xs text-on-surface-variant uppercase tracking-wider mb-1">{t("faturas.kpis.pagas")}</p>
           <p className="text-base font-bold text-green-400">{kpis.pagas}</p>
         </div>
       </div>
@@ -681,7 +685,7 @@ function AbaFaturas({ onVerDetalhe }) {
 
       {/* Lista */}
       {visíveis.length === 0 ? (
-        <p className="py-8 text-center text-on-surface-variant text-sm">Nenhuma fatura com este filtro.</p>
+        <p className="py-8 text-center text-on-surface-variant text-sm">{t("minhas.faturas.vazioFiltro")}</p>
       ) : (
         <div className="space-y-3">
           {visíveis.map(fatura => {
@@ -698,13 +702,13 @@ function AbaFaturas({ onVerDetalhe }) {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <p className="font-semibold text-on-surface text-sm">{labelCompetencia(fatura.competencia)}</p>
-                    <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full border ${sc.cor}`}>{sc.label}</span>
+                    <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full border ${sc.cor}`}>{t(sc.label)}</span>
                   </div>
-                  <p className="text-xs text-on-surface-variant mt-0.5">Vence em {formatarData(fatura.vencimento)}</p>
+                  <p className="text-xs text-on-surface-variant mt-0.5">{t("cobrancas.venceEm", { data: formatarData(fatura.vencimento) })}</p>
                 </div>
                 <div className="text-right shrink-0">
                   <p className="font-bold text-on-surface">{formatarBRL(fatura.valorCentavos)}</p>
-                  <p className="text-xs text-on-surface-variant group-hover:text-primary transition mt-0.5">Ver detalhes →</p>
+                  <p className="text-xs text-on-surface-variant group-hover:text-primary transition mt-0.5">{t("cobrancas.verDetalhes")}</p>
                 </div>
               </button>
             );
@@ -721,6 +725,7 @@ const ABAS_POR_LINK = ["faturas", "gastos", "multas", "prestacao"];
 
 /* ─── Página principal ─────────────────────────────────────────────────── */
 export function MinhasCobrancas() {
+  const { t } = useTranslation("financeiro");
   const { usuario } = useAuth();
   const [params] = useSearchParams();
   const [aba, setAba] = useState(() => {
@@ -742,11 +747,11 @@ export function MinhasCobrancas() {
   }, [ehDono]);
 
   const ABAS = [
-    { id: "faturas",   label: "Faturas",  icone: "receipt_long" },
-    { id: "gastos",    label: "Gastos",   icone: "bar_chart" },
-    { id: "multas",    label: "Multas",   icone: "gavel" },
-    { id: "prestacao", label: "Prestação de contas", icone: "account_balance" },
-    ...(ehDono || temContrato ? [{ id: "contrato", label: "Contrato", icone: "contract" }] : []),
+    { id: "faturas",   label: t("minhas.abas.faturas"),  icone: "receipt_long" },
+    { id: "gastos",    label: t("minhas.abas.gastos"),   icone: "bar_chart" },
+    { id: "multas",    label: t("minhas.abas.multas"),   icone: "gavel" },
+    { id: "prestacao", label: t("minhas.abas.prestacao"), icone: "account_balance" },
+    ...(ehDono || temContrato ? [{ id: "contrato", label: t("minhas.abas.contrato"), icone: "contract" }] : []),
   ];
 
   return (
@@ -755,8 +760,8 @@ export function MinhasCobrancas() {
 
         {/* Título */}
         <div className="pt-2">
-          <h1 className="font-headline text-3xl font-bold text-on-surface">Financeiro</h1>
-          <p className="text-on-surface-variant text-sm mt-1">Faturas, gastos, multas e a prestação de contas do condomínio</p>
+          <h1 className="font-headline text-3xl font-bold text-on-surface">{t("minhas.titulo")}</h1>
+          <p className="text-on-surface-variant text-sm mt-1">{t("minhas.subtitulo")}</p>
         </div>
 
         {/* Abas */}

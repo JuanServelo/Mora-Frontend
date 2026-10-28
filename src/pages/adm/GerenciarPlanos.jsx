@@ -1,24 +1,27 @@
 // src/pages/adm/GerenciarPlanos.jsx
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { planApi } from "../../services/planApi";
 import { Icone } from "../../components/icones/Icone";
 import { Campo } from "../../components/campos/Campo";
 import { Botao } from "../../components/botoes/Botao";
 import { useToast } from "../../contexts/ToastContext";
 import { useConfirm } from "../../contexts/ConfirmContext";
+import { idiomaAtual } from "../../i18n";
+import { formatarReais } from "../../utils/dinheiro";
 
 // ─── constantes ────────────────────────────────
 const MODULES_DISPONIVEIS = [
-  { slug: "portaria", label: "Portaria", icon: "support_agent" },
-  { slug: "reunioes", label: "Reuniões", icon: "groups" },
-  { slug: "vagas", label: "Vagas", icon: "local_parking" },
-  { slug: "entregas", label: "Entregas", icon: "local_shipping" },
-  { slug: "areas_comuns", label: "Áreas Comuns", icon: "deck" },
-  { slug: "reclamacoes", label: "Reclamações", icon: "report_problem" },
-  { slug: "conhecimento", label: "Base de Conhecimento", icon: "menu_book" },
-  { slug: "votacoes", label: "Votações", icon: "how_to_vote" },
-  { slug: "veiculos", label: "Veículos", icon: "directions_car" },
-  { slug: "chaves", label: "Chaves", icon: "vpn_key" },
+  { slug: "portaria", label: "gerenciar.modulos.portaria", icon: "support_agent" },
+  { slug: "reunioes", label: "gerenciar.modulos.reunioes", icon: "groups" },
+  { slug: "vagas", label: "gerenciar.modulos.vagas", icon: "local_parking" },
+  { slug: "entregas", label: "gerenciar.modulos.entregas", icon: "local_shipping" },
+  { slug: "areas_comuns", label: "gerenciar.modulos.areas_comuns", icon: "deck" },
+  { slug: "reclamacoes", label: "gerenciar.modulos.reclamacoes", icon: "report_problem" },
+  { slug: "conhecimento", label: "gerenciar.modulos.conhecimento", icon: "menu_book" },
+  { slug: "votacoes", label: "gerenciar.modulos.votacoes", icon: "how_to_vote" },
+  { slug: "veiculos", label: "gerenciar.modulos.veiculos", icon: "directions_car" },
+  { slug: "chaves", label: "gerenciar.modulos.chaves", icon: "vpn_key" },
 ];
 
 const EMPTY_PLAN = {
@@ -29,17 +32,11 @@ const EMPTY_PLAN = {
   activeModules: [],
 };
 
-function fmtPreco(valor) {
-  if (valor == null) return "—";
-  return Number(valor).toLocaleString("pt-BR", {
-    style: "currency",
-    currency: "BRL",
-  });
-}
+const fmtPreco = formatarReais;
 
 function fmtData(dt) {
   if (!dt) return "—";
-  return new Date(dt).toLocaleString("pt-BR", {
+  return new Date(dt).toLocaleString(idiomaAtual(), {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
@@ -50,6 +47,7 @@ function fmtData(dt) {
 
 // ════════════════════════════════════════════
 export function GerenciarPlanos() {
+  const { t } = useTranslation("planos");
   const toast = useToast();
   const confirm = useConfirm();
 
@@ -70,7 +68,7 @@ export function GerenciarPlanos() {
       const res = await planApi.listar();
       setPlanos(res.data || []);
     } catch {
-      toast.error("Erro ao carregar planos.");
+      toast.error(t("gerenciar.toast.erroCarregar"));
     } finally {
       setCarregando(false);
     }
@@ -119,17 +117,17 @@ export function GerenciarPlanos() {
   // ─── validação client-side ────────────────
   function validarForm() {
     const errors = {};
-    if (!form.name.trim()) errors.name = "Este campo é obrigatório.";
+    if (!form.name.trim()) errors.name = t("gerenciar.validacao.obrigatorio");
     if (!form.maxCondominiums || Number(form.maxCondominiums) <= 0)
-      errors.maxCondominiums = "Informe valores maiores que zero.";
+      errors.maxCondominiums = t("gerenciar.validacao.maiorQueZero");
     if (!form.maxUsersPerCondominium || Number(form.maxUsersPerCondominium) <= 0)
-      errors.maxUsersPerCondominium = "Informe valores maiores que zero.";
+      errors.maxUsersPerCondominium = t("gerenciar.validacao.maiorQueZero");
     if (form.monthlyPrice === "" || form.monthlyPrice === null || form.monthlyPrice === undefined)
-      errors.monthlyPrice = "Este campo é obrigatório.";
+      errors.monthlyPrice = t("gerenciar.validacao.obrigatorio");
     else if (Number(form.monthlyPrice) < 0)
-      errors.monthlyPrice = "O preço não pode ser negativo.";
+      errors.monthlyPrice = t("gerenciar.validacao.precoNegativo");
     if (!form.activeModules.length)
-      errors.activeModules = "Selecione um módulo.";
+      errors.activeModules = t("gerenciar.validacao.selecioneModulo");
     setFieldErrors(errors);
     return Object.keys(errors).length === 0;
   }
@@ -151,10 +149,10 @@ export function GerenciarPlanos() {
 
       if (editandoId) {
         await planApi.atualizar(editandoId, payload);
-        toast.success("Alteração salva com sucesso.");
+        toast.success(t("gerenciar.toast.alteracaoSalva"));
       } else {
         await planApi.criar(payload);
-        toast.success("Plano cadastrado com sucesso.");
+        toast.success(t("gerenciar.toast.cadastrado"));
       }
 
       setForm(EMPTY_PLAN);
@@ -163,7 +161,7 @@ export function GerenciarPlanos() {
       setDetalhe(null);
       carregarPlanos();
     } catch (err) {
-      const msg = err.response?.data?.message || "Erro ao salvar plano.";
+      const msg = err.response?.data?.message || t("gerenciar.toast.erroSalvar");
       setErro(msg);
       toast.error(msg);
     } finally {
@@ -194,9 +192,9 @@ export function GerenciarPlanos() {
   async function toggleStatus(plano) {
     const acao = plano.isActive ? "desativar" : "ativar";
     const ok = await confirm({
-      titulo: `${plano.isActive ? "Desativar" : "Ativar"} plano`,
-      mensagem: `Deseja ${acao} o plano "${plano.name}"?`,
-      confirmarTexto: plano.isActive ? "Desativar" : "Ativar",
+      titulo: t(`gerenciar.status.${acao}.titulo`),
+      mensagem: t(`gerenciar.status.${acao}.mensagem`, { nome: plano.name }),
+      confirmarTexto: t(`gerenciar.status.${acao}.botao`),
       variante: plano.isActive ? "danger" : "primary",
     });
     if (!ok) return;
@@ -205,15 +203,15 @@ export function GerenciarPlanos() {
       await planApi.toggleStatus(plano.id);
       toast.success(
         plano.isActive
-          ? "Plano desativado com sucesso."
-          : "Plano ativado com sucesso."
+          ? t("gerenciar.status.desativar.sucesso")
+          : t("gerenciar.status.ativar.sucesso")
       );
       carregarPlanos();
       if (detalhe?.id === plano.id) {
         setDetalhe((p) => (p ? { ...p, isActive: !p.isActive } : p));
       }
     } catch {
-      toast.error(`Erro ao ${acao} plano.`);
+      toast.error(t(`gerenciar.status.${acao}.erro`));
     }
   }
 
@@ -225,12 +223,12 @@ export function GerenciarPlanos() {
         <header className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
             <p className="text-on-surface-variant text-xs font-semibold uppercase tracking-widest mb-1">
-              Super Admin
+              {t("gerenciar.sobretitulo")}
             </p>
             <h1 className="font-headline text-4xl font-extrabold tracking-tight text-on-surface">
-              Gestão de{" "}
+              {t("gerenciar.titulo")}{" "}
               <span className="bg-gradient-to-r from-primary to-tertiary bg-clip-text text-transparent">
-                Planos SaaS
+                {t("gerenciar.tituloDestaque")}
               </span>
             </h1>
           </div>
@@ -245,11 +243,10 @@ export function GerenciarPlanos() {
               </span>
               <div>
                 <h2 className="font-headline text-xl font-bold text-on-surface">
-                  Planos
+                  {t("gerenciar.planos")}
                 </h2>
                 <p className="text-[10px] text-on-surface-variant uppercase tracking-wider font-semibold">
-                  {planos.length} plano{planos.length !== 1 ? "s" : ""}{" "}
-                  cadastrado{planos.length !== 1 ? "s" : ""}
+                  {t("gerenciar.contagem", { count: planos.length })}
                 </p>
               </div>
             </div>
@@ -258,7 +255,7 @@ export function GerenciarPlanos() {
                 onClick={carregarPlanos}
                 disabled={carregando}
                 className="p-2.5 rounded-xl hover:bg-veu/5 text-on-surface-variant hover:text-on-surface transition cursor-pointer"
-                title="Atualizar"
+                title={t("comum:acoes.atualizar")}
               >
                 <Icone
                   name="refresh"
@@ -281,7 +278,7 @@ export function GerenciarPlanos() {
                   name={criando ? "close" : "add"}
                   className="text-base"
                 />
-                {criando ? "Cancelar" : "Novo Plano"}
+                {criando ? t("comum:acoes.cancelar") : t("gerenciar.novo")}
               </button>
             </div>
           </div>
@@ -300,8 +297,8 @@ export function GerenciarPlanos() {
                     className="text-primary"
                   />
                   {editandoId
-                    ? `Editar Plano #${editandoId}`
-                    : "Novo Plano"}
+                    ? t("gerenciar.form.editar", { id: editandoId })
+                    : t("gerenciar.novo")}
                 </h3>
                 {editandoId && (
                   <button
@@ -314,7 +311,7 @@ export function GerenciarPlanos() {
                     }}
                     className="text-primary hover:underline text-xs font-semibold cursor-pointer"
                   >
-                    Descartar Edição
+                    {t("gerenciar.form.descartar")}
                   </button>
                 )}
               </div>
@@ -327,11 +324,11 @@ export function GerenciarPlanos() {
               )}
 
               <Campo
-                label="Nome do Plano"
+                label={t("gerenciar.form.nome")}
                 name="name"
                 value={form.name}
                 onChange={handleForm}
-                placeholder="Ex: Plano Essencial"
+                placeholder={t("gerenciar.form.nomePlaceholder")}
                 required
               />
               {fieldErrors.name && (
@@ -343,12 +340,12 @@ export function GerenciarPlanos() {
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
                   <Campo
-                    label="Máx. Condomínios"
+                    label={t("gerenciar.form.maxCondominios")}
                     name="maxCondominiums"
                     type="number"
                     value={form.maxCondominiums}
                     onChange={handleForm}
-                    placeholder="Ex: 10"
+                    placeholder={t("gerenciar.form.exemplo", { valor: "10" })}
                     min="1"
                     required
                   />
@@ -360,12 +357,12 @@ export function GerenciarPlanos() {
                 </div>
                 <div>
                   <Campo
-                    label="Máx. Usuários / Condomínio"
+                    label={t("gerenciar.form.maxUsuarios")}
                     name="maxUsersPerCondominium"
                     type="number"
                     value={form.maxUsersPerCondominium}
                     onChange={handleForm}
-                    placeholder="Ex: 200"
+                    placeholder={t("gerenciar.form.exemplo", { valor: "200" })}
                     min="1"
                     required
                   />
@@ -377,13 +374,13 @@ export function GerenciarPlanos() {
                 </div>
                 <div>
                   <Campo
-                    label="Preço Mensal (R$)"
+                    label={t("gerenciar.form.preco")}
                     name="monthlyPrice"
                     type="number"
                     step="0.01"
                     value={form.monthlyPrice}
                     onChange={handleForm}
-                    placeholder="Ex: 199.90"
+                    placeholder={t("gerenciar.form.exemplo", { valor: "199.90" })}
                     min="0"
                     required
                   />
@@ -399,7 +396,7 @@ export function GerenciarPlanos() {
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant ml-1">
-                    Módulos Ativos
+                    {t("gerenciar.form.modulosAtivos")}
                   </label>
                   <div className="flex gap-2">
                     <button
@@ -407,7 +404,7 @@ export function GerenciarPlanos() {
                       onClick={selectAllModules}
                       className="text-[10px] text-primary hover:underline font-semibold cursor-pointer"
                     >
-                      Selecionar todos
+                      {t("gerenciar.form.selecionarTodos")}
                     </button>
                     <span className="text-on-surface-variant/30">|</span>
                     <button
@@ -415,7 +412,7 @@ export function GerenciarPlanos() {
                       onClick={deselectAllModules}
                       className="text-[10px] text-on-surface-variant hover:text-error hover:underline font-semibold cursor-pointer"
                     >
-                      Limpar
+                      {t("gerenciar.form.limpar")}
                     </button>
                   </div>
                 </div>
@@ -438,7 +435,7 @@ export function GerenciarPlanos() {
                           name={selected ? "check_circle" : mod.icon}
                           className={`text-base shrink-0 ${selected ? "text-primary" : ""}`}
                         />
-                        <span className="truncate">{mod.label}</span>
+                        <span className="truncate">{t(mod.label)}</span>
                       </button>
                     );
                   })}
@@ -449,8 +446,7 @@ export function GerenciarPlanos() {
                   </p>
                 )}
                 <p className="text-[10px] text-on-surface-variant/60 ml-1">
-                  {form.activeModules.length} de {MODULES_DISPONIVEIS.length}{" "}
-                  módulos selecionados
+                  {t("gerenciar.form.selecionados", { count: form.activeModules.length, total: MODULES_DISPONIVEIS.length })}
                 </p>
               </div>
 
@@ -466,10 +462,10 @@ export function GerenciarPlanos() {
                     className={`text-base ${salvando ? "animate-spin" : ""}`}
                   />
                   {salvando
-                    ? "Salvando..."
+                    ? t("geral.salvando")
                     : editandoId
-                    ? "Salvar Alterações"
-                    : "Cadastrar Plano"}
+                    ? t("gerenciar.form.salvarAlteracoes")
+                    : t("gerenciar.form.cadastrar")}
                 </button>
               </div>
             </form>
@@ -479,7 +475,7 @@ export function GerenciarPlanos() {
           {carregando ? (
             <div className="text-center py-12 text-on-surface-variant text-xs flex flex-col items-center justify-center gap-2">
               <Icone name="sync" className="text-2xl animate-spin text-primary" />
-              Carregando planos...
+              {t("gerenciar.carregando")}
             </div>
           ) : planos.length === 0 ? (
             <div className="text-center py-16 text-on-surface-variant flex flex-col items-center justify-center gap-3 bg-veu/2 rounded-2xl border border-veu/5">
@@ -488,10 +484,10 @@ export function GerenciarPlanos() {
                 className="text-4xl text-primary/30"
               />
               <p className="font-medium text-sm">
-                Nenhum plano cadastrado.
+                {t("gerenciar.vazio")}
               </p>
               <p className="text-xs text-on-surface-variant/60">
-                Clique em "Novo Plano" para começar.
+                {t("gerenciar.vazioAjuda")}
               </p>
             </div>
           ) : (
@@ -526,7 +522,7 @@ export function GerenciarPlanos() {
                             : "bg-error/10 text-error"
                         }`}
                       >
-                        {plano.isActive ? "Ativo" : "Inativo"}
+                        {plano.isActive ? t("comum:estado.ativo") : t("comum:estado.inativo")}
                       </span>
                     </div>
 
@@ -536,7 +532,7 @@ export function GerenciarPlanos() {
                         {fmtPreco(plano.monthlyPrice)}
                       </span>
                       <span className="text-[10px] text-on-surface-variant font-medium">
-                        /mês
+                        {t("geral.porMes")}
                       </span>
                     </div>
 
@@ -544,7 +540,7 @@ export function GerenciarPlanos() {
                     <div className="grid grid-cols-2 gap-2">
                       <div className="bg-veu/3 rounded-xl p-2.5 border border-veu/5">
                         <p className="text-[9px] text-on-surface-variant uppercase tracking-wider font-semibold mb-0.5">
-                          Condomínios
+                          {t("gerenciar.card.condominios")}
                         </p>
                         <p className="text-sm font-bold text-on-surface flex items-center gap-1">
                           <Icone
@@ -556,7 +552,7 @@ export function GerenciarPlanos() {
                       </div>
                       <div className="bg-veu/3 rounded-xl p-2.5 border border-veu/5">
                         <p className="text-[9px] text-on-surface-variant uppercase tracking-wider font-semibold mb-0.5">
-                          Usuários/Cond.
+                          {t("gerenciar.card.usuariosCond")}
                         </p>
                         <p className="text-sm font-bold text-on-surface flex items-center gap-1">
                           <Icone
@@ -571,7 +567,7 @@ export function GerenciarPlanos() {
                     {/* Módulos */}
                     <div className="space-y-1.5">
                       <p className="text-[9px] text-on-surface-variant uppercase tracking-wider font-semibold">
-                        Módulos ({plano.activeModules?.length || 0})
+                        {t("gerenciar.card.modulos", { qtd: plano.activeModules?.length || 0 })}
                       </p>
                       <div className="flex flex-wrap gap-1">
                         {(plano.activeModules || []).map((slug) => {
@@ -582,13 +578,13 @@ export function GerenciarPlanos() {
                             <span
                               key={slug}
                               className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-primary/8 text-primary text-[9px] font-semibold border border-primary/10"
-                              title={mod?.label || slug}
+                              title={mod ? t(mod.label) : slug}
                             >
                               <Icone
                                 name={mod?.icon || "extension"}
                                 className="text-[10px]"
                               />
-                              {mod?.label || slug}
+                              {mod ? t(mod.label) : slug}
                             </span>
                           );
                         })}
@@ -599,7 +595,7 @@ export function GerenciarPlanos() {
                   {/* Footer do card */}
                   <div className="flex items-center justify-between gap-2 px-4 py-3 border-t border-veu/5 bg-veu/2">
                     <span className="text-[9px] text-on-surface-variant/50 font-medium">
-                      Criado: {fmtData(plano.createdAt)}
+                      {t("gerenciar.card.criado", { data: fmtData(plano.createdAt) })}
                     </span>
                     <div className="flex gap-2">
                       <button
@@ -619,7 +615,7 @@ export function GerenciarPlanos() {
                           }
                           className="text-sm"
                         />
-                        {plano.isActive ? "Desativar" : "Ativar"}
+                        {plano.isActive ? t("gerenciar.status.desativar.botao") : t("gerenciar.status.ativar.botao")}
                       </button>
                       <button
                         type="button"
@@ -627,7 +623,7 @@ export function GerenciarPlanos() {
                         className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[10px] font-semibold bg-primary/10 text-primary hover:bg-primary/20 transition cursor-pointer"
                       >
                         <Icone name="edit" className="text-sm" />
-                        Editar
+                        {t("comum:acoes.editar")}
                       </button>
                       <button
                         type="button"
@@ -642,7 +638,7 @@ export function GerenciarPlanos() {
                           }
                           className="text-sm"
                         />
-                        {detalhe?.id === plano.id ? "Fechar" : "Detalhes"}
+                        {detalhe?.id === plano.id ? t("comum:acoes.fechar") : t("gerenciar.card.detalhes")}
                       </button>
                     </div>
                   </div>
@@ -653,7 +649,7 @@ export function GerenciarPlanos() {
                       <div className="grid grid-cols-2 gap-3">
                         <div>
                           <p className="text-[9px] text-on-surface-variant uppercase tracking-wider font-semibold mb-0.5">
-                            Nome
+                            {t("gerenciar.detalhe.nome")}
                           </p>
                           <p className="text-xs text-on-surface font-medium">
                             {plano.name}
@@ -661,19 +657,19 @@ export function GerenciarPlanos() {
                         </div>
                         <div>
                           <p className="text-[9px] text-on-surface-variant uppercase tracking-wider font-semibold mb-0.5">
-                            Status
+                            {t("gerenciar.detalhe.status")}
                           </p>
                           <p
                             className={`text-xs font-bold ${
                               plano.isActive ? "text-primary" : "text-error"
                             }`}
                           >
-                            {plano.isActive ? "Ativo" : "Inativo"}
+                            {plano.isActive ? t("comum:estado.ativo") : t("comum:estado.inativo")}
                           </p>
                         </div>
                         <div>
                           <p className="text-[9px] text-on-surface-variant uppercase tracking-wider font-semibold mb-0.5">
-                            Preço Mensal
+                            {t("gerenciar.detalhe.preco")}
                           </p>
                           <p className="text-xs text-on-surface font-medium">
                             {fmtPreco(plano.monthlyPrice)}
@@ -681,7 +677,7 @@ export function GerenciarPlanos() {
                         </div>
                         <div>
                           <p className="text-[9px] text-on-surface-variant uppercase tracking-wider font-semibold mb-0.5">
-                            Máx. Condomínios
+                            {t("gerenciar.form.maxCondominios")}
                           </p>
                           <p className="text-xs text-on-surface font-medium">
                             {plano.maxCondominiums}
@@ -689,7 +685,7 @@ export function GerenciarPlanos() {
                         </div>
                         <div>
                           <p className="text-[9px] text-on-surface-variant uppercase tracking-wider font-semibold mb-0.5">
-                            Máx. Usuários/Cond.
+                            {t("gerenciar.detalhe.maxUsuarios")}
                           </p>
                           <p className="text-xs text-on-surface font-medium">
                             {plano.maxUsersPerCondominium}
@@ -697,7 +693,7 @@ export function GerenciarPlanos() {
                         </div>
                         <div>
                           <p className="text-[9px] text-on-surface-variant uppercase tracking-wider font-semibold mb-0.5">
-                            Atualizado em
+                            {t("gerenciar.detalhe.atualizadoEm")}
                           </p>
                           <p className="text-xs text-on-surface font-medium">
                             {fmtData(plano.updatedAt)}
@@ -707,7 +703,7 @@ export function GerenciarPlanos() {
 
                       <div>
                         <p className="text-[9px] text-on-surface-variant uppercase tracking-wider font-semibold mb-1.5">
-                          Todos os Módulos
+                          {t("gerenciar.detalhe.todosModulos")}
                         </p>
                         <div className="grid grid-cols-2 gap-1.5">
                           {MODULES_DISPONIVEIS.map((mod) => {
@@ -727,7 +723,7 @@ export function GerenciarPlanos() {
                                   name={ativo ? "check_circle" : "cancel"}
                                   className="text-xs shrink-0"
                                 />
-                                {mod.label}
+                                {t(mod.label)}
                               </div>
                             );
                           })}

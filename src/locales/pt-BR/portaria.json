@@ -1,0 +1,293 @@
+{
+  "cabecalho": {
+    "sobretitulo": "Controle de Acesso",
+    "titulo": "Portaria",
+    "dentro": "Dentro",
+    "total": "Total"
+  },
+  "modos": {
+    "pessoas": "Pessoas",
+    "veiculos": "Veículos"
+  },
+  "abas": {
+    "registrar": "Registrar acesso",
+    "dentro": "Dentro agora",
+    "historico": "Histórico"
+  },
+  "status": {
+    "dentro": "Dentro",
+    "fora": "Fora",
+    "saiu": "Saiu"
+  },
+  "perfis": {
+    "morador": "Morador",
+    "donoAluguel": "Dono Aluguel",
+    "visitante": "Visitante",
+    "porteiro": "Porteiro",
+    "terceiro": "Terceiro",
+    "sindico": "Síndico",
+    "adminSindico": "Admin Síndico",
+    "adminGeral": "Admin Geral"
+  },
+  "unidade": {
+    "apto": "Apto {{numero}}",
+    "blocoApto": "{{bloco}} - Apto {{numero}}"
+  },
+  "permissao": {
+    "autorizada": "Entrada autorizada",
+    "bloqueada": "Entrada bloqueada"
+  },
+  "acoes": {
+    "entrada": "Entrada",
+    "saida": "Saída",
+    "irAtendimento": "Ir ao atendimento"
+  },
+  "cartao": {
+    "cpf": "CPF: {{cpf}}",
+    "semCpf": "Sem CPF",
+    "unidadeVinculada": "Unidade vinculada",
+    "entradaNaoAutorizada": "Entrada não autorizada pelo responsável",
+    "registrarEntrada": "Registrar entrada"
+  },
+  "erros": {
+    "falhaCarregar": "Falha ao carregar",
+    "falhaCarregarDados": "Falha ao carregar dados",
+    "carregarPortaria": "Não foi possível carregar os dados da portaria.",
+    "carregarHistorico": "Não foi possível carregar o histórico."
+  },
+  "funcionarios": {
+    "buscaPlaceholder": "Nome ou CPF...",
+    "todosPerfis": "Todos os perfis",
+    "semResultadoFiltros": "Nenhum resultado para os filtros aplicados.",
+    "vazio": "Nenhum funcionário ou terceiro cadastrado neste condomínio."
+  },
+  "preAprovados": {
+    "erroCarregar": "Não foi possível carregar os visitantes pré-aprovados.",
+    "entradaRegistrada": "Entrada de {{nome}} registrada.",
+    "entradaRegistradaComVeiculo": "Entrada de {{nome}} e do veículo {{placa}} registrada.",
+    "erroRegistrar": "Não foi possível registrar a entrada.",
+    "vazio": "Nenhum visitante pré-aprovado para hoje.",
+    "vazioVeiculos": "Nenhum veículo de visitante pré-aprovado para hoje.",
+    "info": "Autorizados previamente pelo morador. Registrar a entrada aqui grava o visitante (e o veículo, se houver) e consome a autorização — a vaga é conferida neste momento.",
+    "infoVeiculos": "Autorizados previamente pelo morador. Registrar a entrada aqui grava o visitante junto com o veículo dele e consome a autorização — a vaga é conferida neste momento.",
+    "validaAte": "Válida até {{data}}",
+    "registrando": "Registrando…",
+    "entradaComVeiculo": "Entrada com veículo",
+    "soAPe": "Só a pé"
+  },
+  "registrar": {
+    "abas": {
+      "moradores": "Moradores",
+      "visitantes": "Visitantes",
+      "preAprovados": "Pré-aprovados",
+      "funcionarios": "Funcionários"
+    },
+    "buscaPlaceholder": "Buscar por nome ou CPF...",
+    "semResultadoBusca": "Nenhum resultado para a busca.",
+    "semResidentes": "Nenhum residente cadastrado neste condomínio.",
+    "semVisitantes": "Nenhum visitante cadastrado neste condomínio.",
+    "infoBloqueados": "Visitantes com entrada bloqueada não podem ser registrados. O responsável da unidade deve autorizar."
+  },
+  "dentro": {
+    "vazioTitulo": "Nenhum usuário dentro agora",
+    "vazioDescricao": "Quando uma entrada for registrada, aparecerá aqui."
+  },
+  "tabela": {
+    "nome": "Nome",
+    "perfil": "Perfil",
+    "unidade": "Unidade",
+    "dataEntrada": "Data entrada",
+    "hora": "Hora",
+    "horaEntrada": "Hora entrada",
+    "permanencia": "Permanência",
+    "registradoPor": "Registrado por",
+    "saida": "Saída",
+    "duracao": "Duração",
+    "placa": "Placa",
+    "modelo": "Modelo",
+    "vinculadoA": "Vinculado a"
+  },
+  "filtros": {
+    "titulo": "Filtros",
+    "limpar": "Limpar filtros",
+    "dataInicial": "Data inicial",
+    "dataFinal": "Data final",
+    "nome": "Nome",
+    "perfil": "Perfil",
+    "status": "Status",
+    "placa": "Placa",
+    "vinculadoA": "Vinculado a",
+    "buscaParcial": "Busca parcial…",
+    "vinculadoPlaceholder": "Nome do morador, visitante ou terceiro…",
+    "aplicar": "Aplicar"
+  },
+  "historico": {
+    "vazio": "Nenhum registro encontrado para os filtros selecionados."
+  },
+  "veiculos": {
+    "erroCarregar": "Não foi possível carregar os veículos.",
+    "erroCarregarDentro": "Não foi possível carregar os veículos dentro.",
+    "preAprovados": "Veículos pré-aprovados",
+    "cadastrados": "Veículos cadastrados",
+    "buscaPlaceholder": "Buscar por placa ou modelo...",
+    "falhaCarregar": "Falha ao carregar veículos",
+    "vazio": "Nenhum veículo cadastrado neste condomínio.",
+    "semResultado": "Nenhum resultado para \"{{busca}}\".",
+    "naoCadastrado": "Veículo <placa>{{placa}}</placa> não cadastrado no condomínio.",
+    "cadastrarAtendimento": "Cadastrar no atendimento",
+    "modeloNaoInformado": "Modelo não informado",
+    "vaga": "Vaga {{numero}}",
+    "dentroVazio": "Nenhum veículo dentro agora",
+    "avulso": "Avulso"
+  },
+  "toast": {
+    "entradaRegistrada": "Entrada de {{nome}} registrada.",
+    "saidaRegistrada": "Saída de {{nome}} registrada.",
+    "erroEntrada": "Erro ao registrar entrada.",
+    "erroSaida": "Erro ao registrar saída.",
+    "saidaVeiculoEVisitante": "Saída registrada: veículo {{placa}} e visitante {{nome}}.",
+    "saidaVeiculoPermanece": "Saída de {{nome}} registrada. O veículo {{placa}} permanece no condomínio e seguirá ocupado até a saída do veículo ser registrada.",
+    "saidaVeiculoVagaPermanece": "Saída de {{nome}} registrada. O veículo {{placa}} permanece no condomínio e a vaga {{vaga}} e seguirá ocupado até a saída do veículo ser registrada.",
+    "saidaVeiculoFica": "Saída de {{nome}} registrada. O veículo {{placa}} permanece no condomínio.",
+    "saidaVeiculoVagaFica": "Saída de {{nome}} registrada. O veículo {{placa}} permanece no condomínio e a vaga {{vaga}}."
+  },
+  "atendimento": {
+    "erroInesperado": "Erro inesperado.",
+    "titulo": "Atendimento",
+    "descricao": "Registre a entrada de visitantes e prestadores de serviço.",
+    "passos": {
+      "pessoa": "Pessoa",
+      "veiculo": "Veículo",
+      "confirmar": "Confirmar"
+    },
+    "semDocumento": "Sem documento",
+    "identificacao": "Identificação",
+    "tipos": {
+      "visitante": "Visitante",
+      "servico": "Terceiro / Serviço"
+    },
+    "busca": {
+      "label": "Buscar por nome ou CPF",
+      "placeholder": "Ex: João Silva ou 123.456.789-00",
+      "buscando": "Buscando…",
+      "encontrados": "Encontrados",
+      "semResultado": "Nenhum resultado para \"{{busca}}\".",
+      "cadastrarNovo": "Cadastrar novo",
+      "cadastrarNovoNome": "Cadastrar novo: \"{{nome}}\""
+    },
+    "preLib": {
+      "titulo": "Pré-liberação ativa",
+      "autorizadaPor": "Autorizada por",
+      "moradorDaUnidade": "morador da unidade",
+      "validaAte": "válida até {{data}}",
+      "veiculoAutorizado": "Veículo autorizado:",
+      "vagaConferida": "a vaga ainda é conferida na entrada.",
+      "unidadeResponsavel": "Unidade responsável:",
+      "naoReservaVaga": "A pré-liberação não reserva vaga — a disponibilidade é conferida na entrada."
+    },
+    "jaDentro": "<strong>{{nome}}</strong> já está no condomínio desde {{data}}.",
+    "verDentroAgora": "Ver dentro agora",
+    "form": {
+      "unidadeVisitada": "Unidade visitada",
+      "selecionarUnidade": "Selecionar unidade...",
+      "moradorResponsavel": "Morador responsável",
+      "carregandoMoradores": "Carregando moradores…",
+      "semMoradores": "Esta unidade não possui moradores ativos cadastrados.",
+      "selecionarMorador": "Selecionar morador...",
+      "selecioneUnidade": "Selecione a unidade primeiro.",
+      "novoVisitante": "Novo visitante",
+      "novoPrestador": "Novo prestador de serviço",
+      "nome": "Nome completo",
+      "nomePlaceholder": "Ex: Maria da Silva",
+      "cpf": "CPF",
+      "telefone": "Telefone",
+      "telefonePlaceholder": "Ex: (11) 99999-9999",
+      "empresa": "Empresa / Prestador",
+      "empresaPlaceholder": "Ex: Plombéria Silva",
+      "destino": "Destino",
+      "destinoPlaceholder": "Ex: Apto 501 ou Salão de festas",
+      "obs": "Observações",
+      "obsPlaceholder": "Informações adicionais"
+    },
+    "validacao": {
+      "cpfInvalido": "CPF inválido. Verifique os dígitos.",
+      "placaInvalida": "Formato inválido (AAA9999 ou AAA9A99)"
+    },
+    "proximoVeiculo": "Próximo: Veículo",
+    "proximoConfirmar": "Próximo: Confirmar",
+    "alterar": "Alterar",
+    "opcional": "(opcional)",
+    "veiculo": {
+      "jaDentroTitulo": "Visitante já está no condomínio",
+      "jaDentroDescricao": "Será registrada apenas a entrada do veículo. A entrada da pessoa já existente é mantida.",
+      "aPeDesfazer": "Entrou a pé — toque para desfazer",
+      "aPeSemVeiculo": "Entrou a pé / sem veículo",
+      "semVagaTitulo": "Sem vaga disponível",
+      "semVagasCadastradas": "A unidade {{unidade}} não possui vagas cadastradas. Não é possível registrar a entrada com automóvel — apenas entrada a pé.",
+      "semVagaDisponivel": "A unidade {{unidade}} não possui vaga disponível no momento. Não é possível registrar a entrada com automóvel — apenas entrada a pé.",
+      "registrarAPe": "Registrar entrada a pé",
+      "buscaLabel": "Buscar veículo por placa",
+      "buscaPlaceholder": "Ex: ABC1234",
+      "cadastrar": "Cadastrar veículo: {{placa}}",
+      "dados": "Dados do veículo",
+      "placa": "Placa",
+      "modelo": "Modelo",
+      "modeloPlaceholder": "Ex: Civic",
+      "cor": "Cor",
+      "corPlaceholder": "Ex: Prata",
+      "vagaEstacionamento": "Vaga de estacionamento",
+      "verificandoVagas": "Verificando vagas…",
+      "vaga": "Vaga {{numero}}",
+      "ocupada": "Ocupada: {{placa}} desde {{desde}}",
+      "entrouAPe": "Entrou a pé",
+      "semVaga": "Sem vaga",
+      "semVeiculo": "Sem veículo",
+      "semVagaTerceiro": "Sem vaga (terceiro)"
+    },
+    "confirmarEntrada": "Confirmar entrada",
+    "registrando": "Registrando…",
+    "sucesso": {
+      "titulo": "Entrada registrada",
+      "veiculo": "Veículo: {{placa}}",
+      "novoAtendimento": "Novo atendimento"
+    }
+  },
+  "inicio": {
+    "porteiroPadrao": "Porteiro",
+    "condominioPadrao": "Condomínio",
+    "sobretitulo": "{{condominio}} · Portaria",
+    "ola": "Olá,",
+    "descricao": "Painel de controle da portaria. Selecione a funcionalidade desejada.",
+    "abrir": "Abrir",
+    "cards": {
+      "cadastros": {
+        "titulo": "Cadastros",
+        "descricao": "Registrar entrada de visitantes e prestadores de serviço"
+      },
+      "acesso": {
+        "titulo": "Controle de Acesso",
+        "descricao": "Registrar entradas e saídas de moradores e visitantes"
+      },
+      "entregas": {
+        "titulo": "Controle de Entregas",
+        "descricao": "Receber e registrar encomendas e pacotes"
+      },
+      "chaves": {
+        "titulo": "Controle de Chaves",
+        "descricao": "Gerenciar chaves e acessos do condomínio"
+      },
+      "espacos": {
+        "titulo": "Espaços",
+        "descricao": "Visualizar e acompanhar áreas comuns"
+      },
+      "usuarios": {
+        "titulo": "Usuários do Condomínio",
+        "descricao": "Consultar moradores, porteiros e funcionários"
+      }
+    },
+    "seguranca": {
+      "titulo": "Segurança em primeiro lugar",
+      "descricao": "Registre todas as entradas e saídas. Convidados bloqueados não podem ser autorizados sem permissão do responsável da unidade."
+    }
+  }
+}

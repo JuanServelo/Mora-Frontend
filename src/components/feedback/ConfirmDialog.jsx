@@ -1,15 +1,18 @@
+import { useTranslation } from "react-i18next";
 import { Icone } from "../icones/Icone";
 
 export function ConfirmDialog({
   aberto,
   titulo,
   mensagem,
-  confirmarTexto = "Confirmar",
-  cancelarTexto = "Cancelar",
+  confirmarTexto,
+  cancelarTexto,
   variante = "default",
   onConfirmar,
   onCancelar,
 }) {
+  const { t } = useTranslation("layout");
+
   if (!aberto) return null;
 
   const isDanger = variante === "danger";
@@ -24,7 +27,7 @@ export function ConfirmDialog({
         type="button"
         className="absolute inset-0 bg-black/60 backdrop-blur-sm cursor-default"
         onClick={onCancelar}
-        aria-label="Fechar"
+        aria-label={t("comum:acoes.fechar")}
       />
       <div className="relative glass-panel rounded-3xl p-6 w-full max-w-md shadow-2xl border border-outline-variant/20 animate-[fadeIn_0.2s_ease-out]">
         <div className="flex items-start gap-4 mb-6">
@@ -35,7 +38,7 @@ export function ConfirmDialog({
             />
           </div>
           <div>
-            <h2 className="font-headline text-lg font-bold text-on-surface">{titulo}</h2>
+            <h2 className="font-headline text-lg font-bold text-on-surface">{titulo || t("comum:acoes.confirmar")}</h2>
             {mensagem && (
               <p className="text-on-surface-variant text-sm mt-1 leading-relaxed">{mensagem}</p>
             )}
@@ -47,7 +50,7 @@ export function ConfirmDialog({
             onClick={onCancelar}
             className="px-5 py-2.5 rounded-xl text-sm font-semibold text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest/50 transition-colors cursor-pointer"
           >
-            {cancelarTexto}
+            {cancelarTexto || t("comum:acoes.cancelar")}
           </button>
           <button
             type="button"
@@ -58,7 +61,7 @@ export function ConfirmDialog({
                 : "bg-primary/20 text-primary hover:bg-primary/30 border border-primary/30"
             }`}
           >
-            {confirmarTexto}
+            {confirmarTexto || t("comum:acoes.confirmar")}
           </button>
         </div>
       </div>

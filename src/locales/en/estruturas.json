@@ -1,0 +1,230 @@
+{
+  "unidade": {
+    "naoAtribuida": "Not assigned",
+    "comBloco": "{{bloco}} - Unit {{numero}}",
+    "semBloco": "Unit {{numero}}"
+  },
+  "geral": {
+    "carregando": "Loading..."
+  },
+  "acoes": {
+    "desativar": "Deactivate",
+    "ativar": "Activate",
+    "salvarAlteracoes": "Save changes"
+  },
+  "status": {
+    "ativo": "active",
+    "inativo": "inactive",
+    "ativa": "active",
+    "inativa": "inactive"
+  },
+  "resumo": {
+    "total": "Total",
+    "ativos": "Active",
+    "inativos": "Inactive",
+    "ativas": "Active",
+    "inativas": "Inactive",
+    "apartamentos": "Units",
+    "reservaveis": "Bookable"
+  },
+  "pagina": {
+    "semCliente": "No clients found",
+    "semClienteAntes": "Create a client under ",
+    "semClienteLink": "Clients",
+    "semClienteDepois": " before managing structures.",
+    "painel": "Admin Panel",
+    "estruturas": "Physical",
+    "fisicas": "Structures",
+    "cliente": "Client"
+  },
+  "abas": {
+    "blocos": "Blocks & Units",
+    "areasComuns": "Common Areas",
+    "vagas": "Parking"
+  },
+  "campos": {
+    "nome": "Name",
+    "sigla": "Code",
+    "descricao": "Description",
+    "andares": "Floors",
+    "aptsAndar": "Units/Floor",
+    "aptosPorAndar": "Units per floor",
+    "bloco": "Block",
+    "numero": "Number",
+    "andar": "Floor",
+    "quartos": "Bedrooms",
+    "areaM2": "Area (m²)",
+    "areaTotal": "Total area (m²)",
+    "observacoes": "Notes",
+    "capacidade": "Capacity",
+    "capacidadeMaxima": "Maximum capacity (people)",
+    "reservavel": "Bookable",
+    "aprovacao": "Approval",
+    "antecedencia": "Advance notice",
+    "antecedenciaMinima": "Minimum booking notice (hours)",
+    "tipo": "Type",
+    "localizacao": "Location",
+    "apartamento": "Unit",
+    "condominio": "Condominium",
+    "emailConvidado": "Invitee's email"
+  },
+  "placeholders": {
+    "blocoNome": "e.g. Block A",
+    "blocoSigla": "e.g. A",
+    "blocoDescricao": "e.g. Main tower",
+    "andares": "e.g. 10",
+    "aptosPorAndar": "e.g. 4",
+    "emailConvidado": "person@email.com",
+    "aptNumero": "e.g. 101",
+    "andar": "e.g. 1",
+    "quartos": "e.g. 2",
+    "areaApt": "e.g. 65.50",
+    "opcional": "Optional",
+    "areaNome": "e.g. Main Pool",
+    "capacidade": "e.g. 50",
+    "areaComum": "e.g. 120.00",
+    "areaDescricao": "Describe the common area",
+    "areaLocalizacao": "e.g. Ground floor, next to the front desk",
+    "areaObservacoes": "Additional information",
+    "vagaNumero": "e.g. 12",
+    "vagaLocalizacao": "e.g. Sector A - Ground floor"
+  },
+  "validacao": {
+    "nomeObrigatorio": "Name is required.",
+    "andaresObrigatorio": "Number of floors is required.",
+    "inteiroPositivo": "Enter a whole number greater than zero.",
+    "maxAndares": "The maximum number of floors allowed is {{max}}.",
+    "aptosPorAndarObrigatorio": "Units per floor is required.",
+    "maxAptosPorAndar": "The maximum number of units per floor is {{max}}.",
+    "numeroObrigatorio": "Number is required.",
+    "andarObrigatorio": "Floor is required.",
+    "quartosObrigatorio": "Number of bedrooms is required.",
+    "quartosFaixa": "Bedrooms must be between {{min}} and {{max}}.",
+    "areaTotalObrigatoria": "Total area is required.",
+    "areaTotalFaixa": "Total area must be between {{min}} and {{max}} m².",
+    "capacidadeObrigatoria": "Maximum capacity is required.",
+    "capacidadeFaixa": "Maximum capacity must be between {{min}} and {{max}} people.",
+    "antecedenciaFaixa": "Enter 0 to {{max}} hours (0 = no requirement).",
+    "areaObrigatoria": "Area is required.",
+    "areaFaixa": "Area must be between {{min}} and {{max}} m²."
+  },
+  "antecedencia": {
+    "semExigencia": "No requirement: residents can book any future time.",
+    "dias_one": "{{count}} day",
+    "dias_other": "{{count}} days",
+    "horas_one": "{{count}} hour",
+    "horas_other": "{{count}} hours",
+    "exige": "Residents must book {{texto}} in advance. Managers and admins are not restricted."
+  },
+  "blocos": {
+    "novo": "New block",
+    "editar": "Edit block",
+    "cadastrar": "Add block",
+    "buscaPlaceholder": "Search by name or description...",
+    "vazio": "No blocks found.",
+    "verApartamentos": "View units",
+    "toast": {
+      "criado": "Block created successfully.",
+      "erroCriar": "Failed to create block.",
+      "atualizado": "Block updated.",
+      "erroAtualizar": "Failed to update block.",
+      "desativado": "Block deactivated.",
+      "reativado": "Block reactivated.",
+      "erroStatus": "Failed to change block status."
+    }
+  },
+  "apartamentos": {
+    "novo": "New unit",
+    "novoEm": "New unit in {{bloco}}",
+    "cadastrar": "Add unit",
+    "voltarBlocos": "Back to blocks",
+    "vazioBloco": "No units in this block yet.",
+    "vazio": "No units found.",
+    "buscaPlaceholder": "Search by number or floor...",
+    "todosBlocos": "All blocks",
+    "apt": "Unit {{numero}}",
+    "andarOrdinal": "Floor {{andar}}",
+    "quartos_one": "{{count}} bedroom",
+    "quartos_other": "{{count}} bedrooms",
+    "maxPorAndar": "(max. {{max}}/floor)",
+    "selecioneAndar": "Select a floor",
+    "lotado": "full",
+    "todosLotados": "Every floor in this block has reached its unit limit.",
+    "toast": {
+      "cadastrado": "Unit added.",
+      "atualizado": "Unit updated.",
+      "erroCriar": "Failed to create unit.",
+      "erroAtualizar": "Failed to update unit."
+    }
+  },
+  "convite": {
+    "semPermissao": "Your role can't issue resident invites for this unit.",
+    "titulo": "Invite a resident to this unit",
+    "tipoMorador": "Resident type",
+    "gerar": "Generate invite",
+    "gerando": "Generating…",
+    "gerado": "Invite generated for Unit {{numero}} · {{bloco}}",
+    "emailNaoConfigurado": "Automatic email isn't set up — copy the link below and send it manually.",
+    "codigo": "Code",
+    "linkAtivacao": "Activation link",
+    "copiar": "Copy",
+    "copiado": "Copied",
+    "gerarOutro": "Generate another invite",
+    "toast": {
+      "semEmail": "Invite created — send the link manually.",
+      "codigo": "Code: {{codigo}}",
+      "enviado": "Invite sent.",
+      "erro": "Failed to generate invite."
+    }
+  },
+  "areas": {
+    "nova": "New common area",
+    "cadastrar": "Add common area",
+    "buscaPlaceholder": "Search by name or location...",
+    "todosTipos": "All types",
+    "vazio": "No common areas found.",
+    "aprovacaoSindico": "Manager",
+    "aprovacaoAutomatica": "Automatic",
+    "horasCurto": "{{horas}}h",
+    "antecedenciaNenhuma": "None",
+    "horarioFuncionamento": "Opening hours",
+    "permiteReservas": "Allows bookings",
+    "exigeAprovacao": "Requires manager approval",
+    "exigeAprovacaoDescricao": "Requests stay pending until approved and expire 24h before the start if no one decides.",
+    "toast": {
+      "criada": "Common area created successfully.",
+      "erroCriar": "Failed to create common area.",
+      "atualizada": "Common area updated.",
+      "erroAtualizar": "Failed to update common area.",
+      "desativada": "Area deactivated.",
+      "reativada": "Area reactivated.",
+      "erroStatus": "Failed to change common area status."
+    }
+  },
+  "tiposArea": {
+    "PISCINA": "POOL",
+    "SALAO_FESTAS": "PARTY ROOM",
+    "ACADEMIA": "GYM",
+    "CHURRASQUEIRA": "BARBECUE AREA",
+    "QUADRA": "COURT",
+    "PLAYGROUND": "PLAYGROUND",
+    "OUTRO": "OTHER"
+  },
+  "vagas": {
+    "nova": "New parking spot",
+    "cadastrar": "Add parking spot",
+    "buscaPlaceholder": "Search by number or location...",
+    "todos": "All",
+    "semApartamento": "No unit",
+    "vazio": "No parking spots found.",
+    "vaga": "Spot {{numero}}",
+    "selecioneTipo": "Select a type",
+    "tipos": {
+      "coberta": "Covered",
+      "descoberta": "Uncovered"
+    },
+    "apartamentoOpcional": "Unit (optional)",
+    "erroCriar": "Failed to create parking spot.",
+    "erroAtualizar": "Failed to update parking spot."
+  }
+}

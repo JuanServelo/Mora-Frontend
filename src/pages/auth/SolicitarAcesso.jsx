@@ -8,7 +8,7 @@ import { Campo } from "../../components/campos/Campo";
 import { Botao } from "../../components/botoes/Botao";
 
 export function SolicitarAcesso() {
-  const { t } = useTranslation();
+  const { t } = useTranslation("auth");
   const { registrar } = useAuth();
   const navigate = useNavigate();
   const [erro, setErro] = useState("");
@@ -25,13 +25,13 @@ export function SolicitarAcesso() {
     const senha = form.get("senha")?.trim();
 
     if (!nome || !email || !senha) {
-      setErro("Preencha todos os campos.");
+      setErro(t("geral.camposVazios"));
       setCarregando(false);
       return;
     }
 
     if (senha.length < 6) {
-      setErro("Senha deve ter no minimo 6 caracteres.");
+      setErro(t("form.erros.senhaCurta"));
       setCarregando(false);
       return;
     }
@@ -40,7 +40,7 @@ export function SolicitarAcesso() {
       await registrar(nome, email, senha);
       navigate("/inicio");
     } catch (err) {
-      setErro(err.response?.data?.mensagem || "Erro ao solicitar acesso.");
+      setErro(err.response?.data?.mensagem || t("form.erros.falha"));
     } finally {
       setCarregando(false);
     }
@@ -104,15 +104,15 @@ export function SolicitarAcesso() {
                   name="email"
                   label={t("field.email.label")}
                   type="email"
-                  placeholder="julian@exemplo.com"
+                  placeholder={t("form.emailPlaceholder")}
                   icon="mail"
                 />
                 <Campo
                   id="senha"
                   name="senha"
-                  label="Senha"
+                  label={t("field.password.label")}
                   type="password"
-                  placeholder="Min. 6 caracteres"
+                  placeholder={t("form.senhaPlaceholder")}
                   icon="lock"
                 />
 
@@ -122,7 +122,7 @@ export function SolicitarAcesso() {
 
                 <div className="pt-4">
                   <Botao type="submit" disabled={carregando}>
-                    {carregando ? "Criando conta..." : t("form.submit")}
+                    {carregando ? t("form.criando") : t("form.submit")}
                   </Botao>
                 </div>
               </form>
@@ -131,6 +131,7 @@ export function SolicitarAcesso() {
                 <p className="text-on-surface-variant text-sm">
                   <Trans
                     i18nKey="already.have.account"
+                    t={t}
                     components={{
                       lnk: (
                         <Link

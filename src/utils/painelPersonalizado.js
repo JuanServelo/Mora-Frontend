@@ -11,25 +11,28 @@ import { CORES, PALETA } from "./chartTheme";
 
 export const VERSAO = 2;
 
-/** Formatos de gráfico de série mensal (ver components/charts/GraficoMensal). */
+/**
+ * Formatos de gráfico de série mensal (ver components/charts/GraficoMensal).
+ * `rotuloKey` é a chave do namespace `paineis`, traduzida na tela.
+ */
 export const TIPOS_SERIE = {
-  barras: { rotulo: "Barras", icone: "bar_chart" },
-  linhas: { rotulo: "Linhas", icone: "show_chart" },
-  area: { rotulo: "Área", icone: "area_chart" },
-  combinado: { rotulo: "Barras + linha", icone: "stacked_line_chart" },
+  barras: { rotuloKey: "tiposSerie.barras", icone: "bar_chart" },
+  linhas: { rotuloKey: "tiposSerie.linhas", icone: "show_chart" },
+  area: { rotuloKey: "tiposSerie.area", icone: "area_chart" },
+  combinado: { rotuloKey: "tiposSerie.combinado", icone: "stacked_line_chart" },
 };
 
 /** Larguras que um bloco de gráfico aceita. KPI e seção têm largura fixa. */
 export const LARGURAS = {
-  metade: { rotulo: "Metade", icone: "view_column" },
-  inteira: { rotulo: "Inteira", icone: "view_agenda" },
+  metade: { rotuloKey: "larguras.metade", icone: "view_column" },
+  inteira: { rotuloKey: "larguras.inteira", icone: "view_agenda" },
 };
 
 /** Alturas da área do gráfico, em pixels. */
 export const ALTURAS = {
-  baixa: { rotulo: "Baixa", px: 200 },
-  media: { rotulo: "Média", px: 280 },
-  alta: { rotulo: "Alta", px: 380 },
+  baixa: { rotuloKey: "alturas.baixa", px: 200 },
+  media: { rotuloKey: "alturas.media", px: 280 },
+  alta: { rotuloKey: "alturas.alta", px: 380 },
 };
 
 /**
@@ -41,12 +44,12 @@ export const ALTURAS = {
  * (vermelho quando há atraso, por exemplo).
  */
 export const CORES_BLOCO = {
-  agua: { rotulo: "Água", hex: CORES.primary },
-  turquesa: { rotulo: "Turquesa", hex: CORES.tertiary },
-  dourado: { rotulo: "Dourado", hex: CORES.secondary },
-  coral: { rotulo: "Coral", hex: CORES.error },
-  ardosia: { rotulo: "Ardósia", hex: PALETA[3] },
-  lavanda: { rotulo: "Lavanda", hex: PALETA[5] },
+  agua: { rotuloKey: "cores.agua", hex: CORES.primary },
+  turquesa: { rotuloKey: "cores.turquesa", hex: CORES.tertiary },
+  dourado: { rotuloKey: "cores.dourado", hex: CORES.secondary },
+  coral: { rotuloKey: "cores.coral", hex: CORES.error },
+  ardosia: { rotuloKey: "cores.ardosia", hex: PALETA[3] },
+  lavanda: { rotuloKey: "cores.lavanda", hex: PALETA[5] },
 };
 
 /** O hexadecimal da cor escolhida, ou `null` para a automática. */

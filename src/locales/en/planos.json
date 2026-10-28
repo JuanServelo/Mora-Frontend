@@ -1,0 +1,205 @@
+{
+  "geral": {
+    "porMes": "/month",
+    "salvando": "Saving..."
+  },
+  "status": {
+    "ATIVA": "active",
+    "CANCELADA": "canceled",
+    "SUSPENSA": "suspended"
+  },
+  "modulos": {
+    "portaria": {
+      "rotulo": "Front Desk",
+      "descricao": "Access control, visitors and entry/exit logs"
+    },
+    "reunioes": {
+      "rotulo": "Meetings",
+      "descricao": "Assemblies, agendas, votes and digital minutes"
+    },
+    "vagas": {
+      "rotulo": "Parking Spaces",
+      "descricao": "Parking space management, bookings and transfers"
+    },
+    "entregas": {
+      "rotulo": "Deliveries",
+      "descricao": "Package tracking and pickup notifications"
+    },
+    "areas_comuns": {
+      "rotulo": "Common Areas",
+      "descricao": "Booking for the party room, barbecue area, gym and other spaces"
+    },
+    "reclamacoes": {
+      "rotulo": "Incidents",
+      "descricao": "Logging and tracking of complaints and incidents"
+    },
+    "conhecimento": {
+      "rotulo": "Knowledge Base",
+      "descricao": "FAQ, documents and rules available to residents"
+    },
+    "votacoes": {
+      "rotulo": "Polls",
+      "descricao": "Online polls and votes for building decisions"
+    },
+    "veiculos": {
+      "rotulo": "Vehicles",
+      "descricao": "Registration and control of residents' vehicles"
+    },
+    "chaves": {
+      "rotulo": "Keys",
+      "descricao": "Key lending and return with a record of who has them"
+    }
+  },
+  "meuPlano": {
+    "sobretitulo": "Building manager",
+    "titulo": "My",
+    "tituloDestaque": "Plan",
+    "descricao": "Features available to your building in the Mora app.",
+    "carregando": "Loading plan...",
+    "semPlano": "No active plan",
+    "semPlanoAjuda": "Your building doesn't have an active subscription. Contact Mora support.",
+    "vigencia": "Term: {{inicio}} → {{fim}}",
+    "indeterminado": "open-ended",
+    "mensalidade": "Monthly fee",
+    "incluidos_one": "Included in your plan — {{count}} module",
+    "incluidos_other": "Included in your plan — {{count}} modules",
+    "naoIncluidos": "Not included in your current plan",
+    "alterar": "To change your plan, contact Mora support."
+  },
+  "cliente": {
+    "toast": {
+      "erroCarregar": "Couldn't load the plans.",
+      "escolha": "Choose a plan.",
+      "limiteUsuarios": "The plan supports at most {{max}} users, but the building has {{qtd}}.",
+      "informeInicio": "Enter the term start date.",
+      "fimAntesInicio": "The term end can't be before the start.",
+      "trocado": "Plan changed.",
+      "contratado": "Plan subscribed.",
+      "erroContratar": "Couldn't subscribe to the plan.",
+      "cancelada": "Subscription canceled.",
+      "erroCancelar": "Couldn't cancel."
+    },
+    "trocar": {
+      "titulo": "Change plan",
+      "mensagem": "The current subscription ({{atual}}) will end and \"{{novo}}\" takes effect on {{data}}. The history is kept.",
+      "confirmar": "Change plan"
+    },
+    "cancelar": {
+      "titulo": "Cancel subscription",
+      "mensagem": "The client will have no plan and stop being billed. The limits of \"{{plano}}\" no longer apply."
+    },
+    "carregando": "Loading plan…",
+    "desde": "since {{data}}",
+    "dados": {
+      "limiteUsuarios": "User limit",
+      "modulosAtivos": "Active modules",
+      "vigencia": "Term",
+      "ate": "until {{data}}",
+      "indeterminada": "open-ended"
+    },
+    "semPlano": "This client has no plan",
+    "semPlanoAjuda": "They use the platform without being billed and without plan limits.",
+    "contratarUm": "Subscribe to a plan",
+    "atual": "current",
+    "ateUsuarios": "up to {{max}} users",
+    "modulos_one": "{{count}} module",
+    "modulos_other": "{{count}} modules",
+    "nenhumPlano": "No plans registered. Create one under Plans before subscribing.",
+    "vigencia": {
+      "inicio": "Term start",
+      "inicioAjuda": "When the plan takes effect",
+      "fim": "Term end",
+      "fimAjuda": "Ends on this date",
+      "fimVazio": "Blank: open-ended",
+      "observacao": "Notes",
+      "observacaoAjuda": "Optional — contract no., terms",
+      "observacaoPlaceholder": "Contract 2026/014"
+    },
+    "contratar": "Subscribe",
+    "historico": "Subscription history"
+  },
+  "gerenciar": {
+    "modulos": {
+      "portaria": "Front Desk",
+      "reunioes": "Meetings",
+      "vagas": "Parking",
+      "entregas": "Deliveries",
+      "areas_comuns": "Common Areas",
+      "reclamacoes": "Complaints",
+      "conhecimento": "Knowledge Base",
+      "votacoes": "Polls",
+      "veiculos": "Vehicles",
+      "chaves": "Keys"
+    },
+    "toast": {
+      "erroCarregar": "Error loading plans.",
+      "alteracaoSalva": "Changes saved.",
+      "cadastrado": "Plan created.",
+      "erroSalvar": "Error saving the plan."
+    },
+    "validacao": {
+      "obrigatorio": "This field is required.",
+      "maiorQueZero": "Enter a value greater than zero.",
+      "precoNegativo": "The price can't be negative.",
+      "selecioneModulo": "Select a module."
+    },
+    "status": {
+      "desativar": {
+        "titulo": "Deactivate plan",
+        "mensagem": "Deactivate the plan \"{{nome}}\"?",
+        "botao": "Deactivate",
+        "sucesso": "Plan deactivated.",
+        "erro": "Error deactivating the plan."
+      },
+      "ativar": {
+        "titulo": "Activate plan",
+        "mensagem": "Activate the plan \"{{nome}}\"?",
+        "botao": "Activate",
+        "sucesso": "Plan activated.",
+        "erro": "Error activating the plan."
+      }
+    },
+    "sobretitulo": "Super Admin",
+    "titulo": "SaaS",
+    "tituloDestaque": "Plan Management",
+    "planos": "Plans",
+    "contagem_one": "{{count}} plan registered",
+    "contagem_other": "{{count}} plans registered",
+    "novo": "New Plan",
+    "form": {
+      "editar": "Edit Plan #{{id}}",
+      "descartar": "Discard Changes",
+      "nome": "Plan Name",
+      "nomePlaceholder": "E.g. Essential Plan",
+      "maxCondominios": "Max. Buildings",
+      "exemplo": "E.g. {{valor}}",
+      "maxUsuarios": "Max. Users / Building",
+      "preco": "Monthly Price (R$)",
+      "modulosAtivos": "Active Modules",
+      "selecionarTodos": "Select all",
+      "limpar": "Clear",
+      "selecionados_one": "{{count}} of {{total}} modules selected",
+      "selecionados_other": "{{count}} of {{total}} modules selected",
+      "salvarAlteracoes": "Save Changes",
+      "cadastrar": "Create Plan"
+    },
+    "carregando": "Loading plans...",
+    "vazio": "No plans registered.",
+    "vazioAjuda": "Click \"New Plan\" to get started.",
+    "card": {
+      "condominios": "Buildings",
+      "usuariosCond": "Users/Bldg.",
+      "modulos": "Modules ({{qtd}})",
+      "criado": "Created: {{data}}",
+      "detalhes": "Details"
+    },
+    "detalhe": {
+      "nome": "Name",
+      "status": "Status",
+      "preco": "Monthly Price",
+      "maxUsuarios": "Max. Users/Bldg.",
+      "atualizadoEm": "Updated on",
+      "todosModulos": "All Modules"
+    }
+  }
+}

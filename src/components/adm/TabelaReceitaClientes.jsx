@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Icone } from "../icones/Icone";
 import { formatarBRL } from "../../utils/dinheiro";
 
@@ -8,16 +9,17 @@ import { formatarBRL } from "../../utils/dinheiro";
  */
 export function TabelaReceitaClientes({ dados, cor }) {
   const navigate = useNavigate();
+  const { t } = useTranslation("paineis");
 
   return (
     <div className="glass-panel rounded-3xl p-6 space-y-4">
       <div className="flex items-center justify-between gap-3">
-        <h3 className="font-headline text-lg font-bold text-on-surface">Receita por cliente</h3>
+        <h3 className="font-headline text-lg font-bold text-on-surface">{t("receitaClientes.titulo")}</h3>
         <button
           onClick={() => navigate("/adm/condominios")}
           className="text-sm text-primary font-semibold hover:underline cursor-pointer"
         >
-          Ver clientes
+          {t("receitaClientes.verClientes")}
         </button>
       </div>
 
@@ -25,10 +27,10 @@ export function TabelaReceitaClientes({ dados, cor }) {
         <table className="w-full text-sm">
           <thead>
             <tr className="text-left text-[11px] uppercase tracking-wider text-on-surface-variant">
-              <th className="py-2 pr-4 font-semibold">Cliente</th>
-              <th className="py-2 pr-4 font-semibold">Plano</th>
-              <th className="py-2 pr-4 font-semibold text-right">Mensalidade</th>
-              <th className="py-2 pr-4 font-semibold text-right">Acumulado</th>
+              <th className="py-2 pr-4 font-semibold">{t("receitaClientes.colunas.cliente")}</th>
+              <th className="py-2 pr-4 font-semibold">{t("receitaClientes.colunas.plano")}</th>
+              <th className="py-2 pr-4 font-semibold text-right">{t("receitaClientes.colunas.mensalidade")}</th>
+              <th className="py-2 pr-4 font-semibold text-right">{t("receitaClientes.colunas.acumulado")}</th>
             </tr>
           </thead>
           <tbody>
@@ -61,7 +63,7 @@ export function TabelaReceitaClientes({ dados, cor }) {
                 <td className="py-2.5 pr-4 text-on-surface-variant">{c.nome}</td>
                 <td className="py-2.5 pr-4" colSpan={3}>
                   <span className="px-2 py-0.5 rounded-lg bg-error/10 text-error text-xs font-semibold">
-                    sem plano contratado
+                    {t("receitaClientes.semPlano")}
                   </span>
                 </td>
               </tr>
@@ -74,8 +76,7 @@ export function TabelaReceitaClientes({ dados, cor }) {
           como número de fechamento contábil. */}
       <p className="text-[11px] text-on-surface-variant flex items-center gap-1.5">
         <Icone name="info" className="text-sm" />
-        O acumulado é uma estimativa — mensalidade × meses de vigência. Não há
-        histórico de pagamento das assinaturas.
+        {t("receitaClientes.aviso")}
       </p>
     </div>
   );

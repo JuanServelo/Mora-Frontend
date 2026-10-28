@@ -3,10 +3,10 @@ import { useState } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import { Sidebar } from "../components/sidebar/Sidebar";
 import { Icone } from "../components/icones/Icone";
-import { useAuth } from "../contexts/AuthContext";
+import { useTranslation } from "react-i18next";
 
 export function AppLayout() {
-  const { usuario } = useAuth();
+  const { t } = useTranslation("layout");
   const { pathname } = useLocation();
   const [menuAberto, setMenuAberto] = useState(false);
 
@@ -34,13 +34,13 @@ export function AppLayout() {
         <div className="lg:hidden sticky top-0 z-30 flex items-center gap-3 px-4 py-3 border-b border-veu/5 backdrop-blur-xl bg-surface/70">
           <button
             onClick={() => setMenuAberto(true)}
-            aria-label="Abrir menu"
+            aria-label={t("appLayout.abrirMenu")}
             className="p-2 -ml-2 rounded-xl text-on-surface hover:bg-veu/5 cursor-pointer"
           >
             <Icone name="menu" />
           </button>
           <span className="text-sm font-bold text-on-surface truncate">
-            {tituloDaRota(pathname)}
+            {tituloDaRota(pathname, t)}
           </span>
         </div>
 
@@ -51,31 +51,31 @@ export function AppLayout() {
 }
 
 /** Nome curto da seção, para a barra do celular não ficar sem referência. */
-function tituloDaRota(pathname) {
+function tituloDaRota(pathname, t) {
   const mapa = {
-    "/inicio": "Início",
-    "/adm/painel": "Painel",
-    "/adm/geral": "Visão Geral",
-    "/adm/condominios": "Clientes",
-    "/adm/planos": "Planos",
-    "/adm/usuarios": "Usuários",
-    "/adm/estruturas": "Estruturas",
-    "/adm/perfis": "Perfis",
-    "/adm/financeiro": "Financeiro",
-    "/adm/reunioes": "Reuniões",
-    "/adm/reclamacoes": "Reclamações",
-    "/adm/ordens-servico": "Ordens de Serviço",
-    "/adm/comunicados": "Comunicados",
-    "/adm/conhecimento": "Conhecimento",
-    "/adm/meu-plano": "Meu Plano",
+    "/inicio": "inicio",
+    "/adm/painel": "painel",
+    "/adm/geral": "visaoGeral",
+    "/adm/condominios": "clientes",
+    "/adm/planos": "planos",
+    "/adm/usuarios": "usuarios",
+    "/adm/estruturas": "estruturas",
+    "/adm/perfis": "perfis",
+    "/adm/financeiro": "financeiro",
+    "/adm/reunioes": "reunioes",
+    "/adm/reclamacoes": "reclamacoes",
+    "/adm/ordens-servico": "ordensServico",
+    "/adm/comunicados": "comunicados",
+    "/adm/conhecimento": "conhecimento",
+    "/adm/meu-plano": "meuPlano",
     // Fora de /adm, mas quem usa a barra lateral também abre estas.
-    "/portaria/entregas": "Entregas",
-    "/conversas": "Conversas",
-    "/avisos": "Avisos",
-    "/entradas-e-saidas": "Entradas e Saídas",
-    "/chaves": "Chaves",
-    "/usuarios": "Usuários",
+    "/portaria/entregas": "entregas",
+    "/conversas": "conversas",
+    "/avisos": "avisos",
+    "/entradas-e-saidas": "entradasSaidas",
+    "/chaves": "chaves",
+    "/usuarios": "usuarios",
   };
   const chave = Object.keys(mapa).find((k) => pathname.startsWith(k));
-  return chave ? mapa[chave] : "Mora";
+  return chave ? t(`appLayout.titulos.${mapa[chave]}`) : "Mora";
 }

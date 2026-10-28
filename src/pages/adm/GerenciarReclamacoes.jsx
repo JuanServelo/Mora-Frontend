@@ -1,6 +1,7 @@
 // src/pages/adm/GerenciarReclamacoes.jsx
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { reclamacoesApi, mensagemDeErro } from "../../services/ocorrenciasApi";
 import { Icone } from "../../components/icones/Icone";
 import { useAuth } from "../../contexts/AuthContext";
@@ -38,6 +39,7 @@ const MANTER = "";
 
 // ─── Atendimento ─────────────────────────────
 function FormAtendimento({ rec, onAtualizada }) {
+  const { t } = useTranslation("ocorrencias");
   const toast = useToast();
   const [mensagem, setMensagem] = useState("");
   const [status, setStatus] = useState(rec.status === "PENDENTE" ? "EM_ANALISE" : MANTER);
@@ -45,7 +47,7 @@ function FormAtendimento({ rec, onAtualizada }) {
 
   const enviar = async () => {
     if (!mensagem.trim()) {
-      toast.warning(status ? "Escreva a justificativa da mudança." : "Escreva a resposta.");
+      toast.warning(status ? t("gestao.atendimento.justificativaObrigatoria") : t("gestao.atendimento.respostaObrigatoria"));
       return;
     }
     setEnviando(true);
@@ -57,9 +59,9 @@ function FormAtendimento({ rec, onAtualizada }) {
       onAtualizada(res.data);
       setMensagem("");
       setStatus(MANTER);
-      toast.success("Resposta registrada. O morador foi avisado.");
+      toast.success(t("gestao.atendimento.sucesso"));
     } catch (err) {
-      toast.error(mensagemDeErro(err, "Não foi possível registrar a resposta."));
+      toast.error(mensagemDeErro(err, t("gestao.atendimento.erro")));
     } finally {
       setEnviando(false);
     }
@@ -68,14 +70,14 @@ function FormAtendimento({ rec, onAtualizada }) {
   return (
     <div className="space-y-3">
       <p className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant">
-        {status ? "Responder e mudar o status" : "Responder"}
+        {status ? t("gestao.atendimento.tituloComStatus") : t("gestao.atendimento.titulo")}
       </p>
       <TextArea
         value={mensagem}
         onChange={(e) => setMensagem(e.target.value)}
         rows={3}
         maxLength={5000}
-        placeholder={status ? "Justificativa — o morador vê este texto." : "Digite a resposta para o morador..."}
+        placeholder={status ? t("gestao.atendimento.placeholderJustificativa") : t("gestao.atendimento.placeholderResposta")}
       />
       <div className="flex flex-wrap items-center gap-3">
         <div className="relative">
@@ -84,12 +86,12 @@ function FormAtendimento({ rec, onAtualizada }) {
             onChange={(e) => setStatus(e.target.value)}
             className="appearance-none bg-surface-container-highest/50 border border-veu/10 rounded-xl py-2.5 pl-4 pr-10 text-on-surface text-sm focus:ring-2 focus:ring-primary/50 focus:outline-none transition-all cursor-pointer"
           >
-            <option value={MANTER}>Manter status ({statusReclamacao(rec.status).rotulo})</option>
+            <option value={MANTER}>{t("gestao.atendimento.manterStatus", { status: statusReclamacao(rec.status).rotulo })}</option>
             {Object.entries(STATUS_RECLAMACAO)
               .filter(([s]) => s !== rec.status)
               .map(([s, cfg]) => (
                 <option key={s} value={s}>
-                  Mudar para: {cfg.rotulo}
+                  {t("gestao.atendimento.mudarPara", { status: cfg.rotulo })}
                 </option>
               ))}
           </select>
@@ -102,7 +104,7 @@ function FormAtendimento({ rec, onAtualizada }) {
           className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary/15 text-primary font-semibold text-sm hover:bg-primary/25 transition-all cursor-pointer disabled:opacity-50"
         >
           <Icone name="send" className="text-base" />
-          {enviando ? "Enviando…" : "Enviar"}
+          {enviando ? t("comum:acoes.enviando") : t("comum:acoes.enviar")}
         </button>
       </div>
     </div>
@@ -111,11 +113,12 @@ function FormAtendimento({ rec, onAtualizada }) {
 
 // ─── Histórico ───────────────────────────────
 function Historico({ interacoes }) {
+  const { t } = useTranslation("ocorrencias");
   if (!interacoes?.length) return null;
   return (
     <div>
       <p className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant mb-2">
-        Histórico de atendimento
+        {t("gestao.historico")}
       </p>
       <div className="space-y-2">
         {interacoes.map((i) => (
@@ -141,6 +144,7 @@ function Historico({ interacoes }) {
 export function GerenciarReclamacoes() {
   const navigate = useNavigate();
   const { usuario } = useAuth();
+  const { t } = useTranslation("ocorrencias");
   // O Admin Geral acompanha, mas quem atende é o síndico do condomínio.
   const podeAtender = usuario?.perfil === PERFIS.ADMIN_SINDICO;
 
@@ -159,7 +163,7 @@ export function GerenciarReclamacoes() {
       } catch (e) {
         if (ok) {
           setReclamacoes([]);
-          setErro(mensagemDeErro(e, "Não foi possível carregar as ocorrências."));
+          setErro(mensagemDeErro(e, t("gestao.erroCarregar")));
         }
       } finally {
         if (ok) setCarregando(false);
@@ -168,7 +172,7 @@ export function GerenciarReclamacoes() {
     return () => {
       ok = false;
     };
-  }, []);
+  }, [t]);
 
   const atualizar = (atual) =>
     setReclamacoes((prev) => prev.map((rec) => (rec.id === atual.id ? atual : rec)));
@@ -184,7 +188,7 @@ export function GerenciarReclamacoes() {
   if (carregando) {
     return (
       <div className="min-h-screen w-full pt-4 pb-20 px-6">
-        <div className="max-w-6xl mx-auto py-20 text-center text-on-surface-variant text-sm">Carregando…</div>
+        <div className="max-w-6xl mx-auto py-20 text-center text-on-surface-variant text-sm">{t("comum:estado.carregando")}</div>
       </div>
     );
   }
@@ -196,12 +200,12 @@ export function GerenciarReclamacoes() {
         <header className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
             <p className="text-on-surface-variant text-xs font-semibold uppercase tracking-widest mb-1">
-              Painel Administrativo
+              {t("geral.painelAdministrativo")}
             </p>
             <h1 className="font-headline text-4xl font-extrabold tracking-tight text-on-surface">
-              Gestão de{" "}
+              {t("gestao.cabecalho.titulo")}{" "}
               <span className="bg-gradient-to-r from-primary to-tertiary bg-clip-text text-transparent">
-                Reclamações
+                {t("gestao.cabecalho.tituloDestaque")}
               </span>
             </h1>
           </div>
@@ -211,7 +215,7 @@ export function GerenciarReclamacoes() {
             className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-veu/5 text-on-surface font-semibold text-sm hover:bg-veu/10 transition-all cursor-pointer self-start md:self-auto"
           >
             <Icone name="construction" className="text-lg" />
-            Ordens de serviço
+            {t("detalhe.ordensServico")}
           </button>
         </header>
 
@@ -243,7 +247,7 @@ export function GerenciarReclamacoes() {
         {/* Filtro ativo */}
         {filtroStatus !== "TODOS" && (
           <div className="flex items-center gap-2">
-            <span className="text-sm text-on-surface-variant">Filtrando por:</span>
+            <span className="text-sm text-on-surface-variant">{t("gestao.filtrandoPor")}</span>
             <span className={`text-xs font-semibold px-3 py-1 rounded-full ${statusReclamacao(filtroStatus).cor}`}>
               {statusReclamacao(filtroStatus).rotulo}
             </span>
@@ -251,7 +255,7 @@ export function GerenciarReclamacoes() {
               onClick={() => setFiltroStatus("TODOS")}
               className="text-xs text-on-surface-variant hover:text-on-surface transition-colors cursor-pointer underline underline-offset-2"
             >
-              limpar filtro
+              {t("comum:acoes.limparFiltro")}
             </button>
           </div>
         )}
@@ -294,36 +298,36 @@ export function GerenciarReclamacoes() {
                   <div className="px-6 pb-5 border-t border-veu/5 pt-4 space-y-5">
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
                       <div className="bg-surface-container-highest/30 rounded-xl p-3">
-                        <p className="text-xs text-on-surface-variant mb-1">Morador</p>
+                        <p className="text-xs text-on-surface-variant mb-1">{t("detalhe.morador")}</p>
                         <p className="text-sm font-semibold text-on-surface break-words">
-                          {rec.usuario?.nome || rec.usuario?.email || `Usuário ${rec.usuarioId}`}
+                          {rec.usuario?.nome || rec.usuario?.email || t("detalhe.usuarioId", { id: rec.usuarioId })}
                         </p>
                       </div>
                       <div className="bg-surface-container-highest/30 rounded-xl p-3">
-                        <p className="text-xs text-on-surface-variant mb-1">Registrada em</p>
+                        <p className="text-xs text-on-surface-variant mb-1">{t("detalhe.registradaEm")}</p>
                         <p className="text-sm font-semibold text-on-surface">{dataHora(rec.criadoEm)}</p>
                       </div>
                       <div className="bg-surface-container-highest/30 rounded-xl p-3">
-                        <p className="text-xs text-on-surface-variant mb-1">Tempo</p>
+                        <p className="text-xs text-on-surface-variant mb-1">{t("detalhe.tempo")}</p>
                         <p className="text-sm font-semibold text-on-surface">{tempoDaOcorrencia(rec)}</p>
                       </div>
                       {rec.anexoUrl && (
                         <div className="bg-surface-container-highest/30 rounded-xl p-3">
-                          <p className="text-xs text-on-surface-variant mb-1">Anexo</p>
+                          <p className="text-xs text-on-surface-variant mb-1">{t("detalhe.anexo")}</p>
                           <a
                             href={rec.anexoUrl}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-sm font-semibold text-primary hover:underline"
                           >
-                            Ver arquivo
+                            {t("detalhe.verArquivo")}
                           </a>
                         </div>
                       )}
                     </div>
 
                     <div>
-                      <p className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant mb-1">Descrição</p>
+                      <p className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant mb-1">{t("detalhe.descricao")}</p>
                       <p className="text-sm text-on-surface bg-surface-container-highest/30 rounded-xl p-3 whitespace-pre-line">
                         {rec.descricao}
                       </p>
@@ -333,7 +337,7 @@ export function GerenciarReclamacoes() {
                     <div className="space-y-2">
                       <div className="flex flex-wrap items-center justify-between gap-2">
                         <p className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant">
-                          Ordens de serviço
+                          {t("detalhe.ordensServico")}
                         </p>
                         {podeAtender && rec.status !== "RESOLVIDO" && (
                           <button
@@ -342,7 +346,7 @@ export function GerenciarReclamacoes() {
                             className="flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline cursor-pointer"
                           >
                             <Icone name="add" className="text-base" />
-                            Abrir ordem de serviço
+                            {t("gestao.abrirOs")}
                           </button>
                         )}
                       </div>
@@ -357,7 +361,7 @@ export function GerenciarReclamacoes() {
                             <span className="flex items-center gap-2">
                               <Icone name="construction" className="text-lg text-on-surface-variant" />
                               <span className="text-sm font-mono text-on-surface">{os.numero}</span>
-                              <span className="text-xs text-on-surface-variant">prazo {formatarData(os.prazo)}</span>
+                              <span className="text-xs text-on-surface-variant">{t("detalhe.prazo", { data: formatarData(os.prazo) })}</span>
                             </span>
                             <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${statusOs(os.status).cor}`}>
                               {statusOs(os.status).rotulo}
@@ -365,7 +369,7 @@ export function GerenciarReclamacoes() {
                           </button>
                         ))
                       ) : (
-                        <p className="text-xs text-on-surface-variant">Nenhuma ordem de serviço vinculada.</p>
+                        <p className="text-xs text-on-surface-variant">{t("gestao.semOs")}</p>
                       )}
                     </div>
 
@@ -381,7 +385,7 @@ export function GerenciarReclamacoes() {
           {recFiltradas.length === 0 && (
             <div className="glass-panel rounded-2xl py-16 flex flex-col items-center gap-3 text-on-surface-variant">
               <Icone name="inbox" className="text-5xl opacity-30" />
-              <p className="text-sm">Nenhuma reclamação encontrada.</p>
+              <p className="text-sm">{t("gestao.vazio")}</p>
             </div>
           )}
         </div>

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { financeiroApi } from "../../../services/financeiroApi";
 import { Icone } from "../../icones/Icone";
 import { useToast } from "../../../contexts/ToastContext";
@@ -16,11 +17,13 @@ const VAZIO = {
 };
 
 const BASES = {
-  POR_UNIDADE: "por unidade",
-  TOTAL_CONDOMINIO: "total a ratear",
+  POR_UNIDADE: "taxas.bases.porUnidade",
+  TOTAL_CONDOMINIO: "taxas.bases.totalCondominio",
 };
 
 export function PainelTaxas({ modoRateio }) {
+  // `t` já é o nome da taxa nos laços abaixo; a tradução fica em `tr`.
+  const { t: tr } = useTranslation("financeiro");
   const toast = useToast();
   const confirmar = useConfirm();
 
@@ -36,7 +39,7 @@ export function PainelTaxas({ modoRateio }) {
       const { data } = await financeiroApi.listarTaxas();
       setTaxas(data.itens || []);
     } catch {
-      toast.error("Erro ao carregar as taxas.");
+      toast.error(tr("taxas.toast.erroCarregar"));
     } finally {
       setCarregando(false);
     }
@@ -77,16 +80,16 @@ export function PainelTaxas({ modoRateio }) {
     try {
       if (editandoId) {
         await financeiroApi.atualizarTaxa(editandoId, form);
-        toast.success("Taxa atualizada.");
+        toast.success(tr("taxas.toast.atualizada"));
       } else {
         await financeiroApi.criarTaxa(form);
-        toast.success("Taxa criada.");
+        toast.success(tr("taxas.toast.criada"));
       }
       setForm(null);
       setEditandoId(null);
       carregar();
     } catch (e) {
-      toast.error(e.response?.data?.mensagem || "Erro ao salvar a taxa.");
+      toast.error(e.response?.data?.mensagem || tr("taxas.toast.erroSalvar"));
     } finally {
       setSalvando(false);
     }
@@ -94,19 +97,19 @@ export function PainelTaxas({ modoRateio }) {
 
   async function desativar(t) {
     const ok = await confirmar({
-      titulo: "Desativar taxa",
+      titulo: tr("taxas.desativar.titulo"),
       // Desativar em vez de apagar: faturas já emitidas apontam para o tipo de
       // taxa, e removê-lo deixaria a composição delas sem explicação.
-      mensagem: `"${t.nome}" deixa de entrar nos próximos fechamentos. As faturas já emitidas continuam como estão.`,
-      confirmarTexto: "Desativar",
+      mensagem: tr("taxas.desativar.mensagem", { nome: t.nome }),
+      confirmarTexto: tr("taxas.desativar.confirmar"),
     });
     if (!ok) return;
     try {
       await financeiroApi.desativarTaxa(t.id);
-      toast.success("Taxa desativada.");
+      toast.success(tr("taxas.toast.desativada"));
       carregar();
     } catch {
-      toast.error("Erro ao desativar a taxa.");
+      toast.error(tr("taxas.toast.erroDesativar"));
     }
   }
 
@@ -115,15 +118,15 @@ export function PainelTaxas({ modoRateio }) {
       <div className="flex items-center justify-between gap-3">
         <p className="text-sm text-on-surface-variant">
           {carregando
-            ? "Carregando…"
-            : `${taxas.length} taxa${taxas.length !== 1 ? "s" : ""} ativa${taxas.length !== 1 ? "s" : ""}`}
+            ? tr("comum:estado.carregando")
+            : tr("taxas.lista.contagem", { count: taxas.length })}
         </p>
         <button
           onClick={abrirNova}
           className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-primary/15 text-primary font-semibold text-sm hover:bg-primary/25 transition cursor-pointer"
         >
           <Icone name="add" className="text-lg" />
-          Nova taxa
+          {tr("taxas.nova")}
         </button>
       </div>
 
@@ -145,10 +148,10 @@ export function PainelTaxas({ modoRateio }) {
         <div className="text-center py-12 rounded-2xl border border-dashed border-veu/10">
           <Icone name="receipt_long" className="text-4xl text-outline-variant" />
           <p className="mt-3 text-on-surface-variant text-sm">
-            Nenhuma taxa cadastrada ainda.
+            {tr("taxas.lista.vazio")}
           </p>
           <p className="text-xs text-outline-variant mt-1">
-            Sem ao menos uma taxa ativa, o fechamento do mês não tem o que cobrar.
+            {tr("taxas.lista.vazioAjuda")}
           </p>
         </div>
       )}
@@ -165,7 +168,7 @@ export function PainelTaxas({ modoRateio }) {
             <div className="min-w-0 flex-1">
               <p className="font-semibold text-on-surface truncate">{t.nome}</p>
               <p className="text-xs text-on-surface-variant truncate">
-                {t.descricao || "Sem descrição"}
+                {t.descricao || tr("taxas.lista.semDescricao")}
               </p>
             </div>
             <div className="text-right shrink-0">
@@ -173,21 +176,22 @@ export function PainelTaxas({ modoRateio }) {
                 {formatarBRL(t.valorCentavos)}
               </p>
               <p className="text-[11px] text-on-surface-variant">
-                {BASES[t.baseCalculo]} · {t.periodicidade.toLowerCase()}
+                {tr(BASES[t.baseCalculo])} ·{" "}
+                {tr(`taxas.periodicidade.${t.periodicidade}`, { defaultValue: t.periodicidade.toLowerCase() })}
                 {t.parcelas > 1 && ` · ${t.parcelas}x`}
               </p>
             </div>
             <div className="flex gap-1 shrink-0">
               <button
                 onClick={() => abrirEdicao(t)}
-                title="Editar"
+                title={tr("comum:acoes.editar")}
                 className="p-2 rounded-lg hover:bg-veu/5 text-on-surface-variant hover:text-on-surface transition cursor-pointer"
               >
                 <Icone name="edit" className="text-lg" />
               </button>
               <button
                 onClick={() => desativar(t)}
-                title="Desativar"
+                title={tr("taxas.desativar.confirmar")}
                 className="p-2 rounded-lg hover:bg-error/10 text-on-surface-variant hover:text-error transition cursor-pointer"
               >
                 <Icone name="visibility_off" className="text-lg" />
@@ -201,6 +205,7 @@ export function PainelTaxas({ modoRateio }) {
 }
 
 function FormularioTaxa({ form, setForm, salvando, editando, aoSalvar, aoCancelar }) {
+  const { t } = useTranslation("financeiro");
   const campo = (n, v) => setForm((f) => ({ ...f, [n]: v }));
   const entrada =
     "w-full bg-surface-container-highest/40 border-none rounded-xl py-3 px-4 text-on-surface placeholder:text-outline-variant focus:outline-none focus:ring-2 focus:ring-primary/50";
@@ -210,21 +215,21 @@ function FormularioTaxa({ form, setForm, salvando, editando, aoSalvar, aoCancela
   return (
     <div className="glass-panel rounded-3xl p-6 space-y-4">
       <h3 className="font-headline text-lg font-bold text-on-surface">
-        {editando ? "Editar taxa" : "Nova taxa"}
+        {editando ? t("taxas.form.tituloEditar") : t("taxas.nova")}
       </h3>
 
       <div className="grid sm:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <label className={rotulo}>Nome</label>
+          <label className={rotulo}>{t("taxas.form.nome")}</label>
           <input
             className={entrada}
             value={form.nome}
-            placeholder="Taxa condominial"
+            placeholder={t("taxas.form.nomePlaceholder")}
             onChange={(e) => campo("nome", e.target.value)}
           />
         </div>
         <div className="space-y-2">
-          <label className={rotulo}>Valor</label>
+          <label className={rotulo}>{t("taxas.form.valor")}</label>
           <input
             className={entrada}
             value={form.valor}
@@ -236,44 +241,44 @@ function FormularioTaxa({ form, setForm, salvando, editando, aoSalvar, aoCancela
       </div>
 
       <div className="space-y-2">
-        <label className={rotulo}>Descrição</label>
+        <label className={rotulo}>{t("taxas.form.descricao")}</label>
         <input
           className={entrada}
           value={form.descricao}
-          placeholder="O que esta taxa cobre"
+          placeholder={t("taxas.form.descricaoPlaceholder")}
           onChange={(e) => campo("descricao", e.target.value)}
         />
       </div>
 
       <div className="grid sm:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <label className={rotulo}>O valor informado é</label>
+          <label className={rotulo}>{t("taxas.form.baseCalculo")}</label>
           <select
             className={`${entrada} cursor-pointer`}
             value={form.baseCalculo}
             onChange={(e) => campo("baseCalculo", e.target.value)}
           >
-            <option value="POR_UNIDADE">por unidade</option>
-            <option value="TOTAL_CONDOMINIO">o total do condomínio, a ratear</option>
+            <option value="POR_UNIDADE">{t("taxas.bases.porUnidade")}</option>
+            <option value="TOTAL_CONDOMINIO">{t("taxas.form.baseTotalOpcao")}</option>
           </select>
           {/* Sem isto o rateio fica ambíguo: R$ 350 é de cada apartamento, ou
               é o que o prédio inteiro divide? */}
           <p className="text-[11px] text-on-surface-variant ml-1">
             {form.baseCalculo === "POR_UNIDADE"
-              ? "Cada unidade recebe esse valor."
-              : "Esse valor é dividido entre as unidades."}
+              ? t("taxas.form.basePorUnidadeAjuda")
+              : t("taxas.form.baseTotalAjuda")}
           </p>
         </div>
         <div className="space-y-2">
-          <label className={rotulo}>Periodicidade</label>
+          <label className={rotulo}>{t("taxas.form.periodicidade")}</label>
           <select
             className={`${entrada} cursor-pointer`}
             value={form.periodicidade}
             onChange={(e) => campo("periodicidade", e.target.value)}
           >
-            <option value="MENSAL">mensal</option>
-            <option value="ANUAL">anual</option>
-            <option value="UNICA">única</option>
+            <option value="MENSAL">{t("taxas.periodicidade.MENSAL")}</option>
+            <option value="ANUAL">{t("taxas.periodicidade.ANUAL")}</option>
+            <option value="UNICA">{t("taxas.periodicidade.UNICA")}</option>
           </select>
         </div>
       </div>
@@ -292,12 +297,12 @@ function FormularioTaxa({ form, setForm, salvando, editando, aoSalvar, aoCancela
             }
             className="w-4 h-4 accent-primary cursor-pointer"
           />
-          <span className="text-sm text-on-surface">Taxa extraordinária</span>
+          <span className="text-sm text-on-surface">{t("taxas.form.extraordinaria")}</span>
         </label>
 
         {form.extraordinaria && (
           <div className="flex items-center gap-2">
-            <label className="text-sm text-on-surface-variant">Parcelas</label>
+            <label className="text-sm text-on-surface-variant">{t("taxas.form.parcelas")}</label>
             <input
               type="number"
               min={1}
@@ -311,7 +316,7 @@ function FormularioTaxa({ form, setForm, salvando, editando, aoSalvar, aoCancela
       {/* Parcelar taxa mensal faria a parcela de um mês colidir com a do
           seguinte — só a extraordinária, aprovada em assembleia, se parcela. */}
       <p className="text-[11px] text-on-surface-variant">
-        Só taxa extraordinária pode ser parcelada.
+        {t("taxas.form.parcelasAjuda")}
       </p>
 
       <div className="flex justify-end gap-2 pt-2">
@@ -319,14 +324,14 @@ function FormularioTaxa({ form, setForm, salvando, editando, aoSalvar, aoCancela
           onClick={aoCancelar}
           className="px-5 py-2.5 rounded-full text-on-surface-variant hover:bg-veu/5 transition cursor-pointer"
         >
-          Cancelar
+          {t("comum:acoes.cancelar")}
         </button>
         <button
           onClick={aoSalvar}
           disabled={salvando}
           className="px-6 py-2.5 rounded-full bg-gradient-to-br from-primary to-primary-container text-on-primary-container font-bold cursor-pointer disabled:opacity-60 transition"
         >
-          {salvando ? "Salvando…" : "Salvar"}
+          {salvando ? t("comum:acoes.salvando") : t("comum:acoes.salvar")}
         </button>
       </div>
     </div>

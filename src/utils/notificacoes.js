@@ -1,3 +1,5 @@
+import i18n, { idiomaAtual } from "../i18n";
+
 /**
  * Aparência e destino de cada tipo de notificação.
  *
@@ -118,21 +120,23 @@ export function tempoRelativo(iso) {
   if (!iso) return "";
   const diff = Date.now() - new Date(iso).getTime();
   const min = Math.floor(diff / 60000);
-  if (min < 1) return "agora mesmo";
-  if (min < 60) return `${min} min atrás`;
+  if (min < 1) return i18n.t("comum:tempo.agora");
+  if (min < 60) return i18n.t("comum:tempo.minutosAtras", { n: min });
   const h = Math.floor(min / 60);
-  if (h < 24) return `${h}h atrás`;
+  if (h < 24) return i18n.t("comum:tempo.horasAtras", { n: h });
   const d = Math.floor(h / 24);
-  if (d < 7) return `${d}d atrás`;
-  return new Date(iso).toLocaleDateString("pt-BR");
+  if (d < 7) return i18n.t("comum:tempo.diasAtras", { n: d });
+  return new Date(iso).toLocaleDateString(idiomaAtual());
 }
 
 /** Rótulo do serviço que publicou, para a tela agrupar ou etiquetar. */
-export const ROTULO_ORIGEM = {
-  financeiro: "Financeiro",
-  comunicacao: "Mensagens",
-  portaria: "Portaria",
-  gestao: "Gestão",
-  ocorrencias: "Ocorrências",
-  plataforma: "Mora",
-};
+export const ROTULO_ORIGEM = Object.defineProperties(
+  {},
+  Object.fromEntries(
+    ["financeiro", "comunicacao", "portaria", "gestao", "ocorrencias", "plataforma"].map((origem) => [
+      origem,
+      // Getter: o rótulo sai no idioma em uso na hora da leitura.
+      { enumerable: true, get: () => i18n.t(`layout:origemNotificacao.${origem}`) },
+    ]),
+  ),
+);

@@ -2,6 +2,7 @@
 // Funções de apoio às telas de multas, contratos e prestação de contas.
 // Ficam fora dos arquivos de componente para o recarregamento a quente do Vite
 // continuar funcionando — ele exige que um arquivo .jsx exporte só componentes.
+import { idiomaAtual } from "../i18n";
 
 const FUSO = "America/Sao_Paulo";
 
@@ -19,7 +20,7 @@ export const mesAtual = () => hojeCampo().slice(0, 7);
  */
 export const quandoLocal = (valor) =>
   valor
-    ? new Date(valor).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short", timeZone: FUSO })
+    ? new Date(valor).toLocaleString(idiomaAtual(), { dateStyle: "short", timeStyle: "short", timeZone: FUSO })
     : "—";
 
 /** Mensagem de erro da API, ou a genérica. */

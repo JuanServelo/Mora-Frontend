@@ -1,5 +1,6 @@
 // src/pages/usuario/MinhasReclamacoes.jsx
 import { useState, useEffect } from "react";
+import { Trans, useTranslation } from "react-i18next";
 import { reclamacoesApi, mensagemDeErro } from "../../services/ocorrenciasApi";
 import { Icone } from "../../components/icones/Icone";
 import { Campo } from "../../components/campos/Campo";
@@ -35,6 +36,7 @@ const FORM_VAZIO = { categoria: "BARULHO", descricao: "", anexoUrl: "" };
 
 // ─── Aba: Abrir Reclamação ───────────────────
 function AbaNovaReclamacao({ onCriada }) {
+  const { t } = useTranslation("ocorrencias");
   const [form, setForm] = useState(FORM_VAZIO);
   const [criada, setCriada] = useState(null);
   const [erro, setErro] = useState("");
@@ -58,7 +60,7 @@ function AbaNovaReclamacao({ onCriada }) {
       onCriada(res.data);
       setCriada(res.data);
     } catch (err) {
-      setErro(mensagemDeErro(err, "Não foi possível enviar a reclamação."));
+      setErro(mensagemDeErro(err, t("minhas.nova.erro")));
     } finally {
       setEnviando(false);
     }
@@ -70,11 +72,14 @@ function AbaNovaReclamacao({ onCriada }) {
         <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
           <Icone name="check_circle" className="text-4xl text-primary" />
         </div>
-        <h2 className="font-headline text-2xl font-bold text-on-surface">Reclamação registrada!</h2>
+        <h2 className="font-headline text-2xl font-bold text-on-surface">{t("minhas.registrada.titulo")}</h2>
         <p className="text-on-surface-variant text-sm max-w-sm">
-          Protocolo <strong className="font-mono text-on-surface">{criada.protocolo}</strong>. Acompanhe o
-          andamento pela aba <strong>Minhas Reclamações</strong> — você é avisado quando a administração
-          responder.
+          <Trans
+            t={t}
+            i18nKey="minhas.registrada.texto"
+            values={{ protocolo: criada.protocolo }}
+            components={{ protocolo: <strong className="font-mono text-on-surface" />, aba: <strong /> }}
+          />
         </p>
         <Botao
           onClick={() => {
@@ -82,7 +87,7 @@ function AbaNovaReclamacao({ onCriada }) {
             setForm(FORM_VAZIO);
           }}
         >
-          Abrir outra reclamação
+          {t("minhas.registrada.outra")}
         </Botao>
       </div>
     );
@@ -91,9 +96,9 @@ function AbaNovaReclamacao({ onCriada }) {
   return (
     <div className="glass-panel rounded-2xl p-6 space-y-6">
       <div>
-        <h2 className="font-headline text-xl font-bold text-on-surface">Abrir Reclamação</h2>
+        <h2 className="font-headline text-xl font-bold text-on-surface">{t("minhas.nova.titulo")}</h2>
         <p className="text-sm text-on-surface-variant mt-1">
-          Descreva o problema e nossa equipe responderá em breve.
+          {t("minhas.nova.subtitulo")}
         </p>
       </div>
       {erro && (
@@ -104,7 +109,7 @@ function AbaNovaReclamacao({ onCriada }) {
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-2">
           <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant ml-1">
-            Categoria
+            {t("minhas.nova.categoria")}
           </label>
           <select
             name="categoria"
@@ -120,17 +125,17 @@ function AbaNovaReclamacao({ onCriada }) {
           </select>
         </div>
         <TextArea
-          label="Descrição"
+          label={t("detalhe.descricao")}
           name="descricao"
           value={form.descricao}
           onChange={handleForm}
           rows={4}
           maxLength={5000}
-          placeholder="Descreva o problema com o máximo de detalhes possível..."
+          placeholder={t("minhas.nova.descricaoPlaceholder")}
           required
         />
         <Campo
-          label="URL do Anexo (opcional)"
+          label={t("minhas.nova.anexo")}
           name="anexoUrl"
           value={form.anexoUrl}
           onChange={handleForm}
@@ -139,7 +144,7 @@ function AbaNovaReclamacao({ onCriada }) {
         <div className="flex justify-end pt-2">
           <Botao type="submit" disabled={enviando}>
             <span className="flex items-center gap-2">
-              <Icone name="send" className="text-lg" /> {enviando ? "Enviando…" : "Enviar reclamação"}
+              <Icone name="send" className="text-lg" /> {enviando ? t("comum:acoes.enviando") : t("minhas.nova.enviar")}
             </span>
           </Botao>
         </div>
@@ -150,18 +155,19 @@ function AbaNovaReclamacao({ onCriada }) {
 
 // ─── Histórico ───────────────────────────────
 function Historico({ interacoes }) {
+  const { t } = useTranslation("ocorrencias");
   if (!interacoes?.length) {
     return (
       <div className="bg-surface-container-highest/20 rounded-xl p-3 flex items-center gap-2 text-on-surface-variant">
         <Icone name="hourglass_empty" className="text-lg opacity-50" />
-        <p className="text-sm">Aguardando resposta da administração.</p>
+        <p className="text-sm">{t("minhas.aguardando")}</p>
       </div>
     );
   }
   return (
     <div>
       <p className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant mb-2">
-        Respostas da administração
+        {t("minhas.respostas")}
       </p>
       <div className="space-y-2">
         {interacoes.map((i) => (
@@ -187,13 +193,14 @@ function Historico({ interacoes }) {
 
 // ─── Aba: Minhas Reclamações ─────────────────
 function AbaMinhasReclamacoes({ reclamacoes }) {
+  const { t } = useTranslation("ocorrencias");
   const [expandido, setExpandido] = useState(null);
 
   if (reclamacoes.length === 0) {
     return (
       <div className="glass-panel rounded-2xl py-16 flex flex-col items-center gap-3 text-on-surface-variant">
         <Icone name="inbox" className="text-5xl opacity-30" />
-        <p className="text-sm">Você ainda não abriu nenhuma reclamação.</p>
+        <p className="text-sm">{t("minhas.vazio")}</p>
       </div>
     );
   }
@@ -233,22 +240,22 @@ function AbaMinhasReclamacoes({ reclamacoes }) {
               <div className="px-6 pb-5 border-t border-veu/5 pt-4 space-y-5">
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <div className="bg-surface-container-highest/30 rounded-xl p-3">
-                    <p className="text-xs text-on-surface-variant mb-1">Protocolo</p>
+                    <p className="text-xs text-on-surface-variant mb-1">{t("detalhe.protocolo")}</p>
                     <p className="text-sm font-semibold text-on-surface font-mono">{rec.protocolo}</p>
                   </div>
                   <div className="bg-surface-container-highest/30 rounded-xl p-3">
-                    <p className="text-xs text-on-surface-variant mb-1">Registrada em</p>
+                    <p className="text-xs text-on-surface-variant mb-1">{t("detalhe.registradaEm")}</p>
                     <p className="text-sm font-semibold text-on-surface">{dataHora(rec.criadoEm)}</p>
                   </div>
                   <div className="bg-surface-container-highest/30 rounded-xl p-3">
-                    <p className="text-xs text-on-surface-variant mb-1">Tempo</p>
+                    <p className="text-xs text-on-surface-variant mb-1">{t("detalhe.tempo")}</p>
                     <p className="text-sm font-semibold text-on-surface">{tempoDaOcorrencia(rec)}</p>
                   </div>
                 </div>
 
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant mb-1">
-                    Descrição
+                    {t("detalhe.descricao")}
                   </p>
                   <p className="text-sm text-on-surface bg-surface-container-highest/30 rounded-xl p-3 whitespace-pre-line">
                     {rec.descricao}
@@ -258,7 +265,7 @@ function AbaMinhasReclamacoes({ reclamacoes }) {
                 {rec.anexoUrl && (
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant mb-1">
-                      Anexo
+                      {t("detalhe.anexo")}
                     </p>
                     <a
                       href={rec.anexoUrl}
@@ -266,7 +273,7 @@ function AbaMinhasReclamacoes({ reclamacoes }) {
                       rel="noopener noreferrer"
                       className="text-sm font-semibold text-primary hover:underline"
                     >
-                      Ver arquivo
+                      {t("detalhe.verArquivo")}
                     </a>
                   </div>
                 )}
@@ -274,7 +281,7 @@ function AbaMinhasReclamacoes({ reclamacoes }) {
                 {rec.ordensServico?.length > 0 && (
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant mb-2">
-                      Ordens de serviço
+                      {t("detalhe.ordensServico")}
                     </p>
                     <div className="space-y-2">
                       {rec.ordensServico.map((os) => (
@@ -285,7 +292,7 @@ function AbaMinhasReclamacoes({ reclamacoes }) {
                           <div className="flex items-center gap-2">
                             <Icone name="construction" className="text-lg text-on-surface-variant" />
                             <span className="text-sm font-mono text-on-surface">{os.numero}</span>
-                            <span className="text-xs text-on-surface-variant">prazo {formatarData(os.prazo)}</span>
+                            <span className="text-xs text-on-surface-variant">{t("detalhe.prazo", { data: formatarData(os.prazo) })}</span>
                           </div>
                           <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${statusOs(os.status).cor}`}>
                             {statusOs(os.status).rotulo}
@@ -308,6 +315,7 @@ function AbaMinhasReclamacoes({ reclamacoes }) {
 
 // ═══════════════════════════════════════════════
 export function MinhasReclamacoes() {
+  const { t } = useTranslation("ocorrencias");
   const [aba, setAba] = useState("nova");
   const [reclamacoes, setReclamacoes] = useState([]);
   const [carregando, setCarregando] = useState(true);
@@ -334,8 +342,8 @@ export function MinhasReclamacoes() {
   };
 
   const tabs = [
-    { id: "nova", label: "Abrir Reclamação", icon: "add_circle" },
-    { id: "minhas", label: "Minhas Reclamações", icon: "list_alt" },
+    { id: "nova", label: t("minhas.abas.nova"), icon: "add_circle" },
+    { id: "minhas", label: t("minhas.abas.minhas"), icon: "list_alt" },
   ];
 
   return (
@@ -344,31 +352,31 @@ export function MinhasReclamacoes() {
         {/* Header */}
         <header>
           <p className="text-on-surface-variant text-xs font-semibold uppercase tracking-widest mb-1">
-            Área do Morador
+            {t("minhas.cabecalho.area")}
           </p>
           <h1 className="font-headline text-4xl font-extrabold tracking-tight text-on-surface">
-            Minhas{" "}
+            {t("minhas.cabecalho.titulo")}{" "}
             <span className="bg-gradient-to-r from-primary to-tertiary bg-clip-text text-transparent">
-              Reclamações
+              {t("minhas.cabecalho.tituloDestaque")}
             </span>
           </h1>
         </header>
 
         {/* Tabs */}
         <div className="flex flex-wrap gap-2">
-          {tabs.map((t) => (
+          {tabs.map((tab) => (
             <button
-              key={t.id}
-              onClick={() => setAba(t.id)}
+              key={tab.id}
+              onClick={() => setAba(tab.id)}
               className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
-                aba === t.id
+                aba === tab.id
                   ? "bg-primary/20 text-primary"
                   : "text-on-surface-variant hover:bg-veu/5"
               }`}
             >
-              <Icone name={t.icon} className="text-lg" />
-              {t.label}
-              {t.id === "minhas" && reclamacoes.length > 0 && (
+              <Icone name={tab.icon} className="text-lg" />
+              {tab.label}
+              {tab.id === "minhas" && reclamacoes.length > 0 && (
                 <span className="ml-1 text-xs bg-primary/20 text-primary font-bold px-2 py-0.5 rounded-full">
                   {reclamacoes.length}
                 </span>
@@ -382,7 +390,7 @@ export function MinhasReclamacoes() {
           <AbaNovaReclamacao onCriada={handleCriada} />
         ) : carregando ? (
           <div className="glass-panel rounded-2xl py-16 text-center text-on-surface-variant text-sm">
-            Carregando…
+            {t("comum:estado.carregando")}
           </div>
         ) : (
           <AbaMinhasReclamacoes reclamacoes={reclamacoes} />

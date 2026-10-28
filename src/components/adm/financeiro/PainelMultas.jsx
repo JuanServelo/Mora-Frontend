@@ -1,6 +1,7 @@
 // src/components/adm/financeiro/PainelMultas.jsx
 // Síndico: aplicar multa, julgar recurso e cancelar (RF-16).
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Icone } from "../../icones/Icone";
 import { useAuth } from "../../../contexts/AuthContext";
 import { useToast } from "../../../contexts/ToastContext";
@@ -13,28 +14,29 @@ import { BOTAO_PRIMARIO, BOTAO_SECUNDARIO, CAMPO, ROTULO, Carregando, Janela, Se
 import { hojeCampo, mensagemDe, quandoLocal } from "../../../utils/financeiroTela";
 
 const FILTROS = [
-  { id: "", label: "Todas" },
-  { id: "EM_RECURSO", label: "Em recurso" },
-  { id: "APLICADA", label: "Aplicadas" },
-  { id: "CANCELADA", label: "Canceladas" },
+  { id: "", label: "multas.filtros.todas" },
+  { id: "EM_RECURSO", label: "multas.filtros.emRecurso" },
+  { id: "APLICADA", label: "multas.filtros.aplicadas" },
+  { id: "CANCELADA", label: "multas.filtros.canceladas" },
 ];
 
 /** Situação da multa em uma linha, do jeito que o síndico pensa nela. */
-function situacaoDaMulta(m) {
+function situacaoDaMulta(m, t) {
   if (m.status === "CANCELADA") {
     return m.faturaItemId
-      ? { texto: m.estornoFaturaItemId ? "Cancelada · estornada" : "Cancelada · estorno no próximo fechamento", tom: "neutro" }
-      : { texto: "Cancelada", tom: "neutro" };
+      ? { texto: m.estornoFaturaItemId ? t("multas.situacao.canceladaEstornada") : t("multas.situacao.canceladaEstornoProximo"), tom: "neutro" }
+      : { texto: t("multas.situacao.cancelada"), tom: "neutro" };
   }
-  if (m.status === "EM_RECURSO") return { texto: "Recurso para julgar", tom: "alerta" };
-  if (m.faturaItemId) return { texto: "Cobrada", tom: "ok" };
-  if (m.aguardandoCobranca) return { texto: "Entra no próximo fechamento", tom: "ok" };
-  return { texto: `Prazo de recurso até ${formatarData(m.prazoRecurso)}`, tom: "neutro" };
+  if (m.status === "EM_RECURSO") return { texto: t("multas.situacao.recursoParaJulgar"), tom: "alerta" };
+  if (m.faturaItemId) return { texto: t("multas.situacao.cobrada"), tom: "ok" };
+  if (m.aguardandoCobranca) return { texto: t("multas.situacao.proximoFechamento"), tom: "ok" };
+  return { texto: t("multas.situacao.prazoRecurso", { data: formatarData(m.prazoRecurso) }), tom: "neutro" };
 }
 
 const VAZIO = { unidadeId: "", usuarioId: "", valor: "", dataInfracao: "", motivo: "" };
 
 export function PainelMultas() {
+  const { t } = useTranslation("financeiro");
   const { usuario } = useAuth();
   const toast = useToast();
 
@@ -58,11 +60,11 @@ export function PainelMultas() {
       const { data } = await financeiroApi.listarMultas(filtro ? { status: filtro } : {});
       setMultas(data.multas ?? []);
     } catch (err) {
-      toast.error(mensagemDe(err, "Não foi possível carregar as multas."));
+      toast.error(mensagemDe(err, t("multas.toast.erroCarregar")));
     } finally {
       setCarregando(false);
     }
-  }, [filtro, toast]);
+  }, [filtro, toast, t]);
 
   useEffect(() => { carregar(); }, [carregar]);
 
@@ -74,9 +76,9 @@ export function PainelMultas() {
   }, [usuario?.condominioId]);
 
   const nomeUnidade = useMemo(() => {
-    const mapa = new Map(unidades.map((u) => [u.id, `Apto ${u.numero}${u.blocoNome ? ` · ${u.blocoNome}` : ""}`]));
-    return (id) => mapa.get(id) ?? "Unidade";
-  }, [unidades]);
+    const mapa = new Map(unidades.map((u) => [u.id, `${t("multas.apto", { numero: u.numero })}${u.blocoNome ? ` · ${u.blocoNome}` : ""}`]));
+    return (id) => mapa.get(id) ?? t("multas.unidade");
+  }, [unidades, t]);
 
   async function escolherUnidade(unidadeId) {
     setForm((f) => ({ ...f, unidadeId, usuarioId: "" }));
@@ -100,12 +102,12 @@ export function PainelMultas() {
         dataInfracao: form.dataInfracao,
         motivo: form.motivo,
       });
-      toast.success("Multa aplicada. O morador a vê no financeiro dele e pode recorrer dentro do prazo.");
+      toast.success(t("multas.toast.aplicada"));
       setAplicando(false);
       setForm(VAZIO);
       carregar();
     } catch (err) {
-      toast.error(mensagemDe(err, "Não foi possível aplicar a multa."));
+      toast.error(mensagemDe(err, t("multas.toast.erroAplicar")));
     } finally {
       setSalvando(false);
     }
@@ -118,17 +120,17 @@ export function PainelMultas() {
       if (acao === "cancelar") {
         const { data } = await financeiroApi.cancelarMulta(multa.id, justificativa);
         toast.success(data.multa?.estornoNoProximoFechamento
-          ? "Multa cancelada. Como já foi cobrada, o estorno entra no próximo fechamento."
-          : "Multa cancelada.");
+          ? t("multas.toast.canceladaComEstorno")
+          : t("multas.toast.cancelada"));
       } else {
         await financeiroApi.julgarRecurso(multa.id, acao === "aceitar", justificativa);
-        toast.success(acao === "aceitar" ? "Recurso aceito: multa cancelada." : "Recurso recusado: multa mantida.");
+        toast.success(acao === "aceitar" ? t("multas.toast.recursoAceito") : t("multas.toast.recursoRecusado"));
       }
       setDecisao(null);
       setJustificativa("");
       carregar();
     } catch (err) {
-      toast.error(mensagemDe(err, "Não foi possível registrar a decisão."));
+      toast.error(mensagemDe(err, t("multas.toast.erroDecisao")));
     } finally {
       setSalvando(false);
     }
@@ -148,13 +150,13 @@ export function PainelMultas() {
                 filtro === f.id ? "bg-primary/15 text-primary" : "text-on-surface-variant hover:bg-veu/5"
               }`}
             >
-              {f.label}
+              {t(f.label)}
             </button>
           ))}
         </div>
         <button onClick={() => { setForm({ ...VAZIO, dataInfracao: hojeCampo() }); setAplicando(true); }} className={BOTAO_PRIMARIO}>
           <Icone name="gavel" className="text-lg" />
-          Aplicar multa
+          {t("multas.aplicarMulta")}
         </button>
       </div>
 
@@ -162,19 +164,19 @@ export function PainelMultas() {
         <div className="rounded-2xl p-4 flex items-center gap-3 border border-secondary/25 bg-secondary/5 text-sm">
           <Icone name="pending_actions" className="text-secondary text-xl" />
           <span className="text-on-surface">
-            {emRecurso} recurso{emRecurso > 1 ? "s" : ""} aguardando julgamento. Enquanto não for julgada, a multa não é cobrada.
+            {t("multas.recursosPendentes", { count: emRecurso })}
           </span>
         </div>
       )}
 
       {carregando ? (
-        <Carregando texto="Carregando multas..." />
+        <Carregando texto={t("multas.carregando")} />
       ) : multas.length === 0 ? (
-        <Vazio icone="gavel" texto={filtro ? "Nenhuma multa com este status." : "Nenhuma multa aplicada."} />
+        <Vazio icone="gavel" texto={filtro ? t("multas.vazioFiltro") : t("multas.vazio")} />
       ) : (
         <div className="space-y-3">
           {multas.map((m) => {
-            const situacao = situacaoDaMulta(m);
+            const situacao = situacaoDaMulta(m, t);
             const aberta = m.status === "APLICADA" || m.status === "EM_RECURSO";
             return (
               <article key={m.id} className="glass-panel rounded-2xl p-4 space-y-3">
@@ -182,7 +184,7 @@ export function PainelMultas() {
                   <div className="min-w-0 flex-1">
                     <p className="font-semibold text-on-surface">{m.motivo}</p>
                     <p className="text-xs text-on-surface-variant mt-0.5">
-                      {nomeUnidade(m.unidadeId)} · infração em {formatarData(m.dataInfracao)}
+                      {nomeUnidade(m.unidadeId)} · {t("multas.infracaoEm", { data: formatarData(m.dataInfracao) })}
                     </p>
                   </div>
                   <div className="text-right shrink-0">
@@ -196,12 +198,12 @@ export function PainelMultas() {
                 {m.recursoTexto && (
                   <div className="rounded-xl bg-veu/5 p-3 text-sm">
                     <p className="text-[11px] uppercase tracking-wider font-semibold text-on-surface-variant mb-1">
-                      Recurso do morador · {quandoLocal(m.recursoEm)}
+                      {t("multas.recursoDoMorador")} · {quandoLocal(m.recursoEm)}
                     </p>
                     <p className="text-on-surface whitespace-pre-wrap break-words">{m.recursoTexto}</p>
                     {m.julgamentoJustificativa && (
                       <p className="text-on-surface-variant text-xs mt-2">
-                        Decisão: {m.julgamentoJustificativa}
+                        {t("multas.decisao", { texto: m.julgamentoJustificativa })}
                       </p>
                     )}
                   </div>
@@ -212,17 +214,17 @@ export function PainelMultas() {
                     {m.status === "EM_RECURSO" && (
                       <>
                         <button onClick={() => setDecisao({ multa: m, acao: "recusar" })} className={BOTAO_SECUNDARIO}>
-                          Recusar recurso
+                          {t("multas.acoes.recusar")}
                         </button>
                         <button onClick={() => setDecisao({ multa: m, acao: "aceitar" })} className={BOTAO_PRIMARIO}>
-                          Aceitar recurso
+                          {t("multas.acoes.aceitar")}
                         </button>
                       </>
                     )}
                     {m.status === "APLICADA" && (
                       <button onClick={() => setDecisao({ multa: m, acao: "cancelar" })} className={BOTAO_SECUNDARIO}>
                         <Icone name="block" className="text-base" />
-                        Cancelar multa
+                        {t("multas.acoes.cancelar")}
                       </button>
                     )}
                   </div>
@@ -234,25 +236,25 @@ export function PainelMultas() {
       )}
 
       {aplicando && (
-        <Janela titulo="Aplicar multa" aoFechar={() => setAplicando(false)}>
+        <Janela titulo={t("multas.aplicarMulta")} aoFechar={() => setAplicando(false)}>
           <div>
-            <label className={ROTULO}>Unidade</label>
+            <label className={ROTULO}>{t("multas.form.unidade")}</label>
             <select value={form.unidadeId} onChange={(e) => escolherUnidade(e.target.value)} className={CAMPO}>
-              <option value="">Selecione</option>
+              <option value="">{t("multas.form.selecione")}</option>
               {unidades.map((u) => (
                 <option key={u.id} value={u.id}>{nomeUnidade(u.id)}</option>
               ))}
             </select>
           </div>
           <div>
-            <label className={ROTULO}>Morador (opcional)</label>
+            <label className={ROTULO}>{t("multas.form.morador")}</label>
             <select
               value={form.usuarioId}
               onChange={(e) => setForm((f) => ({ ...f, usuarioId: e.target.value }))}
               disabled={!form.unidadeId}
               className={CAMPO}
             >
-              <option value="">A infração é da unidade</option>
+              <option value="">{t("multas.form.daUnidade")}</option>
               {moradores.map((p) => (
                 <option key={p.id} value={p.id}>{p.nome}</option>
               ))}
@@ -260,7 +262,7 @@ export function PainelMultas() {
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className={ROTULO}>Valor (R$)</label>
+              <label className={ROTULO}>{t("multas.form.valor")}</label>
               <input
                 type="text" inputMode="decimal" placeholder="0,00" value={form.valor}
                 onChange={(e) => setForm((f) => ({ ...f, valor: e.target.value }))}
@@ -268,7 +270,7 @@ export function PainelMultas() {
               />
             </div>
             <div>
-              <label className={ROTULO}>Data da infração</label>
+              <label className={ROTULO}>{t("multas.form.dataInfracao")}</label>
               <input
                 type="date" max={hojeCampo()} value={form.dataInfracao}
                 onChange={(e) => setForm((f) => ({ ...f, dataInfracao: e.target.value }))}
@@ -277,26 +279,25 @@ export function PainelMultas() {
             </div>
           </div>
           <div>
-            <label className={ROTULO}>Motivo</label>
+            <label className={ROTULO}>{t("multas.form.motivo")}</label>
             <textarea
-              rows={3} placeholder="O que aconteceu e qual regra do regimento foi descumprida"
+              rows={3} placeholder={t("multas.form.motivoPlaceholder")}
               value={form.motivo}
               onChange={(e) => setForm((f) => ({ ...f, motivo: e.target.value }))}
               className={CAMPO}
             />
           </div>
           <p className="text-xs text-on-surface-variant">
-            O morador recebe o aviso e pode recorrer no prazo definido nas regras do financeiro.
-            A multa só entra na fatura depois que o prazo vence.
+            {t("multas.form.aviso")}
           </p>
           <div className="flex gap-3">
-            <button onClick={() => setAplicando(false)} className={`${BOTAO_SECUNDARIO} flex-1`}>Cancelar</button>
+            <button onClick={() => setAplicando(false)} className={`${BOTAO_SECUNDARIO} flex-1`}>{t("comum:acoes.cancelar")}</button>
             <button
               onClick={aplicar}
               disabled={salvando || !form.unidadeId || !form.valor || !form.dataInfracao || !form.motivo.trim()}
               className={`${BOTAO_PRIMARIO} flex-1`}
             >
-              {salvando ? "Aplicando..." : "Aplicar"}
+              {salvando ? t("multas.form.aplicando") : t("multas.form.aplicar")}
             </button>
           </div>
         </Janela>
@@ -305,33 +306,33 @@ export function PainelMultas() {
       {decisao && (
         <Janela
           titulo={{
-            aceitar: "Aceitar recurso",
-            recusar: "Recusar recurso",
-            cancelar: "Cancelar multa",
+            aceitar: t("multas.acoes.aceitar"),
+            recusar: t("multas.acoes.recusar"),
+            cancelar: t("multas.acoes.cancelar"),
           }[decisao.acao]}
           aoFechar={() => { setDecisao(null); setJustificativa(""); }}
         >
           <p className="text-sm text-on-surface-variant">
-            {decisao.acao === "aceitar" && "A multa será cancelada e não será cobrada."}
-            {decisao.acao === "recusar" && "A multa volta a valer e entra no próximo fechamento depois do prazo."}
+            {decisao.acao === "aceitar" && t("multas.decisaoModal.aceitar")}
+            {decisao.acao === "recusar" && t("multas.decisaoModal.recusar")}
             {decisao.acao === "cancelar" && (decisao.multa.faturaItemId
-              ? "A multa já foi cobrada: o valor será estornado no próximo fechamento."
-              : "A multa deixa de valer e não será cobrada.")}
+              ? t("multas.decisaoModal.cancelarCobrada")
+              : t("multas.decisaoModal.cancelar"))}
           </p>
           <div>
-            <label className={ROTULO}>Justificativa</label>
+            <label className={ROTULO}>{t("multas.decisaoModal.justificativa")}</label>
             <textarea
               rows={3} value={justificativa} onChange={(e) => setJustificativa(e.target.value)}
-              placeholder="O morador verá esta explicação"
+              placeholder={t("multas.decisaoModal.justificativaPlaceholder")}
               className={CAMPO}
             />
           </div>
           <div className="flex gap-3">
             <button onClick={() => { setDecisao(null); setJustificativa(""); }} className={`${BOTAO_SECUNDARIO} flex-1`}>
-              Voltar
+              {t("comum:acoes.voltar")}
             </button>
             <button onClick={decidir} disabled={salvando || justificativa.trim().length < 5} className={`${BOTAO_PRIMARIO} flex-1`}>
-              {salvando ? "Salvando..." : "Confirmar"}
+              {salvando ? t("geral.salvando") : t("comum:acoes.confirmar")}
             </button>
           </div>
         </Janela>

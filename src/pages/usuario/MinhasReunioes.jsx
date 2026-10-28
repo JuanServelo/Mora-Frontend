@@ -4,16 +4,18 @@ import { Icone } from "../../components/icones/Icone";
 import { Campo } from "../../components/campos/Campo";
 import { useToast } from "../../contexts/ToastContext";
 import { useAuth } from "../../contexts/AuthContext";
+import { useTranslation } from "react-i18next";
+import { idiomaAtual } from "../../i18n";
 
 const STATUS_MEETING = {
-  AGENDADA: { label: "Agendada", cls: "bg-primary/10 text-primary" },
-  CANCELADA: { label: "Cancelada", cls: "bg-error/10 text-error" },
-  FINALIZADA: { label: "Finalizada", cls: "bg-secondary/10 text-secondary" },
+  AGENDADA: { rotuloKey: "status.reuniao.agendada", cls: "bg-primary/10 text-primary" },
+  CANCELADA: { rotuloKey: "status.reuniao.cancelada", cls: "bg-error/10 text-error" },
+  FINALIZADA: { rotuloKey: "status.reuniao.finalizada", cls: "bg-secondary/10 text-secondary" },
 };
 
 function fmt(dt) {
   if (!dt) return "—";
-  return new Date(dt).toLocaleString("pt-BR", {
+  return new Date(dt).toLocaleString(idiomaAtual(), {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
@@ -23,6 +25,7 @@ function fmt(dt) {
 }
 
 export function MinhasReunioes() {
+  const { t } = useTranslation("reunioes");
   const toast = useToast();
   const { usuario } = useAuth();
   
@@ -43,7 +46,7 @@ export function MinhasReunioes() {
       const res = await meetingApi.listar(usuario.id);
       setReunioes(res.data || []);
     } catch (e) {
-      toast.error("Erro ao carregar suas reuniões.");
+      toast.error(t("minhas.erroCarregar"));
     } finally {
       setBuscando(false);
     }
@@ -68,12 +71,12 @@ export function MinhasReunioes() {
         <header className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
             <p className="text-on-surface-variant text-xs font-semibold uppercase tracking-widest mb-1">
-              Condomínio
+              {t("cabecalho.condominio")}
             </p>
             <h1 className="font-headline text-4xl font-extrabold tracking-tight text-on-surface">
-              Minhas{" "}
+              {t("cabecalho.minhas")}{" "}
               <span className="bg-gradient-to-r from-primary to-tertiary bg-clip-text text-transparent">
-                Reuniões
+                {t("cabecalho.reunioes")}
               </span>
             </h1>
           </div>
@@ -83,7 +86,7 @@ export function MinhasReunioes() {
           {!detalhe ? (
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <h2 className="font-headline text-xl font-bold text-on-surface">Próximas Reuniões</h2>
+                <h2 className="font-headline text-xl font-bold text-on-surface">{t("minhas.proximas")}</h2>
                 <button
                   onClick={buscarReunioes}
                   className="p-2 rounded-xl text-on-surface-variant hover:bg-veu/5 hover:text-on-surface transition"
@@ -95,7 +98,7 @@ export function MinhasReunioes() {
               {reunioes.length === 0 && !buscando ? (
                 <div className="text-center py-12">
                   <Icone name="groups" className="text-5xl text-on-surface-variant mb-4" />
-                  <p className="text-on-surface-variant">Nenhuma reunião agendada no momento.</p>
+                  <p className="text-on-surface-variant">{t("minhas.vazio")}</p>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -108,10 +111,10 @@ export function MinhasReunioes() {
                       <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-primary to-tertiary opacity-0 group-hover:opacity-100 transition-opacity" />
                       <div className="flex justify-between items-start mb-2">
                         <span className="text-xs font-bold text-on-surface-variant uppercase tracking-wider">
-                          ID: {r.id}
+                          {t("minhas.id", { id: r.id })}
                         </span>
                         <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${STATUS_MEETING[r.status]?.cls || ""}`}>
-                          {STATUS_MEETING[r.status]?.label || r.status}
+                          {STATUS_MEETING[r.status] ? t(STATUS_MEETING[r.status].rotuloKey) : r.status}
                         </span>
                       </div>
                       <h3 className="font-semibold text-base text-on-surface mb-2">{r.titulo}</h3>
@@ -130,7 +133,7 @@ export function MinhasReunioes() {
                   onClick={() => setDetalhe(null)}
                   className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-surface-container-highest/50 text-on-surface hover:bg-surface-container-highest transition text-xs font-semibold cursor-pointer"
                 >
-                  <Icone name="arrow_back" className="text-sm" /> Voltar
+                  <Icone name="arrow_back" className="text-sm" /> {t("comum:acoes.voltar")}
                 </button>
               </div>
 
@@ -138,16 +141,16 @@ export function MinhasReunioes() {
                 <div className="flex justify-between items-start">
                   <div>
                     <h2 className="text-xl font-bold text-on-surface mb-1">{detalhe.titulo}</h2>
-                    <p className="text-sm text-on-surface-variant">{detalhe.descricao || "Sem descrição."}</p>
+                    <p className="text-sm text-on-surface-variant">{detalhe.descricao || t("minhas.semDescricao")}</p>
                   </div>
                   <span className={`px-2 py-1 rounded-full text-xs font-semibold ${STATUS_MEETING[detalhe.status]?.cls || ""}`}>
-                    {STATUS_MEETING[detalhe.status]?.label || detalhe.status}
+                    {STATUS_MEETING[detalhe.status] ? t(STATUS_MEETING[detalhe.status].rotuloKey) : detalhe.status}
                   </span>
                 </div>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-veu/10">
                   <div>
-                    <p className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-1">Início</p>
+                    <p className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-1">{t("minhas.inicio")}</p>
                     <p className="text-sm text-on-surface flex items-center gap-1.5">
                       <Icone name="event" className="text-base text-primary" />
                       {fmt(detalhe.dataHoraInicio)}
@@ -155,7 +158,7 @@ export function MinhasReunioes() {
                   </div>
                   {detalhe.dataHoraFim && (
                     <div>
-                      <p className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-1">Fim Estimado</p>
+                      <p className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-1">{t("minhas.fimEstimado")}</p>
                       <p className="text-sm text-on-surface flex items-center gap-1.5">
                         <Icone name="event" className="text-base text-tertiary" />
                         {fmt(detalhe.dataHoraFim)}
@@ -164,7 +167,7 @@ export function MinhasReunioes() {
                   )}
                   {detalhe.googleMeetLink && (
                     <div className="col-span-1 md:col-span-2 mt-2">
-                      <p className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-2">Acesso à Reunião</p>
+                      <p className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-2">{t("minhas.acesso")}</p>
                       {(() => {
                         const inicio = new Date(detalhe.dataHoraInicio).getTime();
                         const agora = new Date().getTime();
@@ -183,13 +186,13 @@ export function MinhasReunioes() {
                               }}
                               className="px-4 py-2 bg-primary text-on-primary rounded-xl text-sm font-semibold hover:bg-primary-hover shadow-lg shadow-primary/20 transition flex items-center w-fit gap-2"
                             >
-                              <Icone name="videocam" className="text-base" /> Entrar no Google Meet
+                              <Icone name="videocam" className="text-base" /> {t("minhas.entrarMeet")}
                             </button>
                           );
                         } else {
                           return (
                             <div className="px-4 py-2 bg-surface-container-highest text-on-surface-variant rounded-xl text-sm font-semibold flex items-center w-fit gap-2 opacity-70 cursor-not-allowed">
-                              <Icone name="videocam" className="text-base" /> Disponível 15 minutos antes do início
+                              <Icone name="videocam" className="text-base" /> {t("minhas.disponivelEm15")}
                             </div>
                           );
                         }
@@ -202,15 +205,15 @@ export function MinhasReunioes() {
               {ata && (
                 <div className="bg-surface-container-highest/20 rounded-xl border border-veu/10 p-5 space-y-4 mt-4">
                   <h3 className="text-lg font-bold text-on-surface flex items-center gap-2">
-                    <Icone name="description" className="text-primary" /> Ata da Reunião
+                    <Icone name="description" className="text-primary" /> {t("minhas.ataTitulo")}
                   </h3>
                   <div className="space-y-4">
                     <div>
-                      <p className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-1">Tópicos Discutidos</p>
+                      <p className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-1">{t("minhas.topicos")}</p>
                       <p className="text-sm text-on-surface whitespace-pre-wrap">{ata.topicosDiscutidos}</p>
                     </div>
                     <div>
-                      <p className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-1">Decisões Tomadas</p>
+                      <p className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-1">{t("minhas.decisoes")}</p>
                       <p className="text-sm text-on-surface whitespace-pre-wrap">{ata.decisoesTomadas}</p>
                     </div>
                   </div>

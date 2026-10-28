@@ -10,6 +10,7 @@ import { ToastProvider } from "./contexts/ToastContext.jsx";
 import { ConfirmProvider } from "./contexts/ConfirmContext.jsx";
 import { NotificacoesProvider } from "./contexts/NotificacoesContext.jsx";
 import App from "./App.jsx";
+import { ComIdioma } from "./components/idioma/ComIdioma.jsx";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
@@ -19,7 +20,9 @@ createRoot(document.getElementById("root")).render(
           <AuthProvider>
             <PlanoProvider>
               <NotificacoesProvider>
-                <App />
+                <ComIdioma>
+                  <App />
+                </ComIdioma>
               </NotificacoesProvider>
             </PlanoProvider>
           </AuthProvider>

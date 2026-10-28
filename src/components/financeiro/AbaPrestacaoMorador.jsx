@@ -1,6 +1,7 @@
 // src/components/financeiro/AbaPrestacaoMorador.jsx
 // Morador: prestação de contas publicada pelo síndico (RF-17).
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useToast } from "../../contexts/ToastContext";
 import { financeiroApi } from "../../services/financeiroApi";
 import { formatarBRL } from "../../utils/dinheiro";
@@ -10,6 +11,7 @@ import { mensagemDe } from "../../utils/financeiroTela";
 import { ResumoPrestacao, ListaLancamentos } from "../adm/financeiro/PainelPrestacao";
 
 export function AbaPrestacaoMorador() {
+  const { t } = useTranslation("financeiro");
   const toast = useToast();
   const [competencias, setCompetencias] = useState([]);
   const [carregando, setCarregando] = useState(true);
@@ -23,20 +25,20 @@ export function AbaPrestacaoMorador() {
         setCompetencias(lista);
         if (lista[0]) setSelecionada(lista[0].competencia);
       })
-      .catch((err) => toast.error(mensagemDe(err, "Não foi possível carregar a prestação de contas.")))
+      .catch((err) => toast.error(mensagemDe(err, t("prestacao.toast.erroCarregar"))))
       .finally(() => setCarregando(false));
-  }, [toast]);
+  }, [toast, t]);
 
   useEffect(() => {
     if (!selecionada) return;
     financeiroApi.prestacaoPublicada(selecionada)
       .then(({ data }) => setPrestacao(data.prestacao))
-      .catch((err) => toast.error(mensagemDe(err, "Não foi possível abrir este mês.")));
-  }, [selecionada, toast]);
+      .catch((err) => toast.error(mensagemDe(err, t("prestacaoMorador.erroAbrir"))));
+  }, [selecionada, toast, t]);
 
   if (carregando) return <Carregando />;
   if (!competencias.length) {
-    return <Vazio icone="account_balance" texto="O síndico ainda não publicou nenhuma prestação de contas." />;
+    return <Vazio icone="account_balance" texto={t("prestacaoMorador.vazio")} />;
   }
 
   return (
@@ -54,7 +56,7 @@ export function AbaPrestacaoMorador() {
           >
             <p className="text-sm font-semibold text-on-surface">{formatarCompetencia(c.competencia)}</p>
             <p className={`text-xs ${c.saldoCentavos < 0 ? "text-error" : "text-on-surface-variant"}`}>
-              saldo {formatarBRL(c.saldoCentavos)}
+              {t("prestacaoMorador.saldo", { valor: formatarBRL(c.saldoCentavos) })}
             </p>
           </button>
         ))}

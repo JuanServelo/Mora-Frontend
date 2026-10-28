@@ -1,18 +1,19 @@
 // src/components/agenda/ModalFuncionamento.jsx
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { Icone } from "../icones/Icone";
 import { Botao } from "../botoes/Botao";
 import { funcionamentoApi } from "../../services/portariaApi";
 import { useToast } from "../../contexts/ToastContext";
 
 const DIAS = [
-  { api: "SUNDAY", label: "Domingo" },
-  { api: "MONDAY", label: "Segunda" },
-  { api: "TUESDAY", label: "Terça" },
-  { api: "WEDNESDAY", label: "Quarta" },
-  { api: "THURSDAY", label: "Quinta" },
-  { api: "FRIDAY", label: "Sexta" },
-  { api: "SATURDAY", label: "Sábado" },
+  { api: "SUNDAY", rotuloKey: "funcionamento.dias.domingo" },
+  { api: "MONDAY", rotuloKey: "funcionamento.dias.segunda" },
+  { api: "TUESDAY", rotuloKey: "funcionamento.dias.terca" },
+  { api: "WEDNESDAY", rotuloKey: "funcionamento.dias.quarta" },
+  { api: "THURSDAY", rotuloKey: "funcionamento.dias.quinta" },
+  { api: "FRIDAY", rotuloKey: "funcionamento.dias.sexta" },
+  { api: "SATURDAY", rotuloKey: "funcionamento.dias.sabado" },
 ];
 
 const UTEIS = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY"];
@@ -31,6 +32,7 @@ function hhmm(v) {
 }
 
 export function ModalFuncionamento({ area, onFechar, onSalvo }) {
+  const { t } = useTranslation("reservas");
   const toast = useToast();
   const [modo, setModo] = useState("SEM_RESTRICAO");
   const [dias, setDias] = useState(PADRAO);
@@ -56,10 +58,10 @@ export function ModalFuncionamento({ area, onFechar, onSalvo }) {
           }));
         }
       })
-      .catch(() => { if (ok) setErro("Não foi possível carregar o funcionamento."); })
+      .catch(() => { if (ok) setErro(t("funcionamento.erros.carregar")); })
       .finally(() => { if (ok) setCarregando(false); });
     return () => { ok = false; };
-  }, [area.id]);
+  }, [area.id, t]);
 
   function alterarDia(api, campo, valor) {
     setDias((prev) => prev.map((d) => d.diaSemana === api ? { ...d, [campo]: valor } : d));
@@ -89,12 +91,12 @@ export function ModalFuncionamento({ area, onFechar, onSalvo }) {
     if (modo === "HORARIOS_DEFINIDOS") {
       const abertos = dias.filter((d) => !d.fechado);
       if (abertos.length === 0) {
-        setErro("Ao menos um dia precisa estar aberto."); return;
+        setErro(t("funcionamento.erros.umDiaAberto")); return;
       }
       const igual = abertos.find((d) => d.abertura === d.fechamento);
       if (igual) {
-        const nome = DIAS.find((x) => x.api === igual.diaSemana)?.label;
-        setErro(`Em ${nome}, abertura e fechamento não podem ser iguais. Para 24 horas, use "sem restrição de horário".`);
+        const rotuloKey = DIAS.find((x) => x.api === igual.diaSemana)?.rotuloKey;
+        setErro(t("funcionamento.erros.iguais", { dia: rotuloKey ? t(rotuloKey) : igual.diaSemana }));
         return;
       }
     }
@@ -112,11 +114,11 @@ export function ModalFuncionamento({ area, onFechar, onSalvo }) {
             }))
           : [],
       });
-      toast.success("Funcionamento atualizado.");
+      toast.success(t("funcionamento.toast.atualizado"));
       onSalvo?.();
       onFechar();
     } catch (err) {
-      setErro(errMsg(err) || "Não foi possível salvar o funcionamento.");
+      setErro(errMsg(err) || t("funcionamento.erros.salvar"));
     } finally {
       setSalvando(false);
     }
@@ -126,7 +128,7 @@ export function ModalFuncionamento({ area, onFechar, onSalvo }) {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4 py-8 overflow-y-auto" onClick={onFechar}>
       <div className="glass-panel rounded-3xl p-6 w-full max-w-2xl border border-outline-variant/20 shadow-xl my-auto" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between mb-1">
-          <h2 className="font-headline text-lg font-bold text-on-surface">Horário de funcionamento</h2>
+          <h2 className="font-headline text-lg font-bold text-on-surface">{t("funcionamento.titulo")}</h2>
           <button onClick={onFechar} className="text-on-surface-variant hover:text-on-surface transition-colors cursor-pointer">
             <Icone name="close" className="text-xl" />
           </button>
@@ -137,8 +139,7 @@ export function ModalFuncionamento({ area, onFechar, onSalvo }) {
           <div className="bg-secondary/10 border border-secondary/25 rounded-xl p-3 flex gap-2 text-xs text-on-surface-variant mb-4">
             <Icone name="info" className="text-secondary shrink-0" />
             <p>
-              Este espaço foi migrado automaticamente para “sem restrição de horário”.
-              Revise a configuração se ele tiver horário de funcionamento.
+              {t("funcionamento.migrado")}
             </p>
           </div>
         )}
@@ -151,8 +152,8 @@ export function ModalFuncionamento({ area, onFechar, onSalvo }) {
           <div className="space-y-5">
             <div className="flex flex-col sm:flex-row gap-2">
               {[
-                { v: "SEM_RESTRICAO", l: "Sem restrição de horário", d: "Reservas 24h, todos os dias" },
-                { v: "HORARIOS_DEFINIDOS", l: "Horários definidos", d: "Janela por dia da semana" },
+                { v: "SEM_RESTRICAO", l: t("funcionamento.modos.semRestricao.titulo"), d: t("funcionamento.modos.semRestricao.descricao") },
+                { v: "HORARIOS_DEFINIDOS", l: t("funcionamento.modos.horariosDefinidos.titulo"), d: t("funcionamento.modos.horariosDefinidos.descricao") },
               ].map((o) => (
                 <button key={o.v} type="button" onClick={() => { setModo(o.v); setErro(null); }}
                   className={`flex-1 text-left px-4 py-3 rounded-xl border transition-all cursor-pointer ${
@@ -171,17 +172,18 @@ export function ModalFuncionamento({ area, onFechar, onSalvo }) {
                 <div className="flex flex-wrap gap-2">
                   <button type="button" onClick={aplicarATodos}
                     className="text-xs font-semibold px-3 py-1.5 rounded-lg border border-outline-variant/30 text-on-surface-variant hover:bg-veu/5 transition-all cursor-pointer">
-                    Aplicar a todos os dias
+                    {t("funcionamento.aplicarTodos")}
                   </button>
                   <button type="button" onClick={aplicarAosUteis}
                     className="text-xs font-semibold px-3 py-1.5 rounded-lg border border-outline-variant/30 text-on-surface-variant hover:bg-veu/5 transition-all cursor-pointer">
-                    Aplicar aos dias úteis
+                    {t("funcionamento.aplicarUteis")}
                   </button>
                 </div>
 
                 <div className="space-y-1.5">
                   {dias.map((d) => {
-                    const nome = DIAS.find((x) => x.api === d.diaSemana)?.label;
+                    const rotuloKey = DIAS.find((x) => x.api === d.diaSemana)?.rotuloKey;
+                    const nome = rotuloKey ? t(rotuloKey) : d.diaSemana;
                     const viraDia = !d.fechado && d.abertura && d.fechamento && d.fechamento <= d.abertura;
                     return (
                       <div key={d.diaSemana}
@@ -191,18 +193,18 @@ export function ModalFuncionamento({ area, onFechar, onSalvo }) {
                           <input type="checkbox" checked={d.fechado}
                             onChange={(e) => alterarDia(d.diaSemana, "fechado", e.target.checked)}
                             className="accent-primary w-4 h-4" />
-                          Fechado
+                          {t("funcionamento.fechado")}
                         </label>
                         <input type="time" value={d.abertura} disabled={d.fechado}
                           onChange={(e) => alterarDia(d.diaSemana, "abertura", e.target.value)}
                           className="bg-surface-container-highest/40 border-none rounded-lg py-1.5 px-2 text-sm text-on-surface focus:ring-2 focus:ring-primary/50 focus:outline-none disabled:opacity-40" />
-                        <span className="text-on-surface-variant text-xs">até</span>
+                        <span className="text-on-surface-variant text-xs">{t("funcionamento.ate")}</span>
                         <input type="time" value={d.fechamento} disabled={d.fechado}
                           onChange={(e) => alterarDia(d.diaSemana, "fechamento", e.target.value)}
                           className="bg-surface-container-highest/40 border-none rounded-lg py-1.5 px-2 text-sm text-on-surface focus:ring-2 focus:ring-primary/50 focus:outline-none disabled:opacity-40" />
                         {viraDia && (
                           <span className="text-[11px] text-secondary font-semibold">
-                            vira o dia seguinte
+                            {t("funcionamento.viraDia")}
                           </span>
                         )}
                       </div>
@@ -211,8 +213,7 @@ export function ModalFuncionamento({ area, onFechar, onSalvo }) {
                 </div>
 
                 <p className="text-xs text-on-surface-variant">
-                  Fechamento anterior à abertura significa que a janela atravessa a meia-noite —
-                  sábado 18:00 até 02:00 termina no domingo.
+                  {t("funcionamento.explicacaoMeiaNoite")}
                 </p>
               </>
             )}
@@ -227,10 +228,10 @@ export function ModalFuncionamento({ area, onFechar, onSalvo }) {
             <div className="flex flex-col-reverse sm:flex-row gap-3 sm:justify-end">
               <button type="button" onClick={onFechar}
                 className="px-5 py-2.5 rounded-xl text-sm font-semibold text-on-surface-variant hover:bg-veu/5 transition-all cursor-pointer">
-                Cancelar
+                {t("comum:acoes.cancelar")}
               </button>
               <Botao type="button" onClick={salvar} disabled={salvando}>
-                {salvando ? "Salvando…" : "Salvar funcionamento"}
+                {salvando ? t("comum:acoes.salvando") : t("funcionamento.salvar")}
               </Botao>
             </div>
           </div>

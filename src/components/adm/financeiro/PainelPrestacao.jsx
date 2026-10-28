@@ -1,6 +1,7 @@
 // src/components/adm/financeiro/PainelPrestacao.jsx
 // Síndico: lançamentos de receita e despesa por competência, e publicação (RF-17).
 import { useCallback, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Icone } from "../../icones/Icone";
 import { useToast } from "../../../contexts/ToastContext";
 import { useConfirm } from "../../../contexts/ConfirmContext";
@@ -11,8 +12,8 @@ import { BOTAO_PRIMARIO, CAMPO, ROTULO, Carregando, Selo, Vazio } from "./comum"
 import { hojeCampo, mesAtual, mensagemDe, quandoLocal } from "../../../utils/financeiroTela";
 
 const CATEGORIAS_SUGERIDAS = {
-  DESPESA: ["Limpeza", "Manutenção", "Água", "Energia", "Portaria", "Jardinagem", "Seguro", "Administração"],
-  RECEITA: ["Aluguel de espaço", "Multas recebidas", "Rendimentos", "Outros"],
+  DESPESA: ["limpeza", "manutencao", "agua", "energia", "portaria", "jardinagem", "seguro", "administracao"],
+  RECEITA: ["aluguelEspaco", "multasRecebidas", "rendimentos", "outros"],
 };
 
 /**
@@ -20,6 +21,8 @@ const CATEGORIAS_SUGERIDAS = {
  * o que o síndico vê antes de publicar é exatamente o que o morador vai ver.
  */
 export function ResumoPrestacao({ prestacao }) {
+  // `t` já são os totais; a tradução fica em `tr`.
+  const { t: tr } = useTranslation("financeiro");
   const t = prestacao.totais;
   const maiorDespesa = Math.max(1, ...t.porCategoria.filter((c) => c.tipo === "DESPESA").map((c) => c.valorCentavos));
 
@@ -27,15 +30,15 @@ export function ResumoPrestacao({ prestacao }) {
     <div className="space-y-5">
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <div className="glass-panel rounded-2xl p-4">
-          <p className="text-xs uppercase tracking-wider text-on-surface-variant">Receitas</p>
+          <p className="text-xs uppercase tracking-wider text-on-surface-variant">{tr("prestacao.resumo.receitas")}</p>
           <p className="text-2xl font-bold text-primary mt-1">{formatarBRL(t.receitasCentavos)}</p>
         </div>
         <div className="glass-panel rounded-2xl p-4">
-          <p className="text-xs uppercase tracking-wider text-on-surface-variant">Despesas</p>
+          <p className="text-xs uppercase tracking-wider text-on-surface-variant">{tr("prestacao.resumo.despesas")}</p>
           <p className="text-2xl font-bold text-error mt-1">{formatarBRL(t.despesasCentavos)}</p>
         </div>
         <div className="glass-panel rounded-2xl p-4">
-          <p className="text-xs uppercase tracking-wider text-on-surface-variant">Saldo do mês</p>
+          <p className="text-xs uppercase tracking-wider text-on-surface-variant">{tr("prestacao.resumo.saldo")}</p>
           <p className={`text-2xl font-bold mt-1 ${t.saldoCentavos < 0 ? "text-error" : "text-on-surface"}`}>
             {formatarBRL(t.saldoCentavos)}
           </p>
@@ -44,13 +47,13 @@ export function ResumoPrestacao({ prestacao }) {
 
       {t.porCategoria.length > 0 && (
         <div className="space-y-2">
-          <p className={ROTULO}>Por categoria</p>
+          <p className={ROTULO}>{tr("prestacao.resumo.porCategoria")}</p>
           {t.porCategoria.map((c) => (
             <div key={`${c.tipo}-${c.categoria}`} className="flex items-center gap-3 text-sm">
               <span className={`w-2 h-2 rounded-full shrink-0 ${c.tipo === "RECEITA" ? "bg-primary" : "bg-error"}`} />
               <span className="w-40 shrink-0 truncate text-on-surface">
                 {c.categoria}
-                {c.automatica && <span className="text-on-surface-variant text-xs"> · automática</span>}
+                {c.automatica && <span className="text-on-surface-variant text-xs"> · {tr("prestacao.resumo.automatica")}</span>}
               </span>
               <div className="flex-1 h-2 rounded-full bg-veu/5 overflow-hidden">
                 {c.tipo === "DESPESA" && (
@@ -69,6 +72,7 @@ export function ResumoPrestacao({ prestacao }) {
 const VAZIO = { tipo: "DESPESA", categoria: "", descricao: "", valor: "", dataLancamento: "", comprovanteUrl: "" };
 
 export function PainelPrestacao() {
+  const { t } = useTranslation("financeiro");
   const toast = useToast();
   const confirm = useConfirm();
 
@@ -85,11 +89,11 @@ export function PainelPrestacao() {
       setPrestacao(data.prestacao);
     } catch (err) {
       setPrestacao(null);
-      toast.error(mensagemDe(err, "Não foi possível carregar a prestação de contas."));
+      toast.error(mensagemDe(err, t("prestacao.toast.erroCarregar")));
     } finally {
       setCarregando(false);
     }
-  }, [competencia, toast]);
+  }, [competencia, toast, t]);
 
   useEffect(() => { carregar(); }, [carregar]);
 
@@ -106,11 +110,11 @@ export function PainelPrestacao() {
     setSalvando(true);
     try {
       await financeiroApi.lancar(competencia, { ...form, comprovanteUrl: form.comprovanteUrl || null });
-      toast.success("Lançamento registrado.");
+      toast.success(t("prestacao.toast.lancado"));
       setForm((f) => ({ ...VAZIO, tipo: f.tipo, dataLancamento: f.dataLancamento }));
       carregar();
     } catch (err) {
-      toast.error(mensagemDe(err, "Não foi possível registrar o lançamento."));
+      toast.error(mensagemDe(err, t("prestacao.toast.erroLancar")));
     } finally {
       setSalvando(false);
     }
@@ -118,9 +122,9 @@ export function PainelPrestacao() {
 
   async function excluir(l) {
     const ok = await confirm({
-      titulo: "Excluir lançamento",
+      titulo: t("prestacao.excluir"),
       mensagem: `${l.descricao} — ${formatarBRL(l.valorCentavos)}`,
-      confirmarTexto: "Excluir",
+      confirmarTexto: t("comum:acoes.excluir"),
       variante: "danger",
     });
     if (!ok) return;
@@ -128,23 +132,23 @@ export function PainelPrestacao() {
       await financeiroApi.excluirLancamento(l.id);
       carregar();
     } catch (err) {
-      toast.error(mensagemDe(err, "Não foi possível excluir."));
+      toast.error(mensagemDe(err, t("prestacao.toast.erroExcluir")));
     }
   }
 
   async function publicar() {
     const ok = await confirm({
-      titulo: "Publicar prestação de contas",
-      mensagem: `Os moradores passam a ver a prestação de ${formatarCompetencia(competencia)}. Depois de publicada, ela não aceita mais lançamentos nem exclusões.`,
-      confirmarTexto: "Publicar",
+      titulo: t("prestacao.publicar.titulo"),
+      mensagem: t("prestacao.publicar.mensagem", { competencia: formatarCompetencia(competencia) }),
+      confirmarTexto: t("prestacao.publicar.confirmar"),
     });
     if (!ok) return;
     try {
       await financeiroApi.publicarPrestacao(competencia);
-      toast.success("Prestação de contas publicada para os moradores.");
+      toast.success(t("prestacao.toast.publicada"));
       carregar();
     } catch (err) {
-      toast.error(mensagemDe(err, "Não foi possível publicar."));
+      toast.error(mensagemDe(err, t("prestacao.toast.erroPublicar")));
     }
   }
 
@@ -152,14 +156,14 @@ export function PainelPrestacao() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2">
-          <label className="text-xs font-semibold uppercase tracking-widest text-on-surface-variant">Competência</label>
+          <label className="text-xs font-semibold uppercase tracking-widest text-on-surface-variant">{t("contas.competencia")}</label>
           <input
             type="month" value={competencia} onChange={(e) => e.target.value && setCompetencia(e.target.value)}
             className="bg-veu/5 border border-veu/10 rounded-xl px-3 py-1.5 text-sm text-on-surface focus:outline-none focus:border-primary/50"
           />
           {prestacao && (
             <Selo
-              texto={publicada ? `Publicada em ${quandoLocal(prestacao.publicadoEm)}` : "Rascunho"}
+              texto={publicada ? t("prestacao.publicadaEm", { quando: quandoLocal(prestacao.publicadoEm) }) : t("prestacao.rascunho")}
               tom={publicada ? "ok" : "neutro"}
             />
           )}
@@ -167,13 +171,13 @@ export function PainelPrestacao() {
         {prestacao && !publicada && (
           <button onClick={publicar} className={BOTAO_PRIMARIO}>
             <Icone name="publish" className="text-lg" />
-            Publicar para os moradores
+            {t("prestacao.publicar.botao")}
           </button>
         )}
       </div>
 
       {carregando ? (
-        <Carregando texto="Carregando prestação de contas..." />
+        <Carregando texto={t("prestacao.carregando")} />
       ) : prestacao && (
         <>
           <ResumoPrestacao prestacao={prestacao} />
@@ -181,38 +185,38 @@ export function PainelPrestacao() {
           {prestacao.receitaTaxasCentavos > 0 && (
             <p className="text-xs text-on-surface-variant flex items-center gap-1.5">
               <Icone name="info" className="text-sm" />
-              A receita de taxas vem das faturas pagas desta competência e entra sozinha.
+              {t("prestacao.receitaTaxasAviso")}
             </p>
           )}
 
           {!publicada && (
             <form onSubmit={lancar} className="glass-panel rounded-2xl p-4 space-y-3">
-              <p className="font-semibold text-on-surface text-sm">Novo lançamento</p>
+              <p className="font-semibold text-on-surface text-sm">{t("prestacao.form.titulo")}</p>
               <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
                 <div>
-                  <label className={ROTULO}>Tipo</label>
+                  <label className={ROTULO}>{t("prestacao.form.tipo")}</label>
                   <select value={form.tipo} onChange={(e) => setForm((f) => ({ ...f, tipo: e.target.value, categoria: "" }))} className={CAMPO}>
-                    <option value="DESPESA">Despesa</option>
-                    <option value="RECEITA">Receita</option>
+                    <option value="DESPESA">{t("prestacao.form.despesa")}</option>
+                    <option value="RECEITA">{t("prestacao.form.receita")}</option>
                   </select>
                 </div>
                 <div>
-                  <label className={ROTULO}>Categoria</label>
+                  <label className={ROTULO}>{t("prestacao.form.categoria")}</label>
                   <input
                     list="categorias-prestacao" value={form.categoria}
                     onChange={(e) => setForm((f) => ({ ...f, categoria: e.target.value }))}
-                    placeholder="Ex.: Limpeza" className={CAMPO}
+                    placeholder={t("prestacao.form.categoriaPlaceholder")} className={CAMPO}
                   />
                   <datalist id="categorias-prestacao">
-                    {CATEGORIAS_SUGERIDAS[form.tipo].map((c) => <option key={c} value={c} />)}
+                    {CATEGORIAS_SUGERIDAS[form.tipo].map((c) => <option key={c} value={t(`prestacao.categorias.${c}`)} />)}
                   </datalist>
                 </div>
                 <div>
-                  <label className={ROTULO}>Valor (R$)</label>
+                  <label className={ROTULO}>{t("multas.form.valor")}</label>
                   <input type="text" inputMode="decimal" placeholder="0,00" value={form.valor} onChange={(e) => setForm((f) => ({ ...f, valor: e.target.value }))} className={CAMPO} />
                 </div>
                 <div>
-                  <label className={ROTULO}>Data</label>
+                  <label className={ROTULO}>{t("prestacao.form.data")}</label>
                   <input
                     type="date" value={form.dataLancamento}
                     min={`${competencia}-01`} max={`${competencia}-31`}
@@ -223,11 +227,11 @@ export function PainelPrestacao() {
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className={ROTULO}>Descrição</label>
-                  <input value={form.descricao} onChange={(e) => setForm((f) => ({ ...f, descricao: e.target.value }))} placeholder="Ex.: Produtos de limpeza do mês" className={CAMPO} />
+                  <label className={ROTULO}>{t("prestacao.form.descricao")}</label>
+                  <input value={form.descricao} onChange={(e) => setForm((f) => ({ ...f, descricao: e.target.value }))} placeholder={t("prestacao.form.descricaoPlaceholder")} className={CAMPO} />
                 </div>
                 <div>
-                  <label className={ROTULO}>Link do comprovante (opcional)</label>
+                  <label className={ROTULO}>{t("prestacao.form.comprovante")}</label>
                   <input type="url" value={form.comprovanteUrl} onChange={(e) => setForm((f) => ({ ...f, comprovanteUrl: e.target.value }))} placeholder="https://..." className={CAMPO} />
                 </div>
               </div>
@@ -238,7 +242,7 @@ export function PainelPrestacao() {
                   className={BOTAO_PRIMARIO}
                 >
                   <Icone name="add" className="text-lg" />
-                  {salvando ? "Lançando..." : "Lançar"}
+                  {salvando ? t("prestacao.form.lancando") : t("prestacao.form.lancar")}
                 </button>
               </div>
             </form>
@@ -253,12 +257,13 @@ export function PainelPrestacao() {
 
 /** Lançamentos da competência. Sem `aoExcluir`, somente leitura. */
 export function ListaLancamentos({ lancamentos, aoExcluir }) {
+  const { t } = useTranslation("financeiro");
   if (!lancamentos.length) {
-    return <Vazio icone="receipt_long" texto="Nenhum lançamento nesta competência." />;
+    return <Vazio icone="receipt_long" texto={t("prestacao.lista.vazio")} />;
   }
   return (
     <div className="space-y-2">
-      <p className={ROTULO}>Lançamentos</p>
+      <p className={ROTULO}>{t("prestacao.lista.titulo")}</p>
       {lancamentos.map((l) => (
         <div key={l.id} className="glass-panel rounded-2xl px-4 py-3 flex items-center gap-3">
           <Icone
@@ -273,7 +278,7 @@ export function ListaLancamentos({ lancamentos, aoExcluir }) {
                 <>
                   {" · "}
                   <a href={l.comprovanteUrl} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
-                    comprovante
+                    {t("prestacao.lista.comprovante")}
                   </a>
                 </>
               )}
@@ -284,7 +289,7 @@ export function ListaLancamentos({ lancamentos, aoExcluir }) {
           </span>
           {aoExcluir && (
             <button
-              onClick={() => aoExcluir(l)} aria-label="Excluir lançamento"
+              onClick={() => aoExcluir(l)} aria-label={t("prestacao.excluir")}
               className="w-8 h-8 rounded-lg flex items-center justify-center text-on-surface-variant hover:text-error hover:bg-error/10 transition cursor-pointer"
             >
               <Icone name="delete" className="text-lg" />

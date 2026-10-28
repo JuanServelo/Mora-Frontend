@@ -1,0 +1,141 @@
+{
+  "cabecalho": {
+    "administrativo": "Administration",
+    "funcionarios": "Staff",
+    "turnos": "& Shifts",
+    "descricao": "Employment status, work schedules and exceptional access passes for the team."
+  },
+  "abas": {
+    "quadro": "Roster",
+    "acompanhamento": "Monitoring",
+    "liberacoes": "Access passes"
+  },
+  "erros": {
+    "carregarQuadro": "Couldn't load the staff roster."
+  },
+  "toast": {
+    "jornadaAtualizada": "Schedule updated."
+  },
+  "diasSemana": {
+    "domingo": "Sunday",
+    "segunda": "Monday",
+    "terca": "Tuesday",
+    "quarta": "Wednesday",
+    "quinta": "Thursday",
+    "sexta": "Friday",
+    "sabado": "Saturday"
+  },
+  "situacoes": {
+    "ativo": "Active",
+    "suspenso": "Suspended",
+    "afastado": "On leave",
+    "demitido": "Dismissed"
+  },
+  "quadro": {
+    "vazio": "No staff in this condominium. Register doormen and managers under Users.",
+    "escalaDias_one": "{{count}}-day rotation",
+    "escalaDias_other": "{{count}}-day rotation",
+    "jornadaSemanal": "Weekly schedule",
+    "semJornada": "No schedule",
+    "naoConfigurado": "Not set up",
+    "configurar": "Set up",
+    "proximosPlantoes": "Upcoming shifts",
+    "semPlantoes": "No shifts in the next 14 days."
+  },
+  "modal": {
+    "titulo": "Status and schedule",
+    "situacao": "Status",
+    "avisoSituacao": "This status blocks clocking in. Clocking out is still allowed.",
+    "tipoJornada": "Schedule type",
+    "tipos": {
+      "semanalFixa": "Fixed weekly",
+      "semanalFixaDescricao": "Hours per day of the week",
+      "escala": "Rotation",
+      "escalaDescricao": "Rotating cycle: 12x36, 24x48, 6x1"
+    },
+    "folga": "Day off",
+    "ate": "to",
+    "viraODia": "overnight",
+    "modelos": {
+      "noturno12x36": "12x36 night"
+    },
+    "inicioCiclo": "Cycle start",
+    "tamanhoCiclo": "Cycle length (days)",
+    "dia": "Day {{n}}",
+    "verPrevia": "Preview upcoming shifts with this setup",
+    "observacoes": "Notes",
+    "salvar": "Save schedule",
+    "erros": {
+      "previa": "Couldn't generate the preview.",
+      "salvar": "Couldn't save the schedule."
+    }
+  },
+  "acompanhamento": {
+    "erroCarregar": "Couldn't load monitoring data.",
+    "indicadores": {
+      "noCondominio": "On site now",
+      "semEntradaHoje": "Not clocked in today",
+      "porLiberacao": "Via access pass"
+    },
+    "presencaAtual": "Currently on site",
+    "semPresentes": "No staff on site right now.",
+    "entradaHa": "in at {{entrada}} · {{duracao}} ago",
+    "turno": "shift {{turno}}",
+    "liberacaoExcepcional": "Exceptional pass",
+    "semRegistroHoje": "No clock-in today",
+    "semRegistroAviso": "Counts active staff; anyone with a day off today shows up here, so it isn't necessarily an absence.",
+    "historico": "Access history",
+    "todosFuncionarios": "All staff",
+    "semRegistros": "No team access records in this period.",
+    "colunas": {
+      "funcionario": "Employee",
+      "entrada": "In",
+      "saida": "Out",
+      "status": "Status",
+      "turnoPrevisto": "Scheduled shift",
+      "observacao": "Note",
+      "registradoPor": "Recorded by"
+    },
+    "dentro": "On site",
+    "saiu": "Left",
+    "foraDoTurno": "Off shift — exceptional pass"
+  },
+  "liberacoes": {
+    "status": {
+      "aguardando": "Pending",
+      "utilizada": "Used",
+      "expirada": "Expired",
+      "cancelada": "Canceled"
+    },
+    "erros": {
+      "selecioneFuncionario": "Select an employee.",
+      "informeJanela": "Enter the time window.",
+      "informeMotivo": "Enter the reason for the pass.",
+      "criar": "Couldn't create the pass.",
+      "cancelar": "Couldn't cancel."
+    },
+    "toast": {
+      "criada": "Pass created.",
+      "cancelada": "Pass canceled."
+    },
+    "confirmarCancelar": "Cancel {{nome}}'s pass?",
+    "info": "A pass allows entry outside the usual shift, only on the given date and time window. It does not override suspension, leave or dismissal.",
+    "nova": "New pass",
+    "novaTitulo": "New exceptional pass",
+    "campos": {
+      "funcionario": "Employee",
+      "data": "Date",
+      "das": "From",
+      "ate": "To",
+      "motivo": "Reason",
+      "motivoPlaceholder": "e.g. emergency elevator maintenance"
+    },
+    "semElegiveis": "No active staff with a schedule",
+    "selecione": "Select…",
+    "criando": "Creating…",
+    "criar": "Create pass",
+    "vazio": "No passes recorded.",
+    "autorizadaPor": "Authorized by {{nome}}",
+    "cancelando": "Canceling…"
+  }
+}

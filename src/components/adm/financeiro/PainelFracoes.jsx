@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { financeiroApi } from "../../../services/financeiroApi";
 import { Icone } from "../../icones/Icone";
 import { useToast } from "../../../contexts/ToastContext";
@@ -7,6 +8,7 @@ import { milesimosParaPercentual } from "../../../utils/dinheiro";
 const SOMA_ESPERADA = 1000;
 
 export function PainelFracoes({ modoRateio }) {
+  const { t } = useTranslation("financeiro");
   const toast = useToast();
 
   const [itens, setItens] = useState([]);
@@ -24,7 +26,7 @@ export function PainelFracoes({ modoRateio }) {
       setRascunho({});
     } catch (e) {
       toast.error(
-        e.response?.data?.mensagem || "Não foi possível carregar as unidades.",
+        e.response?.data?.mensagem || t("fracoes.toast.erroCarregar"),
       );
     } finally {
       setCarregando(false);
@@ -56,9 +58,9 @@ export function PainelFracoes({ modoRateio }) {
         proposto[p.id] = p.milesimos;
       });
       setRascunho(proposto);
-      toast.success("Proposta calculada. Confira antes de aplicar.");
+      toast.success(t("fracoes.toast.propostaCalculada"));
     } catch (e) {
-      toast.error(e.response?.data?.mensagem || "Erro ao calcular a proposta.");
+      toast.error(e.response?.data?.mensagem || t("fracoes.toast.erroProposta"));
     }
   }
 
@@ -72,17 +74,17 @@ export function PainelFracoes({ modoRateio }) {
     setSalvando(true);
     try {
       await financeiroApi.aplicarFracoes(fracoes);
-      toast.success(`${fracoes.length} fração(ões) salva(s).`);
+      toast.success(t("fracoes.toast.salvas", { count: fracoes.length }));
       carregar();
     } catch (e) {
-      toast.error(e.response?.data?.mensagem || "Erro ao salvar as frações.");
+      toast.error(e.response?.data?.mensagem || t("fracoes.toast.erroSalvar"));
     } finally {
       setSalvando(false);
     }
   }
 
   if (carregando) {
-    return <p className="text-on-surface-variant text-sm">Carregando unidades…</p>;
+    return <p className="text-on-surface-variant text-sm">{t("fracoes.carregando")}</p>;
   }
 
   if (!itens.length) {
@@ -90,11 +92,10 @@ export function PainelFracoes({ modoRateio }) {
       <div className="text-center py-12 rounded-2xl border border-dashed border-veu/10">
         <Icone name="apartment" className="text-4xl text-outline-variant" />
         <p className="mt-3 text-on-surface-variant text-sm">
-          Nenhuma unidade cadastrada neste condomínio.
+          {t("fracoes.vazio.titulo")}
         </p>
         <p className="text-xs text-outline-variant mt-1 max-w-md mx-auto">
-          A fração ideal é por apartamento. Cadastre blocos e apartamentos em
-          Estruturas antes de configurar o rateio proporcional.
+          {t("fracoes.vazio.ajuda")}
         </p>
       </div>
     );
@@ -108,28 +109,27 @@ export function PainelFracoes({ modoRateio }) {
         <div className="flex items-start gap-3 p-4 rounded-2xl bg-tertiary/10 border border-tertiary/20">
           <Icone name="info" className="text-tertiary shrink-0 mt-0.5" />
           <p className="text-sm text-on-surface-variant">
-            O rateio deste condomínio está em{" "}
-            <strong className="text-on-surface">valor fixo por unidade</strong>,
-            que não usa a fração ideal. O cadastro aqui fica guardado para quando
-            mudar para proporcional.
+            {t("fracoes.avisoFixo.antes")}{" "}
+            <strong className="text-on-surface">{t("fracoes.avisoFixo.destaque")}</strong>
+            {t("fracoes.avisoFixo.depois")}
           </p>
         </div>
       )}
 
       <div className="glass-panel rounded-3xl p-5 flex flex-wrap items-center gap-6">
         <Indicador
-          rotulo="Unidades"
+          rotulo={t("fracoes.indicadores.unidades")}
           valor={resumo.unidades}
           icone="apartment"
         />
         <Indicador
-          rotulo="Com fração"
-          valor={`${resumo.comFracao} de ${resumo.unidades}`}
+          rotulo={t("fracoes.indicadores.comFracao")}
+          valor={t("fracoes.indicadores.comFracaoValor", { com: resumo.comFracao, total: resumo.unidades })}
           icone="task_alt"
           alerta={resumo.faltando > 0}
         />
         <Indicador
-          rotulo="Soma"
+          rotulo={t("fracoes.indicadores.soma")}
           valor={`${somaAtual} / ${SOMA_ESPERADA}`}
           icone={fecha ? "check_circle" : "error"}
           alerta={!fecha}
@@ -139,17 +139,17 @@ export function PainelFracoes({ modoRateio }) {
           <button
             onClick={propor}
             className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-veu/5 text-on-surface-variant hover:text-on-surface hover:bg-veu/10 text-sm font-semibold transition cursor-pointer"
-            title="Calcula uma proposta a partir da área de cada apartamento"
+            title={t("fracoes.sugerirAjuda")}
           >
             <Icone name="calculate" className="text-lg" />
-            Sugerir pela área
+            {t("fracoes.sugerir")}
           </button>
           <button
             onClick={aplicar}
             disabled={salvando || !alterados}
             className="px-6 py-2.5 rounded-full bg-gradient-to-br from-primary to-primary-container text-on-primary-container font-bold text-sm cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed transition"
           >
-            {salvando ? "Salvando…" : `Salvar ${alterados || ""}`.trim()}
+            {salvando ? t("comum:acoes.salvando") : `${t("comum:acoes.salvar")} ${alterados || ""}`.trim()}
           </button>
         </div>
       </div>
@@ -159,8 +159,7 @@ export function PainelFracoes({ modoRateio }) {
       {!fecha && (
         <p className="text-xs text-on-surface-variant flex items-center gap-1.5">
           <Icone name="warning" className="text-sm text-error" />
-          As frações precisam somar {SOMA_ESPERADA} milésimos para o fechamento
-          proporcional rodar. Faltam {SOMA_ESPERADA - somaAtual} milésimos.
+          {t("fracoes.somaNaoFecha", { esperado: SOMA_ESPERADA, faltam: SOMA_ESPERADA - somaAtual })}
         </p>
       )}
 
@@ -168,11 +167,11 @@ export function PainelFracoes({ modoRateio }) {
         <table className="w-full text-sm">
           <thead>
             <tr className="text-left text-[11px] uppercase tracking-wider text-on-surface-variant">
-              <th className="py-2 px-3 font-semibold">Unidade</th>
-              <th className="py-2 px-3 font-semibold">Bloco</th>
-              <th className="py-2 px-3 font-semibold text-right">Área</th>
-              <th className="py-2 px-3 font-semibold text-right">Milésimos</th>
-              <th className="py-2 px-3 font-semibold text-right">Equivale a</th>
+              <th className="py-2 px-3 font-semibold">{t("fracoes.tabela.unidade")}</th>
+              <th className="py-2 px-3 font-semibold">{t("fracoes.tabela.bloco")}</th>
+              <th className="py-2 px-3 font-semibold text-right">{t("fracoes.tabela.area")}</th>
+              <th className="py-2 px-3 font-semibold text-right">{t("fracoes.tabela.milesimos")}</th>
+              <th className="py-2 px-3 font-semibold text-right">{t("fracoes.tabela.equivale")}</th>
             </tr>
           </thead>
           <tbody>

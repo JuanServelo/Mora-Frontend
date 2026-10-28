@@ -1,0 +1,293 @@
+{
+  "cabecalho": {
+    "sobretitulo": "Access Control",
+    "titulo": "Front Desk",
+    "dentro": "Inside",
+    "total": "Total"
+  },
+  "modos": {
+    "pessoas": "People",
+    "veiculos": "Vehicles"
+  },
+  "abas": {
+    "registrar": "Log access",
+    "dentro": "Inside now",
+    "historico": "History"
+  },
+  "status": {
+    "dentro": "Inside",
+    "fora": "Outside",
+    "saiu": "Left"
+  },
+  "perfis": {
+    "morador": "Resident",
+    "donoAluguel": "Landlord",
+    "visitante": "Visitor",
+    "porteiro": "Doorman",
+    "terceiro": "Contractor",
+    "sindico": "Building manager",
+    "adminSindico": "Manager admin",
+    "adminGeral": "General admin"
+  },
+  "unidade": {
+    "apto": "Apt {{numero}}",
+    "blocoApto": "{{bloco}} - Apt {{numero}}"
+  },
+  "permissao": {
+    "autorizada": "Entry allowed",
+    "bloqueada": "Entry blocked"
+  },
+  "acoes": {
+    "entrada": "Entry",
+    "saida": "Exit",
+    "irAtendimento": "Go to check-in"
+  },
+  "cartao": {
+    "cpf": "CPF: {{cpf}}",
+    "semCpf": "No CPF",
+    "unidadeVinculada": "Linked unit",
+    "entradaNaoAutorizada": "Entry not authorized by the unit holder",
+    "registrarEntrada": "Log entry"
+  },
+  "erros": {
+    "falhaCarregar": "Failed to load",
+    "falhaCarregarDados": "Failed to load data",
+    "carregarPortaria": "Couldn't load front desk data.",
+    "carregarHistorico": "Couldn't load the history."
+  },
+  "funcionarios": {
+    "buscaPlaceholder": "Name or CPF...",
+    "todosPerfis": "All roles",
+    "semResultadoFiltros": "No results for the selected filters.",
+    "vazio": "No staff or contractors registered in this building."
+  },
+  "preAprovados": {
+    "erroCarregar": "Couldn't load pre-approved visitors.",
+    "entradaRegistrada": "Entry logged for {{nome}}.",
+    "entradaRegistradaComVeiculo": "Entry logged for {{nome}} and vehicle {{placa}}.",
+    "erroRegistrar": "Couldn't log the entry.",
+    "vazio": "No pre-approved visitors for today.",
+    "vazioVeiculos": "No pre-approved visitor vehicles for today.",
+    "info": "Pre-authorized by the resident. Logging the entry here records the visitor (and their vehicle, if any) and uses up the authorization — parking is checked at this moment.",
+    "infoVeiculos": "Pre-authorized by the resident. Logging the entry here records the visitor together with their vehicle and uses up the authorization — parking is checked at this moment.",
+    "validaAte": "Valid until {{data}}",
+    "registrando": "Logging…",
+    "entradaComVeiculo": "Entry with vehicle",
+    "soAPe": "On foot only"
+  },
+  "registrar": {
+    "abas": {
+      "moradores": "Residents",
+      "visitantes": "Visitors",
+      "preAprovados": "Pre-approved",
+      "funcionarios": "Staff"
+    },
+    "buscaPlaceholder": "Search by name or CPF...",
+    "semResultadoBusca": "No results for your search.",
+    "semResidentes": "No residents registered in this building.",
+    "semVisitantes": "No visitors registered in this building.",
+    "infoBloqueados": "Visitors with blocked entry can't be logged. The unit holder must authorize them."
+  },
+  "dentro": {
+    "vazioTitulo": "No one inside right now",
+    "vazioDescricao": "Once an entry is logged, it will show up here."
+  },
+  "tabela": {
+    "nome": "Name",
+    "perfil": "Role",
+    "unidade": "Unit",
+    "dataEntrada": "Entry date",
+    "hora": "Time",
+    "horaEntrada": "Entry time",
+    "permanencia": "Time inside",
+    "registradoPor": "Logged by",
+    "saida": "Exit",
+    "duracao": "Duration",
+    "placa": "Plate",
+    "modelo": "Model",
+    "vinculadoA": "Linked to"
+  },
+  "filtros": {
+    "titulo": "Filters",
+    "limpar": "Clear filters",
+    "dataInicial": "Start date",
+    "dataFinal": "End date",
+    "nome": "Name",
+    "perfil": "Role",
+    "status": "Status",
+    "placa": "Plate",
+    "vinculadoA": "Linked to",
+    "buscaParcial": "Partial match…",
+    "vinculadoPlaceholder": "Resident, visitor or contractor name…",
+    "aplicar": "Apply"
+  },
+  "historico": {
+    "vazio": "No records found for the selected filters."
+  },
+  "veiculos": {
+    "erroCarregar": "Couldn't load vehicles.",
+    "erroCarregarDentro": "Couldn't load vehicles inside.",
+    "preAprovados": "Pre-approved vehicles",
+    "cadastrados": "Registered vehicles",
+    "buscaPlaceholder": "Search by plate or model...",
+    "falhaCarregar": "Failed to load vehicles",
+    "vazio": "No vehicles registered in this building.",
+    "semResultado": "No results for \"{{busca}}\".",
+    "naoCadastrado": "Vehicle <placa>{{placa}}</placa> is not registered in this building.",
+    "cadastrarAtendimento": "Register at check-in",
+    "modeloNaoInformado": "Model not provided",
+    "vaga": "Spot {{numero}}",
+    "dentroVazio": "No vehicles inside right now",
+    "avulso": "Unlinked"
+  },
+  "toast": {
+    "entradaRegistrada": "Entry logged for {{nome}}.",
+    "saidaRegistrada": "Exit logged for {{nome}}.",
+    "erroEntrada": "Error logging entry.",
+    "erroSaida": "Error logging exit.",
+    "saidaVeiculoEVisitante": "Exit logged: vehicle {{placa}} and visitor {{nome}}.",
+    "saidaVeiculoPermanece": "Exit logged for {{nome}}. Vehicle {{placa}} is still in the building and will stay occupied until the vehicle's exit is logged.",
+    "saidaVeiculoVagaPermanece": "Exit logged for {{nome}}. Vehicle {{placa}} is still in the building and spot {{vaga}} will stay occupied until the vehicle's exit is logged.",
+    "saidaVeiculoFica": "Exit logged for {{nome}}. Vehicle {{placa}} is still in the building.",
+    "saidaVeiculoVagaFica": "Exit logged for {{nome}}. Vehicle {{placa}} is still in the building, in spot {{vaga}}."
+  },
+  "atendimento": {
+    "erroInesperado": "Unexpected error.",
+    "titulo": "Check-in",
+    "descricao": "Log the entry of visitors and service providers.",
+    "passos": {
+      "pessoa": "Person",
+      "veiculo": "Vehicle",
+      "confirmar": "Confirm"
+    },
+    "semDocumento": "No document",
+    "identificacao": "Identification",
+    "tipos": {
+      "visitante": "Visitor",
+      "servico": "Contractor / Service"
+    },
+    "busca": {
+      "label": "Search by name or CPF",
+      "placeholder": "e.g. John Smith or 123.456.789-00",
+      "buscando": "Searching…",
+      "encontrados": "Found",
+      "semResultado": "No results for \"{{busca}}\".",
+      "cadastrarNovo": "Register new",
+      "cadastrarNovoNome": "Register new: \"{{nome}}\""
+    },
+    "preLib": {
+      "titulo": "Active pre-authorization",
+      "autorizadaPor": "Authorized by",
+      "moradorDaUnidade": "unit resident",
+      "validaAte": "valid until {{data}}",
+      "veiculoAutorizado": "Authorized vehicle:",
+      "vagaConferida": "parking is still checked on entry.",
+      "unidadeResponsavel": "Responsible unit:",
+      "naoReservaVaga": "Pre-authorization doesn't reserve a spot — availability is checked on entry."
+    },
+    "jaDentro": "<strong>{{nome}}</strong> has been in the building since {{data}}.",
+    "verDentroAgora": "See who's inside",
+    "form": {
+      "unidadeVisitada": "Unit visited",
+      "selecionarUnidade": "Select unit...",
+      "moradorResponsavel": "Responsible resident",
+      "carregandoMoradores": "Loading residents…",
+      "semMoradores": "This unit has no active residents registered.",
+      "selecionarMorador": "Select resident...",
+      "selecioneUnidade": "Select the unit first.",
+      "novoVisitante": "New visitor",
+      "novoPrestador": "New service provider",
+      "nome": "Full name",
+      "nomePlaceholder": "e.g. Mary Smith",
+      "cpf": "CPF",
+      "telefone": "Phone",
+      "telefonePlaceholder": "e.g. (11) 99999-9999",
+      "empresa": "Company / Provider",
+      "empresaPlaceholder": "e.g. Smith Plumbing",
+      "destino": "Destination",
+      "destinoPlaceholder": "e.g. Apt 501 or Party room",
+      "obs": "Notes",
+      "obsPlaceholder": "Additional information"
+    },
+    "validacao": {
+      "cpfInvalido": "Invalid CPF. Check the digits.",
+      "placaInvalida": "Invalid format (AAA9999 or AAA9A99)"
+    },
+    "proximoVeiculo": "Next: Vehicle",
+    "proximoConfirmar": "Next: Confirm",
+    "alterar": "Change",
+    "opcional": "(optional)",
+    "veiculo": {
+      "jaDentroTitulo": "Visitor is already in the building",
+      "jaDentroDescricao": "Only the vehicle's entry will be logged. The person's existing entry is kept.",
+      "aPeDesfazer": "Arrived on foot — tap to undo",
+      "aPeSemVeiculo": "Arrived on foot / no vehicle",
+      "semVagaTitulo": "No parking spot available",
+      "semVagasCadastradas": "Unit {{unidade}} has no parking spots registered. Entry by car can't be logged — on foot only.",
+      "semVagaDisponivel": "Unit {{unidade}} has no parking spot available right now. Entry by car can't be logged — on foot only.",
+      "registrarAPe": "Log entry on foot",
+      "buscaLabel": "Search vehicle by plate",
+      "buscaPlaceholder": "e.g. ABC1234",
+      "cadastrar": "Register vehicle: {{placa}}",
+      "dados": "Vehicle details",
+      "placa": "Plate",
+      "modelo": "Model",
+      "modeloPlaceholder": "e.g. Civic",
+      "cor": "Color",
+      "corPlaceholder": "e.g. Silver",
+      "vagaEstacionamento": "Parking spot",
+      "verificandoVagas": "Checking spots…",
+      "vaga": "Spot {{numero}}",
+      "ocupada": "Taken: {{placa}} since {{desde}}",
+      "entrouAPe": "Arrived on foot",
+      "semVaga": "No spot",
+      "semVeiculo": "No vehicle",
+      "semVagaTerceiro": "No spot (contractor)"
+    },
+    "confirmarEntrada": "Confirm entry",
+    "registrando": "Logging…",
+    "sucesso": {
+      "titulo": "Entry logged",
+      "veiculo": "Vehicle: {{placa}}",
+      "novoAtendimento": "New check-in"
+    }
+  },
+  "inicio": {
+    "porteiroPadrao": "Doorman",
+    "condominioPadrao": "Building",
+    "sobretitulo": "{{condominio}} · Front Desk",
+    "ola": "Hello,",
+    "descricao": "Front desk control panel. Choose what you want to do.",
+    "abrir": "Open",
+    "cards": {
+      "cadastros": {
+        "titulo": "Check-ins",
+        "descricao": "Log the entry of visitors and service providers"
+      },
+      "acesso": {
+        "titulo": "Access Control",
+        "descricao": "Log entries and exits of residents and visitors"
+      },
+      "entregas": {
+        "titulo": "Deliveries",
+        "descricao": "Receive and log parcels and packages"
+      },
+      "chaves": {
+        "titulo": "Key Control",
+        "descricao": "Manage the building's keys and access"
+      },
+      "espacos": {
+        "titulo": "Spaces",
+        "descricao": "View and follow common areas"
+      },
+      "usuarios": {
+        "titulo": "Building Users",
+        "descricao": "Look up residents, doormen and staff"
+      }
+    },
+    "seguranca": {
+      "titulo": "Safety first",
+      "descricao": "Log every entry and exit. Blocked guests can't be let in without the unit holder's permission."
+    }
+  }
+}

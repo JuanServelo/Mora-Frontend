@@ -1,0 +1,50 @@
+{
+  "titulo": "Conversations",
+  "subtituloGestao": "Resident requests and direct conversations",
+  "subtituloMorador": "Talk to the condominium management",
+  "nova": "New conversation",
+  "erroCarregar": "Could not load the conversations.",
+  "buscarPlaceholder": "Search conversations",
+  "lista": {
+    "semResultado": "No conversations match this search.",
+    "vazioGestao": "No open requests.",
+    "vazioMorador": "You haven't started any conversations yet.",
+    "semMensagem": "no visible message"
+  },
+  "vazio": {
+    "titulo": "Choose a conversation",
+    "gestao": "Resident requests land here without anyone having to forward them.",
+    "morador": "You talk to the management, not to a single person — the conversation carries on even if the property manager changes."
+  },
+  "thread": {
+    "erroAbrir": "Could not open the conversation.",
+    "erroEnviar": "Could not send the message.",
+    "erroEncerrar": "Could not close the conversation.",
+    "voltarLista": "Back to the list",
+    "comAdministracao": "With the management",
+    "direta": "Direct conversation",
+    "encerradaSufixo": " · closed",
+    "encerrar": "Close",
+    "encerradaAviso": "This conversation was closed by the management.",
+    "placeholder": "Write your message…",
+    "enviar": "Send"
+  },
+  "balao": {
+    "removida": "message removed",
+    "administracao": "Management",
+    "morador": "Resident"
+  },
+  "modal": {
+    "titulo": "New conversation",
+    "comPessoa": "With a person",
+    "abertaAdministracao": "Open to the management",
+    "para": "To",
+    "escolhaDestinatario": "Choose the recipient",
+    "avisoMorador": "Your message goes to the condominium management. Whoever is on duty will answer — and the conversation carries on even if the property manager changes.",
+    "assunto": "Subject",
+    "assuntoPlaceholder": "e.g. Leak in the garage",
+    "mensagem": "Message",
+    "mensagemPlaceholder": "Describe what is happening…",
+    "erroAbrir": "Could not open the conversation."
+  }
+}

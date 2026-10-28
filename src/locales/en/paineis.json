@@ -1,0 +1,220 @@
+{
+  "carregando": "Loading...",
+  "tiposSerie": {
+    "barras": "Bars",
+    "linhas": "Lines",
+    "area": "Area",
+    "combinado": "Bars + line",
+    "rosca": "Donut"
+  },
+  "larguras": {
+    "metade": "Half",
+    "inteira": "Full"
+  },
+  "alturas": {
+    "baixa": "Short",
+    "media": "Medium",
+    "alta": "Tall"
+  },
+  "cores": {
+    "agua": "Aqua",
+    "turquesa": "Turquoise",
+    "dourado": "Gold",
+    "coral": "Coral",
+    "ardosia": "Slate",
+    "lavanda": "Lavender"
+  },
+  "personalizavel": {
+    "toast": {
+      "salvo": "Dashboard saved. It will look like this every time you sign in.",
+      "erroSalvar": "Couldn't save the dashboard."
+    },
+    "instrucaoAntes": "Drag to reorder. Use",
+    "instrucaoDepois": "to change size, chart and color.",
+    "restaurarPadrao": "Restore default",
+    "personalizar": "Customize",
+    "todosEscondidos": "All blocks are hidden. Click <strong>Customize</strong> to choose what to see.",
+    "bloco": {
+      "moverAntes": "Move back",
+      "moverDepois": "Move forward",
+      "opcoes": "Block options",
+      "esconder": "Hide",
+      "mostrar": "Show"
+    },
+    "opcoes": {
+      "largura": "Width",
+      "altura": "Height",
+      "tipoGrafico": "Chart type",
+      "cor": "Color",
+      "automatica": "Automatic",
+      "corAutomatica": "Automatic color",
+      "auto": "Auto",
+      "corNomeada": "{{cor}} color"
+    }
+  },
+  "filtro": {
+    "titulo": "Filters",
+    "periodo": "Period",
+    "meses": "{{n}} months",
+    "clientes": "Clients",
+    "status": {
+      "todos": "All",
+      "ativos": "Active",
+      "inativos": "Inactive"
+    },
+    "plano": "Plan (revenue)",
+    "planoAria": "Filter revenue by plan",
+    "atualizando": "updating…"
+  },
+  "receitaClientes": {
+    "titulo": "Revenue by client",
+    "verClientes": "View clients",
+    "colunas": {
+      "cliente": "Client",
+      "plano": "Plan",
+      "mensalidade": "Monthly fee",
+      "acumulado": "To date"
+    },
+    "semPlano": "no plan subscribed",
+    "aviso": "The to-date amount is an estimate — monthly fee × months active. There is no payment history for subscriptions."
+  },
+  "grafico": {
+    "semDados": "Not enough data yet."
+  },
+  "geral": {
+    "erroCarregar": "Couldn't load the platform metrics.",
+    "carregandoReceita": "Loading revenue…",
+    "erroReceita": "Could not load subscription revenue.",
+    "cabecalho": {
+      "sobretitulo": "Admin Dashboard",
+      "titulo": "Platform",
+      "tituloDestaque": "Overview",
+      "subtitulo": "Metrics across every condominium on the platform.",
+      "gerenciarClientes": "Manage clients"
+    },
+    "blocos": {
+      "condominiosAtivos": "Active condominiums",
+      "condominiosCadastrados": "of {{total}} registered",
+      "novos30": "New in 30 days",
+      "usuariosAtivos": "Active users",
+      "usuariosNaPlataforma": "of {{total}} on the platform",
+      "mediaPorCondominio": "Average per condominium",
+      "convitesPendentes": "Pending invitations",
+      "ocorrenciasAbertas": "Open issues",
+      "ocorrenciasRegistradas": "of {{total}} reported",
+      "ocorrenciasIndisponivel": "ocorrencias-service unavailable",
+      "receitaMensal": "Monthly revenue",
+      "assinaturaAtiva": "{{n}} active subscription",
+      "assinaturasAtivas": "{{n}} active subscriptions",
+      "variacaoMesAnterior": "{{variacao}}% vs. last month",
+      "projecaoAnual": "Annual projection",
+      "projecaoSub": "Monthly revenue × 12",
+      "ticketMedio": "Average ticket",
+      "ticketSub": "Per active client",
+      "semPlano": "Clients without a plan",
+      "semPlanoSub": "Not being billed",
+      "todosComAssinatura": "All subscribed",
+      "evolucaoReceita": "Revenue trend",
+      "evolucaoDescricao": "Monthly recurring revenue over the last {{meses}} months",
+      "evolucaoVazio": "No active subscriptions in this period.",
+      "serieReceita": "Revenue",
+      "receitaPorPlano": "Revenue by plan",
+      "receitaPorPlanoDescricao": "Each plan's share of the total",
+      "receitaPorPlanoVazio": "No active subscriptions.",
+      "tooltipAssinaturas": "{{valor}} · {{n}} subscription(s)",
+      "receitaPorCliente": "Revenue by client",
+      "crescimento": "Portfolio growth",
+      "crescimentoDescricao": "Condominiums created per month and running total",
+      "crescimentoVazio": "No condominiums created in this period.",
+      "serieCriados": "Created this month",
+      "serieAcumulado": "Total",
+      "porPerfil": "Users by role",
+      "porPerfilDescricao": "Breakdown by role",
+      "porCondominio": "Users by condominium",
+      "porCondominioDescricao": "Top ten — click to open the client",
+      "porCondominioVazio": "No users linked to a condominium yet.",
+      "serieUsuarios": "Users"
+    }
+  },
+  "condominio": {
+    "abas": {
+      "operacional": {
+        "label": "Operational",
+        "descricao": "What needs action now"
+      },
+      "estrategico": {
+        "label": "Strategic",
+        "descricao": "How the condominium is trending"
+      }
+    },
+    "fontes": {
+      "portaria": "front desk (deliveries, bookings, access)",
+      "usuarios": "users",
+      "ocorrencias": "issues and work orders",
+      "comunicacao": "notices and conversations",
+      "financeiro": "finance"
+    },
+    "avisoFontes": "Some figures couldn't be loaded right now: {{fontes}}. The rest of the dashboard is up to date.",
+    "cabecalho": {
+      "sobretitulo": "Property manager",
+      "titulo": "Condominium",
+      "tituloDestaque": "dashboard"
+    },
+    "janela": "{{n}} months",
+    "erroCarregar": "Couldn't load the dashboard.",
+    "carregando": "Loading dashboard...",
+    "operacional": {
+      "reservasAprovar": "Bookings to approve",
+      "primeiroPrazo": "First deadline: {{data}}",
+      "ocorrenciasAbertas": "Open issues",
+      "semAtendimento": "{{n}} unattended",
+      "osAtrasadas": "Overdue work orders",
+      "osSub": "{{criticas}} critical · {{prazo}}",
+      "noPrazo": "{{percentual}}% on time",
+      "nenhumaConcluida": "none completed",
+      "conversasNova": "Conversations with new messages",
+      "emAberto": "{{n}} open",
+      "faturasAtraso": "Overdue invoices",
+      "faturasAtrasoMes": "Overdue invoices this month",
+      "recebidos": "{{valor}} received",
+      "entregas": "Deliveries at the front desk",
+      "maisAntiga": "Oldest: {{data}}",
+      "visitantes": "Visitors on site",
+      "atendimentos": "Front desk requests",
+      "atendimentosAbertos": "Open front desk requests",
+      "avisos": "Active notices",
+      "leituraAvisos": "Notice readership"
+    },
+    "leitura": {
+      "titulo": "Readership of active notices",
+      "descricao": "Who confirmed reading, against who should read it based on the notice's audience. Least read first.",
+      "nenhumAviso": "No active notices right now.",
+      "percentual": "{{leituras}} of {{destinatarios}} · {{percentual}}%",
+      "leituras": "{{n}} reads"
+    },
+    "estrategico": {
+      "reservas": "Bookings per month",
+      "reservasDescricao": "Approved, pending and completed — cancelled and declined are excluded",
+      "reservasVazio": "No bookings in this period.",
+      "serieReservas": "Bookings",
+      "ocorrencias": "Issues opened and resolved",
+      "tempoMedio": "Average time to resolve: {{dias}} day(s)",
+      "ocorrenciasDescricao": "Opened by report date, resolved by resolution date",
+      "ocorrenciasVazio": "No issues in this period.",
+      "serieAbertas": "Opened",
+      "serieResolvidas": "Resolved",
+      "inadimplencia": "Delinquency by billing month",
+      "inadimplenciaDescricao": "Share of the month's invoices that are overdue",
+      "inadimplenciaVazio": "No invoices issued in this period.",
+      "serieEmAtraso": "Overdue",
+      "multas": "Fines per month",
+      "multasDescricao": "Issued and cancelled, by issue date",
+      "multasVazio": "No fines in this period.",
+      "serieAplicadas": "Issued",
+      "serieCanceladas": "Cancelled",
+      "areas": "Most booked areas",
+      "categorias": "Issues by category",
+      "rankingVazio": "No records in this period."
+    }
+  }
+}

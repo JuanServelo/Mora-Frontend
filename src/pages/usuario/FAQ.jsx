@@ -4,17 +4,19 @@ import { Icone } from "../../components/icones/Icone";
 import { useToast } from "../../contexts/ToastContext";
 import { useConfirm } from "../../contexts/ConfirmContext";
 import { conhecimentoApi, perguntasFaqApi, mensagemDeErro } from "../../services/comunicacaoApi";
+import { Trans, useTranslation } from "react-i18next";
+import { idiomaAtual } from "../../i18n";
 
 const CATEGORIA_LABEL = {
-  REGRA: "Regra",
-  MANUAL: "Manual",
-  TUTORIAL: "Tutorial",
-  ORIENTACAO_CONVIVENCIA: "Orientação de Convivência",
-  FAQ: "FAQ",
+  REGRA: "categorias.regra",
+  MANUAL: "categorias.manual",
+  TUTORIAL: "categorias.tutorial",
+  ORIENTACAO_CONVIVENCIA: "categorias.orientacaoConvivencia",
+  FAQ: "categorias.faq",
 };
 
 function dataCurta(iso) {
-  return iso ? new Date(iso).toLocaleDateString("pt-BR") : "";
+  return iso ? new Date(iso).toLocaleDateString(idiomaAtual()) : "";
 }
 
 /**
@@ -24,6 +26,7 @@ function dataCurta(iso) {
  * para a administração — é quando a FAQ falhou que a pergunta faz sentido.
  */
 function AvaliacaoArtigo({ artigo, meuVoto, aoVotar, aoPerguntar }) {
+  const { t } = useTranslation("conhecimento");
   const [enviando, setEnviando] = useState(false);
 
   async function votar(util) {
@@ -58,26 +61,26 @@ function AvaliacaoArtigo({ artigo, meuVoto, aoVotar, aoPerguntar }) {
   return (
     <div className="mt-5 pt-4 border-t border-veu/5 space-y-3">
       <div className="flex flex-wrap items-center gap-2">
-        <span className="text-xs text-on-surface-variant mr-1">Essa resposta ajudou?</span>
-        {botao(true, "thumb_up", "Sim")}
-        {botao(false, "thumb_down", "Não")}
+        <span className="text-xs text-on-surface-variant mr-1">{t("faq.avaliacao.pergunta")}</span>
+        {botao(true, "thumb_up", t("comum:acoes.sim"))}
+        {botao(false, "thumb_down", t("comum:acoes.nao"))}
         {meuVoto === true && (
-          <span className="text-xs text-primary ml-1">Obrigado pelo retorno!</span>
+          <span className="text-xs text-primary ml-1">{t("faq.avaliacao.obrigado")}</span>
         )}
       </div>
 
       {meuVoto === false && (
         <div className="flex flex-col sm:flex-row sm:items-center gap-3 rounded-xl bg-veu/5 px-4 py-3">
           <p className="flex-1 text-xs text-on-surface-variant">
-            Que pena. Conte para a administração o que ficou faltando.
+            {t("faq.avaliacao.quePena")}
           </p>
           <button
             type="button"
-            onClick={() => aoPerguntar(`Sobre "${artigo.titulo}": `, artigo.categoria)}
+            onClick={() => aoPerguntar(t("faq.avaliacao.prefixo", { titulo: artigo.titulo }), artigo.categoria)}
             className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-primary text-on-primary hover:bg-primary/90 transition cursor-pointer"
           >
             <Icone name="contact_support" className="text-base" />
-            Enviar minha dúvida
+            {t("faq.avaliacao.enviarDuvida")}
           </button>
         </div>
       )}
@@ -86,10 +89,11 @@ function AvaliacaoArtigo({ artigo, meuVoto, aoVotar, aoPerguntar }) {
 }
 
 function ItemFAQ({ artigo, meuVoto, aoVotar, aoPerguntar }) {
+  const { t } = useTranslation("conhecimento");
   const [aberto, setAberto] = useState(false);
 
   const tags = artigo.tags
-    ? artigo.tags.split(",").map((t) => t.trim()).filter(Boolean)
+    ? artigo.tags.split(",").map((tag) => tag.trim()).filter(Boolean)
     : [];
 
   return (
@@ -109,7 +113,7 @@ function ItemFAQ({ artigo, meuVoto, aoVotar, aoPerguntar }) {
           </p>
           {artigo.categoria && (
             <span className="text-xs text-on-surface-variant">
-              {CATEGORIA_LABEL[artigo.categoria] ?? artigo.categoria}
+              {CATEGORIA_LABEL[artigo.categoria] ? t(CATEGORIA_LABEL[artigo.categoria]) : artigo.categoria}
             </span>
           )}
         </div>
@@ -154,6 +158,7 @@ function ItemFAQ({ artigo, meuVoto, aoVotar, aoPerguntar }) {
 
 /** Formulário para mandar a dúvida à administração. */
 function ModalPergunta({ inicial, aoFechar, aoEnviar }) {
+  const { t } = useTranslation("conhecimento");
   const [texto, setTexto] = useState(inicial.texto ?? "");
   const [categoria, setCategoria] = useState(inicial.categoria ?? "");
   const [erro, setErro] = useState("");
@@ -164,7 +169,7 @@ function ModalPergunta({ inicial, aoFechar, aoEnviar }) {
   async function enviar(e) {
     e.preventDefault();
     if (tamanho < 10) {
-      setErro("Escreva a sua dúvida com pelo menos 10 caracteres.");
+      setErro(t("faq.modal.erroMinimo"));
       return;
     }
     setEnviando(true);
@@ -172,7 +177,7 @@ function ModalPergunta({ inicial, aoFechar, aoEnviar }) {
     try {
       await aoEnviar({ texto: texto.trim(), categoria: categoria || null });
     } catch (err) {
-      setErro(mensagemDeErro(err, "Não foi possível enviar a pergunta."));
+      setErro(mensagemDeErro(err, t("faq.modal.erroEnviar")));
       setEnviando(false);
     }
   }
@@ -188,15 +193,14 @@ function ModalPergunta({ inicial, aoFechar, aoEnviar }) {
         className="glass-panel rounded-3xl w-full max-w-lg p-6 space-y-4 max-h-[90dvh] overflow-y-auto"
       >
         <div>
-          <h2 className="font-headline text-xl font-bold text-on-surface">Enviar pergunta</h2>
+          <h2 className="font-headline text-xl font-bold text-on-surface">{t("faq.enviarPergunta")}</h2>
           <p className="text-xs text-on-surface-variant mt-1">
-            Sua dúvida vai para a administração do condomínio. A resposta aparece
-            em <strong>Minhas perguntas</strong>.
+            <Trans t={t} i18nKey="faq.modal.descricao" components={{ strong: <strong /> }} />
           </p>
         </div>
 
         <label className="block">
-          <span className="text-xs font-semibold text-on-surface-variant">Sua dúvida</span>
+          <span className="text-xs font-semibold text-on-surface-variant">{t("faq.modal.suaDuvida")}</span>
           <textarea
             autoFocus
             required
@@ -204,7 +208,7 @@ function ModalPergunta({ inicial, aoFechar, aoEnviar }) {
             maxLength={1000}
             value={texto}
             onChange={(e) => setTexto(e.target.value)}
-            placeholder="Ex.: Posso usar a churrasqueira em dia de semana?"
+            placeholder={t("faq.modal.placeholder")}
             className="mt-1 w-full resize-none bg-surface-container-highest/40 border-none rounded-xl px-4 py-2.5 text-sm text-on-surface placeholder:text-on-surface-variant/50 focus:outline-none focus:ring-2 focus:ring-primary/50"
           />
           <span className="block text-right text-[11px] text-on-surface-variant/60 tabular-nums">
@@ -213,15 +217,15 @@ function ModalPergunta({ inicial, aoFechar, aoEnviar }) {
         </label>
 
         <label className="block">
-          <span className="text-xs font-semibold text-on-surface-variant">Assunto (opcional)</span>
+          <span className="text-xs font-semibold text-on-surface-variant">{t("faq.modal.assunto")}</span>
           <select
             value={categoria}
             onChange={(e) => setCategoria(e.target.value)}
             className="mt-1 w-full bg-surface-container-highest/40 border-none rounded-xl px-4 py-2.5 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/50 cursor-pointer"
           >
-            <option value="">Não sei / outro</option>
+            <option value="">{t("faq.modal.naoSei")}</option>
             {Object.entries(CATEGORIA_LABEL).map(([valor, rotulo]) => (
-              <option key={valor} value={valor}>{rotulo}</option>
+              <option key={valor} value={valor}>{t(rotulo)}</option>
             ))}
           </select>
         </label>
@@ -234,14 +238,14 @@ function ModalPergunta({ inicial, aoFechar, aoEnviar }) {
             onClick={aoFechar}
             className="px-4 py-2.5 rounded-xl text-sm font-semibold text-on-surface-variant hover:bg-veu/5 transition cursor-pointer"
           >
-            Cancelar
+            {t("comum:acoes.cancelar")}
           </button>
           <button
             type="submit"
             disabled={enviando}
             className="px-5 py-2.5 rounded-xl bg-primary text-on-primary text-sm font-semibold hover:bg-primary/90 transition disabled:opacity-50 cursor-pointer"
           >
-            {enviando ? "Enviando…" : "Enviar pergunta"}
+            {enviando ? t("comum:acoes.enviando") : t("faq.enviarPergunta")}
           </button>
         </div>
       </form>
@@ -250,6 +254,7 @@ function ModalPergunta({ inicial, aoFechar, aoEnviar }) {
 }
 
 function MinhasPerguntas({ perguntas, carregando, aoExcluir, aoPerguntar }) {
+  const { t } = useTranslation("conhecimento");
   if (carregando) {
     return (
       <div className="flex justify-center py-16">
@@ -263,14 +268,14 @@ function MinhasPerguntas({ perguntas, carregando, aoExcluir, aoPerguntar }) {
       <div className="glass-panel rounded-2xl p-6 sm:p-10 text-center space-y-4">
         <Icone name="contact_support" className="text-4xl text-on-surface-variant" />
         <p className="text-sm text-on-surface-variant">
-          Você ainda não enviou nenhuma pergunta.
+          {t("faq.minhas.vazio")}
         </p>
         <button
           onClick={() => aoPerguntar()}
           className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary text-on-primary text-sm font-semibold hover:bg-primary/90 transition cursor-pointer"
         >
           <Icone name="add" className="text-lg" />
-          Enviar pergunta
+          {t("faq.enviarPergunta")}
         </button>
       </div>
     );
@@ -288,8 +293,8 @@ function MinhasPerguntas({ perguntas, carregando, aoExcluir, aoPerguntar }) {
                   {p.texto}
                 </p>
                 <p className="text-xs text-on-surface-variant mt-1">
-                  Enviada em {dataCurta(p.criadoEm)}
-                  {p.categoria && ` · ${CATEGORIA_LABEL[p.categoria] ?? p.categoria}`}
+                  {t("faq.minhas.enviadaEm", { data: dataCurta(p.criadoEm) })}
+                  {p.categoria && ` · ${CATEGORIA_LABEL[p.categoria] ? t(CATEGORIA_LABEL[p.categoria]) : p.categoria}`}
                 </p>
               </div>
               <span
@@ -297,7 +302,7 @@ function MinhasPerguntas({ perguntas, carregando, aoExcluir, aoPerguntar }) {
                   respondida ? "bg-primary/10 text-primary" : "bg-tertiary/10 text-tertiary"
                 }`}
               >
-                {respondida ? "Respondida" : "Aguardando resposta"}
+                {respondida ? t("perguntas.status.respondida") : t("faq.minhas.aguardando")}
               </span>
             </div>
 
@@ -312,7 +317,7 @@ function MinhasPerguntas({ perguntas, carregando, aoExcluir, aoPerguntar }) {
                   {p.artigoId && (
                     <span className="inline-flex items-center gap-1 ml-2 text-primary font-semibold">
                       <Icone name="public" className="text-sm" />
-                      Publicada na FAQ
+                      {t("perguntas.publicadaNaFaq")}
                     </span>
                   )}
                 </p>
@@ -324,7 +329,7 @@ function MinhasPerguntas({ perguntas, carregando, aoExcluir, aoPerguntar }) {
                   className="flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-lg text-on-surface-variant hover:text-error hover:bg-error/10 transition cursor-pointer"
                 >
                   <Icone name="delete" className="text-sm" />
-                  Excluir
+                  {t("comum:acoes.excluir")}
                 </button>
               </div>
             )}
@@ -336,6 +341,7 @@ function MinhasPerguntas({ perguntas, carregando, aoExcluir, aoPerguntar }) {
 }
 
 export function FAQ() {
+  const { t } = useTranslation("conhecimento");
   const toast = useToast();
   const confirm = useConfirm();
 
@@ -355,7 +361,7 @@ export function FAQ() {
     conhecimentoApi
       .listarPublicados()
       .then(({ data }) => setArtigos(data))
-      .catch(() => setErro("Não foi possível carregar os artigos."))
+      .catch(() => setErro(true))
       .finally(() => setCarregando(false));
 
     // Sem os votos a FAQ continua funcionando: só não mostra o que já foi votado.
@@ -383,7 +389,7 @@ export function FAQ() {
       else await conhecimentoApi.avaliar(artigoId, util);
       setVotos((v) => ({ ...v, [artigoId]: util }));
     } catch (err) {
-      toast.error(mensagemDeErro(err, "Não foi possível registrar sua avaliação."));
+      toast.error(mensagemDeErro(err, t("faq.avaliacao.erroRegistrar")));
     }
   }
 
@@ -394,17 +400,17 @@ export function FAQ() {
   async function enviarPergunta(dados) {
     await perguntasFaqApi.perguntar(dados);
     setPerguntando(null);
-    toast.success("Pergunta enviada! A resposta vai aparecer em Minhas perguntas.");
+    toast.success(t("faq.minhas.enviada"));
     carregarPerguntas();
     setAba("minhas");
   }
 
   async function excluirPergunta(pergunta) {
     const ok = await confirm({
-      titulo: "Excluir pergunta",
-      mensagem: "A pergunta ainda não foi respondida. Deseja mesmo excluí-la?",
-      confirmarTexto: "Sim, excluir",
-      cancelarTexto: "Cancelar",
+      titulo: t("faq.excluir.titulo"),
+      mensagem: t("faq.excluir.mensagem"),
+      confirmarTexto: t("faq.excluir.confirmar"),
+      cancelarTexto: t("comum:acoes.cancelar"),
       variante: "danger",
     });
     if (!ok) return;
@@ -412,7 +418,7 @@ export function FAQ() {
       await perguntasFaqApi.excluir(pergunta.id);
       setPerguntas((prev) => prev.filter((p) => p.id !== pergunta.id));
     } catch (err) {
-      toast.error(mensagemDeErro(err, "Não foi possível excluir a pergunta."));
+      toast.error(mensagemDeErro(err, t("faq.excluir.erro")));
     }
   }
 
@@ -438,10 +444,10 @@ export function FAQ() {
       <div className="mb-6 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
           <h1 className="font-headline text-2xl sm:text-3xl font-extrabold tracking-tight text-on-surface">
-            Perguntas Frequentes
+            {t("faq.titulo")}
           </h1>
           <p className="text-sm text-on-surface-variant mt-1">
-            Encontre respostas para as dúvidas mais comuns do condomínio.
+            {t("faq.subtitulo")}
           </p>
         </div>
         <button
@@ -449,15 +455,15 @@ export function FAQ() {
           className="shrink-0 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-primary text-on-primary font-semibold text-sm hover:bg-primary/90 transition cursor-pointer"
         >
           <Icone name="contact_support" className="text-lg" />
-          Enviar pergunta
+          {t("faq.enviarPergunta")}
         </button>
       </div>
 
       {/* Abas */}
       <div className="glass-panel rounded-2xl p-1.5 flex gap-1 w-full sm:w-fit mb-6">
         {[
-          { id: "faq", label: "Perguntas frequentes", icon: "quiz" },
-          { id: "minhas", label: "Minhas perguntas", icon: "forum" },
+          { id: "faq", rotuloKey: "faq.abas.faq", icon: "quiz" },
+          { id: "minhas", rotuloKey: "faq.abas.minhas", icon: "forum" },
         ].map((tab) => (
           <button
             key={tab.id}
@@ -469,7 +475,7 @@ export function FAQ() {
             }`}
           >
             <Icone name={tab.icon} className="text-lg" />
-            {tab.label}
+            {t(tab.rotuloKey)}
             {tab.id === "minhas" && perguntas.length > 0 && (
               <span className="min-w-[18px] h-[18px] px-1.5 rounded-full bg-primary/20 text-primary text-[10px] font-bold flex items-center justify-center">
                 {perguntas.length}
@@ -496,7 +502,7 @@ export function FAQ() {
         />
         <input
           type="text"
-          placeholder="Buscar pergunta..."
+          placeholder={t("faq.buscarPlaceholder")}
           value={busca}
           onChange={(e) => setBusca(e.target.value)}
           className="w-full bg-surface-container-highest/40 border-none rounded-2xl py-3 pl-11 pr-4 text-on-surface placeholder:text-outline-variant focus:ring-2 focus:ring-primary/50 focus:outline-none backdrop-blur-sm transition-all"
@@ -517,7 +523,7 @@ export function FAQ() {
                     : "bg-surface-container-highest/40 text-on-surface-variant hover:bg-veu/10"
                 }`}
             >
-              {cat === "TODAS" ? "Todas" : (CATEGORIA_LABEL[cat] ?? cat)}
+              {cat === "TODAS" ? t("faq.todas") : (CATEGORIA_LABEL[cat] ? t(CATEGORIA_LABEL[cat]) : cat)}
             </button>
           ))}
         </div>
@@ -531,20 +537,20 @@ export function FAQ() {
       ) : erro ? (
         <div className="glass-panel rounded-2xl p-6 sm:p-8 text-center">
           <Icone name="error_outline" className="text-3xl text-tertiary mb-2" />
-          <p className="text-sm text-on-surface-variant">{erro}</p>
+          <p className="text-sm text-on-surface-variant">{t("faq.erroCarregar")}</p>
         </div>
       ) : filtrados.length === 0 ? (
         <div className="glass-panel rounded-2xl p-5 sm:p-8 sm:p-12 text-center space-y-4">
           <Icone name="search_off" className="text-4xl text-on-surface-variant" />
           <p className="text-sm text-on-surface-variant">
-            {busca ? "Nenhum resultado para sua busca." : "Nenhum artigo publicado ainda."}
+            {busca ? t("faq.semResultadoBusca") : t("faq.vazio")}
           </p>
           <button
             onClick={() => abrirPergunta(busca)}
             className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary text-on-primary text-sm font-semibold hover:bg-primary/90 transition cursor-pointer"
           >
             <Icone name="contact_support" className="text-lg" />
-            Perguntar à administração
+            {t("faq.perguntarAdministracao")}
           </button>
         </div>
       ) : (
@@ -562,13 +568,13 @@ export function FAQ() {
           <div className="rounded-2xl border border-dashed border-veu/15 p-5 flex flex-col sm:flex-row items-center gap-3 text-center sm:text-left">
             <Icone name="contact_support" className="text-2xl text-on-surface-variant" />
             <p className="flex-1 text-sm text-on-surface-variant">
-              Não encontrou o que procurava? Envie sua dúvida para a administração.
+              {t("faq.naoEncontrou")}
             </p>
             <button
               onClick={() => abrirPergunta(busca)}
               className="shrink-0 px-4 py-2 rounded-xl text-sm font-semibold text-primary bg-primary/10 hover:bg-primary/20 transition cursor-pointer"
             >
-              Enviar pergunta
+              {t("faq.enviarPergunta")}
             </button>
           </div>
         </div>

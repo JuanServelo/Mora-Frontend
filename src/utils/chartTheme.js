@@ -1,3 +1,5 @@
+import { idiomaAtual } from "../i18n";
+
 /**
  * Recharts não resolve classes Tailwind — precisa de cor literal.
  * Os valores abaixo espelham as variáveis de src/index.css; se o tema mudar lá,
@@ -42,9 +44,13 @@ export const EIXO_STYLE = {
   axisLine: false,
 };
 
-/** "2026-08" → "ago/26" */
+/** "2026-08" → "ago/26" (pt-BR) ou "Aug/26" (en) */
 export function rotuloMes(chave) {
   const [ano, mes] = String(chave).split("-");
-  const nomes = ["jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez"];
-  return `${nomes[Number(mes) - 1] ?? mes}/${String(ano).slice(2)}`;
+  const numero = Number(mes);
+  if (!numero) return String(chave);
+  const nome = new Intl.DateTimeFormat(idiomaAtual(), { month: "short", timeZone: "UTC" })
+    .format(new Date(Date.UTC(Number(ano), numero - 1, 1)))
+    .replace(".", "");
+  return `${nome}/${String(ano).slice(2)}`;
 }

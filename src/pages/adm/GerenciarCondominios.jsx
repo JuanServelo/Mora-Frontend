@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { condominiosApi } from "../../services/condominiosApi";
 import { gestaoApi } from "../../services/gestaoApi";
 import { CartaoKpi } from "../../components/cards/CartaoKpi";
@@ -18,6 +19,7 @@ const STATUS_STYLE = {
 };
 
 export function GerenciarCondominios() {
+  const { t } = useTranslation("condominios");
   const navigate = useNavigate();
   const toast = useToast();
   const { usuario } = useAuth();
@@ -35,7 +37,7 @@ export function GerenciarCondominios() {
   useEffect(() => {
     condominiosApi.listar()
       .then((res) => setCondominios(res.data.condominios || []))
-      .catch(() => toast.error("Erro ao carregar clientes."))
+      .catch(() => toast.error(t("lista.toast.erroCarregar")))
       .finally(() => setCarregando(false));
 
     if (isGerente) {
@@ -63,9 +65,9 @@ export function GerenciarCondominios() {
       const res = await condominiosApi.criar(dados);
       setCondominios((cs) => [res.data.condominio, ...cs]);
       setCriando(false);
-      toast.success("Cliente criado com sucesso.");
+      toast.success(t("lista.toast.criado"));
     } catch (err) {
-      toast.error(err.response?.data?.mensagem || "Erro ao criar cliente.");
+      toast.error(err.response?.data?.mensagem || t("lista.toast.erroCriar"));
     }
   }
 
@@ -79,12 +81,12 @@ export function GerenciarCondominios() {
         <header className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
             <p className="text-on-surface-variant text-xs font-semibold uppercase tracking-widest mb-1">
-              Painel Administrativo
+              {t("lista.cabecalho.painel")}
             </p>
             <h1 className="font-headline text-4xl font-extrabold tracking-tight text-on-surface">
-              Gerenciar{" "}
+              {t("lista.cabecalho.gerenciar")}{" "}
               <span className="bg-gradient-to-r from-primary to-tertiary bg-clip-text text-transparent">
-                Clientes
+                {t("lista.cabecalho.clientes")}
               </span>
             </h1>
           </div>
@@ -100,20 +102,20 @@ export function GerenciarCondominios() {
                 }`}
               >
                 <Icone name={criando ? "close" : "add_business"} className="text-xl" />
-                {criando ? "Cancelar" : "Novo Cliente"}
+                {criando ? t("comum:acoes.cancelar") : t("lista.novoCliente")}
               </button>
             )}
 
             <div className="flex gap-3">
               <div className="glass-panel rounded-2xl px-5 py-3 text-center">
                 <p className="text-2xl font-headline font-bold text-on-surface">{condominios.length}</p>
-                <p className="text-on-surface-variant text-xs uppercase tracking-wider">Total</p>
+                <p className="text-on-surface-variant text-xs uppercase tracking-wider">{t("lista.resumo.total")}</p>
               </div>
               <div className="glass-panel rounded-2xl px-5 py-3 text-center">
                 <p className="text-2xl font-headline font-bold text-primary">
                   {condominios.filter((c) => c.status === "active").length}
                 </p>
-                <p className="text-on-surface-variant text-xs uppercase tracking-wider">Ativos</p>
+                <p className="text-on-surface-variant text-xs uppercase tracking-wider">{t("lista.resumo.ativos")}</p>
               </div>
             </div>
           </div>
@@ -126,7 +128,7 @@ export function GerenciarCondominios() {
               <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
                 <Icone name="add_business" className="text-primary" />
               </div>
-              <h2 className="font-headline text-xl font-bold text-on-surface">Novo Cliente</h2>
+              <h2 className="font-headline text-xl font-bold text-on-surface">{t("lista.novoCliente")}</h2>
             </div>
             <FormCondominio onSalvar={criarCondominio} onCancelar={() => setCriando(false)} isNovo />
           </div>
@@ -137,31 +139,31 @@ export function GerenciarCondominios() {
           <section className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             <CartaoKpi
               valor={formatarBRL(receita.indicadores.mrrCentavos)}
-              label="Receita mensal"
-              sub={`${receita.indicadores.clientesAtivos} cliente(s) com plano`}
+              label={t("lista.kpi.receitaMensal")}
+              sub={t("lista.kpi.clientesComPlano", { count: receita.indicadores.clientesAtivos })}
               tom="primary"
               icone="account_balance_wallet"
             />
             <CartaoKpi
               valor={formatarBRL(receita.indicadores.arrCentavos)}
-              label="Projeção anual"
-              sub="Receita mensal × 12"
+              label={t("lista.kpi.projecaoAnual")}
+              sub={t("lista.kpi.projecaoAnualSub")}
               tom="tertiary"
               icone="trending_up"
             />
             <CartaoKpi
               valor={formatarBRL(receita.indicadores.ticketMedioCentavos)}
-              label="Ticket médio"
-              sub="Por cliente ativo"
+              label={t("lista.kpi.ticketMedio")}
+              sub={t("lista.kpi.ticketMedioSub")}
               tom="neutro"
               icone="analytics"
             />
             <CartaoKpi
               valor={receita.indicadores.clientesSemAssinatura}
-              label="Sem plano"
+              label={t("lista.kpi.semPlano")}
               sub={receita.indicadores.clientesSemAssinatura > 0
-                ? "Não estão sendo cobrados"
-                : "Todos com assinatura"}
+                ? t("lista.kpi.naoCobrados")
+                : t("lista.kpi.todosComAssinatura")}
               tom={receita.indicadores.clientesSemAssinatura > 0 ? "error" : "neutro"}
               icone="money_off"
             />
@@ -171,7 +173,7 @@ export function GerenciarCondominios() {
         <div className="max-w-md">
           <Campo
             id="busca-cond"
-            placeholder="Buscar por nome, ID ou CNPJ..."
+            placeholder={t("lista.buscaPlaceholder")}
             icon="search"
             value={busca}
             onChange={(e) => setBusca(e.target.value)}
@@ -189,7 +191,7 @@ export function GerenciarCondominios() {
 
         {!carregando && filtrados.length === 0 && (
           <div className="glass-panel rounded-3xl p-10 text-center text-on-surface-variant">
-            Nenhum cliente encontrado.
+            {t("lista.vazio")}
           </div>
         )}
 
@@ -213,17 +215,17 @@ export function GerenciarCondominios() {
                 <div className="hidden sm:flex gap-6 text-sm shrink-0">
                   {[
                     {
-                      label: "Plano",
-                      value: planoPorCliente.get(cond.id)?.plano ?? "sem plano",
+                      label: t("lista.colunas.plano"),
+                      value: planoPorCliente.get(cond.id)?.plano ?? t("lista.colunas.semPlano"),
                       alerta: !planoPorCliente.has(cond.id),
                     },
                     {
-                      label: "Mensalidade",
+                      label: t("lista.colunas.mensalidade"),
                       value: planoPorCliente.has(cond.id)
                         ? formatarBRL(planoPorCliente.get(cond.id).mensalidadeCentavos)
                         : "—",
                     },
-                    { label: "E-mail", value: cond.email || "—" },
+                    { label: t("lista.colunas.email"), value: cond.email || "—" },
                   ].map((col) => (
                     <div key={col.label} className="text-center">
                       <p className="text-on-surface-variant text-xs uppercase tracking-wider">{col.label}</p>
@@ -235,7 +237,7 @@ export function GerenciarCondominios() {
                 </div>
 
                 <span className={`shrink-0 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider ${STATUS_STYLE[cond.status]}`}>
-                  {cond.status === "active" ? "ativo" : "inativo"}
+                  {cond.status === "active" ? t("status.ativo") : t("status.inativo")}
                 </span>
 
                 <Icone name="chevron_right" className="text-outline shrink-0" />
