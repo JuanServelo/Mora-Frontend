@@ -1,5 +1,5 @@
 // src/pages/adm/GerenciarReunioes.jsx
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { meetingApi, ataApi, pollApi } from "../../services/meetingApi";
 import { Icone } from "../../components/icones/Icone";
 import { Campo } from "../../components/campos/Campo";
@@ -8,9 +8,12 @@ import { useToast } from "../../contexts/ToastContext";
 import { useConfirm } from "../../contexts/ConfirmContext";
 import { useAuth } from "../../contexts/AuthContext";
 import api from "../../services/api";
+import { GoogleMeetConnection } from "../../components/meetings/GoogleMeetConnection";
+import { JoinMeetingButton } from "../../components/meetings/JoinMeetingButton";
+import { MeetingFilters } from "../../components/meetings/MeetingFilters";
+import { confirmarPresencaLocal, filtrarReunioes } from "../../utils/meetings";
 import { useTranslation } from "react-i18next";
 import { idiomaAtual } from "../../i18n";
-import { formatarData } from "../../utils/datas";
 
 function TextArea({ label, ...props }) {
   return (
@@ -65,30 +68,6 @@ function toInputDatetime(dt) {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
-function getWeekRange() {
-  const now = new Date();
-  
-  // Início da semana (domingo)
-  const start = new Date(now);
-  const day = start.getDay(); // 0 é domingo, 1 é segunda...
-  start.setDate(now.getDate() - day);
-  start.setHours(0, 0, 0, 0);
-  
-  // Fim da semana (sábado)
-  const end = new Date(start);
-  end.setDate(start.getDate() + 6);
-  end.setHours(23, 59, 59, 999);
-  
-  return { start, end };
-}
-
-function filtrarReunioesDaSemana(lista) {
-  const { start, end } = getWeekRange();
-  return lista.filter((r) => {
-    const dataInicio = new Date(r.dataHoraInicio);
-    return dataInicio >= start && dataInicio <= end;
-  });
-}
 
 // ════════════════════════════════════════════
 export function GerenciarReunioes() {
@@ -112,6 +91,8 @@ export function GerenciarReunioes() {
             </h1>
           </div>
         </header>
+
+        <GoogleMeetConnection />
 
         {/* Sub-navbar de abas */}
         <div className="glass-panel rounded-2xl p-1.5 flex gap-1 w-fit flex-wrap">
@@ -158,23 +139,21 @@ function AbaReunioes({ irParaVotacao }) {
   const toast = useToast();
   const confirm = useConfirm();
   const { usuario } = useAuth();
-  const [reunioes, setReunioes] = useState([]);
-  const [carregando, setCarregando] = useState(false);
   const [criando, setCriando] = useState(false);
   const [form, setForm] = useState(EMPTY_MEETING);
   const [salvando, setSalvando] = useState(false);
   const [erro, setErro] = useState("");
 
-  // busca individual por dia
-  const [buscaDia, setBuscaDia] = useState(() => {
-    const d = new Date();
-    const pad = (n) => String(n).padStart(2, "0");
-    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
-  });
+  const [buscaDia, setBuscaDia] = useState("");
+  const [buscaNome, setBuscaNome] = useState("");
   const [resultadosBusca, setResultadosBusca] = useState(null);
   const [detalhe, setDetalhe] = useState(null);
   const [buscando, setBuscando] = useState(false);
   const [erroDetalhe, setErroDetalhe] = useState("");
+  const resultadosFiltrados = filtrarReunioes(resultadosBusca || [], { nome: buscaNome, data: buscaDia });
+  const detalheAtual = useRef(null);
+  const buscaAtual = useRef(0);
+  detalheAtual.current = detalhe?.id;
 
   // Modal de confirmação premium
   const [confirmModal, setConfirmModal] = useState({ aberto: false, titulo: "", mensagem: "", onConfirmar: null });
@@ -194,8 +173,6 @@ function AbaReunioes({ irParaVotacao }) {
   // Lista de todos os usuários para picker e listagem de reuniões semanais
   const [todosUsuarios, setTodosUsuarios] = useState([]);
   const [buscaUsuario, setBuscaUsuario] = useState("");
-  const [reunioesSemana, setReunioesSemana] = useState([]);
-  const [carregandoSemana, setCarregandoSemana] = useState(false);
 
   const [votacoesReuniao, setVotacoesReuniao] = useState([]);
 
@@ -229,24 +206,40 @@ function AbaReunioes({ irParaVotacao }) {
       .catch((err) => console.error("Erro ao carregar moradores para picker:", err));
   }, []);
 
-  // Carrega reuniões da semana do usuário logado
-  const carregarReunioesSemana = async () => {
-    if (!usuario?.id) return;
-    setCarregandoSemana(true);
+  // Atualiza a lista do condomínio e a presença no detalhe aberto.
+  const carregarReunioes = async (mostrarLoading = false) => {
+    const pedido = ++buscaAtual.current;
+    if (mostrarLoading) setBuscando(true);
     try {
-      const res = await meetingApi.listar(usuario.id);
-      const filtradas = filtrarReunioesDaSemana(res.data || []);
-      setReunioesSemana(filtradas);
-    } catch (err) {
-      console.error("Erro ao carregar reuniões da semana:", err);
-    } finally {
-      setCarregandoSemana(false);
-    }
+      const res = await meetingApi.listar();
+      if (pedido !== buscaAtual.current) return;
+      setResultadosBusca(res.data || []);
+      setErroDetalhe("");
+    } catch {
+      if (pedido === buscaAtual.current) setErroDetalhe("Erro ao carregar reuniões. Tente atualizar novamente.");
+    } finally { if (pedido === buscaAtual.current) setBuscando(false); }
   };
 
   useEffect(() => {
-    carregarReunioesSemana();
-  }, [usuario?.id]);
+    setDetalhe(null);
+    setResultadosBusca(null);
+    carregarReunioes(true);
+    let ativo = true;
+    const atualizar = async () => {
+      if (document.visibilityState === "hidden") return;
+      await carregarReunioes();
+      const id = detalheAtual.current;
+      if (id) {
+        try {
+          const { data } = await meetingApi.buscar(id);
+          if (ativo && detalheAtual.current === id) setDetalhe(data);
+        } catch { /* Mantém o detalhe e tenta novamente na próxima atualização. */ }
+      }
+    };
+    const timer = window.setInterval(atualizar, 30000);
+    window.addEventListener("focus", atualizar);
+    return () => { ativo = false; ++buscaAtual.current; window.clearInterval(timer); window.removeEventListener("focus", atualizar); };
+  }, [usuario?.id, usuario?.condominioId]);
 
   // Preenche organizador automaticamente quando criando form
   useEffect(() => {
@@ -290,7 +283,6 @@ function AbaReunioes({ irParaVotacao }) {
         descricao: form.descricao,
         dataHoraInicio: form.dataHoraInicio,
         dataHoraFim: form.dataHoraFim,
-        idOrganizador: Number(usuario?.id || form.idOrganizador),
         idConvidados: form.idConvidados
           .split(",")
           .map((s) => s.trim())
@@ -309,7 +301,7 @@ function AbaReunioes({ irParaVotacao }) {
 
       setForm(EMPTY_MEETING);
       setCriando(false);
-      carregarReunioesSemana();
+      carregarReunioes();
       
       if (detalhe && detalhe.id === editandoMeetingId) {
         const res = await meetingApi.buscar(editandoMeetingId);
@@ -373,26 +365,8 @@ function AbaReunioes({ irParaVotacao }) {
     }
   }
 
-  async function buscarReunioesPorDia() {
-    if (!buscaDia || !usuario?.id) return;
-    setBuscando(true);
-    setErroDetalhe("");
-    setResultadosBusca([]);
-    try {
-      const res = await meetingApi.listar(usuario.id);
-      const filtradas = (res.data || []).filter((r) => {
-        const dataInicioStr = r.dataHoraInicio.split("T")[0];
-        return dataInicioStr === buscaDia;
-      });
-      setResultadosBusca(filtradas);
-      if (filtradas.length === 0) {
-        setErroDetalhe(t("reunioes.busca.nenhuma"));
-      }
-    } catch {
-      setErroDetalhe(t("reunioes.busca.erro"));
-    } finally {
-      setBuscando(false);
-    }
+  async function atualizarReunioes() {
+    await carregarReunioes(true);
   }
 
 
@@ -409,7 +383,6 @@ function AbaReunioes({ irParaVotacao }) {
       await meetingApi.cancelar(id);
       setDetalhe((p) => (p ? { ...p, status: "CANCELADA" } : p));
       setResultadosBusca((prev) => prev ? prev.map((r) => r.id === id ? { ...r, status: "CANCELADA" } : r) : prev);
-      setReunioesSemana((prev) => prev ? prev.map((r) => r.id === id ? { ...r, status: "CANCELADA" } : r) : prev);
     } catch {
       toast.error(t("reunioes.toast.erroCancelar"));
     }
@@ -426,7 +399,6 @@ function AbaReunioes({ irParaVotacao }) {
       await meetingApi.finalizar(id);
       setDetalhe((p) => (p ? { ...p, status: "FINALIZADA" } : p));
       setResultadosBusca((prev) => prev ? prev.map((r) => r.id === id ? { ...r, status: "FINALIZADA" } : r) : prev);
-      setReunioesSemana((prev) => prev ? prev.map((r) => r.id === id ? { ...r, status: "FINALIZADA" } : r) : prev);
     } catch {
       toast.error(t("reunioes.toast.erroFinalizar"));
     }
@@ -453,9 +425,9 @@ function AbaReunioes({ irParaVotacao }) {
 
   async function responderPresenca(meetingId, status) {
     try {
-        await meetingApi.responderPresenca(meetingId, { status });
-        toast.success(t("reunioes.toast.respostaRegistrada"));
-        carregarReunioesSemana();
+        await meetingApi.atualizarPresenca(meetingId, usuario.id, status);
+        toast.success("Resposta registrada!");
+        carregarReunioes();
         if (detalhe?.id === meetingId) {
             const res = await meetingApi.buscar(meetingId);
             setDetalhe(res.data);
@@ -463,6 +435,11 @@ function AbaReunioes({ irParaVotacao }) {
     } catch (err) {
         toast.error(t("reunioes.toast.erroPresenca"));
     }
+  }
+
+  function presencaAtualizada(id, usuarioId) {
+    setResultadosBusca((lista) => lista?.map((r) => r.id === id ? confirmarPresencaLocal(r, usuarioId) : r));
+    setDetalhe((r) => r?.id === id ? confirmarPresencaLocal(r, usuarioId) : r);
   }
 
   return (
@@ -661,37 +638,35 @@ function AbaReunioes({ irParaVotacao }) {
           </form>
         )}
 
-        {/* Busca por Dia */}
-        <div className="space-y-4" id="busca-reuniao-dia">
-          <div className="flex gap-2">
+        {/* Busca por nome com data opcional */}
+        <div className="space-y-4" id="busca-reunioes">
+          <div className="flex flex-col md:flex-row md:items-end gap-3">
             <div className="flex-1">
-              <Campo 
-                label={t("reunioes.busca.label")} 
-                type="date" 
-                value={buscaDia} 
-                onChange={(e) => setBuscaDia(e.target.value)} 
-              />
+              <MeetingFilters nome={buscaNome} data={buscaDia} onNomeChange={setBuscaNome} onDataChange={setBuscaDia} />
             </div>
             <button
-              onClick={buscarReunioesPorDia}
+              onClick={atualizarReunioes}
               disabled={buscando}
               className="self-end mb-0.5 flex items-center gap-2 px-5 py-3 rounded-xl bg-primary/10 text-primary hover:bg-primary/20 transition text-sm font-semibold cursor-pointer"
             >
-              <Icone name="search" className="text-base" />
-              {buscando ? t("reunioes.busca.buscando") : t("comum:acoes.buscar")}
+              <Icone name="refresh" className="text-base" />
+              {buscando ? "Atualizando..." : "Atualizar"}
             </button>
           </div>
           {erroDetalhe && <p className="text-error text-xs">{erroDetalhe}</p>}
+          {resultadosBusca !== null && resultadosFiltrados.length === 0 && (
+            <p className="text-sm text-on-surface-variant">Nenhuma reunião encontrada. Tente outro nome ou limpe a data.</p>
+          )}
         </div>
 
         {/* Resultados da busca por dia */}
-        {resultadosBusca !== null && resultadosBusca.length > 0 && (
+        {resultadosFiltrados.length > 0 && (
           <div className="space-y-3">
             <h3 className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider">
-              {t("reunioes.busca.encontradas", { data: formatarData(buscaDia) })}
+              {resultadosFiltrados.length} reunião(ões) encontrada(s)
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {resultadosBusca.map((reuniao) => {
+              {resultadosFiltrados.map((reuniao) => {
                 const isOrganizador = reuniao.idOrganizador === usuario?.id;
                 const meuConvidado = reuniao.convidados?.find((c) => c.usuarioId === usuario?.id);
                 const meuStatusPresenca = meuConvidado?.status || "PENDENTE";
@@ -739,20 +714,13 @@ function AbaReunioes({ irParaVotacao }) {
 
                       {reuniao.googleMeetLink && (
                         <div className="pt-1">
-                          <a
-                            href={reuniao.googleMeetLink}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-primary hover:underline"
-                          >
-                            <Icone name="videocam" className="text-sm shrink-0" />
-                            {t("reunioes.card.entrarMeet")}
-                          </a>
+                          <JoinMeetingButton reuniao={reuniao} usuarioId={usuario?.id}
+                            liberarAntecipado onPresencaAtualizada={presencaAtualizada} />
                         </div>
                       )}
                     </div>
 
-                    {!isOrganizador && reuniao.status === "AGENDADA" && (
+                    {!isOrganizador && meuConvidado && reuniao.status === "AGENDADA" && (
                       <div className="flex items-center justify-between gap-2 bg-veu/5 p-2 rounded-xl border border-veu/5">
                         <div className="flex flex-col">
                           <span className="text-[9px] text-on-surface-variant font-semibold uppercase tracking-wider">{t("reunioes.card.suaPresenca")}</span>
@@ -875,10 +843,8 @@ function AbaReunioes({ irParaVotacao }) {
                     <Icone name="event_available" className="text-sm" /> {t("reunioes.card.fim", { data: fmt(detalhe.dataHoraFim) })}
                   </span>
                   {detalhe.googleMeetLink && (
-                    <a href={detalhe.googleMeetLink} target="_blank" rel="noreferrer"
-                      className="flex items-center gap-1 text-primary hover:underline">
-                      <Icone name="videocam" className="text-sm" /> {t("reunioes.detalhe.googleMeet")}
-                    </a>
+                    <JoinMeetingButton reuniao={detalhe} usuarioId={usuario?.id}
+                      liberarAntecipado onPresencaAtualizada={presencaAtualizada} />
                   )}
                 </div>
               </div>
@@ -1167,203 +1133,6 @@ function AbaReunioes({ irParaVotacao }) {
         </div>
       )}
 
-      {/* Minhas Reuniões da Semana */}
-      <div className="glass-panel rounded-3xl p-6 space-y-4 border border-veu/5">
-        <div className="flex items-center justify-between gap-3 border-b border-veu/5 pb-3">
-          <div className="flex items-center gap-2">
-            <span className="p-2 rounded-xl bg-primary/10 text-primary">
-              <Icone name="date_range" className="text-xl" />
-            </span>
-            <div>
-              <h2 className="font-headline text-lg font-bold text-on-surface">{t("reunioes.semana.titulo")}</h2>
-              <p className="text-[10px] text-on-surface-variant uppercase tracking-wider font-semibold">
-                {t("reunioes.semana.periodo", { inicio: fmt(getWeekRange().start).split(" ")[0], fim: fmt(getWeekRange().end).split(" ")[0] })}
-              </p>
-            </div>
-          </div>
-          <button
-            onClick={carregarReunioesSemana}
-            disabled={carregandoSemana}
-            className="p-2 rounded-xl hover:bg-veu/5 text-on-surface-variant hover:text-on-surface transition cursor-pointer"
-            title={t("reunioes.semana.atualizar")}
-          >
-            <Icone name="refresh" className={`text-lg ${carregandoSemana ? "animate-spin" : ""}`} />
-          </button>
-        </div>
-
-        {carregandoSemana ? (
-          <div className="text-center py-8 text-on-surface-variant text-xs flex flex-col items-center justify-center gap-2">
-            <Icone name="sync" className="text-lg animate-spin text-primary" />
-            {t("reunioes.semana.carregando")}
-          </div>
-        ) : reunioesSemana.length === 0 ? (
-          <div className="text-center py-10 text-on-surface-variant text-sm flex flex-col items-center justify-center gap-2 bg-veu/2 rounded-2xl border border-veu/5">
-            <Icone name="event_busy" className="text-3xl text-primary/40" />
-            <p className="font-medium text-xs">{t("reunioes.semana.vazio")}</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {reunioesSemana.map((reuniao) => {
-              const isOrganizador = reuniao.idOrganizador === usuario?.id;
-              const meuConvidado = reuniao.convidados?.find((c) => c.usuarioId === usuario?.id);
-              const meuStatusPresenca = meuConvidado?.status || "PENDENTE";
-
-              return (
-                <div key={reuniao.id} className="relative bg-surface-container-highest/20 hover:bg-surface-container-highest/30 rounded-2xl border border-veu/5 p-4 flex flex-col justify-between gap-4 transition-all duration-300 hover:scale-[1.01] hover:shadow-lg">
-                  <div className="space-y-2">
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="space-y-0.5 min-w-0">
-                        <span className="font-semibold text-sm text-on-surface truncate block" title={reuniao.titulo}>
-                          {reuniao.titulo}
-                        </span>
-                        <span className="text-[10px] text-on-surface-variant/80 block">
-                          {t("reunioes.card.id", { id: reuniao.id })}
-                        </span>
-                      </div>
-                      <div className="flex gap-1.5 shrink-0">
-                        {isOrganizador && (
-                          <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-tertiary/15 text-tertiary uppercase tracking-wider">
-                            {t("reunioes.card.organizador")}
-                          </span>
-                        )}
-                        <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider ${STATUS_MEETING[reuniao.status]?.cls ?? "bg-veu/10 text-white"}`}>
-                          {STATUS_MEETING[reuniao.status] ? t(STATUS_MEETING[reuniao.status].rotuloKey) : reuniao.status}
-                        </span>
-                      </div>
-                    </div>
-
-                    {reuniao.descricao && (
-                      <p className="text-on-surface-variant text-xs line-clamp-2" title={reuniao.descricao}>
-                        {reuniao.descricao}
-                      </p>
-                    )}
-
-                    <div className="space-y-1 pt-1 border-t border-veu/5">
-                      <p className="flex items-center gap-1.5 text-[11px] text-on-surface-variant">
-                        <Icone name="schedule" className="text-xs text-primary" />
-                        {t("reunioes.card.inicio", { data: fmt(reuniao.dataHoraInicio) })}
-                      </p>
-                      <p className="flex items-center gap-1.5 text-[11px] text-on-surface-variant">
-                        <Icone name="event_available" className="text-xs text-primary" />
-                        {t("reunioes.card.fim", { data: fmt(reuniao.dataHoraFim) })}
-                      </p>
-                    </div>
-
-                    {reuniao.googleMeetLink && (
-                      <div className="pt-1">
-                        <a
-                          href={reuniao.googleMeetLink}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-primary hover:underline"
-                        >
-                          <Icone name="videocam" className="text-sm shrink-0" />
-                          {t("reunioes.card.entrarMeet")}
-                        </a>
-                      </div>
-                    )}
-                  </div>
-
-                  {!isOrganizador && reuniao.status === "AGENDADA" && (
-                    <div className="flex items-center justify-between gap-2 bg-veu/5 p-2 rounded-xl border border-veu/5">
-                      <div className="flex flex-col">
-                        <span className="text-[9px] text-on-surface-variant font-semibold uppercase tracking-wider">{t("reunioes.card.suaPresenca")}</span>
-                        <span className={`text-[10px] font-bold ${
-                          meuStatusPresenca === 'CONFIRMADO' ? 'text-primary' : meuStatusPresenca === 'RECUSADO' ? 'text-error' : 'text-secondary'
-                        }`}>
-                          {ATTENDANCE_LABEL[meuStatusPresenca] ? t(ATTENDANCE_LABEL[meuStatusPresenca]) : meuStatusPresenca}
-                        </span>
-                      </div>
-                      <div className="flex gap-1">
-                        <button
-                          type="button"
-                          onClick={() => responderPresenca(reuniao.id, 'CONFIRMADO')}
-                          className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[10px] font-semibold transition cursor-pointer ${
-                            meuStatusPresenca === 'CONFIRMADO' 
-                              ? 'bg-primary/20 text-primary border border-primary/30' 
-                              : 'bg-veu/5 text-on-surface-variant hover:bg-primary/10 hover:text-primary'
-                          }`}
-                        >
-                          <Icone name="check" className="text-xs" />
-                          {t("comum:acoes.confirmar")}
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => responderPresenca(reuniao.id, 'RECUSADO')}
-                          className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[10px] font-semibold transition cursor-pointer ${
-                            meuStatusPresenca === 'RECUSADO' 
-                              ? 'bg-error/20 text-error border border-error/30' 
-                              : 'bg-veu/5 text-on-surface-variant hover:bg-error/10 hover:text-error'
-                          }`}
-                        >
-                          <Icone name="close" className="text-xs" />
-                          {t("reunioes.card.recusar")}
-                        </button>
-                      </div>
-                    </div>
-                  )}
-
-                  <div className="flex justify-end pt-1 gap-3">
-                    {isOrganizador && reuniao.status === "AGENDADA" && (
-                      <button
-                        type="button"
-                        onClick={() => iniciarEdicao(reuniao)}
-                        className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary hover:underline cursor-pointer"
-                      >
-                        <Icone name="edit" className="text-xs" />
-                        {t("comum:acoes.editar")}
-                      </button>
-                    )}
-                    {isOrganizador && (
-                      <button
-                        type="button"
-                        onClick={async () => {
-                          try {
-                            const res = await meetingApi.buscar(reuniao.id);
-                            setDetalhe(res.data);
-                            await carregarAtaReuniao(reuniao.id);
-                            setEscrevendoAta(true);
-                            setTimeout(() => {
-                              const el = document.getElementById("meeting-detalhe-container");
-                              if (el) el.scrollIntoView({ behavior: 'smooth' });
-                            }, 100);
-                          } catch {
-                            mostrarNotificacao(t("reunioes.toast.erroAbrirAta"), "erro");
-                          }
-                        }}
-                        className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary hover:underline cursor-pointer"
-                      >
-                        <Icone name="description" className="text-xs" />
-                        {t("reunioes.card.criarAta")}
-                      </button>
-                    )}
-                    <button
-                      type="button"
-                      onClick={async () => {
-                        try {
-                          const res = await meetingApi.buscar(reuniao.id);
-                          setDetalhe(res.data);
-                          carregarAtaReuniao(reuniao.id);
-                          setTimeout(() => {
-                            const el = document.getElementById("meeting-detalhe-container");
-                            if (el) el.scrollIntoView({ behavior: 'smooth' });
-                          }, 100);
-                        } catch {
-                          mostrarNotificacao(t("reunioes.toast.erroDetalhes"), "erro");
-                        }
-                      }}
-                      className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary hover:underline cursor-pointer"
-                    >
-                      {t("comum:acoes.verDetalhes")}
-                      <Icone name="arrow_forward" className="text-xs" />
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
 
     </div>
   );

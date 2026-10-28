@@ -13,7 +13,7 @@ import { PERFIS } from "../utils/perfis";
 
 let usuario = null;
 let authLoading = false;
-let resposta = () => Promise.resolve({ data: { modulosAtivos: ["portaria", "areas_comuns"] } });
+let resposta = () => Promise.resolve({ data: { vigente: true, modulosAtivos: ["portaria", "areas_comuns"] } });
 
 vi.mock("./AuthContext", () => ({
   useAuth: () => ({ usuario, loading: authLoading }),
@@ -44,10 +44,15 @@ beforeEach(() => {
   vi.clearAllMocks();
   usuario = { perfil: PERFIS.ADMIN_SINDICO, condominioId: "cond-a" };
   authLoading = false;
-  resposta = () => Promise.resolve({ data: { modulosAtivos: ["portaria", "areas_comuns"] } });
+  resposta = () => Promise.resolve({ data: { vigente: true, modulosAtivos: ["portaria", "areas_comuns"] } });
 });
 
 describe("PlanoContext", () => {
+  it("não libera módulos de assinatura sem vigência", async () => {
+    resposta = () => Promise.resolve({ data: { vigente: false, modulosAtivos: ["portaria"] } });
+    montar();
+    await waitFor(() => expect(modulos()).toBe("[]"));
+  });
   it("expõe os módulos da assinatura vigente", async () => {
     montar();
     await waitFor(() => expect(modulos()).toContain("areas_comuns"));

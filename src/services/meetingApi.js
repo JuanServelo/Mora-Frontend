@@ -1,8 +1,10 @@
 // src/services/meetingApi.js
 import axios from "axios";
+import { GATEWAY_URL } from "./gateway";
 
 const meetingHttp = axios.create({
-  baseURL: import.meta.env.VITE_MEETING_API_URL || "http://localhost:8091",
+  baseURL: GATEWAY_URL,
+  withCredentials: true,
 });
 
 meetingHttp.interceptors.request.use((config) => {
@@ -13,7 +15,17 @@ meetingHttp.interceptors.request.use((config) => {
   return config;
 });
 
+meetingHttp.interceptors.response.use((response) => response, (error) => {
+  if (error.config?.method === "post" && error.config?.url === "/api/meetings"
+      && [409, 503].includes(error.response?.status)) {
+    window.dispatchEvent(new Event("google-meet-connection-changed"));
+  }
+  return Promise.reject(error);
+});
+
 export const meetingApi = {
+  googleStatus: () => meetingHttp.get("/api/meetings/google/status"),
+  conectarGoogle: () => meetingHttp.post("/api/meetings/google/authorize"),
   criar: (data) => meetingHttp.post("/api/meetings", data),
   buscar: (id) => meetingHttp.get(`/api/meetings/${id}`),
   listar: (usuarioId) => meetingHttp.get("/api/meetings", { params: { usuarioId } }),

@@ -99,6 +99,7 @@ export const ADM_LINKS = [
   }),
   item("financeiro", {
     to: "/adm/financeiro",
+    modulo: "financeiro",
     icon: "payments",
     perfis: CONDOMINIO,
   }),
@@ -138,11 +139,13 @@ export const ADM_LINKS = [
     // decide o que cada perfil enxerga e o servico. Fica aqui so para aparecer
     // na barra lateral de quem usa o layout administrativo.
     to: "/conversas",
+    modulo: "comunicacao",
     icon: "forum",
     perfis: CONDOMINIO,
   }),
   item("comunicados", {
     to: "/adm/comunicados",
+    modulo: "comunicacao",
     icon: "campaign",
     perfis: CONDOMINIO,
   }),

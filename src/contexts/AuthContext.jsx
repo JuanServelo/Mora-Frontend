@@ -64,7 +64,7 @@ export function AuthProvider({ children }) {
   }, []);
 
   function loginComGoogle() {
-    const base = import.meta.env.VITE_API_URL || "http://localhost:3001";
+    const base = api.defaults.baseURL;
     window.location.href = `${base}/api/auth/google`;
   }
 

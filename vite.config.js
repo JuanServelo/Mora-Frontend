@@ -84,27 +84,4 @@ export default defineConfig({
     },
   },
 
-  server: {
-    proxy: {
-      "/portaria-api": {
-        target: "http://localhost:8090",
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/portaria-api/, ""),
-      },
-      // O comunicacao-service em Java. O prefixo é removido antes de
-      // encaminhar, como no portaria: o Traefik faz o mesmo em produção, então
-      // os caminhos do client são os mesmos nos dois ambientes.
-      "/comunicacao-api": {
-        target: "http://localhost:8094",
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/comunicacao-api/, ""),
-      },
-      // O ocorrencias-service: reclamações, ordens de serviço e fornecedores.
-      "/ocorrencias-api": {
-        target: "http://localhost:8095",
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/ocorrencias-api/, ""),
-      },
-    },
-  },
 });

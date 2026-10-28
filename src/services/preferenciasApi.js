@@ -1,4 +1,5 @@
 import axios from "axios";
+import { GATEWAY_URL } from "./gateway";
 
 /**
  * Preferências de tela do usuário logado — hoje, como cada um monta os
@@ -9,7 +10,7 @@ import axios from "axios";
  * monta o painel no computador do escritório encontra o mesmo painel em casa.
  */
 const gestao = axios.create({
-  baseURL: import.meta.env.VITE_GESTAO_API_URL || "http://localhost:3002",
+  baseURL: GATEWAY_URL,
 });
 
 gestao.interceptors.request.use((config) => {

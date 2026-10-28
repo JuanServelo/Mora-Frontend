@@ -1,14 +1,15 @@
 import axios from "axios";
+import { GATEWAY_URL } from "./gateway";
 
 /**
  * Client do financeiro-service.
  *
- * Instância própria porque é outro serviço, em outra porta — mesmo desenho de
+ * Instância própria com a mesma origem do gateway — mesmo desenho de
  * gestaoApi.js. Valores monetários trafegam em centavos (inteiro); a conversão
  * para reais acontece só na tela.
  */
 const financeiro = axios.create({
-  baseURL: import.meta.env.VITE_FINANCEIRO_API_URL || "http://localhost:3004",
+  baseURL: GATEWAY_URL,
 });
 
 financeiro.interceptors.request.use((config) => {

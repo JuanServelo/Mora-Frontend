@@ -24,6 +24,7 @@ import { InicioDoorman } from "../porteiro/InicioDoorman";
 const ACESSO_RAPIDO = [
   {
     to: "/avisos",
+    modulo: "comunicacao",
     chave: "avisos",
     icon: "campaign",
   },
@@ -272,11 +273,15 @@ function PopupAviso({ aviso, aoFechar }) {
 export function Inicio() {
   const { t } = useTranslation("inicio");
   const { usuario } = useAuth();
+  const { hasModulo, modulosAtivos } = usePlano();
+  const podeLerAvisos = Boolean(usuario?.condominioId && !isUsuarioRestrito(usuario)
+    && (usuario.perfil === PERFIS.ADMIN_GERAL || hasModulo("comunicacao")));
   const { buscar: recarregarSino } = useNotificacoes();
 
   const primeiroNome = usuario?.nome?.split(" ")[0] || t("saudacao.morador");
   const [nomeCondominio, setNomeCondominio] = useState(null);
-  const [avisos, setAvisos] = useState([]);
+  const [dadosAvisos, setDadosAvisos] = useState({ usuarioId: null, avisos: [] });
+  const avisos = podeLerAvisos && dadosAvisos.usuarioId === usuario?.id ? dadosAvisos.avisos : [];
   const [avisoAberto, setAvisoAberto] = useState(null);
 
   useEffect(() => {
@@ -284,14 +289,22 @@ export function Inicio() {
     condominiosApi.buscar(usuario.condominioId)
       .then((res) => setNomeCondominio(res.data.condominio?.nome ?? null))
       .catch(() => {});
+  }, [usuario?.condominioId]);
+
+  useEffect(() => {
+    if (!podeLerAvisos) return;
+    let ativo = true;
     // Pelo comunicacao-service, e não direto no portaria: é ele que recorta
     // pelo público-alvo e sabe o que esta pessoa já leu. Buscando no portaria,
     // esta seção mostrava a todo mundo os avisos de todo mundo — inclusive
     // comunicado interno de funcionário para o morador.
     comunicacaoApi.listarAvisos()
-      .then((res) => setAvisos(res.data?.avisos ?? []))
+      .then((res) => {
+        if (ativo) setDadosAvisos({ usuarioId: usuario.id, avisos: res.data?.avisos ?? [] });
+      })
       .catch(() => {});
-  }, [usuario?.condominioId]);
+    return () => { ativo = false; };
+  }, [usuario?.id, usuario?.condominioId, podeLerAvisos]);
 
   // `destinatario` vem falso para a gestão; `lido` some da lista assim que a
   // pessoa abre o aviso em /avisos.
@@ -314,26 +327,23 @@ export function Inicio() {
   const fecharEMarcar = useCallback(async () => {
     const aviso = avisoAberto;
     setAvisoAberto(null);
-    if (!aviso || aviso.lido) return;
+    if (!podeLerAvisos || !aviso || aviso.lido) return;
 
     try {
       const { data } = await comunicacaoApi.confirmarLeitura(aviso.id);
-      setAvisos((lista) =>
-        lista.map((a) =>
+      setDadosAvisos((dados) => ({ ...dados, avisos: dados.avisos.map((a) =>
           a.id === aviso.id ? { ...a, lido: true, lidoEm: data.leitura?.confirmadaEm } : a,
-        ),
-      );
+        ) }));
       recarregarSino();
     } catch {
       /* fica pendente, e reaparece na próxima visita */
     }
-  }, [avisoAberto, recarregarSino]);
+  }, [avisoAberto, recarregarSino, podeLerAvisos]);
 
   // Sem vínculo com unidade, a navbar já esconde todos os links. Os atalhos
   // precisavam seguir a mesma regra: ofereciam por outro caminho exatamente o
   // que ela esconde.
   const restrito = isUsuarioRestrito(usuario);
-  const { hasModulo, modulosAtivos } = usePlano();
 
   // O síndico opera o condomínio, não mora nele: convidados, encomendas e
   // veículos da unidade não existem no perfil dele. Em vez de uma segunda
@@ -376,7 +386,7 @@ export function Inicio() {
           </p>
         </header>
 
-        {avisoAberto && <PopupAviso aviso={avisoAberto} aoFechar={fecharEMarcar} />}
+        {podeLerAvisos && avisos.some((a) => a.id === avisoAberto?.id) && <PopupAviso aviso={avisoAberto} aoFechar={fecharEMarcar} />}
 
         {/*
           Só o que ainda não foi lido, e só para quem é destinatário. A gestão

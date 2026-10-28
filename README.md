@@ -92,17 +92,13 @@ Sobe em `http://localhost:5173`.
 
 Todas com prefixo `VITE_`, num `.env` na raiz.
 
-| Variável | Padrão | Serviço |
+| Variável | Padrão | Destino |
 |---|---|---|
-| `VITE_API_URL` | `http://localhost:3001` | auth-api |
-| `VITE_GESTAO_API_URL` | `http://localhost:3002` | gestao-geral |
-| `VITE_FINANCEIRO_API_URL` | `http://localhost:3004` | financeiro |
-| `VITE_COMUNICACAO_API_URL` | ausente → proxy `/comunicacao-api` | comunicacao-service |
+| `VITE_GATEWAY_URL` | `http://localhost:8087` | API Gateway Traefik |
 
-O `vite.config.js` faz proxy de `/portaria-api` para a 8090 e de `/comunicacao-api` para a 8094.
-Definir `VITE_COMUNICACAO_API_URL` **desliga o proxy** para esse serviço — só faça isso apontando
-para a porta certa, senão a tela fala com uma porta que não existe. Em produção, configure o mesmo
-redirecionamento no reverse proxy.
+Todas as APIs, imagens e o início do login Google usam essa origem. As antigas variáveis por serviço
+e os proxies diretos do Vite foram removidos. Em produção, configure a origem pública do gateway.
+O controle de acesso de pessoas usa `/api/acessos`; `/api/portaria` atende ao serviço Java.
 
 ### Comandos
 
