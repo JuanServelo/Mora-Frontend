@@ -1,0 +1,626 @@
+{
+  "geral": {
+    "carregando": "Carregando...",
+    "salvando": "Salvando..."
+  },
+  "tela": {
+    "sobretitulo": "Síndico",
+    "titulo": "Configuração",
+    "tituloDestaque": "Financeira",
+    "descricao": "O que o sistema precisa saber antes de emitir a primeira fatura."
+  },
+  "abas": {
+    "config": {
+      "rotulo": "Regras",
+      "descricao": "Como a taxa é dividida e quando vence"
+    },
+    "taxas": {
+      "rotulo": "Taxas",
+      "descricao": "O que é cobrado todo mês"
+    },
+    "fracoes": {
+      "rotulo": "Fração ideal",
+      "descricao": "Quanto cabe a cada unidade"
+    },
+    "contas": {
+      "rotulo": "Contas",
+      "descricao": "Lançamentos de água, luz, gás e outras contas do condomínio"
+    },
+    "faturas": {
+      "rotulo": "Faturas",
+      "descricao": "Faturas emitidas para as unidades — acompanhamento e baixa manual"
+    },
+    "multas": {
+      "rotulo": "Multas",
+      "descricao": "Aplicação, recurso do morador e cobrança na fatura"
+    },
+    "contratos": {
+      "rotulo": "Contratos",
+      "descricao": "Contratos de locação entre proprietário e inquilino"
+    },
+    "prestacao": {
+      "rotulo": "Prestação de contas",
+      "descricao": "Receitas e despesas do mês, publicadas para os moradores"
+    },
+    "gateway": {
+      "rotulo": "Teste de cobrança",
+      "descricao": "Emite uma cobrança no sandbox para conferir a integração"
+    }
+  },
+  "config": {
+    "toast": {
+      "erroCarregar": "Não foi possível carregar a configuração financeira.",
+      "salva": "Configuração salva.",
+      "erroSalvar": "Erro ao salvar a configuração."
+    },
+    "divisao": {
+      "titulo": "Como a taxa é dividida"
+    },
+    "modos": {
+      "fixo": {
+        "titulo": "Valor fixo por unidade",
+        "descricao": "Todo apartamento paga o mesmo. Simples, e o que a maioria dos condomínios pequenos usa."
+      },
+      "fracaoIdeal": {
+        "titulo": "Proporcional à fração ideal",
+        "descricao": "Cada unidade paga conforme sua fração na convenção. Exige a fração cadastrada de todas."
+      }
+    },
+    "calendario": {
+      "titulo": "Calendário de cobrança",
+      "diaFechamento": "Dia do fechamento",
+      "diaFechamentoAjuda": "Quando as faturas do mês são geradas",
+      "diaVencimento": "Dia do vencimento",
+      "diaVencimentoAjuda": "Prazo de pagamento do morador",
+      "prazoRecurso": "Prazo de recurso",
+      "prazoRecursoAjuda": "Dias que o morador tem para recorrer de uma multa",
+      "limiteDias": "Os dias vão até 28 para que a regra funcione em todos os meses, fevereiro incluído.",
+      "dia": "Dia {{dia}}"
+    },
+    "salvar": "Salvar configuração"
+  },
+  "taxas": {
+    "bases": {
+      "porUnidade": "por unidade",
+      "totalCondominio": "total a ratear"
+    },
+    "toast": {
+      "erroCarregar": "Erro ao carregar as taxas.",
+      "atualizada": "Taxa atualizada.",
+      "criada": "Taxa criada.",
+      "erroSalvar": "Erro ao salvar a taxa.",
+      "desativada": "Taxa desativada.",
+      "erroDesativar": "Erro ao desativar a taxa."
+    },
+    "desativar": {
+      "titulo": "Desativar taxa",
+      "mensagem": "\"{{nome}}\" deixa de entrar nos próximos fechamentos. As faturas já emitidas continuam como estão.",
+      "confirmar": "Desativar"
+    },
+    "lista": {
+      "contagem_one": "{{count}} taxa ativa",
+      "contagem_other": "{{count}} taxas ativas",
+      "vazio": "Nenhuma taxa cadastrada ainda.",
+      "vazioAjuda": "Sem ao menos uma taxa ativa, o fechamento do mês não tem o que cobrar.",
+      "semDescricao": "Sem descrição"
+    },
+    "nova": "Nova taxa",
+    "periodicidade": {
+      "MENSAL": "mensal",
+      "ANUAL": "anual",
+      "UNICA": "única"
+    },
+    "form": {
+      "tituloEditar": "Editar taxa",
+      "nome": "Nome",
+      "nomePlaceholder": "Taxa condominial",
+      "valor": "Valor (R$)",
+      "descricao": "Descrição",
+      "descricaoPlaceholder": "O que esta taxa cobre",
+      "baseCalculo": "O valor informado é",
+      "baseTotalOpcao": "o total do condomínio, a ratear",
+      "basePorUnidadeAjuda": "Cada unidade recebe esse valor.",
+      "baseTotalAjuda": "Esse valor é dividido entre as unidades.",
+      "periodicidade": "Periodicidade",
+      "extraordinaria": "Taxa extraordinária",
+      "parcelas": "Parcelas",
+      "parcelasAjuda": "Só taxa extraordinária pode ser parcelada."
+    }
+  },
+  "fracoes": {
+    "toast": {
+      "erroCarregar": "Não foi possível carregar as unidades.",
+      "propostaCalculada": "Proposta calculada. Confira antes de aplicar.",
+      "erroProposta": "Erro ao calcular a proposta.",
+      "salvas_one": "{{count}} fração(ões) salva(s).",
+      "salvas_other": "{{count}} fração(ões) salva(s).",
+      "erroSalvar": "Erro ao salvar as frações."
+    },
+    "carregando": "Carregando unidades…",
+    "vazio": {
+      "titulo": "Nenhuma unidade cadastrada neste condomínio.",
+      "ajuda": "A fração ideal é por apartamento. Cadastre blocos e apartamentos em Estruturas antes de configurar o rateio proporcional."
+    },
+    "avisoFixo": {
+      "antes": "O rateio deste condomínio está em",
+      "destaque": "valor fixo por unidade",
+      "depois": ", que não usa a fração ideal. O cadastro aqui fica guardado para quando mudar para proporcional."
+    },
+    "indicadores": {
+      "unidades": "Unidades",
+      "comFracao": "Com fração",
+      "comFracaoValor": "{{com}} de {{total}}",
+      "soma": "Soma"
+    },
+    "sugerir": "Sugerir pela área",
+    "sugerirAjuda": "Calcula uma proposta a partir da área de cada apartamento",
+    "somaNaoFecha": "As frações precisam somar {{esperado}} milésimos para o fechamento proporcional rodar. Faltam {{faltam}} milésimos.",
+    "tabela": {
+      "unidade": "Unidade",
+      "bloco": "Bloco",
+      "area": "Área",
+      "milesimos": "Milésimos",
+      "equivale": "Equivale a"
+    }
+  },
+  "gateway": {
+    "toast": {
+      "criada": "Cobrança de teste criada no sandbox.",
+      "erroGateway": "Erro ao falar com o gateway.",
+      "status": "Status: {{status}}",
+      "statusPago": "Status: {{status}} · pago em {{pagoEm}}",
+      "erroConsultar": "Não foi possível consultar a cobrança.",
+      "cancelada": "Cobrança de teste cancelada.",
+      "erroCancelar": "Não foi possível cancelar a cobrança.",
+      "copiado": "{{rotulo}} copiado.",
+      "erroCopiar": "Não foi possível copiar."
+    },
+    "verificando": "Verificando o gateway…",
+    "semCredencial": {
+      "titulo": "Nenhuma credencial de gateway configurada.",
+      "antes": "Defina",
+      "depois": "no ambiente do serviço para habilitar as cobranças."
+    },
+    "ambiente": "Ambiente",
+    "sandbox": "Sandbox",
+    "producao": "PRODUÇÃO",
+    "chave": "Chave",
+    "avisoSandbox": "Cobranças criadas aqui são fictícias e não movimentam dinheiro.",
+    "avisoProducao": "Fora do sandbox esta tela não emite cobrança.",
+    "formaPagamento": "Forma de pagamento",
+    "boleto": "Boleto",
+    "valor": "Valor (R$)",
+    "emitindo": "Emitindo…",
+    "gerar": "Gerar cobrança",
+    "vence": "vence {{data}}",
+    "conferirStatus": "Conferir status",
+    "qrAlt": "QR Code do PIX de teste",
+    "pixCopiaCola": "PIX copia e cola",
+    "codigoPix": "Código PIX",
+    "copiarCodigo": "Copiar código",
+    "linhaDigitavel": "Linha digitável",
+    "copiarLinha": "Copiar linha",
+    "abrirBoleto": "Abrir boleto",
+    "paginaPagamento": "Página de pagamento do gateway"
+  },
+  "contas": {
+    "tipos": {
+      "AGUA": "Água",
+      "LUZ": "Luz/Energia",
+      "GAS": "Gás",
+      "INTERNET": "Internet",
+      "OUTRO": "Outro"
+    },
+    "modos": {
+      "FRACAO_IDEAL": "Fração Ideal (proporcional à unidade)",
+      "FIXO_POR_UNIDADE": "Fixo por Unidade (igual para todas)"
+    },
+    "status": {
+      "PENDENTE": "PENDENTE",
+      "RATEADA": "RATEADA",
+      "CANCELADA": "CANCELADA"
+    },
+    "toast": {
+      "erroCarregar": "Não foi possível carregar as contas.",
+      "preencha": "Preencha valor e vencimento.",
+      "atualizada": "Conta atualizada.",
+      "criada": "Conta criada.",
+      "erroSalvar": "Erro ao salvar conta.",
+      "cancelada": "Conta cancelada.",
+      "erroCancelar": "Erro ao cancelar.",
+      "rateada": "Conta rateada em {{unidades}} unidades.",
+      "erroRatear": "Erro ao ratear.",
+      "fechado_one": "Fechamento concluído. {{count}} fatura(s) criada(s).",
+      "fechado_other": "Fechamento concluído. {{count}} fatura(s) criada(s).",
+      "erroFechar": "Erro ao fechar competência."
+    },
+    "cancelar": {
+      "titulo": "Cancelar conta",
+      "mensagem": "A conta será marcada como cancelada. Esta ação não pode ser desfeita."
+    },
+    "ratear": {
+      "titulo": "Ratear conta",
+      "mensagem": "O valor será distribuído entre as unidades com fração ideal cadastrada. Continuar?",
+      "confirmar": "Ratear"
+    },
+    "fechar": {
+      "titulo": "Fechar competência",
+      "mensagem": "Serão geradas faturas para todas as unidades da competência {{competencia}}. Unidades que já têm fatura não serão duplicadas. Continuar?",
+      "fechando": "Fechando...",
+      "botao": "Fechar Competência"
+    },
+    "competencia": "Competência",
+    "nova": "Nova Conta",
+    "preview": {
+      "unidades": "Unidades",
+      "faturasNovas": "Faturas novas",
+      "contasPendentes": "Contas pendentes",
+      "multas": "Multas",
+      "estornos_one": "{{count}} estorno(s)",
+      "estornos_other": "{{count}} estorno(s)"
+    },
+    "plano": {
+      "titulo": "Plataforma Mora — {{plano}}",
+      "descricao": "Mensalidade do plano • gerada automaticamente",
+      "porMes": "/mês"
+    },
+    "carregando": "Carregando contas...",
+    "vazio": "Nenhuma conta cadastrada para {{competencia}}.",
+    "lista": {
+      "fracaoIdeal": "Fração ideal",
+      "fixoPorUnidade": "Fixo por unidade",
+      "vencimento": "Venc. {{data}}",
+      "ratear": "Ratear entre unidades"
+    },
+    "form": {
+      "tituloEditar": "Editar Conta",
+      "tituloNova": "Nova Conta de Consumo",
+      "descricao": "Descrição (opcional)",
+      "descricaoPlaceholder": "Ex: Conta de novembro",
+      "vencimento": "Vencimento",
+      "valorTotal": "Valor Total (R$)",
+      "modoRateio": "Modo de Rateio"
+    }
+  },
+  "faturas": {
+    "status": {
+      "ABERTA": "Em aberto",
+      "PAGA": "Paga",
+      "EM_ATRASO": "Em atraso",
+      "CANCELADA": "Cancelada"
+    },
+    "apt": "Apt {{numero}}",
+    "toast": {
+      "erroCarregar": "Não foi possível carregar as faturas.",
+      "baixaRegistrada": "Baixa manual registrada.",
+      "erroBaixa": "Erro ao registrar baixa."
+    },
+    "kpis": {
+      "totalEmitido": "Total emitido",
+      "pagas": "Pagas",
+      "emAberto": "Em aberto",
+      "emAtraso": "Em atraso"
+    },
+    "filtroStatus": "Status",
+    "filtroCanceladas": "Canceladas",
+    "carregando": "Carregando faturas...",
+    "vazio": "Nenhuma fatura encontrada para os filtros selecionados.",
+    "tabela": {
+      "unidade": "Unidade",
+      "vencimento": "Vencimento",
+      "valor": "Valor",
+      "acoes": "Ações"
+    },
+    "baixa": {
+      "botao": "Baixa manual",
+      "titulo": "Baixa Manual",
+      "descricao": "Registra o pagamento desta fatura sem passar pelo gateway de pagamento.",
+      "dataPagamento": "Data do pagamento",
+      "valorPago": "Valor pago (centavos)",
+      "confirmar": "Confirmar Baixa"
+    }
+  },
+  "multas": {
+    "filtros": {
+      "todas": "Todas",
+      "emRecurso": "Em recurso",
+      "aplicadas": "Aplicadas",
+      "canceladas": "Canceladas"
+    },
+    "situacao": {
+      "canceladaEstornada": "Cancelada · estornada",
+      "canceladaEstornoProximo": "Cancelada · estorno no próximo fechamento",
+      "cancelada": "Cancelada",
+      "recursoParaJulgar": "Recurso para julgar",
+      "cobrada": "Cobrada",
+      "proximoFechamento": "Entra no próximo fechamento",
+      "prazoRecurso": "Prazo de recurso até {{data}}"
+    },
+    "toast": {
+      "erroCarregar": "Não foi possível carregar as multas.",
+      "aplicada": "Multa aplicada. O morador a vê no financeiro dele e pode recorrer dentro do prazo.",
+      "erroAplicar": "Não foi possível aplicar a multa.",
+      "canceladaComEstorno": "Multa cancelada. Como já foi cobrada, o estorno entra no próximo fechamento.",
+      "cancelada": "Multa cancelada.",
+      "recursoAceito": "Recurso aceito: multa cancelada.",
+      "recursoRecusado": "Recurso recusado: multa mantida.",
+      "erroDecisao": "Não foi possível registrar a decisão."
+    },
+    "apto": "Apto {{numero}}",
+    "unidade": "Unidade",
+    "aplicarMulta": "Aplicar multa",
+    "recursosPendentes_one": "{{count}} recurso aguardando julgamento. Enquanto não for julgada, a multa não é cobrada.",
+    "recursosPendentes_other": "{{count}} recursos aguardando julgamento. Enquanto não for julgada, a multa não é cobrada.",
+    "carregando": "Carregando multas...",
+    "vazioFiltro": "Nenhuma multa com este status.",
+    "vazio": "Nenhuma multa aplicada.",
+    "infracaoEm": "infração em {{data}}",
+    "recursoDoMorador": "Recurso do morador",
+    "decisao": "Decisão: {{texto}}",
+    "acoes": {
+      "recusar": "Recusar recurso",
+      "aceitar": "Aceitar recurso",
+      "cancelar": "Cancelar multa"
+    },
+    "form": {
+      "unidade": "Unidade",
+      "selecione": "Selecione",
+      "morador": "Morador (opcional)",
+      "daUnidade": "A infração é da unidade",
+      "valor": "Valor (R$)",
+      "dataInfracao": "Data da infração",
+      "motivo": "Motivo",
+      "motivoPlaceholder": "O que aconteceu e qual regra do regimento foi descumprida",
+      "aviso": "O morador recebe o aviso e pode recorrer no prazo definido nas regras do financeiro. A multa só entra na fatura depois que o prazo vence.",
+      "aplicando": "Aplicando...",
+      "aplicar": "Aplicar"
+    },
+    "decisaoModal": {
+      "aceitar": "A multa será cancelada e não será cobrada.",
+      "recusar": "A multa volta a valer e entra no próximo fechamento depois do prazo.",
+      "cancelarCobrada": "A multa já foi cobrada: o valor será estornado no próximo fechamento.",
+      "cancelar": "A multa deixa de valer e não será cobrada.",
+      "justificativa": "Justificativa",
+      "justificativaPlaceholder": "O morador verá esta explicação"
+    }
+  },
+  "contratos": {
+    "divergencia": {
+      "semConferir": "Não foi possível conferir quem recebe a fatura desta unidade agora.",
+      "texto": "Pelo contrato, a taxa é paga por <b>{{esperado}}</b>, mas a fatura está indo para <b>{{atual}}</b>. Para mudar, use a transferência de responsabilidade financeira da unidade.",
+      "ninguem": "ninguém"
+    },
+    "toast": {
+      "erroCarregar": "Não foi possível carregar os contratos.",
+      "cadastrado": "Contrato cadastrado.",
+      "erroCadastrar": "Não foi possível cadastrar o contrato.",
+      "encerrado": "Contrato encerrado.",
+      "erroEncerrar": "Não foi possível encerrar o contrato."
+    },
+    "usuario": "Usuário {{id}}",
+    "encerrar": {
+      "titulo": "Encerrar contrato",
+      "mensagem": "O contrato de {{unidade}} deixa de ser vigente hoje.",
+      "botao": "Encerrar"
+    },
+    "descricao": "Registro do que proprietário e inquilino combinaram. Quem recebe a fatura continua sendo definido pela responsabilidade financeira da unidade.",
+    "novo": "Novo contrato",
+    "carregando": "Carregando contratos...",
+    "vazio": "Nenhum contrato de locação cadastrado.",
+    "lista": {
+      "partes": "Proprietário: {{proprietario}} · Inquilino: {{inquilino}}",
+      "periodo": "{{inicio}} até {{fim}}",
+      "semFim": "sem data de fim",
+      "aluguel": "aluguel {{valor}}",
+      "taxaInquilino": "taxa paga pelo inquilino",
+      "taxaProprietario": "taxa paga pelo proprietário",
+      "vigente": "Vigente",
+      "encerrado": "Encerrado"
+    },
+    "form": {
+      "titulo": "Novo contrato de locação",
+      "proprietario": "Proprietário",
+      "inquilino": "Inquilino",
+      "semMoradores": "Esta unidade não tem moradores vinculados. Vincule proprietário e inquilino em Usuários antes.",
+      "inicio": "Início",
+      "fim": "Fim (opcional)",
+      "aluguel": "Aluguel (R$, opcional)",
+      "quemPaga": "Quem paga a taxa",
+      "cadastrar": "Cadastrar"
+    }
+  },
+  "prestacao": {
+    "categorias": {
+      "limpeza": "Limpeza",
+      "manutencao": "Manutenção",
+      "agua": "Água",
+      "energia": "Energia",
+      "portaria": "Portaria",
+      "jardinagem": "Jardinagem",
+      "seguro": "Seguro",
+      "administracao": "Administração",
+      "aluguelEspaco": "Aluguel de espaço",
+      "multasRecebidas": "Multas recebidas",
+      "rendimentos": "Rendimentos",
+      "outros": "Outros"
+    },
+    "resumo": {
+      "receitas": "Receitas",
+      "despesas": "Despesas",
+      "saldo": "Saldo do mês",
+      "porCategoria": "Por categoria",
+      "automatica": "automática"
+    },
+    "toast": {
+      "erroCarregar": "Não foi possível carregar a prestação de contas.",
+      "lancado": "Lançamento registrado.",
+      "erroLancar": "Não foi possível registrar o lançamento.",
+      "erroExcluir": "Não foi possível excluir.",
+      "publicada": "Prestação de contas publicada para os moradores.",
+      "erroPublicar": "Não foi possível publicar."
+    },
+    "excluir": "Excluir lançamento",
+    "publicar": {
+      "titulo": "Publicar prestação de contas",
+      "mensagem": "Os moradores passam a ver a prestação de {{competencia}}. Depois de publicada, ela não aceita mais lançamentos nem exclusões.",
+      "confirmar": "Publicar",
+      "botao": "Publicar para os moradores"
+    },
+    "publicadaEm": "Publicada em {{quando}}",
+    "rascunho": "Rascunho",
+    "carregando": "Carregando prestação de contas...",
+    "receitaTaxasAviso": "A receita de taxas vem das faturas pagas desta competência e entra sozinha.",
+    "form": {
+      "titulo": "Novo lançamento",
+      "tipo": "Tipo",
+      "despesa": "Despesa",
+      "receita": "Receita",
+      "categoria": "Categoria",
+      "categoriaPlaceholder": "Ex.: Limpeza",
+      "data": "Data",
+      "descricao": "Descrição",
+      "descricaoPlaceholder": "Ex.: Produtos de limpeza do mês",
+      "comprovante": "Link do comprovante (opcional)",
+      "lancando": "Lançando...",
+      "lancar": "Lançar"
+    },
+    "lista": {
+      "vazio": "Nenhum lançamento nesta competência.",
+      "titulo": "Lançamentos",
+      "comprovante": "comprovante"
+    }
+  },
+  "abaContrato": {
+    "toast": {
+      "erroCarregar": "Não foi possível carregar o contrato.",
+      "erroEncerrar": "Não foi possível encerrar."
+    },
+    "outraPessoa": "outra pessoa",
+    "encerrarMensagem": "O contrato deixa de ser vigente hoje.",
+    "cadastrar": "Cadastrar contrato",
+    "vazio": "Nenhum contrato de locação registrado para esta unidade.",
+    "aluguel": "Aluguel {{valor}}",
+    "taxaInquilino": "Taxa do condomínio paga pelo inquilino",
+    "taxaProprietario": "Taxa do condomínio paga pelo proprietário",
+    "semInquilinos": "Cadastre o inquilino como ocupante da unidade no seu perfil antes.",
+    "euProprietario": "Eu, proprietário",
+    "aviso": "O contrato registra o que foi combinado. Quem recebe a fatura do condomínio continua sendo definido pela transferência de responsabilidade financeira da unidade."
+  },
+  "minhasMultas": {
+    "situacao": {
+      "cancelada": "Cancelada",
+      "canceladaDevolvida": "Cancelada · valor devolvido em fatura",
+      "canceladaProxima": "Cancelada · valor devolvido na próxima fatura",
+      "emAnalise": "Recurso em análise",
+      "cobrada": "Cobrada na fatura",
+      "podeRecorrer": "Você pode recorrer até {{data}}",
+      "seraCobrada": "Será cobrada na próxima fatura"
+    },
+    "toast": {
+      "enviado": "Recurso enviado. Enquanto o síndico não decidir, a multa não é cobrada.",
+      "erroEnviar": "Não foi possível enviar o recurso."
+    },
+    "vazio": "Nenhuma multa para a sua unidade.",
+    "datas": "Infração em {{infracao}} · aplicada em {{aplicada}}",
+    "seuRecurso": "Seu recurso",
+    "resposta": "Resposta do síndico: {{texto}}",
+    "recorrer": "Recorrer",
+    "modal": {
+      "titulo": "Recorrer da multa",
+      "aviso": "O recurso é um só: depois de julgado, a decisão vale.",
+      "motivo": "Por que a multa não procede",
+      "motivoPlaceholder": "Conte o que aconteceu. Se tiver como comprovar, diga como.",
+      "enviando": "Enviando...",
+      "enviar": "Enviar recurso"
+    }
+  },
+  "prestacaoMorador": {
+    "erroAbrir": "Não foi possível abrir este mês.",
+    "vazio": "O síndico ainda não publicou nenhuma prestação de contas.",
+    "saldo": "saldo {{valor}}"
+  },
+  "cobrancas": {
+    "titulo": "Minhas cobranças",
+    "vazio": "Nenhuma fatura encontrada.",
+    "vazioAjuda": "As faturas aparecerão aqui quando o síndico fechar a competência.",
+    "venceEm": "Vence em {{data}}",
+    "verDetalhes": "Ver detalhes →",
+    "detalhe": {
+      "titulo": "Fatura {{competencia}}",
+      "carregando": "Carregando fatura...",
+      "erro": "Não foi possível carregar os detalhes.",
+      "total": "Total",
+      "composicao": "Composição",
+      "pagamentoConfirmado": "Pagamento confirmado",
+      "pagoEm": "em {{data}}",
+      "gateway": "Gateway",
+      "pagarPix": "Pagar via PIX",
+      "qrAlt": "QR Code PIX",
+      "copiaECola": "Código copia e cola:",
+      "copiar": "Copiar",
+      "processando": "Cobrança em processamento",
+      "processandoAjuda": "Aguarde alguns instantes e recarregue a página para ver as opções de pagamento."
+    }
+  },
+  "minhas": {
+    "titulo": "Financeiro",
+    "subtitulo": "Faturas, gastos, multas e a prestação de contas do condomínio",
+    "abas": {
+      "faturas": "Faturas",
+      "gastos": "Gastos",
+      "multas": "Multas",
+      "prestacao": "Prestação de contas",
+      "contrato": "Contrato"
+    },
+    "categorias": {
+      "TODOS": "Todos",
+      "CONDOMINIO": "Condomínio",
+      "AGUA": "Água",
+      "LUZ": "Luz",
+      "GAS": "Gás",
+      "INTERNET": "Internet",
+      "PLATAFORMA": "Plataforma",
+      "OUTRO": "Outro"
+    },
+    "detalhe": {
+      "erroGerar": "Erro ao gerar cobrança.",
+      "erroGerarTente": "Erro ao gerar cobrança. Tente novamente.",
+      "valorTotal": "Valor total",
+      "composicao": "Composição da fatura",
+      "viaGateway": "Via gateway",
+      "gerandoPix": "Gerando QR Code PIX...",
+      "gerandoBoleto": "Gerando Boleto...",
+      "gerarPix": "Gerar QR Code PIX",
+      "gerarBoleto": "Gerar Boleto Bancário",
+      "copiaECola": "Código copia e cola",
+      "copiado": "Copiado!",
+      "preferoBoleto": "Prefiro pagar via boleto →",
+      "preferoPix": "Prefiro pagar via PIX →",
+      "abrirBoleto": "Abrir boleto para imprimir"
+    },
+    "gastos": {
+      "resumo": "Resumo de gastos do ano",
+      "anoAnterior": "Ano anterior",
+      "proximoAno": "Próximo ano",
+      "carregando": "Carregando gastos...",
+      "vazio": "Sem gastos em {{ano}}",
+      "vazioAjuda": "Os gastos aparecerão aqui após o fechamento de competências.",
+      "totalAno": "Total {{ano}}",
+      "mediaMes": "Média/mês",
+      "mesMaior": "Mês maior",
+      "categoria": "Categoria",
+      "distribuicao": "Distribuição",
+      "distribuicaoDescricao": "Por categoria no ano",
+      "evolucao": "Evolução mensal",
+      "evolucaoDescricao": "Gasto total por mês",
+      "totalGastoAno": "Total gasto no ano",
+      "totalCategoria": "Total {{categoria}}",
+      "vazioFiltro": "Nenhum gasto com este filtro."
+    },
+    "faturas": {
+      "vazio": "Nenhuma fatura ainda",
+      "vazioAjuda": "As faturas aparecem aqui após o síndico fechar a competência mensal.",
+      "vazioFiltro": "Nenhuma fatura com este filtro."
+    }
+  }
+}

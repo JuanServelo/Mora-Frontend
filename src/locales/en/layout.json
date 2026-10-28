@@ -1,0 +1,155 @@
+{
+  "sidebar": {
+    "links": {
+      "inicio": "Home",
+      "conversas": "Conversations",
+      "cobrancas": "Billing",
+      "espacos": "Spaces",
+      "entregas": "Deliveries",
+      "reunioes": "Meetings",
+      "reclamacoes": "Complaints",
+      "comunicados": "Announcements",
+      "conhecimento": "Knowledge",
+      "votacoes": "Votes",
+      "veiculos": "Vehicles",
+      "cadastros": "Check-in",
+      "entradasSaidas": "Entries and Exits",
+      "chaves": "Keys",
+      "usuariosCondominio": "Condominium Users",
+      "avisos": "Notices"
+    },
+    "subtitulo": {
+      "portaria": "Front Desk",
+      "plataforma": "Platform",
+      "administrativo": "Administration",
+      "condominio": "Condominium"
+    },
+    "fecharMenu": "Close menu",
+    "painel": "Dashboard",
+    "notificacoes_one": "{{count}} notification",
+    "notificacoes_other": "{{count}} notifications",
+    "usuarioPadrao": "Admin"
+  },
+  "menuAdmin": {
+    "painelGeral": {
+      "rotulo": "Overview",
+      "descricao": "Platform metrics"
+    },
+    "clientes": {
+      "rotulo": "Clients",
+      "descricao": "Manage subscribing condominiums"
+    },
+    "planos": {
+      "rotulo": "Plans",
+      "descricao": "Commercial plans"
+    },
+    "usuarios": {
+      "rotulo": "Users",
+      "descricao": "Accounts and invitations"
+    },
+    "estruturas": {
+      "rotulo": "Structures",
+      "descricao": "Buildings, units and common areas"
+    },
+    "perfis": {
+      "rotulo": "Roles",
+      "descricao": "Permissions by role"
+    },
+    "painel": {
+      "rotulo": "Dashboard",
+      "descricao": "Operational and strategic metrics"
+    },
+    "meuPlano": {
+      "rotulo": "My Plan",
+      "descricao": "Subscribed plan and available modules"
+    },
+    "reservas": {
+      "rotulo": "Bookings",
+      "descricao": "Space calendar and approvals"
+    },
+    "financeiro": {
+      "rotulo": "Finance",
+      "descricao": "Fees, cost sharing and billing"
+    },
+    "funcionarios": {
+      "rotulo": "Staff",
+      "descricao": "Employment status, shifts and access"
+    },
+    "reunioes": {
+      "rotulo": "Meetings",
+      "descricao": "Assemblies and minutes"
+    },
+    "votacoes": {
+      "rotulo": "Votes",
+      "descricao": "Condominium votes and polls"
+    },
+    "reclamacoes": {
+      "rotulo": "Complaints",
+      "descricao": "Residents' issues"
+    },
+    "ordensServico": {
+      "rotulo": "Work Orders",
+      "descricao": "Corrective and preventive maintenance"
+    },
+    "conversas": {
+      "rotulo": "Conversations",
+      "descricao": "Residents' requests"
+    },
+    "comunicados": {
+      "rotulo": "Announcements",
+      "descricao": "Who has confirmed reading notices"
+    },
+    "conhecimento": {
+      "rotulo": "Knowledge",
+      "descricao": "Knowledge base and FAQ"
+    }
+  },
+  "appLayout": {
+    "abrirMenu": "Open menu",
+    "titulos": {
+      "inicio": "Home",
+      "painel": "Dashboard",
+      "visaoGeral": "Overview",
+      "clientes": "Clients",
+      "planos": "Plans",
+      "usuarios": "Users",
+      "estruturas": "Structures",
+      "perfis": "Roles",
+      "financeiro": "Finance",
+      "reunioes": "Meetings",
+      "reclamacoes": "Complaints",
+      "ordensServico": "Work Orders",
+      "comunicados": "Announcements",
+      "conhecimento": "Knowledge",
+      "meuPlano": "My Plan",
+      "entregas": "Deliveries",
+      "conversas": "Conversations",
+      "avisos": "Notices",
+      "entradasSaidas": "Entries and Exits",
+      "chaves": "Keys"
+    }
+  },
+  "perfis": {
+    "ADMIN_GERAL": "Platform Admin",
+    "ADMIN_SINDICO": "Property Manager",
+    "PORTEIRO": "Doorman",
+    "MORADOR": "Resident",
+    "DONO_ALUGUEL": "Landlord",
+    "CONVIDADO": "Guest"
+  },
+  "origemNotificacao": {
+    "financeiro": "Finance",
+    "comunicacao": "Messages",
+    "portaria": "Front Desk",
+    "gestao": "Management",
+    "ocorrencias": "Issues",
+    "plataforma": "Mora"
+  },
+  "rota": {
+    "carregando": "Loading..."
+  },
+  "foto": {
+    "alt": "Photo of {{nome}}",
+    "altPadrao": "Profile photo"
+  }
+}

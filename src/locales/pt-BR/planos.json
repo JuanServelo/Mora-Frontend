@@ -1,0 +1,205 @@
+{
+  "geral": {
+    "porMes": "/mês",
+    "salvando": "Salvando..."
+  },
+  "status": {
+    "ATIVA": "ativa",
+    "CANCELADA": "cancelada",
+    "SUSPENSA": "suspensa"
+  },
+  "modulos": {
+    "portaria": {
+      "rotulo": "Portaria",
+      "descricao": "Controle de acesso, visitantes e registros de entrada e saída"
+    },
+    "reunioes": {
+      "rotulo": "Reuniões",
+      "descricao": "Assembleias, pautas, votações e atas digitais"
+    },
+    "vagas": {
+      "rotulo": "Vagas de Garagem",
+      "descricao": "Gestão de vagas, reservas e transferências"
+    },
+    "entregas": {
+      "rotulo": "Entregas",
+      "descricao": "Rastreamento de encomendas e notificação de retirada"
+    },
+    "areas_comuns": {
+      "rotulo": "Áreas Comuns",
+      "descricao": "Reserva de salão, churrasqueira, academia e outros espaços"
+    },
+    "reclamacoes": {
+      "rotulo": "Ocorrências",
+      "descricao": "Registro e acompanhamento de reclamações e ocorrências"
+    },
+    "conhecimento": {
+      "rotulo": "Base de Conhecimento",
+      "descricao": "FAQ, documentos e regulamentos acessíveis aos moradores"
+    },
+    "votacoes": {
+      "rotulo": "Votações",
+      "descricao": "Enquetes e votações online para decisões do condomínio"
+    },
+    "veiculos": {
+      "rotulo": "Veículos",
+      "descricao": "Cadastro e controle de veículos dos moradores"
+    },
+    "chaves": {
+      "rotulo": "Chaves",
+      "descricao": "Empréstimo e devolução de chaves com registro de responsável"
+    }
+  },
+  "meuPlano": {
+    "sobretitulo": "Síndico",
+    "titulo": "Meu",
+    "tituloDestaque": "Plano",
+    "descricao": "Recursos disponíveis para o seu condomínio no aplicativo Mora.",
+    "carregando": "Carregando plano...",
+    "semPlano": "Nenhum plano ativo",
+    "semPlanoAjuda": "Seu condomínio não possui uma assinatura ativa. Entre em contato com o suporte Mora.",
+    "vigencia": "Vigência: {{inicio}} → {{fim}}",
+    "indeterminado": "indeterminado",
+    "mensalidade": "Mensalidade",
+    "incluidos_one": "Incluído no seu plano — {{count}} módulo",
+    "incluidos_other": "Incluído no seu plano — {{count}} módulos",
+    "naoIncluidos": "Não incluso no plano atual",
+    "alterar": "Para alterar seu plano, entre em contato com o suporte Mora."
+  },
+  "cliente": {
+    "toast": {
+      "erroCarregar": "Não foi possível carregar os planos.",
+      "escolha": "Escolha um plano.",
+      "limiteUsuarios": "O plano suporta no máximo {{max}} usuários, mas o condomínio possui {{qtd}}.",
+      "informeInicio": "Informe a data de início da vigência.",
+      "fimAntesInicio": "O fim da vigência não pode ser anterior ao início.",
+      "trocado": "Plano trocado.",
+      "contratado": "Plano contratado.",
+      "erroContratar": "Não foi possível contratar o plano.",
+      "cancelada": "Assinatura cancelada.",
+      "erroCancelar": "Não foi possível cancelar."
+    },
+    "trocar": {
+      "titulo": "Trocar de plano",
+      "mensagem": "A assinatura atual ({{atual}}) será encerrada e \"{{novo}}\" passa a valer a partir de {{data}}. O histórico fica registrado.",
+      "confirmar": "Trocar plano"
+    },
+    "cancelar": {
+      "titulo": "Cancelar assinatura",
+      "mensagem": "O cliente fica sem plano e deixa de ser cobrado. Os limites de \"{{plano}}\" param de valer."
+    },
+    "carregando": "Carregando plano…",
+    "desde": "desde {{data}}",
+    "dados": {
+      "limiteUsuarios": "Limite de usuários",
+      "modulosAtivos": "Módulos ativos",
+      "vigencia": "Vigência",
+      "ate": "até {{data}}",
+      "indeterminada": "indeterminada"
+    },
+    "semPlano": "Este cliente não tem plano contratado",
+    "semPlanoAjuda": "Ele usa a plataforma sem ser cobrado, e sem limites de plano aplicados.",
+    "contratarUm": "Contratar um plano",
+    "atual": "atual",
+    "ateUsuarios": "até {{max}} usuários",
+    "modulos_one": "{{count}} módulos",
+    "modulos_other": "{{count}} módulos",
+    "nenhumPlano": "Nenhum plano cadastrado. Crie um em Planos antes de contratar.",
+    "vigencia": {
+      "inicio": "Início da vigência",
+      "inicioAjuda": "Quando o plano passa a valer",
+      "fim": "Fim da vigência",
+      "fimAjuda": "Encerra nesta data",
+      "fimVazio": "Em branco: indeterminado",
+      "observacao": "Observação",
+      "observacaoAjuda": "Opcional — nº do contrato, condições",
+      "observacaoPlaceholder": "Contrato 2026/014"
+    },
+    "contratar": "Contratar plano",
+    "historico": "Histórico de assinaturas"
+  },
+  "gerenciar": {
+    "modulos": {
+      "portaria": "Portaria",
+      "reunioes": "Reuniões",
+      "vagas": "Vagas",
+      "entregas": "Entregas",
+      "areas_comuns": "Áreas Comuns",
+      "reclamacoes": "Reclamações",
+      "conhecimento": "Base de Conhecimento",
+      "votacoes": "Votações",
+      "veiculos": "Veículos",
+      "chaves": "Chaves"
+    },
+    "toast": {
+      "erroCarregar": "Erro ao carregar planos.",
+      "alteracaoSalva": "Alteração salva com sucesso.",
+      "cadastrado": "Plano cadastrado com sucesso.",
+      "erroSalvar": "Erro ao salvar plano."
+    },
+    "validacao": {
+      "obrigatorio": "Este campo é obrigatório.",
+      "maiorQueZero": "Informe valores maiores que zero.",
+      "precoNegativo": "O preço não pode ser negativo.",
+      "selecioneModulo": "Selecione um módulo."
+    },
+    "status": {
+      "desativar": {
+        "titulo": "Desativar plano",
+        "mensagem": "Deseja desativar o plano \"{{nome}}\"?",
+        "botao": "Desativar",
+        "sucesso": "Plano desativado com sucesso.",
+        "erro": "Erro ao desativar plano."
+      },
+      "ativar": {
+        "titulo": "Ativar plano",
+        "mensagem": "Deseja ativar o plano \"{{nome}}\"?",
+        "botao": "Ativar",
+        "sucesso": "Plano ativado com sucesso.",
+        "erro": "Erro ao ativar plano."
+      }
+    },
+    "sobretitulo": "Super Admin",
+    "titulo": "Gestão de",
+    "tituloDestaque": "Planos SaaS",
+    "planos": "Planos",
+    "contagem_one": "{{count}} plano cadastrado",
+    "contagem_other": "{{count}} planos cadastrados",
+    "novo": "Novo Plano",
+    "form": {
+      "editar": "Editar Plano #{{id}}",
+      "descartar": "Descartar Edição",
+      "nome": "Nome do Plano",
+      "nomePlaceholder": "Ex: Plano Essencial",
+      "maxCondominios": "Máx. Condomínios",
+      "exemplo": "Ex: {{valor}}",
+      "maxUsuarios": "Máx. Usuários / Condomínio",
+      "preco": "Preço Mensal (R$)",
+      "modulosAtivos": "Módulos Ativos",
+      "selecionarTodos": "Selecionar todos",
+      "limpar": "Limpar",
+      "selecionados_one": "{{count}} de {{total}} módulos selecionados",
+      "selecionados_other": "{{count}} de {{total}} módulos selecionados",
+      "salvarAlteracoes": "Salvar Alterações",
+      "cadastrar": "Cadastrar Plano"
+    },
+    "carregando": "Carregando planos...",
+    "vazio": "Nenhum plano cadastrado.",
+    "vazioAjuda": "Clique em \"Novo Plano\" para começar.",
+    "card": {
+      "condominios": "Condomínios",
+      "usuariosCond": "Usuários/Cond.",
+      "modulos": "Módulos ({{qtd}})",
+      "criado": "Criado: {{data}}",
+      "detalhes": "Detalhes"
+    },
+    "detalhe": {
+      "nome": "Nome",
+      "status": "Status",
+      "preco": "Preço Mensal",
+      "maxUsuarios": "Máx. Usuários/Cond.",
+      "atualizadoEm": "Atualizado em",
+      "todosModulos": "Todos os Módulos"
+    }
+  }
+}

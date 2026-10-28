@@ -1,0 +1,203 @@
+{
+  "cabecalho": {
+    "painelAdministrativo": "Admin Panel",
+    "condominio": "Condominium",
+    "gestaoDe": "Manage",
+    "minhas": "My",
+    "reunioes": "Meetings",
+    "votacoes": "Polls"
+  },
+  "acoes": {
+    "salvando": "Saving...",
+    "finalizar": "Finish",
+    "salvarAlteracoes": "Save Changes"
+  },
+  "status": {
+    "reuniao": {
+      "agendada": "Scheduled",
+      "cancelada": "Canceled",
+      "finalizada": "Finished"
+    },
+    "votacao": {
+      "aberta": "Open",
+      "encerrada": "Closed",
+      "cancelada": "Canceled"
+    },
+    "votacaoSigla": {
+      "aberta": "OPEN",
+      "encerrada": "CLOSED",
+      "cancelada": "CANCELED"
+    },
+    "presenca": {
+      "pendente": "Pending",
+      "confirmado": "Confirmed",
+      "recusado": "Declined"
+    }
+  },
+  "abas": {
+    "reunioes": "Meetings",
+    "atas": "Minutes"
+  },
+  "reunioes": {
+    "titulo": "Meetings",
+    "nova": "New Meeting",
+    "editarId": "Edit Meeting #{{id}}",
+    "descartarEdicao": "Discard Changes",
+    "form": {
+      "titulo": "Title",
+      "tituloPlaceholder": "e.g. Condominium Meeting",
+      "descricao": "Description",
+      "descricaoPlaceholder": "Meeting description",
+      "inicio": "Start",
+      "fim": "End",
+      "organizador": "Organizer",
+      "voce": "You ({{nome}})",
+      "carregando": "Loading...",
+      "selecionarConvidados": "Select Guests",
+      "nenhumConvidado": "No guests selected.",
+      "buscarMoradores": "Search residents by name, email, block or unit...",
+      "nenhumMorador": "No other residents registered.",
+      "nomeApt": "{{nome}} (Unit {{apt}})",
+      "blocoApt": "Block {{bloco}} · Unit {{apt}}",
+      "criar": "Create Meeting"
+    },
+    "busca": {
+      "label": "Search meetings by date",
+      "buscando": "Searching...",
+      "encontradas": "Meetings found for {{data}}",
+      "nenhuma": "No meetings found for this date.",
+      "erro": "Failed to search meetings."
+    },
+    "card": {
+      "id": "ID: #{{id}}",
+      "organizador": "Organizer",
+      "inicio": "Start: {{data}}",
+      "fim": "End: {{data}}",
+      "entrarMeet": "Join Google Meet",
+      "suaPresenca": "Your Attendance",
+      "recusar": "Decline",
+      "criarAta": "Create Minutes"
+    },
+    "detalhe": {
+      "googleMeet": "Google Meet",
+      "convidados": "Guests and Attendance ({{total}})",
+      "nenhumConvidado": "No guests in this meeting.",
+      "usuarioId": "User ID #{{id}}"
+    },
+    "ata": {
+      "carregando": "Loading minutes...",
+      "titulo": "Meeting Minutes",
+      "editar": "Edit Minutes",
+      "criar": "Create Minutes",
+      "topicos": "Topics Discussed",
+      "topicosPlaceholder": "List the main topics discussed...",
+      "decisoes": "Decisions Made",
+      "decisoesPlaceholder": "List the decisions and resolutions agreed on...",
+      "salvar": "Save Minutes",
+      "presentes": "Attendees",
+      "idPresente": "ID #{{id}}",
+      "publicadaEm": "Published on: {{data}}"
+    },
+    "semana": {
+      "titulo": "My Meetings This Week",
+      "periodo": "Period: {{inicio}} to {{fim}}",
+      "atualizar": "Refresh meetings",
+      "carregando": "Loading meetings...",
+      "vazio": "You have no meetings scheduled this week."
+    },
+    "toast": {
+      "atualizada": "Meeting updated successfully!",
+      "agendada": "Meeting scheduled successfully!",
+      "erroSalvar": "Failed to save meeting.",
+      "ataAtualizada": "Minutes updated successfully!",
+      "ataCriada": "Minutes created successfully!",
+      "erroSalvarAta": "Failed to save minutes: {{erro}}",
+      "erroCancelar": "Failed to cancel meeting.",
+      "erroFinalizar": "Failed to finish meeting.",
+      "avaliacaoRegistrada": "Rating saved!",
+      "erroAvaliar": "Failed to submit rating.",
+      "respostaRegistrada": "Response saved!",
+      "erroPresenca": "Failed to respond to the invitation.",
+      "erroAbrirAta": "Failed to open minutes.",
+      "erroDetalhes": "Failed to load meeting details."
+    },
+    "confirmar": {
+      "cancelarTitulo": "Cancel meeting",
+      "cancelarMensagem": "Do you want to cancel this meeting?",
+      "cancelarBotao": "Cancel meeting",
+      "finalizarTitulo": "Finish meeting",
+      "finalizarMensagem": "Do you want to finish this meeting?"
+    }
+  },
+  "atas": {
+    "titulo": "Meeting Minutes",
+    "idReuniao": "Meeting ID",
+    "idPlaceholder": "Enter the meeting ID",
+    "naoEncontrada": "No minutes found for this meeting. You can create them.",
+    "erroSalvar": "Failed to save minutes.",
+    "tituloId": "Minutes of Meeting #{{id}}",
+    "presentesIds": "Attendees (IDs)",
+    "nova": "New Minutes",
+    "editar": "Edit Minutes",
+    "criar": "Create Minutes",
+    "topicosPlaceholder": "List the topics discussed",
+    "decisoesPlaceholder": "List the decisions made",
+    "registrar": "Save Minutes"
+  },
+  "votacoes": {
+    "titulo": "Polls",
+    "nova": "New Poll",
+    "form": {
+      "titulo": "Title",
+      "tituloPlaceholder": "e.g. Budget approval",
+      "descricao": "Description",
+      "descricaoPlaceholder": "Poll description",
+      "dataEncerramento": "Closing Date (optional)",
+      "opcoes": "Options (comma-separated)",
+      "opcoesPlaceholder": "e.g. Yes, No, Abstain",
+      "criar": "Create Poll"
+    },
+    "buscarLabel": "Search polls by title",
+    "buscarPlaceholder": "Enter the poll title",
+    "doCondominio": "Condominium Polls",
+    "disponiveis": "Available Polls",
+    "buscando": "Searching polls...",
+    "nenhuma": "No polls found in this condominium.",
+    "erroBuscar": "Failed to search polls.",
+    "encerrar": "Close",
+    "encerramento": "Closes:",
+    "opcoes": "Options",
+    "resultado_one": "{{pct}}% ({{count}} vote)",
+    "resultado_other": "{{pct}}% ({{count}} votes)",
+    "jaVotou": "You have already voted in this poll!",
+    "registrando": "Submitting...",
+    "confirmarVoto": "Confirm Vote",
+    "toast": {
+      "criada": "Poll created!",
+      "erroCriar": "Failed to create poll.",
+      "encerrada": "Poll closed!",
+      "erroEncerrar": "Failed to close poll.",
+      "votoRegistrado": "Vote recorded!",
+      "erroVoto": "Failed to record vote."
+    },
+    "confirmar": {
+      "titulo": "Close poll",
+      "mensagem": "Do you want to close this poll?"
+    }
+  },
+  "minhas": {
+    "proximas": "Upcoming Meetings",
+    "vazio": "No meetings scheduled right now.",
+    "erroCarregar": "Failed to load your meetings.",
+    "id": "ID: {{id}}",
+    "semDescricao": "No description.",
+    "inicio": "Start",
+    "fimEstimado": "Estimated End",
+    "acesso": "Meeting Access",
+    "entrarMeet": "Join Google Meet",
+    "disponivelEm15": "Available 15 minutes before the start",
+    "ataTitulo": "Meeting Minutes",
+    "topicos": "Topics Discussed",
+    "decisoes": "Decisions Made"
+  }
+}

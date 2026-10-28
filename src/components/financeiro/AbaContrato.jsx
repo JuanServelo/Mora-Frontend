@@ -1,6 +1,7 @@
 // src/components/financeiro/AbaContrato.jsx
 // Dono e inquilino: contrato de locação da unidade (RF-15). Só o dono cadastra.
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Icone } from "../icones/Icone";
 import { useAuth } from "../../contexts/AuthContext";
 import { useToast } from "../../contexts/ToastContext";
@@ -17,6 +18,7 @@ import { AvisoDivergencia } from "../adm/financeiro/PainelContratos";
 const VAZIO = { inquilinoUsuarioId: "", inicio: "", fim: "", valorAluguel: "", responsavelTaxas: "INQUILINO" };
 
 export function AbaContrato() {
+  const { t } = useTranslation("financeiro");
   const { usuario } = useAuth();
   const toast = useToast();
   const confirm = useConfirm();
@@ -34,9 +36,9 @@ export function AbaContrato() {
       setContratos(data.contratos ?? []);
     } catch (err) {
       setContratos([]);
-      toast.error(mensagemDe(err, "Não foi possível carregar o contrato."));
+      toast.error(mensagemDe(err, t("abaContrato.toast.erroCarregar")));
     }
-  }, [toast]);
+  }, [toast, t]);
 
   useEffect(() => { carregar(); }, [carregar]);
 
@@ -49,8 +51,8 @@ export function AbaContrato() {
 
   const nomeDe = useMemo(() => {
     const mapa = new Map(moradores.map((m) => [m.id, m.nome]));
-    return (id) => (id ? mapa.get(id) ?? "outra pessoa" : "—");
-  }, [moradores]);
+    return (id) => (id ? mapa.get(id) ?? t("abaContrato.outraPessoa") : "—");
+  }, [moradores, t]);
 
   async function salvar() {
     setSalvando(true);
@@ -61,11 +63,11 @@ export function AbaContrato() {
         fim: form.fim || null,
         valorAluguel: form.valorAluguel || null,
       });
-      toast.success("Contrato cadastrado.");
+      toast.success(t("contratos.toast.cadastrado"));
       setNovo(false);
       carregar();
     } catch (err) {
-      toast.error(mensagemDe(err, "Não foi possível cadastrar o contrato."));
+      toast.error(mensagemDe(err, t("contratos.toast.erroCadastrar")));
     } finally {
       setSalvando(false);
     }
@@ -73,18 +75,18 @@ export function AbaContrato() {
 
   async function encerrar(c) {
     const ok = await confirm({
-      titulo: "Encerrar contrato",
-      mensagem: "O contrato deixa de ser vigente hoje.",
-      confirmarTexto: "Encerrar",
+      titulo: t("contratos.encerrar.titulo"),
+      mensagem: t("abaContrato.encerrarMensagem"),
+      confirmarTexto: t("contratos.encerrar.botao"),
       variante: "danger",
     });
     if (!ok) return;
     try {
       await financeiroApi.encerrarMeuContrato(c.id);
-      toast.success("Contrato encerrado.");
+      toast.success(t("contratos.toast.encerrado"));
       carregar();
     } catch (err) {
-      toast.error(mensagemDe(err, "Não foi possível encerrar."));
+      toast.error(mensagemDe(err, t("abaContrato.toast.erroEncerrar")));
     }
   }
 
@@ -99,31 +101,31 @@ export function AbaContrato() {
         <div className="flex justify-end">
           <button onClick={() => { setForm({ ...VAZIO, inicio: hojeCampo() }); setNovo(true); }} className={BOTAO_PRIMARIO}>
             <Icone name="add" className="text-lg" />
-            Cadastrar contrato
+            {t("abaContrato.cadastrar")}
           </button>
         </div>
       )}
 
       {!contratos.length ? (
-        <Vazio icone="contract" texto="Nenhum contrato de locação registrado para esta unidade." />
+        <Vazio icone="contract" texto={t("abaContrato.vazio")} />
       ) : contratos.map((c) => (
         <article key={c.id} className="glass-panel rounded-2xl p-4 space-y-3">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div className="text-sm space-y-0.5">
               <p className="font-semibold text-on-surface">
-                {formatarData(c.inicio)} até {c.fim ? formatarData(c.fim) : "sem data de fim"}
+                {t("contratos.lista.periodo", { inicio: formatarData(c.inicio), fim: c.fim ? formatarData(c.fim) : t("contratos.lista.semFim") })}
               </p>
               <p className="text-on-surface-variant">
-                Proprietário: {nomeDe(c.proprietarioUsuarioId)} · Inquilino: {nomeDe(c.inquilinoUsuarioId)}
+                {t("contratos.lista.partes", { proprietario: nomeDe(c.proprietarioUsuarioId), inquilino: nomeDe(c.inquilinoUsuarioId) })}
               </p>
               <p className="text-on-surface-variant">
-                {c.valorAluguelCentavos != null && `Aluguel ${formatarBRL(c.valorAluguelCentavos)} · `}
-                Taxa do condomínio paga pelo {c.responsavelTaxas === "INQUILINO" ? "inquilino" : "proprietário"}
+                {c.valorAluguelCentavos != null && `${t("abaContrato.aluguel", { valor: formatarBRL(c.valorAluguelCentavos) })} · `}
+                {c.responsavelTaxas === "INQUILINO" ? t("abaContrato.taxaInquilino") : t("abaContrato.taxaProprietario")}
               </p>
             </div>
             <div className="flex items-center gap-2">
-              <Selo texto={c.ativo ? "Vigente" : "Encerrado"} tom={c.ativo ? "ok" : "neutro"} />
-              {ehDono && c.ativo && <button onClick={() => encerrar(c)} className={BOTAO_SECUNDARIO}>Encerrar</button>}
+              <Selo texto={c.ativo ? t("contratos.lista.vigente") : t("contratos.lista.encerrado")} tom={c.ativo ? "ok" : "neutro"} />
+              {ehDono && c.ativo && <button onClick={() => encerrar(c)} className={BOTAO_SECUNDARIO}>{t("contratos.encerrar.botao")}</button>}
             </div>
           </div>
           <AvisoDivergencia contrato={c} nomeDe={nomeDe} />
@@ -131,54 +133,53 @@ export function AbaContrato() {
       ))}
 
       {novo && (
-        <Janela titulo="Cadastrar contrato" aoFechar={() => setNovo(false)}>
+        <Janela titulo={t("abaContrato.cadastrar")} aoFechar={() => setNovo(false)}>
           <div>
-            <label className={ROTULO}>Inquilino</label>
+            <label className={ROTULO}>{t("contratos.form.inquilino")}</label>
             <select value={form.inquilinoUsuarioId} onChange={(e) => setForm((f) => ({ ...f, inquilinoUsuarioId: e.target.value }))} className={CAMPO}>
-              <option value="">Selecione</option>
+              <option value="">{t("multas.form.selecione")}</option>
               {inquilinos.map((m) => <option key={m.id} value={m.id}>{m.nome}</option>)}
             </select>
             {!inquilinos.length && (
               <p className="text-xs text-on-surface-variant mt-1">
-                Cadastre o inquilino como ocupante da unidade no seu perfil antes.
+                {t("abaContrato.semInquilinos")}
               </p>
             )}
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className={ROTULO}>Início</label>
+              <label className={ROTULO}>{t("contratos.form.inicio")}</label>
               <input type="date" value={form.inicio} onChange={(e) => setForm((f) => ({ ...f, inicio: e.target.value }))} className={CAMPO} />
             </div>
             <div>
-              <label className={ROTULO}>Fim (opcional)</label>
+              <label className={ROTULO}>{t("contratos.form.fim")}</label>
               <input type="date" min={form.inicio} value={form.fim} onChange={(e) => setForm((f) => ({ ...f, fim: e.target.value }))} className={CAMPO} />
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className={ROTULO}>Aluguel (R$, opcional)</label>
+              <label className={ROTULO}>{t("contratos.form.aluguel")}</label>
               <input type="text" inputMode="decimal" placeholder="0,00" value={form.valorAluguel} onChange={(e) => setForm((f) => ({ ...f, valorAluguel: e.target.value }))} className={CAMPO} />
             </div>
             <div>
-              <label className={ROTULO}>Quem paga a taxa</label>
+              <label className={ROTULO}>{t("contratos.form.quemPaga")}</label>
               <select value={form.responsavelTaxas} onChange={(e) => setForm((f) => ({ ...f, responsavelTaxas: e.target.value }))} className={CAMPO}>
-                <option value="INQUILINO">Inquilino</option>
-                <option value="PROPRIETARIO">Eu, proprietário</option>
+                <option value="INQUILINO">{t("contratos.form.inquilino")}</option>
+                <option value="PROPRIETARIO">{t("abaContrato.euProprietario")}</option>
               </select>
             </div>
           </div>
           <p className="text-xs text-on-surface-variant">
-            O contrato registra o que foi combinado. Quem recebe a fatura do condomínio continua sendo
-            definido pela transferência de responsabilidade financeira da unidade.
+            {t("abaContrato.aviso")}
           </p>
           <div className="flex gap-3">
-            <button onClick={() => setNovo(false)} className={`${BOTAO_SECUNDARIO} flex-1`}>Cancelar</button>
+            <button onClick={() => setNovo(false)} className={`${BOTAO_SECUNDARIO} flex-1`}>{t("comum:acoes.cancelar")}</button>
             <button
               onClick={salvar}
               disabled={salvando || !form.inicio || (form.responsavelTaxas === "INQUILINO" && !form.inquilinoUsuarioId)}
               className={`${BOTAO_PRIMARIO} flex-1`}
             >
-              {salvando ? "Salvando..." : "Cadastrar"}
+              {salvando ? t("geral.salvando") : t("contratos.form.cadastrar")}
             </button>
           </div>
         </Janela>

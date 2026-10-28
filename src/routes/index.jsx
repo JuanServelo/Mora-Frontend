@@ -12,6 +12,7 @@ import { GerenciarUsuarios } from "../pages/adm/GerenciarUsuarios";
 import { GerenciarEstruturas } from "../pages/adm/GerenciarEstruturas";
 import { GerenciarReunioes } from "../pages/adm/GerenciarReunioes";
 import { GerenciarReclamacoes } from "../pages/adm/GerenciarReclamacoes";
+import { GerenciarOrdensServico } from "../pages/adm/GerenciarOrdensServico";
 import { GerenciarEntregas } from "../pages/adm/GerenciarEntregas";
 import { GerenciarConhecimento } from "../pages/adm/GerenciarConhecimento";
 import { GerenciarPerfis } from "../pages/adm/GerenciarPerfis";
@@ -155,6 +156,7 @@ export const router = createBrowserRouter([
       { path: "/adm/reunioes", element: <AdminRoute><GerenciarReunioes /></AdminRoute> },
       { path: "/adm/votacoes", element: <AdminRoute><GerenciarVotacoes /></AdminRoute> },
       { path: "/adm/reclamacoes", element: <AdminRoute><GerenciarReclamacoes /></AdminRoute> },
+      { path: "/adm/ordens-servico", element: <AdminRoute><GerenciarOrdensServico /></AdminRoute> },
       { path: "/adm/conhecimento", element: <AdminRoute><GerenciarConhecimento /></AdminRoute> },
       { path: "/adm/veiculos", element: <GerenciarVeiculos /> },
 

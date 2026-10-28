@@ -1,0 +1,123 @@
+{
+  "views": {
+    "detalhes": "Account Details",
+    "privacidade": "Privacy & Security",
+    "aparencia": "Appearance",
+    "familia": "Unit occupants",
+    "cobranca": "Billing History"
+  },
+  "itens": {
+    "detalhes": { "titulo": "Account Details", "desc": "Personal and residence information" },
+    "privacidade": { "titulo": "Privacy & Security", "desc": "Password, biometrics and access" },
+    "aparencia": { "titulo": "Appearance", "desc": "Light, dark or your device's theme" },
+    "familia": { "titulo": "Unit occupants", "desc": "Manage the Lessees, Occupants and Guests linked to your unit" },
+    "cobranca": { "titulo": "Billing History", "desc": "Past invoices and receipts" }
+  },
+  "detalhes": {
+    "foto": {
+      "titulo": "Profile Photo",
+      "formatos": "JPG or PNG - Max. 5MB",
+      "enviando": "Uploading...",
+      "alterar": "Change"
+    },
+    "campos": {
+      "nome": { "label": "Full Name", "placeholder": "Your name" },
+      "email": { "label": "Email", "placeholder": "you@email.com" },
+      "telefone": { "label": "Phone", "placeholder": "(11) 99999-9999" },
+      "dataNascimento": "Date of Birth"
+    },
+    "validacao": {
+      "obrigatorio": "This field is required."
+    },
+    "msg": {
+      "salvo": "Your details have been updated.",
+      "erroSalvar": "Couldn't save your changes.",
+      "fotoAtualizada": "Photo updated.",
+      "erroFoto": "Couldn't upload the photo."
+    },
+    "salvando": "Saving...",
+    "salvar": "Save Changes"
+  },
+  "privacidade": {
+    "titulo": "Change Password",
+    "campos": {
+      "senhaAtual": "Current Password",
+      "novaSenha": "New Password",
+      "novaSenhaPlaceholder": "Min. 8 characters, 1 number, 1 uppercase letter",
+      "confirmarSenha": "Confirm New Password"
+    },
+    "erros": {
+      "preencherTodos": "Please fill in all fields.",
+      "naoCoincidem": "Passwords don't match."
+    },
+    "msg": {
+      "atualizada": "Password updated.",
+      "erroAtualizar": "Couldn't update the password."
+    },
+    "atualizando": "Updating...",
+    "atualizar": "Update Password"
+  },
+  "familia": {
+    "form": {
+      "titulos": {
+        "lessee": "Add Lessee",
+        "occupant": "Add Occupant",
+        "guest": "Add Guest"
+      },
+      "campos": {
+        "nome": "Name *",
+        "nomePlaceholder": "Full name",
+        "cpf": "CPF *",
+        "email": "Email *",
+        "emailPlaceholder": "email@example.com",
+        "dataNascimento": "Date of birth",
+        "dataNascimentoObrigatoria": "Date of birth *"
+      },
+      "avisoGuest": "Guests don't have access to the system — they're added directly, with no email invitation.",
+      "salvando": "Saving...",
+      "cadastrar": "Add"
+    },
+    "card": {
+      "convitePendente": "Pending invitation",
+      "semAcesso": "No system access",
+      "responsavelFinanceiro": "Financially responsible",
+      "pendente": "pending",
+      "ativo": "active",
+      "removerVinculo": "Remove link"
+    },
+    "toast": {
+      "erroCarregar": "Couldn't load occupants.",
+      "conviteEnviado": "Invitation sent",
+      "codigo": "Code: {{codigo}}",
+      "erroCadastrar": "Couldn't add this person.",
+      "erroTransferir": "Transfer failed.",
+      "erroRemover": "Couldn't remove the link."
+    },
+    "transferir": {
+      "titulo": "Transfer financial responsibility",
+      "mensagem": "The active Lessee will become financially responsible and your profile will be changed to Absent Owner. Occupants and guests you added will be deactivated. Do you want to continue?",
+      "confirmar": "Transfer",
+      "aviso": "You are financially responsible for this unit. You can transfer this responsibility to the active Lessee."
+    },
+    "remover": {
+      "titulo": "Remove link",
+      "mensagem": "Remove {{nome}} from this unit?",
+      "confirmar": "Remove"
+    },
+    "semPermissao": "You don't have permission to manage occupants of this unit.",
+    "semUnidade": {
+      "titulo": "Your account isn't linked to a unit yet.",
+      "desc": "Wait for an administrator to link your user to an apartment."
+    },
+    "carregando": "Loading occupants...",
+    "vazio": "No occupants linked to this unit.",
+    "contagem_one": "{{count}} person linked to the unit",
+    "contagem_other": "{{count}} people linked to the unit",
+    "botoes": {
+      "lessee": "Add Lessee",
+      "occupant": "Add Occupant",
+      "guest": "Add Guest",
+      "gerenciarAcessos": "Manage Access"
+    }
+  }
+}

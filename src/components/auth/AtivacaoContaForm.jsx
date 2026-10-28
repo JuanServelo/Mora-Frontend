@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "../../contexts/AuthContext";
 import { Campo } from "../campos/Campo";
 import { Botao } from "../botoes/Botao";
@@ -8,6 +9,7 @@ import { validarSenha } from "../../utils/passwordValidation";
 import { mascararCpf, mascararTelefone, validarCpf, validarTelefone } from "../../utils/masks";
 
 export function AtivacaoContaForm({ tituloPasso1, subtituloPasso1, subtituloPasso2 }) {
+  const { t } = useTranslation("auth");
   const { validarConvite, ativarConta, getRedirectPath } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -49,7 +51,7 @@ export function AtivacaoContaForm({ tituloPasso1, subtituloPasso1, subtituloPass
     setCarregando(true);
 
     if (!codigo.trim()) {
-      setErros({ codigo: "Este campo é obrigatório." });
+      setErros({ codigo: t("ativacao.erros.obrigatorio") });
       setCarregando(false);
       return;
     }
@@ -60,7 +62,7 @@ export function AtivacaoContaForm({ tituloPasso1, subtituloPasso1, subtituloPass
       setCodigo(codigo.trim());
       setPasso(2);
     } catch (err) {
-      setErro(err.response?.data?.mensagem || "Erro ao validar código.");
+      setErro(err.response?.data?.mensagem || t("ativacao.erros.validarCodigo"));
     } finally {
       setCarregando(false);
     }
@@ -87,22 +89,22 @@ export function AtivacaoContaForm({ tituloPasso1, subtituloPasso1, subtituloPass
     const novosErros = {};
     const camposObrigatorios = ["nome", "email", "telefone", "cpf", "dataNascimento", "senha", "confirmacaoSenha"];
     for (const c of camposObrigatorios) {
-      if (!dados[c]) novosErros[c] = "Este campo é obrigatório.";
+      if (!dados[c]) novosErros[c] = t("ativacao.erros.obrigatorio");
     }
 
     if (!novosErros.cpf && !validarCpf(dados.cpf)) {
-      novosErros.cpf = "CPF inválido.";
+      novosErros.cpf = t("ativacao.erros.cpfInvalido");
     }
 
     if (!novosErros.dataNascimento) {
       const d = new Date(dados.dataNascimento);
       if (isNaN(d.getTime()) || d >= new Date()) {
-        novosErros.dataNascimento = "Data de nascimento inválida.";
+        novosErros.dataNascimento = t("ativacao.erros.dataInvalida");
       }
     }
 
     if (!novosErros.telefone && !validarTelefone(dados.telefone)) {
-      novosErros.telefone = "Telefone inválido. Informe DDD + número (10 ou 11 dígitos).";
+      novosErros.telefone = t("ativacao.erros.telefoneInvalido");
     }
 
     if (Object.keys(novosErros).length > 0) {
@@ -111,8 +113,8 @@ export function AtivacaoContaForm({ tituloPasso1, subtituloPasso1, subtituloPass
     }
 
     if (dados.senha !== dados.confirmacaoSenha) {
-      setErros({ senha: "As senhas não coincidem.", confirmacaoSenha: "As senhas não coincidem." });
-      setErro("As senhas não coincidem.");
+      setErros({ senha: t("geral.senhasDiferentes"), confirmacaoSenha: t("geral.senhasDiferentes") });
+      setErro(t("geral.senhasDiferentes"));
       return;
     }
 
@@ -131,7 +133,7 @@ export function AtivacaoContaForm({ tituloPasso1, subtituloPasso1, subtituloPass
       const data = err.response?.data;
       if (data?.erros) setErros(data.erros);
       if (data?.errosSenha) setErrosSenha(data.errosSenha);
-      setErro(data?.mensagem || "Erro ao criar conta.");
+      setErro(data?.mensagem || t("ativacao.erros.criarConta"));
     } finally {
       setCarregando(false);
     }
@@ -143,7 +145,7 @@ export function AtivacaoContaForm({ tituloPasso1, subtituloPasso1, subtituloPass
     <>
       <div className="mb-6">
         <h2 className="text-xl font-headline font-bold text-on-surface">
-          {passo === 1 ? tituloPasso1 : "Concluir cadastro"}
+          {passo === 1 ? tituloPasso1 : t("ativacao.concluirCadastro")}
         </h2>
         <p className="text-on-surface-variant text-sm mt-1">
           {passo === 1 ? subtituloPasso1 : subtituloPasso2}
@@ -155,8 +157,8 @@ export function AtivacaoContaForm({ tituloPasso1, subtituloPasso1, subtituloPass
           <Campo
             id="codigo"
             name="codigo"
-            label="Código de convite"
-            placeholder="Ex: AB12CD34"
+            label={t("ativacao.campos.codigo")}
+            placeholder={t("ativacao.campos.codigoPlaceholder")}
             icon="key"
             value={codigo}
             onChange={(e) => setCodigo(e.target.value.toUpperCase())}
@@ -165,7 +167,7 @@ export function AtivacaoContaForm({ tituloPasso1, subtituloPasso1, subtituloPass
           {erros.codigo && <p className="text-error text-sm">{erros.codigo}</p>}
           {erro && <p className="text-error text-sm font-medium">{erro}</p>}
           <Botao type="submit" disabled={carregando}>
-            {carregando ? "Validando..." : "Validar código"}
+            {carregando ? t("ativacao.validando") : t("ativacao.validar")}
             {!carregando && <Icone name="arrow_forward" className="text-xl" />}
           </Botao>
         </form>
@@ -174,8 +176,8 @@ export function AtivacaoContaForm({ tituloPasso1, subtituloPasso1, subtituloPass
           <Campo
             id="nome"
             name="nome"
-            label="Nome completo"
-            placeholder="Seu nome"
+            label={t("ativacao.campos.nome")}
+            placeholder={t("ativacao.campos.nomePlaceholder")}
             icon="person"
             defaultValue={convite?.nomePrecadastro || ""}
             className={campoErro("nome")}
@@ -185,9 +187,9 @@ export function AtivacaoContaForm({ tituloPasso1, subtituloPasso1, subtituloPass
           <Campo
             id="email"
             name="email"
-            label="E-mail"
+            label={t("field.email.label")}
             type="email"
-            placeholder="seu@email.com"
+            placeholder={t("geral.emailPlaceholder")}
             icon="mail"
             defaultValue={convite?.email || ""}
             className={campoErro("email")}
@@ -197,7 +199,7 @@ export function AtivacaoContaForm({ tituloPasso1, subtituloPasso1, subtituloPass
           <Campo
             id="telefone"
             name="telefone"
-            label="Telefone"
+            label={t("ativacao.campos.telefone")}
             placeholder="(11) 99999-9999"
             icon="phone"
             inputMode="numeric"
@@ -210,7 +212,7 @@ export function AtivacaoContaForm({ tituloPasso1, subtituloPasso1, subtituloPass
           <Campo
             id="cpf"
             name="cpf"
-            label="CPF"
+            label={t("ativacao.campos.cpf")}
             placeholder="000.000.000-00"
             icon="badge"
             inputMode="numeric"
@@ -223,7 +225,7 @@ export function AtivacaoContaForm({ tituloPasso1, subtituloPasso1, subtituloPass
           <Campo
             id="dataNascimento"
             name="dataNascimento"
-            label="Data de nascimento"
+            label={t("ativacao.campos.dataNascimento")}
             type="date"
             icon="cake"
             value={dataNascimento}
@@ -236,9 +238,9 @@ export function AtivacaoContaForm({ tituloPasso1, subtituloPasso1, subtituloPass
           <Campo
             id="senha"
             name="senha"
-            label="Senha"
+            label={t("field.password.label")}
             type="password"
-            placeholder="Mín. 8 caracteres"
+            placeholder={t("geral.senhaPlaceholder")}
             icon="lock"
             className={campoErro("senha")}
           />
@@ -250,9 +252,9 @@ export function AtivacaoContaForm({ tituloPasso1, subtituloPasso1, subtituloPass
           <Campo
             id="confirmacaoSenha"
             name="confirmacaoSenha"
-            label="Confirmar senha"
+            label={t("geral.confirmarSenha")}
             type="password"
-            placeholder="Repita a senha"
+            placeholder={t("geral.repitaSenha")}
             icon="lock_reset"
             className={campoErro("confirmacaoSenha")}
           />
@@ -266,11 +268,11 @@ export function AtivacaoContaForm({ tituloPasso1, subtituloPasso1, subtituloPass
               onClick={() => { setPasso(1); setErro(""); }}
               className="px-4 py-3 rounded-full text-sm font-semibold text-on-surface-variant hover:text-on-surface transition-colors cursor-pointer"
             >
-              Voltar
+              {t("comum:acoes.voltar")}
             </button>
             <div className="flex-1">
               <Botao type="submit" disabled={carregando}>
-                {carregando ? "Criando..." : "Criar conta"}
+                {carregando ? t("ativacao.criando") : t("ativacao.criar")}
                 {!carregando && <Icone name="check" className="text-xl" />}
               </Botao>
             </div>

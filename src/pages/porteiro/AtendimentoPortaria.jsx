@@ -1,6 +1,7 @@
 // src/pages/porteiro/AtendimentoPortaria.jsx
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
+import { useTranslation, Trans } from "react-i18next";
 import { Icone } from "../../components/icones/Icone";
 import { Campo } from "../../components/campos/Campo";
 import {
@@ -11,6 +12,7 @@ import {
 } from "../../services/portariaApi";
 import { acessoApi } from "../../services/acessoApi";
 import { formatarUnidade } from "../../utils/unidades";
+import i18n, { idiomaAtual } from "../../i18n";
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
 
@@ -19,13 +21,13 @@ function errMsg(err) {
     err?.response?.data?.mensagem ||
     err?.response?.data?.message ||
     err?.message ||
-    "Erro inesperado."
+    i18n.t("portaria:atendimento.erroInesperado")
   );
 }
 
 function fmtDH(iso) {
   if (!iso) return "—";
-  return new Date(iso).toLocaleString("pt-BR", {
+  return new Date(iso).toLocaleString(idiomaAtual(), {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
@@ -65,7 +67,8 @@ function validarCpf(cpf) {
 // ─── Indicador de passos ───────────────────────────────────────────────────────
 
 function IndicadorPassos({ passo }) {
-  const passos = ["Pessoa", "Veículo", "Confirmar"];
+  const { t } = useTranslation("portaria");
+  const passos = [t("atendimento.passos.pessoa"), t("atendimento.passos.veiculo"), t("atendimento.passos.confirmar")];
   return (
     <div className="flex items-center gap-0 mb-8">
       {passos.map((label, i) => {
@@ -111,17 +114,18 @@ function IndicadorPassos({ passo }) {
 // ─── Chip de status de acesso ─────────────────────────────────────────────────
 
 function ChipStatus({ status }) {
+  const { t } = useTranslation("portaria");
   if (status === "DENTRO")
     return (
       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-error/15 text-error">
         <span className="w-1.5 h-1.5 rounded-full bg-error" />
-        Dentro
+        {t("status.dentro")}
       </span>
     );
   return (
     <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-primary/10 text-primary">
       <span className="w-1.5 h-1.5 rounded-full bg-primary" />
-      Fora
+      {t("status.fora")}
     </span>
   );
 }
@@ -129,6 +133,7 @@ function ChipStatus({ status }) {
 // ─── Cartão de pessoa (resultado de busca) ────────────────────────────────────
 
 function CartaoPessoa({ pessoa, onSelecionar }) {
+  const { t } = useTranslation("portaria");
   return (
     <button
       type="button"
@@ -139,9 +144,9 @@ function CartaoPessoa({ pessoa, onSelecionar }) {
         <div>
           <p className="font-semibold text-on-surface text-sm">{pessoa.nome}</p>
           <p className="text-xs text-outline-variant mt-0.5">
-            {pessoa.documento || "Sem documento"}
+            {pessoa.documento || t("atendimento.semDocumento")}
             {pessoa.empresa ? ` · ${pessoa.empresa}` : ""}
-            {pessoa.apartamentoNumero ? ` · Apto ${pessoa.apartamentoNumero}` : ""}
+            {pessoa.apartamentoNumero ? ` · ${t("unidade.apto", { numero: pessoa.apartamentoNumero })}` : ""}
           </p>
         </div>
         <div className="flex items-center gap-2 shrink-0">
@@ -159,6 +164,7 @@ function CartaoPessoa({ pessoa, onSelecionar }) {
 // ─── Componente principal ─────────────────────────────────────────────────────
 
 export function AtendimentoPortaria() {
+  const { t } = useTranslation("portaria");
   const [searchParams] = useSearchParams();
 
   // ─── passo global ──────────────────────────────────────────────────────────
@@ -374,21 +380,21 @@ export function AtendimentoPortaria() {
 
   function validarPessoa() {
     const erros = {};
-    if (!formPessoa.nome.trim()) erros.nome = "Obrigatório";
+    if (!formPessoa.nome.trim()) erros.nome = t("comum:estado.obrigatorio");
     const cpfNorm = formPessoa.cpf.replace(/\D/g, "");
     if (!cpfNorm) {
-      erros.cpf = "Obrigatório";
+      erros.cpf = t("comum:estado.obrigatorio");
     } else if (!validarCpf(cpfNorm)) {
-      erros.cpf = "CPF inválido. Verifique os dígitos.";
+      erros.cpf = t("atendimento.validacao.cpfInvalido");
     }
     if (tipo === "VISITA") {
-      if (!formPessoa.apartamentoId) erros.apartamentoId = "Obrigatório";
+      if (!formPessoa.apartamentoId) erros.apartamentoId = t("comum:estado.obrigatorio");
       if (!formPessoa.moradorId && moradoresdaUnidade.length > 0) {
-        erros.moradorId = "Obrigatório";
+        erros.moradorId = t("comum:estado.obrigatorio");
       }
     }
     if (tipo === "SERVICO" && !formPessoa.empresa.trim()) {
-      erros.empresa = "Obrigatório";
+      erros.empresa = t("comum:estado.obrigatorio");
     }
     setErrosPessoa(erros);
     if (Object.keys(erros).length > 0) {
@@ -405,10 +411,10 @@ export function AtendimentoPortaria() {
     } else if (tipo === "VISITA") {
       const erros = {};
       if (!formPessoa.apartamentoId && !pessoaConfirmada?.apartamentoId) {
-        erros.apartamentoId = "Obrigatório";
+        erros.apartamentoId = t("comum:estado.obrigatorio");
       }
       if (!formPessoa.moradorId && moradoresdaUnidade.length > 0) {
-        erros.moradorId = "Obrigatório";
+        erros.moradorId = t("comum:estado.obrigatorio");
       }
       setErrosPessoa(erros);
       if (Object.keys(erros).length > 0) return;
@@ -444,9 +450,9 @@ export function AtendimentoPortaria() {
   function validarVeiculo() {
     const erros = {};
     const placa = normalizarPlaca(formVeiculo.placa);
-    if (!placa) { erros.placa = "Obrigatório"; }
+    if (!placa) { erros.placa = t("comum:estado.obrigatorio"); }
     else if (!/^[A-Z]{3}[0-9]{4}$|^[A-Z]{3}[0-9][A-Z][0-9]{2}$/.test(placa)) {
-      erros.placa = "Formato inválido (AAA9999 ou AAA9A99)";
+      erros.placa = t("atendimento.validacao.placaInvalida");
     }
     setErrosVeiculo(erros);
     if (erros.placa) document.getElementById("campo-placa")?.focus();
@@ -554,7 +560,7 @@ export function AtendimentoPortaria() {
               <Icone name="check_circle" className="text-primary text-4xl" />
             </div>
             <div>
-              <h2 className="font-headline text-2xl font-bold text-on-surface">Entrada registrada</h2>
+              <h2 className="font-headline text-2xl font-bold text-on-surface">{t("atendimento.sucesso.titulo")}</h2>
               <p className="text-on-surface-variant mt-2 text-sm">{resultado.mensagem}</p>
             </div>
 
@@ -562,13 +568,15 @@ export function AtendimentoPortaria() {
               <div className="glass-panel rounded-2xl p-4 text-left space-y-1 border border-outline-variant/10">
                 <p className="font-semibold text-on-surface">{resultado.pessoa.nome}</p>
                 <p className="text-xs text-outline-variant">
-                  {resultado.pessoa.tipoVisita === "VISITA" ? "Visitante" : "Terceiro"}
-                  {resultado.pessoa.apartamentoNumero ? ` · Apto ${resultado.pessoa.apartamentoNumero}` : ""}
+                  {resultado.pessoa.tipoVisita === "VISITA" ? t("perfis.visitante") : t("perfis.terceiro")}
+                  {resultado.pessoa.apartamentoNumero ? ` · ${t("unidade.apto", { numero: resultado.pessoa.apartamentoNumero })}` : ""}
                 </p>
                 {resultado.veiculo && (
                   <p className="text-xs text-on-surface-variant mt-1">
-                    Veículo: {resultado.veiculo.placa}
-                    {resultado.vagaNumero ? ` · Vaga ${resultado.vagaNumero}` : " · Sem vaga"}
+                    {t("atendimento.sucesso.veiculo", { placa: resultado.veiculo.placa })}
+                    {resultado.vagaNumero
+                      ? ` · ${t("atendimento.veiculo.vaga", { numero: resultado.vagaNumero })}`
+                      : ` · ${t("atendimento.veiculo.semVaga")}`}
                   </p>
                 )}
               </div>
@@ -580,13 +588,13 @@ export function AtendimentoPortaria() {
                 onClick={() => resetarTudo(null)}
                 className="flex-1 rounded-2xl py-3 px-4 bg-primary text-on-primary font-semibold text-sm hover:opacity-90 transition-opacity"
               >
-                Novo atendimento
+                {t("atendimento.sucesso.novoAtendimento")}
               </button>
               <Link
                 to="/entradas-e-saidas"
                 className="flex-1 rounded-2xl py-3 px-4 bg-surface-container-highest/40 text-on-surface font-semibold text-sm text-center hover:bg-surface-container-highest/60 transition-colors"
               >
-                Dentro agora
+                {t("abas.dentro")}
               </Link>
             </div>
           </div>
@@ -604,13 +612,13 @@ export function AtendimentoPortaria() {
         {/* Cabeçalho */}
         <div>
           <p className="text-on-surface-variant text-xs font-semibold uppercase tracking-widest mb-1">
-            Portaria
+            {t("cabecalho.titulo")}
           </p>
           <h1 className="font-headline text-3xl font-bold text-on-surface">
-            Atendimento
+            {t("atendimento.titulo")}
           </h1>
           <p className="text-on-surface-variant text-sm mt-1">
-            Registre a entrada de visitantes e prestadores de serviço.
+            {t("atendimento.descricao")}
           </p>
         </div>
 
@@ -620,14 +628,14 @@ export function AtendimentoPortaria() {
         <section className="glass-panel rounded-3xl p-6 border border-outline-variant/15 space-y-5">
           <h2 className="font-headline font-bold text-lg text-on-surface flex items-center gap-2">
             <span className="w-6 h-6 rounded-full bg-primary/15 text-primary text-xs font-bold flex items-center justify-center">1</span>
-            Identificação
+            {t("atendimento.identificacao")}
           </h2>
 
           {/* Tipo */}
           <div className="flex gap-3">
             {[
-              { value: "VISITA", label: "Visitante", icon: "person" },
-              { value: "SERVICO", label: "Terceiro / Serviço", icon: "engineering" },
+              { value: "VISITA", label: t("atendimento.tipos.visitante"), icon: "person" },
+              { value: "SERVICO", label: t("atendimento.tipos.servico"), icon: "engineering" },
             ].map(({ value, label, icon }) => (
               <button
                 key={value}
@@ -652,8 +660,8 @@ export function AtendimentoPortaria() {
                 <div className="space-y-3">
                   <Campo
                     id="campo-busca"
-                    label="Buscar por nome ou CPF"
-                    placeholder="Ex: João Silva ou 123.456.789-00"
+                    label={t("atendimento.busca.label")}
+                    placeholder={t("atendimento.busca.placeholder")}
                     icon="search"
                     value={busca}
                     onChange={(e) => { setBusca(e.target.value); setModoForm(false); setPessoaConfirmada(null); }}
@@ -662,7 +670,7 @@ export function AtendimentoPortaria() {
 
                   {/* Resultados */}
                   {buscando && (
-                    <p className="text-xs text-outline-variant text-center py-2">Buscando…</p>
+                    <p className="text-xs text-outline-variant text-center py-2">{t("atendimento.busca.buscando")}</p>
                   )}
 
                   {!buscando && busca.trim().length >= 2 && (
@@ -670,7 +678,7 @@ export function AtendimentoPortaria() {
                       {resultados.length > 0 && (
                         <>
                           <p className="text-xs text-outline-variant uppercase tracking-wider font-semibold">
-                            Encontrados
+                            {t("atendimento.busca.encontrados")}
                           </p>
                           {resultados.map((p) => (
                             <CartaoPessoa key={p.id} pessoa={p} onSelecionar={selecionarPessoa} />
@@ -680,7 +688,7 @@ export function AtendimentoPortaria() {
                       {resultados.length === 0 && !modoForm && (
                         <div className="text-center py-2">
                           <p className="text-sm text-on-surface-variant">
-                            Nenhum resultado para "{busca}".
+                            {t("atendimento.busca.semResultado", { busca })}
                           </p>
                         </div>
                       )}
@@ -690,8 +698,9 @@ export function AtendimentoPortaria() {
                         className="w-full rounded-2xl py-3 px-4 border border-dashed border-primary/40 text-primary text-sm font-semibold hover:bg-primary/5 transition-colors flex items-center justify-center gap-2"
                       >
                         <Icone name="person_add" className="text-lg" />
-                        Cadastrar novo
-                        {busca.trim() && `: "${busca.trim()}"`}
+                        {busca.trim()
+                          ? t("atendimento.busca.cadastrarNovoNome", { nome: busca.trim() })
+                          : t("atendimento.busca.cadastrarNovo")}
                       </button>
                     </div>
                   )}
@@ -703,24 +712,24 @@ export function AtendimentoPortaria() {
                 <div className="rounded-2xl border border-primary/30 bg-primary/5 p-4 space-y-2">
                   <div className="flex items-center gap-2">
                     <Icone name="verified" className="text-primary text-xl" />
-                    <p className="font-semibold text-primary text-sm">Pré-liberação ativa</p>
+                    <p className="font-semibold text-primary text-sm">{t("atendimento.preLib.titulo")}</p>
                   </div>
                   <p className="text-xs text-on-surface-variant">
-                    Autorizada por{" "}
+                    {t("atendimento.preLib.autorizadaPor")}{" "}
                     <span className="font-semibold text-on-surface">
                       {apartamentos.find((a) => a.id === preLibPessoa.unidadeId)?.numero
-                        ? `Apto ${apartamentos.find((a) => a.id === preLibPessoa.unidadeId).numero}`
-                        : "morador da unidade"}
+                        ? t("unidade.apto", { numero: apartamentos.find((a) => a.id === preLibPessoa.unidadeId).numero })
+                        : t("atendimento.preLib.moradorDaUnidade")}
                     </span>
-                    {" · válida até "}
-                    {String(preLibPessoa.validadeFim || "").split("-").reverse().join("/")}
+                    {" · "}
+                    {t("atendimento.preLib.validaAte", { data: String(preLibPessoa.validadeFim || "").split("-").reverse().join("/") })}
                   </p>
                   {preLibPessoa.placaVeiculo && (
                     <p className="text-xs text-on-surface-variant">
-                      Veículo autorizado:{" "}
+                      {t("atendimento.preLib.veiculoAutorizado")}{" "}
                       <span className="font-mono font-semibold text-on-surface">{preLibPessoa.placaVeiculo}</span>
                       {preLibPessoa.modeloVeiculo ? ` · ${preLibPessoa.modeloVeiculo}` : ""}
-                      {" — a vaga ainda é conferida na entrada."}
+                      {` — ${t("atendimento.preLib.vagaConferida")}`}
                     </p>
                   )}
                 </div>
@@ -752,10 +761,14 @@ export function AtendimentoPortaria() {
                   {/* Avisos */}
                   {pessoaConfirmada.status === "DENTRO" && (
                     <div className="rounded-xl bg-error/10 border border-error/20 p-3 text-xs text-error">
-                      <strong>{pessoaConfirmada.nome}</strong> já está no condomínio desde{" "}
-                      {fmtDH(pessoaConfirmada.horarioEntrada)}.{" "}
+                      <Trans
+                        t={t}
+                        i18nKey="atendimento.jaDentro"
+                        values={{ nome: pessoaConfirmada.nome, data: fmtDH(pessoaConfirmada.horarioEntrada) }}
+                        components={{ strong: <strong /> }}
+                      />{" "}
                       <Link to="/entradas-e-saidas" className="underline font-semibold">
-                        Ver dentro agora
+                        {t("atendimento.verDentroAgora")}
                       </Link>
                     </div>
                   )}
@@ -765,14 +778,14 @@ export function AtendimentoPortaria() {
                     <>
                       <div>
                         <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant ml-1 block mb-1">
-                          Unidade visitada <span className="text-red-500">*</span>
+                          {t("atendimento.form.unidadeVisitada")} <span className="text-red-500">*</span>
                         </label>
                         <select
                           className="w-full bg-surface-container-highest/40 rounded-xl py-3 px-4 text-sm text-on-surface border-none focus:outline-none focus:ring-2 focus:ring-primary/50"
                           value={formPessoa.apartamentoId || pessoaConfirmada.apartamentoId || ""}
                           onChange={(e) => setFormPessoa((f) => ({ ...f, apartamentoId: e.target.value, moradorId: "" }))}
                         >
-                          <option value="">Selecionar unidade...</option>
+                          <option value="">{t("atendimento.form.selecionarUnidade")}</option>
                           {apartamentos.map((a) => (
                             <option key={a.id} value={a.id}>
                               {formatarUnidade(a.blocoNome || a.bloco?.nome, a.numero)}
@@ -785,24 +798,24 @@ export function AtendimentoPortaria() {
                       {(formPessoa.apartamentoId || pessoaConfirmada.apartamentoId) && (
                         <div>
                           <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant ml-1 block mb-1">
-                            Morador responsável <span className="text-red-500">*</span>
+                            {t("atendimento.form.moradorResponsavel")} <span className="text-red-500">*</span>
                           </label>
                           {moradoresCarregando ? (
-                            <p className="text-xs text-on-surface-variant px-1 py-2">Carregando moradores…</p>
+                            <p className="text-xs text-on-surface-variant px-1 py-2">{t("atendimento.form.carregandoMoradores")}</p>
                           ) : erroMoradores ? (
                             <div className="rounded-xl bg-error/10 border border-error/20 p-3 text-xs text-error flex items-center justify-between gap-2">
                               <span>{erroMoradores}</span>
-                              <button type="button" onClick={recarregarMoradores} className="underline font-semibold shrink-0">Tentar novamente</button>
+                              <button type="button" onClick={recarregarMoradores} className="underline font-semibold shrink-0">{t("comum:acoes.tentarNovamente")}</button>
                             </div>
                           ) : moradoresdaUnidade.length === 0 ? (
-                            <p className="text-xs text-on-surface-variant px-1 py-2">Esta unidade não possui moradores ativos cadastrados.</p>
+                            <p className="text-xs text-on-surface-variant px-1 py-2">{t("atendimento.form.semMoradores")}</p>
                           ) : (
                             <select
                               className={`w-full bg-surface-container-highest/40 rounded-xl py-3 px-4 text-sm text-on-surface border-none focus:outline-none ${errosPessoa.moradorId ? "ring-2 ring-error/60" : "focus:ring-2 focus:ring-primary/50"}`}
                               value={formPessoa.moradorId}
                               onChange={(e) => setFormPessoa((f) => ({ ...f, moradorId: e.target.value }))}
                             >
-                              <option value="">Selecionar morador...</option>
+                              <option value="">{t("atendimento.form.selecionarMorador")}</option>
                               {moradoresdaUnidade.map((m) => (
                                 <option key={m.id} value={m.id}>{m.nome}</option>
                               ))}
@@ -822,22 +835,22 @@ export function AtendimentoPortaria() {
               {modoForm && (
                 <div className="space-y-4 border-t border-outline-variant/15 pt-4">
                   <p className="text-xs text-outline-variant uppercase tracking-wider font-semibold">
-                    Novo {tipo === "VISITA" ? "visitante" : "prestador de serviço"}
+                    {tipo === "VISITA" ? t("atendimento.form.novoVisitante") : t("atendimento.form.novoPrestador")}
                   </p>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <Campo
                       id="campo-nome"
-                      label="Nome completo"
+                      label={t("atendimento.form.nome")}
                       required
-                      placeholder="Ex: Maria da Silva"
+                      placeholder={t("atendimento.form.nomePlaceholder")}
                       value={formPessoa.nome}
                       onChange={(e) => setFormPessoa((f) => ({ ...f, nome: e.target.value }))}
                       error={errosPessoa.nome}
                     />
                     <Campo
                       id="campo-cpf"
-                      label="CPF"
+                      label={t("atendimento.form.cpf")}
                       required
                       placeholder="000.000.000-00"
                       value={formPessoa.cpf}
@@ -848,9 +861,9 @@ export function AtendimentoPortaria() {
                   </div>
                   <Campo
                     id="campo-telefone"
-                    label="Telefone"
+                    label={t("atendimento.form.telefone")}
                     optional
-                    placeholder="Ex: (11) 99999-9999"
+                    placeholder={t("atendimento.form.telefonePlaceholder")}
                     value={formPessoa.telefone}
                     onChange={(e) => setFormPessoa((f) => ({ ...f, telefone: e.target.value }))}
                   />
@@ -859,7 +872,7 @@ export function AtendimentoPortaria() {
                     <>
                       <div>
                         <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant ml-1 block mb-1.5">
-                          Unidade visitada <span className="text-red-500">*</span>
+                          {t("atendimento.form.unidadeVisitada")} <span className="text-red-500">*</span>
                         </label>
                         <select
                           id="campo-apartamentoId"
@@ -867,7 +880,7 @@ export function AtendimentoPortaria() {
                           value={formPessoa.apartamentoId}
                           onChange={(e) => setFormPessoa((f) => ({ ...f, apartamentoId: e.target.value, moradorId: "" }))}
                         >
-                          <option value="">Selecionar unidade...</option>
+                          <option value="">{t("atendimento.form.selecionarUnidade")}</option>
                           {apartamentos.map((a) => (
                             <option key={a.id} value={a.id}>
                               {formatarUnidade(a.blocoNome || a.bloco?.nome, a.numero)}
@@ -881,19 +894,19 @@ export function AtendimentoPortaria() {
 
                       <div>
                         <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant ml-1 block mb-1.5">
-                          Morador responsável <span className="text-red-500">*</span>
+                          {t("atendimento.form.moradorResponsavel")} <span className="text-red-500">*</span>
                         </label>
                         {!formPessoa.apartamentoId ? (
-                          <p className="text-xs text-on-surface-variant px-1 py-2">Selecione a unidade primeiro.</p>
+                          <p className="text-xs text-on-surface-variant px-1 py-2">{t("atendimento.form.selecioneUnidade")}</p>
                         ) : moradoresCarregando ? (
-                          <p className="text-xs text-on-surface-variant px-1 py-2">Carregando moradores…</p>
+                          <p className="text-xs text-on-surface-variant px-1 py-2">{t("atendimento.form.carregandoMoradores")}</p>
                         ) : erroMoradores ? (
                           <div className="rounded-xl bg-error/10 border border-error/20 p-3 text-xs text-error flex items-center justify-between gap-2">
                             <span>{erroMoradores}</span>
-                            <button type="button" onClick={recarregarMoradores} className="underline font-semibold shrink-0">Tentar novamente</button>
+                            <button type="button" onClick={recarregarMoradores} className="underline font-semibold shrink-0">{t("comum:acoes.tentarNovamente")}</button>
                           </div>
                         ) : moradoresdaUnidade.length === 0 ? (
-                          <p className="text-xs text-on-surface-variant px-1 py-2">Esta unidade não possui moradores ativos cadastrados.</p>
+                          <p className="text-xs text-on-surface-variant px-1 py-2">{t("atendimento.form.semMoradores")}</p>
                         ) : (
                           <select
                             id="campo-moradorId"
@@ -901,7 +914,7 @@ export function AtendimentoPortaria() {
                             value={formPessoa.moradorId}
                             onChange={(e) => setFormPessoa((f) => ({ ...f, moradorId: e.target.value }))}
                           >
-                            <option value="">Selecionar morador...</option>
+                            <option value="">{t("atendimento.form.selecionarMorador")}</option>
                             {moradoresdaUnidade.map((m) => (
                               <option key={m.id} value={m.id}>{m.nome}</option>
                             ))}
@@ -918,18 +931,18 @@ export function AtendimentoPortaria() {
                     <>
                       <Campo
                         id="campo-empresa"
-                        label="Empresa / Prestador"
+                        label={t("atendimento.form.empresa")}
                         required
-                        placeholder="Ex: Plombéria Silva"
+                        placeholder={t("atendimento.form.empresaPlaceholder")}
                         value={formPessoa.empresa}
                         onChange={(e) => setFormPessoa((f) => ({ ...f, empresa: e.target.value }))}
                         error={errosPessoa.empresa}
                       />
                       <Campo
                         id="campo-destino"
-                        label="Destino"
+                        label={t("atendimento.form.destino")}
                         optional
-                        placeholder="Ex: Apto 501 ou Salão de festas"
+                        placeholder={t("atendimento.form.destinoPlaceholder")}
                         value={formPessoa.destino}
                         onChange={(e) => setFormPessoa((f) => ({ ...f, destino: e.target.value }))}
                       />
@@ -938,9 +951,9 @@ export function AtendimentoPortaria() {
 
                   <Campo
                     id="campo-obs"
-                    label="Observações"
+                    label={t("atendimento.form.obs")}
                     optional
-                    placeholder="Informações adicionais"
+                    placeholder={t("atendimento.form.obsPlaceholder")}
                     value={formPessoa.obs}
                     onChange={(e) => setFormPessoa((f) => ({ ...f, obs: e.target.value }))}
                   />
@@ -954,7 +967,7 @@ export function AtendimentoPortaria() {
                   onClick={confirmarPessoa}
                   className="w-full rounded-2xl py-3 px-4 bg-primary text-on-primary font-semibold text-sm hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
                 >
-                  Próximo: Veículo
+                  {t("atendimento.proximoVeiculo")}
                   <Icone name="arrow_forward" className="text-lg" />
                 </button>
               )}
@@ -967,9 +980,9 @@ export function AtendimentoPortaria() {
               <div>
                 <p className="font-semibold text-on-surface text-sm">{pessoaConfirmada.nome || formPessoa.nome}</p>
                 <p className="text-xs text-outline-variant">
-                  {tipo === "VISITA" ? "Visitante" : "Terceiro"}
+                  {tipo === "VISITA" ? t("perfis.visitante") : t("perfis.terceiro")}
                   {(pessoaConfirmada.apartamentoNumero || aptSelecionado?.numero) &&
-                    ` · Apto ${pessoaConfirmada.apartamentoNumero || aptSelecionado?.numero}`}
+                    ` · ${t("unidade.apto", { numero: pessoaConfirmada.apartamentoNumero || aptSelecionado?.numero })}`}
                 </p>
               </div>
               <button
@@ -977,7 +990,7 @@ export function AtendimentoPortaria() {
                 onClick={() => { setPasso(1); setVeiculoConfirmado(null); setSemVeiculo(false); }}
                 className="text-xs text-primary font-semibold hover:underline"
               >
-                Alterar
+                {t("atendimento.alterar")}
               </button>
             </div>
           )}
@@ -988,8 +1001,8 @@ export function AtendimentoPortaria() {
           <section className="glass-panel rounded-3xl p-6 border border-outline-variant/15 space-y-5">
             <h2 className="font-headline font-bold text-lg text-on-surface flex items-center gap-2">
               <span className="w-6 h-6 rounded-full bg-primary/15 text-primary text-xs font-bold flex items-center justify-center">2</span>
-              Veículo
-              <span className="text-xs font-normal text-on-surface-variant normal-case">(opcional)</span>
+              {t("atendimento.passos.veiculo")}
+              <span className="text-xs font-normal text-on-surface-variant normal-case">{t("atendimento.opcional")}</span>
             </h2>
 
             {passo === 2 && (
@@ -999,8 +1012,8 @@ export function AtendimentoPortaria() {
                   <div className="flex items-start gap-3 rounded-xl bg-primary/10 border border-primary/20 p-4">
                     <Icone name="info" className="text-primary text-xl shrink-0 mt-0.5" />
                     <div>
-                      <p className="text-sm font-semibold text-primary">Visitante já está no condomínio</p>
-                      <p className="text-xs text-primary/80 mt-0.5">Será registrada apenas a entrada do veículo. A entrada da pessoa já existente é mantida.</p>
+                      <p className="text-sm font-semibold text-primary">{t("atendimento.veiculo.jaDentroTitulo")}</p>
+                      <p className="text-xs text-primary/80 mt-0.5">{t("atendimento.veiculo.jaDentroDescricao")}</p>
                     </div>
                   </div>
                 )}
@@ -1018,7 +1031,7 @@ export function AtendimentoPortaria() {
                     }`}
                   >
                     <Icone name="directions_walk" className="text-lg" />
-                    {semVeiculo ? "Entrou a pé — toque para desfazer" : "Entrou a pé / sem veículo"}
+                    {semVeiculo ? t("atendimento.veiculo.aPeDesfazer") : t("atendimento.veiculo.aPeSemVeiculo")}
                   </button>
                 )}
 
@@ -1043,7 +1056,7 @@ export function AtendimentoPortaria() {
                           }}
                           className="underline font-semibold shrink-0"
                         >
-                          Tentar novamente
+                          {t("comum:acoes.tentarNovamente")}
                         </button>
                       </div>
                     )}
@@ -1054,11 +1067,11 @@ export function AtendimentoPortaria() {
                         <div className="flex items-start gap-3">
                           <Icone name="block" className="text-error text-xl shrink-0 mt-0.5" />
                           <div>
-                            <p className="text-sm font-semibold text-error">Sem vaga disponível</p>
+                            <p className="text-sm font-semibold text-error">{t("atendimento.veiculo.semVagaTitulo")}</p>
                             <p className="text-xs text-error/80 mt-1">
                               {semVagasCadastradas
-                                ? `A unidade ${aptSelecionado ? formatarUnidade(aptSelecionado.blocoNome || aptSelecionado.bloco?.nome, aptSelecionado.numero) : ""} não possui vagas cadastradas. Não é possível registrar a entrada com automóvel — apenas entrada a pé.`
-                                : `A unidade ${aptSelecionado ? formatarUnidade(aptSelecionado.blocoNome || aptSelecionado.bloco?.nome, aptSelecionado.numero) : ""} não possui vaga disponível no momento. Não é possível registrar a entrada com automóvel — apenas entrada a pé.`}
+                                ? t("atendimento.veiculo.semVagasCadastradas", { unidade: aptSelecionado ? formatarUnidade(aptSelecionado.blocoNome || aptSelecionado.bloco?.nome, aptSelecionado.numero) : "" })
+                                : t("atendimento.veiculo.semVagaDisponivel", { unidade: aptSelecionado ? formatarUnidade(aptSelecionado.blocoNome || aptSelecionado.bloco?.nome, aptSelecionado.numero) : "" })}
                             </p>
                           </div>
                         </div>
@@ -1068,7 +1081,7 @@ export function AtendimentoPortaria() {
                           className="w-full rounded-xl py-2.5 px-4 border border-error/30 text-error text-sm font-semibold hover:bg-error/10 transition-colors flex items-center justify-center gap-2"
                         >
                           <Icone name="directions_walk" className="text-base" />
-                          Registrar entrada a pé
+                          {t("atendimento.veiculo.registrarAPe")}
                         </button>
                       </div>
                     )}
@@ -1081,8 +1094,8 @@ export function AtendimentoPortaria() {
                           <div className="space-y-3">
                             <Campo
                               id="campo-placa-busca"
-                              label="Buscar veículo por placa"
-                              placeholder="Ex: ABC1234"
+                              label={t("atendimento.veiculo.buscaLabel")}
+                              placeholder={t("atendimento.veiculo.buscaPlaceholder")}
                               icon="search"
                               value={buscaPlaca}
                               onChange={(e) => { setBuscaPlaca(e.target.value); setVeiculoConfirmado(null); setModoFormVeiculo(false); }}
@@ -1094,7 +1107,7 @@ export function AtendimentoPortaria() {
                               <div className="rounded-2xl border border-primary/30 bg-primary/5 p-4 space-y-2">
                                 <div className="flex items-center gap-2">
                                   <Icone name="verified" className="text-primary text-xl" />
-                                  <p className="font-semibold text-primary text-sm">Pré-liberação ativa</p>
+                                  <p className="font-semibold text-primary text-sm">{t("atendimento.preLib.titulo")}</p>
                                 </div>
                                 <p className="text-sm text-on-surface">
                                   <span className="font-semibold">{preLiberacao.nomeVisitante}</span>
@@ -1104,18 +1117,18 @@ export function AtendimentoPortaria() {
                                   {preLiberacao.corVeiculo ? ` · ${preLiberacao.corVeiculo}` : ""}
                                 </p>
                                 <p className="text-xs text-on-surface-variant">
-                                  Unidade responsável:{" "}
+                                  {t("atendimento.preLib.unidadeResponsavel")}{" "}
                                   <span className="font-semibold text-on-surface">
                                     {apartamentos.find((a) => a.id === preLiberacao.unidadeId)?.numero
-                                      ? `Apto ${apartamentos.find((a) => a.id === preLiberacao.unidadeId).numero}`
+                                      ? t("unidade.apto", { numero: apartamentos.find((a) => a.id === preLiberacao.unidadeId).numero })
                                       : "—"}
                                   </span>
-                                  {" · válida até "}
-                                  {String(preLiberacao.validadeFim || "").split("-").reverse().join("/")}
+                                  {" · "}
+                                  {t("atendimento.preLib.validaAte", { data: String(preLiberacao.validadeFim || "").split("-").reverse().join("/") })}
                                 </p>
                                 <p className="text-xs text-on-surface-variant flex items-start gap-1.5">
                                   <Icone name="info" className="text-sm shrink-0 mt-0.5" />
-                                  A pré-liberação não reserva vaga — a disponibilidade é conferida na entrada.
+                                  {t("atendimento.preLib.naoReservaVaga")}
                                 </p>
                               </div>
                             )}
@@ -1150,7 +1163,7 @@ export function AtendimentoPortaria() {
                                   className="w-full rounded-2xl py-3 px-4 border border-dashed border-primary/40 text-primary text-sm font-semibold hover:bg-primary/5 transition-colors flex items-center justify-center gap-2"
                                 >
                                   <Icone name="add" className="text-lg" />
-                                  Cadastrar veículo: {normalizarPlaca(buscaPlaca)}
+                                  {t("atendimento.veiculo.cadastrar", { placa: normalizarPlaca(buscaPlaca) })}
                                 </button>
                               </div>
                             )}
@@ -1160,11 +1173,11 @@ export function AtendimentoPortaria() {
                         {/* Form de novo veículo */}
                         {modoFormVeiculo && !veiculoConfirmado && (
                           <div className="space-y-4 border-t border-outline-variant/15 pt-4">
-                            <p className="text-xs text-outline-variant uppercase tracking-wider font-semibold">Dados do veículo</p>
+                            <p className="text-xs text-outline-variant uppercase tracking-wider font-semibold">{t("atendimento.veiculo.dados")}</p>
                             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                               <Campo
                                 id="campo-placa"
-                                label="Placa"
+                                label={t("atendimento.veiculo.placa")}
                                 required
                                 placeholder="ABC1234"
                                 value={formVeiculo.placa}
@@ -1173,17 +1186,17 @@ export function AtendimentoPortaria() {
                               />
                               <Campo
                                 id="campo-modelo"
-                                label="Modelo"
+                                label={t("atendimento.veiculo.modelo")}
                                 optional
-                                placeholder="Ex: Civic"
+                                placeholder={t("atendimento.veiculo.modeloPlaceholder")}
                                 value={formVeiculo.modelo}
                                 onChange={(e) => setFormVeiculo((f) => ({ ...f, modelo: e.target.value }))}
                               />
                               <Campo
                                 id="campo-cor"
-                                label="Cor"
+                                label={t("atendimento.veiculo.cor")}
                                 optional
-                                placeholder="Ex: Prata"
+                                placeholder={t("atendimento.veiculo.corPlaceholder")}
                                 value={formVeiculo.cor}
                                 onChange={(e) => setFormVeiculo((f) => ({ ...f, cor: e.target.value }))}
                               />
@@ -1214,11 +1227,11 @@ export function AtendimentoPortaria() {
                         {tipo === "VISITA" && (veiculoConfirmado || modoFormVeiculo) && aptId && (
                           <div className="space-y-3 border-t border-outline-variant/15 pt-4">
                             <p className="text-xs text-outline-variant uppercase tracking-wider font-semibold">
-                              Vaga de estacionamento
+                              {t("atendimento.veiculo.vagaEstacionamento")}
                             </p>
 
                             {vagasCarregando && (
-                              <p className="text-xs text-outline-variant text-center py-2">Verificando vagas…</p>
+                              <p className="text-xs text-outline-variant text-center py-2">{t("atendimento.veiculo.verificandoVagas")}</p>
                             )}
 
                             {vagasUnidade.length > 0 && (
@@ -1237,11 +1250,11 @@ export function AtendimentoPortaria() {
                                         : "border-outline-variant/30 text-on-surface hover:border-primary/40"
                                     }`}
                                   >
-                                    <p>Vaga {v.numero}</p>
+                                    <p>{t("atendimento.veiculo.vaga", { numero: v.numero })}</p>
                                     {v.tipo && <p className="text-xs font-normal opacity-70">{v.tipo}</p>}
                                     {!v.disponivel && (
                                       <p className="text-xs font-normal text-error mt-0.5">
-                                        Ocupada: {v.ocupadaPorPlaca} desde {v.ocupadaDesde}
+                                        {t("atendimento.veiculo.ocupada", { placa: v.ocupadaPorPlaca, desde: v.ocupadaDesde })}
                                       </p>
                                     )}
                                   </button>
@@ -1263,7 +1276,7 @@ export function AtendimentoPortaria() {
                   disabled={!semVeiculo && !veiculoBloqueado && !veiculoConfirmado && !modoFormVeiculo}
                   className="w-full rounded-2xl py-3 px-4 bg-primary text-on-primary font-semibold text-sm hover:opacity-90 transition-opacity flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
                 >
-                  Próximo: Confirmar
+                  {t("atendimento.proximoConfirmar")}
                   <Icone name="arrow_forward" className="text-lg" />
                 </button>
               </>
@@ -1274,7 +1287,7 @@ export function AtendimentoPortaria() {
               <div className="flex items-center justify-between rounded-xl bg-surface-container-highest/20 border border-outline-variant/15 px-4 py-3">
                 <div>
                   {semVeiculo ? (
-                    <p className="text-sm text-on-surface-variant">Entrou a pé</p>
+                    <p className="text-sm text-on-surface-variant">{t("atendimento.veiculo.entrouAPe")}</p>
                   ) : (
                     <>
                       <p className="font-semibold text-on-surface text-sm">
@@ -1282,8 +1295,8 @@ export function AtendimentoPortaria() {
                       </p>
                       <p className="text-xs text-outline-variant">
                         {tipo === "VISITA" && vagaId
-                          ? `Vaga ${vagasUnidade.find((v) => v.id === vagaId)?.numero || ""}`
-                          : "Sem vaga"}
+                          ? t("atendimento.veiculo.vaga", { numero: vagasUnidade.find((v) => v.id === vagaId)?.numero || "" })
+                          : t("atendimento.veiculo.semVaga")}
                       </p>
                     </>
                   )}
@@ -1293,7 +1306,7 @@ export function AtendimentoPortaria() {
                   onClick={() => setPasso(2)}
                   className="text-xs text-primary font-semibold hover:underline"
                 >
-                  Alterar
+                  {t("atendimento.alterar")}
                 </button>
               </div>
             )}
@@ -1305,7 +1318,7 @@ export function AtendimentoPortaria() {
           <section className="glass-panel rounded-3xl p-6 border border-outline-variant/15 space-y-5">
             <h2 className="font-headline font-bold text-lg text-on-surface flex items-center gap-2">
               <span className="w-6 h-6 rounded-full bg-primary/15 text-primary text-xs font-bold flex items-center justify-center">3</span>
-              Confirmar entrada
+              {t("atendimento.confirmarEntrada")}
             </h2>
 
             {/* Resumo */}
@@ -1317,9 +1330,9 @@ export function AtendimentoPortaria() {
                     {pessoaConfirmada?.nome || formPessoa.nome}
                   </p>
                   <p className="text-xs text-on-surface-variant">
-                    {tipo === "VISITA" ? "Visitante" : "Terceiro"}
-                    {aptSelecionado?.numero && ` · Apto ${aptSelecionado.numero}`}
-                    {pessoaConfirmada?.apartamentoNumero && ` · Apto ${pessoaConfirmada.apartamentoNumero}`}
+                    {tipo === "VISITA" ? t("perfis.visitante") : t("perfis.terceiro")}
+                    {aptSelecionado?.numero && ` · ${t("unidade.apto", { numero: aptSelecionado.numero })}`}
+                    {pessoaConfirmada?.apartamentoNumero && ` · ${t("unidade.apto", { numero: pessoaConfirmada.apartamentoNumero })}`}
                     {(formPessoa.empresa || pessoaConfirmada?.empresa) &&
                       ` · ${formPessoa.empresa || pessoaConfirmada?.empresa}`}
                     {(formPessoa.destino || pessoaConfirmada?.destino) &&
@@ -1332,7 +1345,7 @@ export function AtendimentoPortaria() {
                 <Icone name="directions_car" className="text-secondary text-xl mt-0.5 shrink-0" />
                 <div>
                   {semVeiculo ? (
-                    <p className="text-sm text-on-surface-variant">Sem veículo</p>
+                    <p className="text-sm text-on-surface-variant">{t("atendimento.veiculo.semVeiculo")}</p>
                   ) : (
                     <>
                       <p className="font-semibold text-on-surface text-sm">
@@ -1341,9 +1354,9 @@ export function AtendimentoPortaria() {
                       <p className="text-xs text-on-surface-variant">
                         {tipo === "VISITA"
                           ? vagaId
-                            ? `Vaga ${vagasUnidade.find((v) => v.id === vagaId)?.numero || ""}`
-                            : "Sem vaga"
-                          : "Sem vaga (terceiro)"}
+                            ? t("atendimento.veiculo.vaga", { numero: vagasUnidade.find((v) => v.id === vagaId)?.numero || "" })
+                            : t("atendimento.veiculo.semVaga")
+                          : t("atendimento.veiculo.semVagaTerceiro")}
                       </p>
                     </>
                   )}
@@ -1366,12 +1379,12 @@ export function AtendimentoPortaria() {
               {confirmando ? (
                 <>
                   <span className="w-4 h-4 border-2 border-on-primary/40 border-t-on-primary rounded-full animate-spin" />
-                  Registrando…
+                  {t("atendimento.registrando")}
                 </>
               ) : (
                 <>
                   <Icone name="login" className="text-xl" />
-                  Confirmar entrada
+                  {t("atendimento.confirmarEntrada")}
                 </>
               )}
             </button>

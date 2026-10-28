@@ -1,0 +1,95 @@
+{
+  "status": {
+    "pendente": "Pendente",
+    "retirada": "Retirada"
+  },
+  "erros": {
+    "marcarRetirada": "Não foi possível marcar como retirada. Tente novamente."
+  },
+  "header": {
+    "secao": "Serviços",
+    "tituloOperador": "Controle de ",
+    "tituloMorador": "Minhas ",
+    "destaque": "Encomendas",
+    "descOperador": "Registre a chegada de encomendas para moradores e funcionários.",
+    "unidade": "{{bloco}} · Apt {{apartamento}}"
+  },
+  "stats": {
+    "total": "Total",
+    "pendentes": "Pendentes",
+    "retiradas": "Retiradas"
+  },
+  "filtros": {
+    "titulo": "Filtros",
+    "limpar": "Limpar filtros",
+    "buscar": "Buscar",
+    "buscarPlaceholder": "Descrição ou remetente...",
+    "status": "Status",
+    "opcoes": {
+      "todas": "Todas",
+      "pendentes": "Pendentes",
+      "retiradas": "Retiradas"
+    },
+    "exibindo": "Exibindo",
+    "deTotal_one": "de {{count}} encomendas",
+    "deTotal_other": "de {{count}} encomendas"
+  },
+  "lista": {
+    "carregando": "Carregando...",
+    "vazio": {
+      "titulo": "Nenhuma encomenda encontrada.",
+      "desc": "Quando uma encomenda for registrada para o seu apartamento, ela aparecerá aqui."
+    },
+    "semFiltro": "Nenhuma encomenda corresponde aos filtros.",
+    "encomenda": "Encomenda",
+    "recebidaEm": "Recebida em {{data}}"
+  },
+  "detalhes": {
+    "remetente": "Remetente",
+    "recebidaEm": "Recebida em",
+    "retiradaEm": "Retirada em",
+    "descricao": "Descrição",
+    "observacoes": "Observações",
+    "recebidaPor": "Recebida por",
+    "marcarRetirada": "Marcar como retirada"
+  },
+  "registrar": {
+    "titulo": "Registrar entrega",
+    "registrando": "Registrando…",
+    "erros": {
+      "destinatario": "Selecione o destinatário da encomenda.",
+      "descricao": "Descreva a encomenda (ex.: caixa, envelope).",
+      "salvar": "Não foi possível registrar a entrega."
+    },
+    "destinatario": "Destinatário",
+    "tipos": {
+      "morador": "Morador",
+      "funcionario": "Funcionário"
+    },
+    "nenhumMorador": "Nenhum morador ativo",
+    "nenhumFuncionario": "Nenhum funcionário ativo",
+    "selecione": "Selecione…",
+    "semUnidade": "Este morador não tem unidade no cadastro; a entrega ficará vinculada apenas ao nome.",
+    "campos": {
+      "descricao": "Descrição",
+      "descricaoPlaceholder": "Ex.: caixa média, envelope",
+      "remetente": "Remetente",
+      "remetentePlaceholder": "Ex.: Correios",
+      "recebidaEm": "Recebida em",
+      "observacoes": "Observações",
+      "opcional": "(opcional)",
+      "observacoesPlaceholder": "Ex.: volume frágil, deixado na guarita"
+    }
+  },
+  "retirada": {
+    "titulo": "Confirmar retirada",
+    "por": "Retirada por",
+    "data": "Data de retirada",
+    "dica": "Recebida em {{data}} — data não pode ser anterior.",
+    "erros": {
+      "informe": "Informe a data de retirada.",
+      "futura": "A data de retirada não pode ser futura.",
+      "anterior": "A data de retirada não pode ser anterior à data de recebimento."
+    }
+  }
+}

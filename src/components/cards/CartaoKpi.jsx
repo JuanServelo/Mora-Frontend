@@ -12,9 +12,15 @@ const TOM = {
   error: "text-error",
 };
 
-export function CartaoKpi({ valor, label, sub, tom = "neutro", icone, onClick }) {
+/**
+ * `cor` (hexadecimal) sobrepõe o `tom`: é a cor que o usuário escolheu ao
+ * personalizar o painel. Sem ela vale o tom, que carrega significado.
+ */
+export function CartaoKpi({ valor, label, sub, tom = "neutro", icone, onClick, cor }) {
   const clicavel = typeof onClick === "function";
   const Tag = clicavel ? "button" : "div";
+  const classeTom = cor ? "" : (TOM[tom] ?? TOM.neutro);
+  const estiloCor = cor ? { color: cor } : undefined;
 
   return (
     <Tag
@@ -25,13 +31,17 @@ export function CartaoKpi({ valor, label, sub, tom = "neutro", icone, onClick })
     >
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className={`text-3xl font-headline font-bold leading-none ${TOM[tom] ?? TOM.neutro}`}>
+          <p className={`text-3xl font-headline font-bold leading-none ${classeTom}`} style={estiloCor}>
             {valor}
           </p>
           <p className="text-on-surface-variant text-xs uppercase tracking-wider mt-2">{label}</p>
           {sub && <p className="text-on-surface-variant/70 text-xs mt-1">{sub}</p>}
         </div>
-        {icone && <Icone name={icone} className={`${TOM[tom] ?? TOM.neutro} opacity-40`} />}
+        {icone && (
+          <span style={estiloCor} className="opacity-40">
+            <Icone name={icone} className={classeTom} />
+          </span>
+        )}
       </div>
     </Tag>
   );

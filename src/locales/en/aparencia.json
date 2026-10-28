@@ -1,0 +1,13 @@
+{
+  "tema": {
+    "titulo": "Theme",
+    "descricao": "This choice only applies to this device and browser — it doesn't travel with your account.",
+    "agora": "now: {{tema}}",
+    "nomes": { "claro": "light", "escuro": "dark" },
+    "opcoes": {
+      "claro": { "titulo": "Light", "descricao": "Light background, for well-lit places" },
+      "escuro": { "titulo": "Dark", "descricao": "Dark background, easier on the eyes at night" },
+      "sistema": { "titulo": "Follow the system", "descricao": "Matches your device's setting, and changes with it" }
+    }
+  }
+}

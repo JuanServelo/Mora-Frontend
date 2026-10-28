@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { acessoApi } from "../../services/acessoApi";
 import { preAutorizacaoApi, meusVeiculosApi, apartamentoApi } from "../../services/portariaApi";
 // Mesma validação de CPF usada nas demais telas — sem cópia paralela da regra.
@@ -8,6 +9,8 @@ import { Campo } from "../../components/campos/Campo";
 import { Botao } from "../../components/botoes/Botao";
 import { useToast } from "../../contexts/ToastContext";
 import { useAuth } from "../../contexts/AuthContext";
+import { idiomaAtual } from "../../i18n";
+import { formatarData } from "../../utils/datas";
 
 function formatarCpf(cpf) {
   const d = String(cpf ?? "").replace(/\D/g, "");
@@ -16,13 +19,11 @@ function formatarCpf(cpf) {
 }
 
 function fmtData(iso) {
-  if (!iso) return "—";
-  const parts = String(iso).split("T")[0].split("-");
-  if (parts.length !== 3) return iso;
-  return `${parts[2]}/${parts[1]}/${parts[0]}`;
+  return formatarData(iso);
 }
 
 export function MeusConvidados() {
+  const { t } = useTranslation("convidados");
   const { usuario } = useAuth();
   const [aba, setAba] = useState("convidados");
   const podeGerenciar = usuario?.responsavelFinanceiro || usuario?.perfil === "MORADOR";
@@ -32,20 +33,20 @@ export function MeusConvidados() {
       <div className="max-w-3xl mx-auto space-y-8">
         <header>
           <p className="text-on-surface-variant text-xs font-semibold uppercase tracking-widest mb-1">
-            Minha Unidade
+            {t("header.secao")}
           </p>
           <h1 className="font-headline text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-on-surface">
-            Meus{" "}
+            {t("header.titulo")}{" "}
             <span className="bg-gradient-to-r from-primary to-tertiary bg-clip-text text-transparent">
-              Convidados
+              {t("header.destaque")}
             </span>
           </h1>
         </header>
 
         <div className="glass-panel rounded-2xl p-1.5 flex flex-wrap gap-1 w-full sm:w-fit">
           {[
-            { id: "convidados", label: "Convidados", icon: "person" },
-            { id: "pre-autorizacoes", label: "Pré-autorizações", icon: "how_to_reg" },
+            { id: "convidados", labelKey: "abas.convidados", icon: "person" },
+            { id: "pre-autorizacoes", labelKey: "abas.preAutorizacoes", icon: "how_to_reg" },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -58,7 +59,7 @@ export function MeusConvidados() {
               }`}
             >
               <Icone name={tab.icon} className="text-lg" />
-              {tab.label}
+              {t(tab.labelKey)}
             </button>
           ))}
         </div>
@@ -66,7 +67,7 @@ export function MeusConvidados() {
         {!podeGerenciar && (
           <div className="flex items-start gap-3 p-4 rounded-2xl bg-error/10 text-error text-sm">
             <Icone name="warning" className="text-base shrink-0 mt-0.5" />
-            <span>Apenas o responsável financeiro da unidade pode gerenciar permissões de convidados.</span>
+            <span>{t("semPermissao")}</span>
           </div>
         )}
 
@@ -81,6 +82,7 @@ export function MeusConvidados() {
 // ABA: CONVIDADOS (visitantes cadastrados)
 // ════════════════════════════════════════════
 function TogglePermissao({ ativo, onChange, desabilitado }) {
+  const { t } = useTranslation("convidados");
   return (
     <button
       type="button"
@@ -89,7 +91,7 @@ function TogglePermissao({ ativo, onChange, desabilitado }) {
       className={`relative inline-flex w-12 h-6 rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary/50 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${
         ativo ? "bg-secondary" : "bg-outline-variant/40"
       }`}
-      aria-label={ativo ? "Bloquear entrada" : "Permitir entrada"}
+      aria-label={ativo ? t("toggle.bloquear") : t("toggle.permitir")}
     >
       <span
         className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform duration-200 ${
@@ -101,6 +103,7 @@ function TogglePermissao({ ativo, onChange, desabilitado }) {
 }
 
 function CartaoConvidado({ guest, onToggle, alterando }) {
+  const { t } = useTranslation("convidados");
   const dentro = guest.statusAcesso === "DENTRO";
   return (
     <div className="glass-panel rounded-2xl p-5 space-y-3">
@@ -110,7 +113,7 @@ function CartaoConvidado({ guest, onToggle, alterando }) {
         </div>
         <div className="flex-1 min-w-0">
           <p className="font-semibold text-on-surface">{guest.nome}</p>
-          <p className="text-xs text-on-surface-variant">CPF: {formatarCpf(guest.cpf)}</p>
+          <p className="text-xs text-on-surface-variant">{t("cartao.cpf", { cpf: formatarCpf(guest.cpf) })}</p>
         </div>
         <span
           className={`shrink-0 inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider ${
@@ -118,16 +121,16 @@ function CartaoConvidado({ guest, onToggle, alterando }) {
           }`}
         >
           <span className={`w-1.5 h-1.5 rounded-full ${dentro ? "bg-primary" : "bg-outline-variant"}`} />
-          {dentro ? "Dentro" : "Fora"}
+          {dentro ? t("cartao.dentro") : t("cartao.fora")}
         </span>
       </div>
       <div className="flex items-center justify-between gap-3 pt-1 border-t border-outline-variant/10">
         <div className="min-w-0">
-          <p className="text-sm font-semibold text-on-surface">Permissão de entrada</p>
+          <p className="text-sm font-semibold text-on-surface">{t("cartao.permissao.titulo")}</p>
           <p className="text-xs text-on-surface-variant mt-0.5">
             {guest.entradaPermitida
-              ? "Portaria pode registrar a entrada"
-              : "Portaria não pode registrar a entrada"}
+              ? t("cartao.permissao.permitida")
+              : t("cartao.permissao.negada")}
           </p>
         </div>
         <TogglePermissao
@@ -138,8 +141,8 @@ function CartaoConvidado({ guest, onToggle, alterando }) {
       </div>
       {guest.ultimoRegistroEm && (
         <p className="text-xs text-on-surface-variant">
-          Último registro:{" "}
-          {new Date(guest.ultimoRegistroEm).toLocaleString("pt-BR", {
+          {t("cartao.ultimoRegistro")}{" "}
+          {new Date(guest.ultimoRegistroEm).toLocaleString(idiomaAtual(), {
             day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit",
           })}
         </p>
@@ -149,6 +152,7 @@ function CartaoConvidado({ guest, onToggle, alterando }) {
 }
 
 function AbaConvidados({ podeGerenciar }) {
+  const { t } = useTranslation("convidados");
   const toast = useToast();
   const [guests, setGuests] = useState([]);
   const [carregando, setCarregando] = useState(true);
@@ -160,11 +164,11 @@ function AbaConvidados({ podeGerenciar }) {
       const res = await acessoApi.listarMeusGuests();
       setGuests(res.data.guests || []);
     } catch {
-      toast.error("Erro ao carregar convidados.");
+      toast.error(t("lista.erroCarregar"));
     } finally {
       setCarregando(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => { carregar(); }, [carregar]);
 
@@ -177,7 +181,7 @@ function AbaConvidados({ podeGerenciar }) {
       );
       toast.success(res.data.mensagem);
     } catch (err) {
-      toast.error(err.response?.data?.mensagem || "Erro ao alterar permissão.");
+      toast.error(err.response?.data?.mensagem || t("lista.erroAlterar"));
     } finally {
       setAlterando(null);
     }
@@ -188,27 +192,27 @@ function AbaConvidados({ podeGerenciar }) {
       <div className="flex items-start gap-2 px-4 py-3 rounded-xl bg-surface-container-highest/30 text-on-surface-variant text-xs">
         <Icone name="info" className="text-primary text-base shrink-0 mt-0.5" />
         <span>
-          Ative a permissão de entrada para que a portaria possa registrar o acesso do seu convidado.
+          {t("lista.info")}
         </span>
       </div>
 
       {carregando ? (
         <div className="glass-panel rounded-3xl p-6 sm:p-10 text-center text-on-surface-variant">
-          Carregando convidados...
+          {t("lista.carregando")}
         </div>
       ) : guests.length === 0 ? (
         <div className="glass-panel rounded-3xl p-6 sm:p-10 text-center space-y-3">
           <Icone name="person_outline" className="text-4xl text-on-surface-variant mx-auto block" />
-          <p className="text-on-surface-variant">Você não possui convidados cadastrados.</p>
+          <p className="text-on-surface-variant">{t("lista.vazio.titulo")}</p>
           <p className="text-xs text-on-surface-variant">
-            Solicite ao administrador o cadastro de convidados para sua unidade.
+            {t("lista.vazio.desc")}
           </p>
         </div>
       ) : (
         <div className="space-y-4">
           <p className="text-sm text-on-surface-variant">
-            {guests.length} convidado{guests.length !== 1 ? "s" : ""} ·{" "}
-            {guests.filter((g) => g.entradaPermitida).length} autorizado{guests.filter((g) => g.entradaPermitida).length !== 1 ? "s" : ""}
+            {t("lista.resumo.convidados", { count: guests.length })} ·{" "}
+            {t("lista.resumo.autorizados", { count: guests.filter((g) => g.entradaPermitida).length })}
           </p>
           {guests.map((guest) => (
             <CartaoConvidado
@@ -245,10 +249,10 @@ const PA_INICIAL = {
 };
 
 const STATUS_PA = {
-  AGUARDANDO: { label: "Aguardando", cor: "bg-secondary/10 text-secondary" },
-  UTILIZADA: { label: "Utilizada", cor: "bg-primary/10 text-primary" },
-  EXPIRADA: { label: "Expirada", cor: "bg-outline-variant/20 text-on-surface-variant" },
-  CANCELADA: { label: "Cancelada", cor: "bg-error/10 text-error" },
+  AGUARDANDO: { labelKey: "pre.status.aguardando", cor: "bg-secondary/10 text-secondary" },
+  UTILIZADA: { labelKey: "pre.status.utilizada", cor: "bg-primary/10 text-primary" },
+  EXPIRADA: { labelKey: "pre.status.expirada", cor: "bg-outline-variant/20 text-on-surface-variant" },
+  CANCELADA: { labelKey: "pre.status.cancelada", cor: "bg-error/10 text-error" },
 };
 
 const PLACA_REGEX = /^[A-Z]{3}[0-9]{4}$|^[A-Z]{3}[0-9][A-Z][0-9]{2}$/;
@@ -265,6 +269,7 @@ function hojeISO() {
 }
 
 function AbaPreAutorizacoes({ podeGerenciar }) {
+  const { t } = useTranslation("convidados");
   const toast = useToast();
   const { usuario } = useAuth();
   const [lista, setLista] = useState([]);
@@ -318,26 +323,26 @@ function AbaPreAutorizacoes({ podeGerenciar }) {
     setErro("");
 
     if (!form.nomeVisitante.trim()) {
-      setErro("Informe o nome completo do visitante."); return;
+      setErro(t("pre.erros.nome")); return;
     }
     // Mesma validação por dígitos verificadores que o atendimento aplica.
     if (!validarCpf(form.cpfVisitante)) {
-      setErro("CPF inválido. Verifique os dígitos informados."); return;
+      setErro(t("pre.erros.cpf")); return;
     }
     if (!form.validadeInicio || !form.validadeFim) {
-      setErro("Informe o período de validade."); return;
+      setErro(t("pre.erros.periodo")); return;
     }
     if (form.validadeInicio > form.validadeFim) {
-      setErro("A data de fim não pode ser anterior à data de início."); return;
+      setErro(t("pre.erros.fimAntesInicio")); return;
     }
     if (form.validadeFim < hojeISO()) {
-      setErro("A validade não pode terminar no passado."); return;
+      setErro(t("pre.erros.passado")); return;
     }
     let placa = null;
     if (form.viraDeCarro) {
       placa = normalizarPlaca(form.placaVeiculo);
       if (!PLACA_REGEX.test(placa)) {
-        setErro("Placa inválida. Use o formato AAA-9999 ou AAA9A99 (Mercosul)."); return;
+        setErro(t("pre.erros.placa")); return;
       }
     }
 
@@ -356,45 +361,43 @@ function AbaPreAutorizacoes({ podeGerenciar }) {
       });
       setCriando(false);
       setForm(PA_INICIAL);
-      toast.success("Pré-liberação criada.");
+      toast.success(t("pre.toast.criada"));
       await carregar();
     } catch (err) {
       setErro(err.response?.data?.erro || err.response?.data?.mensagem
-        || err.response?.data?.message || "Erro ao criar a pré-liberação.");
+        || err.response?.data?.message || t("pre.toast.erroCriar"));
     } finally {
       setSalvando(false);
     }
   }
 
   async function handleCancelar(pa) {
-    if (!confirm(`Cancelar a pré-liberação de ${pa.nomeVisitante}?`)) return;
+    if (!confirm(t("pre.confirmarCancelar", { nome: pa.nomeVisitante }))) return;
     setCancelando(pa.id);
     try {
       await preAutorizacaoApi.revogar(pa.id);
-      toast.success("Pré-liberação cancelada.");
+      toast.success(t("pre.toast.cancelada"));
       await carregar();
     } catch (err) {
       toast.error(err.response?.data?.erro || err.response?.data?.mensagem
-        || "Erro ao cancelar a pré-liberação.");
+        || t("pre.toast.erroCancelar"));
     } finally {
       setCancelando(null);
     }
   }
 
   const rotuloUnidade = unidade
-    ? `${unidade.blocoNome ? `${unidade.blocoNome} — ` : ""}Apto ${unidade.numero}`
+    ? `${unidade.blocoNome ? `${unidade.blocoNome} — ` : ""}${t("pre.unidade.apto", { numero: unidade.numero })}`
     : (usuario?.bloco && usuario?.apartamento
-        ? `${usuario.bloco} — Apto ${usuario.apartamento}`
-        : "Vinculada ao seu cadastro");
+        ? `${usuario.bloco} — ${t("pre.unidade.apto", { numero: usuario.apartamento })}`
+        : t("pre.unidade.vinculada"));
 
   return (
     <div className="space-y-6">
       <div className="flex items-start gap-2 px-4 py-3 rounded-xl bg-surface-container-highest/30 text-on-surface-variant text-xs">
         <Icone name="info" className="text-primary text-base shrink-0 mt-0.5" />
         <span>
-          A pré-liberação permite que a portaria libere a entrada de um visitante específico
-          durante o período indicado, sem precisar da sua presença. Se ele vier de carro,
-          inclua o veículo aqui mesmo — a vaga é conferida na chegada, não reservada.
+          {t("pre.info")}
         </span>
       </div>
 
@@ -402,7 +405,7 @@ function AbaPreAutorizacoes({ podeGerenciar }) {
         <div className="flex justify-end">
           <Botao onClick={() => setCriando(true)}>
             <span className="flex items-center gap-2">
-              <Icone name="add" className="text-lg" /> Nova pré-liberação
+              <Icone name="add" className="text-lg" /> {t("pre.nova")}
             </span>
           </Botao>
         </div>
@@ -410,22 +413,22 @@ function AbaPreAutorizacoes({ podeGerenciar }) {
 
       {criando && (
         <div className="glass-panel rounded-2xl p-5 sm:p-6 space-y-4">
-          <h2 className="font-headline text-lg font-bold text-on-surface">Nova pré-liberação</h2>
+          <h2 className="font-headline text-lg font-bold text-on-surface">{t("pre.nova")}</h2>
           <form onSubmit={handleSalvar} className="space-y-4" noValidate>
             <Campo
-              id="nomeVisitante" label="Nome completo" name="nomeVisitante"
+              id="nomeVisitante" label={t("pre.campos.nome")} name="nomeVisitante"
               value={form.nomeVisitante} onChange={handleForm}
-              placeholder="Nome do visitante" required
+              placeholder={t("pre.campos.nomePlaceholder")} required
             />
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Campo
-                id="cpfVisitante" label="CPF" name="cpfVisitante"
+                id="cpfVisitante" label={t("pre.campos.cpf")} name="cpfVisitante"
                 value={form.cpfVisitante}
                 onChange={(e) => set("cpfVisitante", mascararCpf(e.target.value))}
                 placeholder="000.000.000-00" required
               />
               <Campo
-                id="telefoneVisitante" label="Telefone" name="telefoneVisitante" optional
+                id="telefoneVisitante" label={t("pre.campos.telefone")} name="telefoneVisitante" optional
                 value={form.telefoneVisitante}
                 onChange={(e) => set("telefoneVisitante", mascararTelefone(e.target.value))}
                 placeholder="(00) 00000-0000"
@@ -436,16 +439,16 @@ function AbaPreAutorizacoes({ podeGerenciar }) {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant ml-1">
-                  Morador responsável
+                  {t("pre.campos.morador")}
                 </label>
                 <div className="w-full bg-surface-container-highest/20 rounded-xl py-3 px-4 text-on-surface-variant text-sm flex items-center gap-2">
                   <Icone name="lock" className="text-base shrink-0" />
-                  <span className="truncate">{usuario?.nome || "Você"}</span>
+                  <span className="truncate">{usuario?.nome || t("pre.campos.voce")}</span>
                 </div>
               </div>
               <div className="space-y-2">
                 <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant ml-1">
-                  Unidade
+                  {t("pre.campos.unidade")}
                 </label>
                 <div className="w-full bg-surface-container-highest/20 rounded-xl py-3 px-4 text-on-surface-variant text-sm flex items-center gap-2">
                   <Icone name="lock" className="text-base shrink-0" />
@@ -456,11 +459,11 @@ function AbaPreAutorizacoes({ podeGerenciar }) {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Campo
-                id="validadeInicio" label="Válido a partir de" name="validadeInicio" type="date"
+                id="validadeInicio" label={t("pre.campos.validoDe")} name="validadeInicio" type="date"
                 value={form.validadeInicio} min={hojeISO()} onChange={handleForm} required
               />
               <Campo
-                id="validadeFim" label="Válido até" name="validadeFim" type="date"
+                id="validadeFim" label={t("pre.campos.validoAte")} name="validadeFim" type="date"
                 value={form.validadeFim} min={form.validadeInicio || hojeISO()}
                 onChange={handleForm} required
               />
@@ -474,31 +477,31 @@ function AbaPreAutorizacoes({ podeGerenciar }) {
                   onChange={(e) => set("viraDeCarro", e.target.checked)}
                   className="accent-primary w-4 h-4"
                 />
-                <span className="text-sm font-semibold text-on-surface">Virá de carro</span>
+                <span className="text-sm font-semibold text-on-surface">{t("pre.veiculo.viraDeCarro")}</span>
               </label>
 
               {!temVaga ? (
                 <p className="text-xs text-on-surface-variant flex items-start gap-1.5">
                   <Icone name="info" className="text-sm shrink-0 mt-0.5" />
-                  Sua unidade não possui vagas cadastradas. O visitante poderá entrar apenas a pé.
+                  {t("pre.veiculo.semVaga")}
                 </p>
               ) : form.viraDeCarro && (
                 <div className="space-y-4">
                   <Campo
-                    id="placaVeiculo" label="Placa" name="placaVeiculo"
+                    id="placaVeiculo" label={t("pre.veiculo.placa")} name="placaVeiculo"
                     value={form.placaVeiculo}
                     onChange={(e) => set("placaVeiculo", normalizarPlaca(e.target.value))}
                     placeholder="AAA1A23" className="font-mono" required
                   />
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <Campo id="modeloVeiculo" label="Modelo" name="modeloVeiculo" optional
-                      value={form.modeloVeiculo} onChange={handleForm} placeholder="Ex.: Civic" />
-                    <Campo id="corVeiculo" label="Cor" name="corVeiculo" optional
-                      value={form.corVeiculo} onChange={handleForm} placeholder="Ex.: Prata" />
+                    <Campo id="modeloVeiculo" label={t("pre.veiculo.modelo")} name="modeloVeiculo" optional
+                      value={form.modeloVeiculo} onChange={handleForm} placeholder={t("pre.veiculo.modeloPlaceholder")} />
+                    <Campo id="corVeiculo" label={t("pre.veiculo.cor")} name="corVeiculo" optional
+                      value={form.corVeiculo} onChange={handleForm} placeholder={t("pre.veiculo.corPlaceholder")} />
                   </div>
                   <p className="text-xs text-on-surface-variant flex items-start gap-1.5">
                     <Icone name="info" className="text-sm shrink-0 mt-0.5" />
-                    A pré-liberação não reserva a vaga: a disponibilidade é conferida na chegada.
+                    {t("pre.veiculo.avisoVaga")}
                   </p>
                 </div>
               )}
@@ -506,11 +509,11 @@ function AbaPreAutorizacoes({ podeGerenciar }) {
 
             <div className="space-y-2">
               <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant ml-1">
-                Observações <span className="font-normal text-on-surface-variant/60">(opcional)</span>
+                {t("pre.campos.observacoes")} <span className="font-normal text-on-surface-variant/60">{t("pre.campos.opcional")}</span>
               </label>
               <textarea
                 name="observacoes" value={form.observacoes} onChange={handleForm} rows={2}
-                placeholder="Ex: visita de médico, prestador de serviço..."
+                placeholder={t("pre.campos.observacoesPlaceholder")}
                 className="w-full bg-surface-container-highest/40 border-none rounded-xl py-3 px-4 text-on-surface placeholder:text-outline-variant focus:ring-2 focus:ring-primary/50 focus:outline-none backdrop-blur-sm transition-all resize-none"
               />
             </div>
@@ -523,10 +526,10 @@ function AbaPreAutorizacoes({ podeGerenciar }) {
                 onClick={() => { setCriando(false); setErro(""); setForm(PA_INICIAL); }}
                 className="px-5 py-2.5 rounded-xl text-sm font-semibold text-on-surface-variant hover:bg-veu/5 transition-all cursor-pointer"
               >
-                Cancelar
+                {t("comum:acoes.cancelar")}
               </button>
               <Botao type="submit" disabled={salvando}>
-                {salvando ? "Criando…" : "Criar pré-liberação"}
+                {salvando ? t("pre.criando") : t("pre.criar")}
               </Botao>
             </div>
           </form>
@@ -541,8 +544,7 @@ function AbaPreAutorizacoes({ podeGerenciar }) {
         <div className="glass-panel rounded-2xl py-14 flex flex-col items-center gap-3 text-center text-on-surface-variant px-4">
           <Icone name="how_to_reg" className="text-5xl opacity-30" />
           <p className="text-sm max-w-md">
-            Nenhuma pré-liberação registrada. Crie uma para que a portaria libere a entrada
-            do seu visitante sem precisar da sua presença.
+            {t("pre.vazio")}
           </p>
         </div>
       ) : (
@@ -557,15 +559,15 @@ function AbaPreAutorizacoes({ podeGerenciar }) {
                   <div className="min-w-0">
                     <p className="font-semibold text-on-surface truncate">{pa.nomeVisitante}</p>
                     <p className="text-xs text-on-surface-variant mt-0.5">
-                      CPF {formatarCpf(pa.cpfVisitante)}
+                      {t("pre.item.cpf", { cpf: formatarCpf(pa.cpfVisitante) })}
                       {pa.telefoneVisitante ? ` · ${pa.telefoneVisitante}` : ""}
                     </p>
                     <p className="text-xs text-on-surface-variant mt-0.5">
-                      Válida de {fmtData(pa.validadeInicio)} a {fmtData(pa.validadeFim)}
+                      {t("pre.item.validade", { inicio: fmtData(pa.validadeInicio), fim: fmtData(pa.validadeFim) })}
                     </p>
                   </div>
                   <span className={`shrink-0 text-xs font-bold px-3 py-1 rounded-full ${cfg.cor}`}>
-                    {cfg.label}
+                    {t(cfg.labelKey)}
                   </span>
                 </div>
 
@@ -589,7 +591,7 @@ function AbaPreAutorizacoes({ podeGerenciar }) {
                     type="button" onClick={() => handleCancelar(pa)} disabled={cancelando === pa.id}
                     className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-error/10 text-error hover:bg-error/20 transition-all cursor-pointer disabled:opacity-50"
                   >
-                    {cancelando === pa.id ? "Cancelando…" : "Cancelar pré-liberação"}
+                    {cancelando === pa.id ? t("pre.cancelando") : t("pre.cancelar")}
                   </button>
                 )}
               </div>

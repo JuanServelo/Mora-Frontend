@@ -60,7 +60,34 @@ export const conhecimentoApi = {
   atualizar: (id, data) => comunicacao.put(`/artigos/${id}`, data),
   publicar: (id) => comunicacao.patch(`/artigos/${id}/publicar`),
   excluir: (id) => comunicacao.delete(`/artigos/${id}`),
+
+  // "Essa resposta ajudou?" — totais por artigo, com o voto de quem pediu
+  avaliacoes: () => comunicacao.get("/artigos/avaliacoes"),
+  avaliar: (id, util) => comunicacao.put(`/artigos/${id}/avaliacao`, { util }),
+  removerAvaliacao: (id) => comunicacao.delete(`/artigos/${id}/avaliacao`),
 };
+
+// ─────────────────────────────────────────────
+// PERGUNTAS DA FAQ (morador pergunta, administração responde)
+// ─────────────────────────────────────────────
+export const perguntasFaqApi = {
+  perguntar: (data) => comunicacao.post("/faq/perguntas", data),
+  minhas: () => comunicacao.get("/faq/perguntas/minhas"),
+  listar: (status) => comunicacao.get("/faq/perguntas", { params: status ? { status } : {} }),
+  responder: (id, data) => comunicacao.post(`/faq/perguntas/${id}/resposta`, data),
+  excluir: (id) => comunicacao.delete(`/faq/perguntas/${id}`),
+};
+
+/**
+ * Mensagem de erro do serviço de comunicação.
+ *
+ * O serviço devolve `erro` para regras de negócio e `erros` (por campo) para
+ * validação; algumas telas antigas ainda esperam `mensagem`.
+ */
+export function mensagemDeErro(err, padrao) {
+  const data = err?.response?.data;
+  return data?.erro ?? data?.mensagem ?? Object.values(data?.erros ?? {})[0] ?? padrao;
+}
 
 // ─────────────────────────────────────────────
 // AVISOS — forma de recurso

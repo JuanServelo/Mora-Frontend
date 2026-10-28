@@ -1,0 +1,140 @@
+{
+  "cabecalho": {
+    "painelAdministrativo": "Painel Administrativo",
+    "baseDe": "Base de",
+    "conhecimento": "Conhecimento",
+    "subtitulo": "Gerencie a base de conhecimento (FAQ) e os avisos do condomínio."
+  },
+  "abas": {
+    "conhecimento": "Base de Conhecimento",
+    "avisos": "Avisos",
+    "perguntas": "Perguntas dos moradores"
+  },
+  "categorias": {
+    "regra": "Regra",
+    "manual": "Manual",
+    "tutorial": "Tutorial",
+    "orientacaoConvivencia": "Orientação de Convivência",
+    "faq": "FAQ"
+  },
+  "artigos": {
+    "novo": "Novo Artigo",
+    "editar": "Editar Artigo",
+    "confirmarExclusao": "Tem certeza que deseja excluir este artigo?",
+    "form": {
+      "titulo": "Título",
+      "tituloPlaceholder": "Ex: Regras de uso da piscina",
+      "categoria": "Categoria",
+      "autor": "Autor",
+      "autorPlaceholder": "Nome do autor (opcional)",
+      "conteudo": "Conteúdo",
+      "conteudoPlaceholder": "Escreva o conteúdo do artigo...",
+      "publicar": "Publicar artigo (visível para todos os moradores)",
+      "salvarAlteracoes": "Salvar alterações",
+      "criar": "Criar artigo"
+    },
+    "resumo": {
+      "total": "Total de artigos",
+      "publicados": "Publicados",
+      "rascunhos": "Rascunhos",
+      "revisao": "Precisam de revisão"
+    },
+    "buscarPlaceholder": "Buscar por título ou autor...",
+    "todasCategorias": "Todas as categorias",
+    "por": "Por {{autor}} · ",
+    "status": {
+      "publicado": "Publicado",
+      "rascunho": "Rascunho"
+    },
+    "conteudo": "Conteúdo",
+    "ultimaAtualizacao": "Última atualização: {{data}}",
+    "publicar": "Publicar",
+    "despublicar": "Despublicar",
+    "vazio": "Nenhum artigo encontrado.",
+    "carregando": "Carregando artigos...",
+    "votos": {
+      "alerta": "Mais moradores disseram que não ajudou: vale revisar o texto",
+      "titulo": "Avaliação dos moradores"
+    }
+  },
+  "faq": {
+    "titulo": "Perguntas Frequentes",
+    "subtitulo": "Encontre respostas para as dúvidas mais comuns do condomínio.",
+    "buscarPlaceholder": "Buscar pergunta...",
+    "todas": "Todas",
+    "erroCarregar": "Não foi possível carregar os artigos.",
+    "semResultadoBusca": "Nenhum resultado para sua busca.",
+    "vazio": "Nenhum artigo publicado ainda.",
+    "enviarPergunta": "Enviar pergunta",
+    "perguntarAdministracao": "Perguntar à administração",
+    "naoEncontrou": "Não encontrou o que procurava? Envie sua dúvida para a administração.",
+    "abas": {
+      "faq": "Perguntas frequentes",
+      "minhas": "Minhas perguntas"
+    },
+    "avaliacao": {
+      "pergunta": "Essa resposta ajudou?",
+      "obrigado": "Obrigado pelo retorno!",
+      "quePena": "Que pena. Conte para a administração o que ficou faltando.",
+      "enviarDuvida": "Enviar minha dúvida",
+      "prefixo": "Sobre \"{{titulo}}\": ",
+      "erroRegistrar": "Não foi possível registrar sua avaliação."
+    },
+    "modal": {
+      "descricao": "Sua dúvida vai para a administração do condomínio. A resposta aparece em <strong>Minhas perguntas</strong>.",
+      "suaDuvida": "Sua dúvida",
+      "placeholder": "Ex.: Posso usar a churrasqueira em dia de semana?",
+      "assunto": "Assunto (opcional)",
+      "naoSei": "Não sei / outro",
+      "erroMinimo": "Escreva a sua dúvida com pelo menos 10 caracteres.",
+      "erroEnviar": "Não foi possível enviar a pergunta."
+    },
+    "minhas": {
+      "vazio": "Você ainda não enviou nenhuma pergunta.",
+      "enviadaEm": "Enviada em {{data}}",
+      "aguardando": "Aguardando resposta",
+      "enviada": "Pergunta enviada! A resposta vai aparecer em Minhas perguntas."
+    },
+    "excluir": {
+      "titulo": "Excluir pergunta",
+      "mensagem": "A pergunta ainda não foi respondida. Deseja mesmo excluí-la?",
+      "confirmar": "Sim, excluir",
+      "erro": "Não foi possível excluir a pergunta."
+    }
+  },
+  "perguntas": {
+    "erroCarregar": "Não foi possível carregar as perguntas.",
+    "filtros": {
+      "pendente": "Aguardando resposta",
+      "respondidas": "Respondidas"
+    },
+    "morador": "Morador",
+    "status": {
+      "respondida": "Respondida",
+      "aguardando": "Aguardando"
+    },
+    "publicadaNaFaq": "Publicada na FAQ",
+    "responder": "Responder",
+    "vazioPendentes": "Nenhuma pergunta aguardando resposta.",
+    "vazio": "Nenhuma pergunta encontrada.",
+    "carregando": "Carregando perguntas...",
+    "descartar": {
+      "botao": "Descartar",
+      "titulo": "Descartar pergunta",
+      "mensagem": "A pergunta será excluída e o morador não receberá resposta. Deseja continuar?",
+      "confirmar": "Sim, descartar",
+      "erro": "Não foi possível descartar a pergunta."
+    },
+    "resposta": {
+      "label": "Resposta",
+      "placeholder": "Escreva a resposta para o morador...",
+      "publicar": "Publicar também na FAQ (visível para todos os moradores)",
+      "tituloArtigo": "Título do artigo",
+      "enviando": "Enviando...",
+      "enviar": "Enviar resposta",
+      "sucessoPublicada": "Resposta enviada e publicada na FAQ.",
+      "sucesso": "Resposta enviada ao morador.",
+      "erro": "Não foi possível enviar a resposta."
+    }
+  }
+}

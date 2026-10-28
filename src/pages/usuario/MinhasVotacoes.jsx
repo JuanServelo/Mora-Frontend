@@ -4,14 +4,17 @@ import { Icone } from "../../components/icones/Icone";
 import { Botao } from "../../components/botoes/Botao";
 import { useToast } from "../../contexts/ToastContext";
 import { useAuth } from "../../contexts/AuthContext";
+import { useTranslation } from "react-i18next";
+import { idiomaAtual } from "../../i18n";
 
 const STATUS_POLL = {
-  ABERTA: { label: "Aberta", cls: "bg-primary/10 text-primary" },
-  ENCERRADA: { label: "Encerrada", cls: "bg-secondary/10 text-secondary" },
-  CANCELADA: { label: "Cancelada", cls: "bg-error/10 text-error" },
+  ABERTA: { rotuloKey: "status.votacao.aberta", siglaKey: "status.votacaoSigla.aberta", cls: "bg-primary/10 text-primary" },
+  ENCERRADA: { rotuloKey: "status.votacao.encerrada", siglaKey: "status.votacaoSigla.encerrada", cls: "bg-secondary/10 text-secondary" },
+  CANCELADA: { rotuloKey: "status.votacao.cancelada", siglaKey: "status.votacaoSigla.cancelada", cls: "bg-error/10 text-error" },
 };
 
 export function MinhasVotacoes() {
+  const { t } = useTranslation("reunioes");
   const toast = useToast();
   const { usuario } = useAuth();
   
@@ -36,9 +39,9 @@ export function MinhasVotacoes() {
     try {
       const res = await pollApi.listar({ condominioId: usuario.condominioId });
       setResultadosBusca(res.data || []);
-      if (res.data.length === 0) setErroDetalhe("Nenhuma votação encontrada no condomínio.");
+      if (res.data.length === 0) setErroDetalhe(t("votacoes.nenhuma"));
     } catch (e) {
-      setErroDetalhe("Erro ao buscar votações.");
+      setErroDetalhe(t("votacoes.erroBuscar"));
       setResultadosBusca([]);
     } finally {
       setBuscando(false);
@@ -56,9 +59,9 @@ export function MinhasVotacoes() {
       setVoteForm({ pollOptionId: "" });
       const res = await pollApi.buscar(detalhe.id);
       setDetalhe(res.data);
-      toast.success("Voto registrado!");
+      toast.success(t("votacoes.toast.votoRegistrado"));
     } catch (e) {
-      toast.error(e.response?.data?.message || "Erro ao registrar voto.");
+      toast.error(e.response?.data?.message || t("votacoes.toast.erroVoto"));
     } finally {
       setVotando(false);
     }
@@ -70,30 +73,30 @@ export function MinhasVotacoes() {
         <header className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
             <p className="text-on-surface-variant text-xs font-semibold uppercase tracking-widest mb-1">
-              Condomínio
+              {t("cabecalho.condominio")}
             </p>
             <h1 className="font-headline text-4xl font-extrabold tracking-tight text-on-surface">
-              Minhas{" "}
+              {t("cabecalho.minhas")}{" "}
               <span className="bg-gradient-to-r from-primary to-tertiary bg-clip-text text-transparent">
-                Votações
+                {t("cabecalho.votacoes")}
               </span>
             </h1>
           </div>
         </header>
 
         <div className="glass-panel rounded-3xl p-6 space-y-4">
-          {buscando && <p className="text-sm text-on-surface-variant">Buscando votações...</p>}
+          {buscando && <p className="text-sm text-on-surface-variant">{t("votacoes.buscando")}</p>}
           {erroDetalhe && <p className="text-error text-sm">{erroDetalhe}</p>}
 
           {resultadosBusca.length > 0 && !detalhe && (
             <div className="space-y-2">
-              <h3 className="font-semibold text-sm text-on-surface">Votações Disponíveis</h3>
+              <h3 className="font-semibold text-sm text-on-surface">{t("votacoes.disponiveis")}</h3>
               {resultadosBusca.map(poll => (
                 <div key={poll.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-3 rounded-xl bg-veu/5 border border-veu/10 hover:bg-veu/10 transition cursor-pointer" onClick={() => setDetalhe(poll)}>
                   <div>
                     <div className="flex items-center gap-2">
                       <span className="text-sm font-bold text-on-surface">{poll.titulo}</span>
-                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${STATUS_POLL[poll.status]?.cls ?? ""}`}>{poll.status}</span>
+                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${STATUS_POLL[poll.status]?.cls ?? ""}`}>{STATUS_POLL[poll.status] ? t(STATUS_POLL[poll.status].siglaKey) : poll.status}</span>
                     </div>
                   </div>
                   <Icone name="chevron_right" className="text-on-surface-variant hidden sm:block" />
@@ -109,14 +112,14 @@ export function MinhasVotacoes() {
                   <div className="flex items-center gap-2">
                     <span className="font-semibold text-on-surface">{detalhe.titulo}</span>
                     <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${STATUS_POLL[detalhe.status]?.cls ?? ""}`}>
-                      {STATUS_POLL[detalhe.status]?.label ?? detalhe.status}
+                      {STATUS_POLL[detalhe.status] ? t(STATUS_POLL[detalhe.status].rotuloKey) : detalhe.status}
                     </span>
                   </div>
                   <button
                     onClick={() => setDetalhe(null)}
                     className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-surface-container-highest/50 text-on-surface hover:bg-surface-container-highest transition text-xs font-semibold cursor-pointer"
                   >
-                    <Icone name="arrow_back" className="text-sm" /> Voltar
+                    <Icone name="arrow_back" className="text-sm" /> {t("comum:acoes.voltar")}
                   </button>
                 </div>
                 {detalhe.descricao && (
@@ -124,13 +127,13 @@ export function MinhasVotacoes() {
                 )}
                 {detalhe.dataHoraFim && (
                   <p className="text-on-surface-variant text-xs mt-1">
-                    <span className="font-semibold">Encerramento:</span> {new Date(detalhe.dataHoraFim).toLocaleString("pt-BR")}
+                    <span className="font-semibold">{t("votacoes.encerramento")}</span> {new Date(detalhe.dataHoraFim).toLocaleString(idiomaAtual())}
                   </p>
                 )}
 
                 {detalhe.opcoes?.length > 0 && (
                   <div className="space-y-2 pt-2">
-                    <p className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider">Opções</p>
+                    <p className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider">{t("votacoes.opcoes")}</p>
                     <div className="flex flex-col gap-2">
                       {(() => {
                         const totalVotos = detalhe.opcoes.reduce((acc, op) => acc + (op.quantidadeVotos || 0), 0);
@@ -165,7 +168,7 @@ export function MinhasVotacoes() {
                                 <span className="text-sm font-medium">{op.descricao}</span>
                               </div>
                               {mostraResultados && (
-                                <span className="relative z-10 text-xs font-bold text-on-surface-variant">{pct}% ({votos} votos)</span>
+                                <span className="relative z-10 text-xs font-bold text-on-surface-variant">{t("votacoes.resultado", { pct, count: votos })}</span>
                               )}
                             </button>
                           );

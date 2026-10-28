@@ -1,6 +1,7 @@
 // src/components/adm/financeiro/comum.jsx
 // Peças das telas de multas, contratos e prestação de contas — síndico e morador.
 import { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { Icone } from "../../icones/Icone";
 
 export const CAMPO =
@@ -21,6 +22,7 @@ export const BOTAO_SECUNDARIO =
  * Escape e no clique fora, como o pop-up de avisos.
  */
 export function Janela({ titulo, aoFechar, children, largura = "max-w-md" }) {
+  const { t } = useTranslation("financeiro");
   useEffect(() => {
     const tecla = (e) => e.key === "Escape" && aoFechar();
     document.addEventListener("keydown", tecla);
@@ -43,7 +45,7 @@ export function Janela({ titulo, aoFechar, children, largura = "max-w-md" }) {
           <h3 className="font-headline text-xl font-bold text-on-surface">{titulo}</h3>
           <button
             onClick={aoFechar}
-            aria-label="Fechar"
+            aria-label={t("comum:acoes.fechar")}
             className="p-1.5 -mr-1.5 rounded-lg text-on-surface-variant hover:bg-veu/5 cursor-pointer"
           >
             <Icone name="close" />
@@ -55,11 +57,12 @@ export function Janela({ titulo, aoFechar, children, largura = "max-w-md" }) {
   );
 }
 
-export function Carregando({ texto = "Carregando..." }) {
+export function Carregando({ texto }) {
+  const { t } = useTranslation("financeiro");
   return (
     <div className="flex items-center justify-center py-12 text-on-surface-variant">
       <Icone name="sync" className="text-3xl animate-spin mr-3" />
-      <span>{texto}</span>
+      <span>{texto ?? t("geral.carregando")}</span>
     </div>
   );
 }

@@ -1,5 +1,6 @@
 // src/pages/perfil/PrivacidadeView.jsx
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "../../../contexts/AuthContext";
 import { Campo } from "../../../components/campos/Campo";
 import { Botao } from "../../../components/botoes/Botao";
@@ -7,6 +8,7 @@ import { Icone } from "../../../components/icones/Icone";
 import { validarSenha } from "../../../utils/passwordValidation";
 
 export function PrivacidadeView() {
+  const { t } = useTranslation("perfil");
   const { atualizarPerfil } = useAuth();
   const [salvando, setSalvando] = useState(false);
   const [msg, setMsg] = useState("");
@@ -25,12 +27,12 @@ export function PrivacidadeView() {
     const confirmarSenha = form.get("confirmarSenha");
 
     if (!senhaAtual || !novaSenha || !confirmarSenha) {
-      setErro("Preencha todos os campos.");
+      setErro(t("privacidade.erros.preencherTodos"));
       return;
     }
 
     if (novaSenha !== confirmarSenha) {
-      setErro("As senhas não coincidem.");
+      setErro(t("privacidade.erros.naoCoincidem"));
       return;
     }
 
@@ -43,10 +45,10 @@ export function PrivacidadeView() {
     setSalvando(true);
     try {
       await atualizarPerfil({ senha: novaSenha, senhaAtual });
-      setMsg("Senha atualizada com sucesso.");
+      setMsg(t("privacidade.msg.atualizada"));
       e.target.reset();
     } catch (err) {
-      setErro(err.response?.data?.mensagem || "Erro ao atualizar senha.");
+      setErro(err.response?.data?.mensagem || t("privacidade.msg.erroAtualizar"));
     } finally {
       setSalvando(false);
     }
@@ -56,12 +58,12 @@ export function PrivacidadeView() {
     <form onSubmit={handleAtualizarSenha} className="space-y-7">
       <div className="space-y-4">
         <p className="text-xs font-semibold uppercase tracking-widest text-on-surface-variant ml-1">
-          Alterar Senha
+          {t("privacidade.titulo")}
         </p>
         <Campo
           id="senha-atual"
           name="senhaAtual"
-          label="Senha Atual"
+          label={t("privacidade.campos.senhaAtual")}
           type="password"
           placeholder="••••••••"
           icon="lock"
@@ -69,9 +71,9 @@ export function PrivacidadeView() {
         <Campo
           id="nova-senha"
           name="novaSenha"
-          label="Nova Senha"
+          label={t("privacidade.campos.novaSenha")}
           type="password"
-          placeholder="Mín. 8 caracteres, 1 número, 1 maiúscula"
+          placeholder={t("privacidade.campos.novaSenhaPlaceholder")}
           icon="lock_reset"
         />
         {errosSenha.map((m) => (
@@ -80,7 +82,7 @@ export function PrivacidadeView() {
         <Campo
           id="confirmar-senha"
           name="confirmarSenha"
-          label="Confirmar Nova Senha"
+          label={t("privacidade.campos.confirmarSenha")}
           type="password"
           placeholder="••••••••"
           icon="check_circle"
@@ -92,7 +94,7 @@ export function PrivacidadeView() {
 
       <div className="pt-1">
         <Botao type="submit" disabled={salvando}>
-          {salvando ? "Atualizando..." : "Atualizar Senha"}
+          {salvando ? t("privacidade.atualizando") : t("privacidade.atualizar")}
           {!salvando && <Icone name="check" className="text-xl" />}
         </Botao>
       </div>

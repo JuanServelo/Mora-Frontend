@@ -12,6 +12,9 @@ import { GoogleMeetConnection } from "../../components/meetings/GoogleMeetConnec
 import { JoinMeetingButton } from "../../components/meetings/JoinMeetingButton";
 import { MeetingFilters } from "../../components/meetings/MeetingFilters";
 import { confirmarPresencaLocal, filtrarReunioes } from "../../utils/meetings";
+import { useTranslation } from "react-i18next";
+import { idiomaAtual } from "../../i18n";
+import { formatarData } from "../../utils/datas";
 
 function TextArea({ label, ...props }) {
   return (
@@ -31,26 +34,26 @@ function TextArea({ label, ...props }) {
 
 // ─── helpers ────────────────────────────────
 const STATUS_MEETING = {
-  AGENDADA: { label: "Agendada", cls: "bg-primary/10 text-primary" },
-  CANCELADA: { label: "Cancelada", cls: "bg-error/10 text-error" },
-  FINALIZADA: { label: "Finalizada", cls: "bg-secondary/10 text-secondary" },
+  AGENDADA: { rotuloKey: "status.reuniao.agendada", cls: "bg-primary/10 text-primary" },
+  CANCELADA: { rotuloKey: "status.reuniao.cancelada", cls: "bg-error/10 text-error" },
+  FINALIZADA: { rotuloKey: "status.reuniao.finalizada", cls: "bg-secondary/10 text-secondary" },
 };
 
 const STATUS_POLL = {
-  ABERTA: { label: "Aberta", cls: "bg-primary/10 text-primary" },
-  ENCERRADA: { label: "Encerrada", cls: "bg-secondary/10 text-secondary" },
-  CANCELADA: { label: "Cancelada", cls: "bg-error/10 text-error" },
+  ABERTA: { rotuloKey: "status.votacao.aberta", cls: "bg-primary/10 text-primary" },
+  ENCERRADA: { rotuloKey: "status.votacao.encerrada", cls: "bg-secondary/10 text-secondary" },
+  CANCELADA: { rotuloKey: "status.votacao.cancelada", cls: "bg-error/10 text-error" },
 };
 
 const ATTENDANCE_LABEL = {
-  PENDENTE: "Pendente",
-  CONFIRMADO: "Confirmado",
-  RECUSADO: "Recusado",
+  PENDENTE: "status.presenca.pendente",
+  CONFIRMADO: "status.presenca.confirmado",
+  RECUSADO: "status.presenca.recusado",
 };
 
 function fmt(dt) {
   if (!dt) return "—";
-  return new Date(dt).toLocaleString("pt-BR", {
+  return new Date(dt).toLocaleString(idiomaAtual(), {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
@@ -69,6 +72,7 @@ function toInputDatetime(dt) {
 
 // ════════════════════════════════════════════
 export function GerenciarReunioes() {
+  const { t } = useTranslation("reunioes");
   const [aba, setAba] = useState("reunioes");
 
   return (
@@ -78,12 +82,12 @@ export function GerenciarReunioes() {
         <header className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
             <p className="text-on-surface-variant text-xs font-semibold uppercase tracking-widest mb-1">
-              Painel Administrativo
+              {t("cabecalho.painelAdministrativo")}
             </p>
             <h1 className="font-headline text-4xl font-extrabold tracking-tight text-on-surface">
-              Gestão de{" "}
+              {t("cabecalho.gestaoDe")}{" "}
               <span className="bg-gradient-to-r from-primary to-tertiary bg-clip-text text-transparent">
-                Reuniões
+                {t("cabecalho.reunioes")}
               </span>
             </h1>
           </div>
@@ -94,8 +98,8 @@ export function GerenciarReunioes() {
         {/* Sub-navbar de abas */}
         <div className="glass-panel rounded-2xl p-1.5 flex gap-1 w-fit flex-wrap">
           {[
-            { id: "reunioes", label: "Reuniões", icon: "groups" },
-            { id: "atas", label: "Atas", icon: "description" },
+            { id: "reunioes", rotuloKey: "abas.reunioes", icon: "groups" },
+            { id: "atas", rotuloKey: "abas.atas", icon: "description" },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -107,7 +111,7 @@ export function GerenciarReunioes() {
               }`}
             >
               <Icone name={tab.icon} className="text-lg" />
-              {tab.label}
+              {t(tab.rotuloKey)}
             </button>
           ))}
         </div>
@@ -132,6 +136,7 @@ const EMPTY_MEETING = {
 };
 
 function AbaReunioes({ irParaVotacao }) {
+  const { t } = useTranslation("reunioes");
   const toast = useToast();
   const confirm = useConfirm();
   const { usuario } = useAuth();
@@ -288,11 +293,11 @@ function AbaReunioes({ irParaVotacao }) {
 
       if (editandoMeetingId) {
         await meetingApi.atualizar(editandoMeetingId, payload);
-        mostrarNotificacao("Reunião atualizada com sucesso!", "sucesso");
+        mostrarNotificacao(t("reunioes.toast.atualizada"), "sucesso");
         setEditandoMeetingId(null);
       } else {
         await meetingApi.criar(payload);
-        mostrarNotificacao("Reunião agendada com sucesso!", "sucesso");
+        mostrarNotificacao(t("reunioes.toast.agendada"), "sucesso");
       }
 
       setForm(EMPTY_MEETING);
@@ -305,7 +310,7 @@ function AbaReunioes({ irParaVotacao }) {
         carregarAtaReuniao(editandoMeetingId);
       }
     } catch (e) {
-      const msg = e.response?.data?.message || "Erro ao salvar reunião.";
+      const msg = e.response?.data?.message || t("reunioes.toast.erroSalvar");
       setErro(msg);
       mostrarNotificacao(msg, "erro");
     } finally {
@@ -347,15 +352,15 @@ function AbaReunioes({ irParaVotacao }) {
       let res;
       if (ataReuniao) {
         res = await ataApi.atualizar(detalhe.id, payload);
-        mostrarNotificacao("Ata atualizada com sucesso!", "sucesso");
+        mostrarNotificacao(t("reunioes.toast.ataAtualizada"), "sucesso");
       } else {
         res = await ataApi.registrar(detalhe.id, payload);
-        mostrarNotificacao("Ata criada com sucesso!", "sucesso");
+        mostrarNotificacao(t("reunioes.toast.ataCriada"), "sucesso");
       }
       setAtaReuniao(res.data);
       setEscrevendoAta(false);
     } catch (err) {
-      mostrarNotificacao("Erro ao salvar ata: " + (err.response?.data?.message || err.message), "erro");
+      mostrarNotificacao(t("reunioes.toast.erroSalvarAta", { erro: err.response?.data?.message || err.message }), "erro");
     } finally {
       setSalvandoAta(false);
     }
@@ -369,9 +374,9 @@ function AbaReunioes({ irParaVotacao }) {
 
   async function cancelar(id) {
     const ok = await confirm({
-      titulo: "Cancelar reunião",
-      mensagem: "Deseja cancelar esta reunião?",
-      confirmarTexto: "Cancelar reunião",
+      titulo: t("reunioes.confirmar.cancelarTitulo"),
+      mensagem: t("reunioes.confirmar.cancelarMensagem"),
+      confirmarTexto: t("reunioes.confirmar.cancelarBotao"),
       variante: "danger",
     });
     if (!ok) return;
@@ -380,15 +385,15 @@ function AbaReunioes({ irParaVotacao }) {
       setDetalhe((p) => (p ? { ...p, status: "CANCELADA" } : p));
       setResultadosBusca((prev) => prev ? prev.map((r) => r.id === id ? { ...r, status: "CANCELADA" } : r) : prev);
     } catch {
-      toast.error("Erro ao cancelar reunião.");
+      toast.error(t("reunioes.toast.erroCancelar"));
     }
   }
 
   async function finalizar(id) {
     const ok = await confirm({
-      titulo: "Finalizar reunião",
-      mensagem: "Deseja finalizar esta reunião?",
-      confirmarTexto: "Finalizar",
+      titulo: t("reunioes.confirmar.finalizarTitulo"),
+      mensagem: t("reunioes.confirmar.finalizarMensagem"),
+      confirmarTexto: t("acoes.finalizar"),
     });
     if (!ok) return;
     try {
@@ -396,7 +401,7 @@ function AbaReunioes({ irParaVotacao }) {
       setDetalhe((p) => (p ? { ...p, status: "FINALIZADA" } : p));
       setResultadosBusca((prev) => prev ? prev.map((r) => r.id === id ? { ...r, status: "FINALIZADA" } : r) : prev);
     } catch {
-      toast.error("Erro ao finalizar reunião.");
+      toast.error(t("reunioes.toast.erroFinalizar"));
     }
   }
 
@@ -411,9 +416,9 @@ function AbaReunioes({ irParaVotacao }) {
       });
       setAvalForm({ nota: "", comentario: "" });
       setAvalUsuarioId("");
-      toast.success("Avaliação registrada!");
+      toast.success(t("reunioes.toast.avaliacaoRegistrada"));
     } catch (e) {
-      toast.error(e.response?.data?.message || "Erro ao avaliar.");
+      toast.error(e.response?.data?.message || t("reunioes.toast.erroAvaliar"));
     } finally {
       setSalvandoAval(false);
     }
@@ -429,7 +434,7 @@ function AbaReunioes({ irParaVotacao }) {
             setDetalhe(res.data);
         }
     } catch (err) {
-        toast.error("Erro ao responder presença.");
+        toast.error(t("reunioes.toast.erroPresenca"));
     }
   }
 
@@ -466,7 +471,7 @@ function AbaReunioes({ irParaVotacao }) {
       {/* Toolbar */}
       <div className="glass-panel rounded-3xl p-6 space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="font-headline text-xl font-bold text-on-surface">Reuniões</h2>
+          <h2 className="font-headline text-xl font-bold text-on-surface">{t("reunioes.titulo")}</h2>
           <button
             onClick={() => {
               if (criando) {
@@ -479,7 +484,7 @@ function AbaReunioes({ irParaVotacao }) {
             className="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary/10 text-primary hover:bg-primary/20 transition text-sm font-semibold cursor-pointer"
           >
             <Icone name={criando ? "close" : "add"} className="text-base" />
-            {criando ? "Cancelar" : "Nova Reunião"}
+            {criando ? t("comum:acoes.cancelar") : t("reunioes.nova")}
           </button>
         </div>
 
@@ -488,7 +493,7 @@ function AbaReunioes({ irParaVotacao }) {
           <form id="form-meeting-topo" onSubmit={salvarReuniao} className="bg-surface-container-highest/20 rounded-xl p-4 space-y-4 border border-veu/10">
             <div className="flex items-center justify-between border-b border-veu/5 pb-2">
               <h3 className="font-semibold text-on-surface text-sm">
-                {editandoMeetingId ? `Editar Reunião #${editandoMeetingId}` : "Nova Reunião"}
+                {editandoMeetingId ? t("reunioes.editarId", { id: editandoMeetingId }) : t("reunioes.nova")}
               </h3>
               {editandoMeetingId && (
                 <button
@@ -500,35 +505,35 @@ function AbaReunioes({ irParaVotacao }) {
                   }}
                   className="text-primary hover:underline text-xs font-semibold cursor-pointer"
                 >
-                  Descartar Edição
+                  {t("reunioes.descartarEdicao")}
                 </button>
               )}
             </div>
             
             {erro && <p className="text-error text-xs">{erro}</p>}
             
-            <Campo label="Título" name="titulo" value={form.titulo} onChange={handleForm} placeholder="Ex: Reunião de Condomínio" required />
+            <Campo label={t("reunioes.form.titulo")} name="titulo" value={form.titulo} onChange={handleForm} placeholder={t("reunioes.form.tituloPlaceholder")} required />
             
-            <TextArea label="Descrição" name="descricao" value={form.descricao} onChange={handleForm} rows={2} placeholder="Descrição da reunião" />
+            <TextArea label={t("reunioes.form.descricao")} name="descricao" value={form.descricao} onChange={handleForm} rows={2} placeholder={t("reunioes.form.descricaoPlaceholder")} />
             
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <Campo label="Início" id="dataHoraInicio" type="datetime-local" name="dataHoraInicio" value={form.dataHoraInicio} onChange={handleForm} required />
-              <Campo label="Fim" id="dataHoraFim" type="datetime-local" name="dataHoraFim" value={form.dataHoraFim} onChange={handleForm} required />
+              <Campo label={t("reunioes.form.inicio")} id="dataHoraInicio" type="datetime-local" name="dataHoraInicio" value={form.dataHoraInicio} onChange={handleForm} required />
+              <Campo label={t("reunioes.form.fim")} id="dataHoraFim" type="datetime-local" name="dataHoraFim" value={form.dataHoraFim} onChange={handleForm} required />
             </div>
 
             {/* Indicação visual do organizador logado */}
             <div className="space-y-2">
-              <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant ml-1">Organizador</label>
+              <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant ml-1">{t("reunioes.form.organizador")}</label>
               <div className="w-full bg-surface-container-highest/40 rounded-xl py-3 px-4 text-on-surface-variant flex items-center gap-2 border border-veu/5 backdrop-blur-sm">
                 <Icone name="verified_user" className="text-primary text-base shrink-0" />
-                <span className="text-xs font-medium">Você ({usuario?.nome || "Carregando..."})</span>
+                <span className="text-xs font-medium">{t("reunioes.form.voce", { nome: usuario?.nome || t("reunioes.form.carregando") })}</span>
               </div>
             </div>
 
             {/* Seleção visual de convidados */}
             <div className="space-y-2">
               <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant ml-1">
-                Selecionar Convidados
+                {t("reunioes.form.selecionarConvidados")}
               </label>
               
               {/* Badges de selecionados */}
@@ -543,7 +548,7 @@ function AbaReunioes({ irParaVotacao }) {
                     return (
                       <span key={uId} className="flex items-center gap-1 bg-primary/10 border border-primary/20 text-primary rounded-full pl-3 pr-1.5 py-1 text-xs font-semibold backdrop-blur-sm">
                         <Icone name="person" className="text-[10px]" />
-                        {usr.nome} (Apt {usr.apartamento || "—"})
+                        {t("reunioes.form.nomeApt", { nome: usr.nome, apt: usr.apartamento || "—" })}
                         <button
                           type="button"
                           onClick={() => {
@@ -561,14 +566,14 @@ function AbaReunioes({ irParaVotacao }) {
                     );
                   })}
                 {(!form.idConvidados || form.idConvidados.split(",").map((s) => s.trim()).filter(Boolean).length === 0) && (
-                  <p className="text-xs text-on-surface-variant italic ml-1">Nenhum convidado selecionado.</p>
+                  <p className="text-xs text-on-surface-variant italic ml-1">{t("reunioes.form.nenhumConvidado")}</p>
                 )}
               </div>
 
               {/* Lista e Busca de Moradores */}
               <div className="bg-surface-container-highest/10 border border-veu/5 rounded-2xl p-4 space-y-3">
                 <Campo
-                  placeholder="Buscar moradores por nome, e-mail, bloco ou apt..."
+                  placeholder={t("reunioes.form.buscarMoradores")}
                   icon="search"
                   value={buscaUsuario}
                   onChange={(e) => setBuscaUsuario(e.target.value)}
@@ -613,7 +618,7 @@ function AbaReunioes({ irParaVotacao }) {
                             <div className="min-w-0">
                               <p className="font-semibold text-xs truncate">{u.nome}</p>
                               <p className="text-[10px] opacity-60 truncate">
-                                Bloco {u.bloco || "—"} · Apt {u.apartamento || "—"}
+                                {t("reunioes.form.blocoApt", { bloco: u.bloco || "—", apt: u.apartamento || "—" })}
                               </p>
                             </div>
                           </div>
@@ -622,14 +627,14 @@ function AbaReunioes({ irParaVotacao }) {
                       );
                     })}
                   {todosUsuarios.filter((u) => u.id !== usuario?.id).length === 0 && (
-                    <p className="text-center text-xs text-on-surface-variant py-4">Nenhum outro morador cadastrado.</p>
+                    <p className="text-center text-xs text-on-surface-variant py-4">{t("reunioes.form.nenhumMorador")}</p>
                   )}
                 </div>
               </div>
             </div>
 
             <Botao type="submit" disabled={salvando}>
-              {salvando ? "Salvando..." : editandoMeetingId ? "Salvar Alterações" : "Criar Reunião"}
+              {salvando ? t("acoes.salvando") : editandoMeetingId ? t("acoes.salvarAlteracoes") : t("reunioes.form.criar")}
             </Botao>
           </form>
         )}
@@ -676,17 +681,17 @@ function AbaReunioes({ irParaVotacao }) {
                             {reuniao.titulo}
                           </span>
                           <span className="text-[10px] text-on-surface-variant/80 block">
-                            ID: #{reuniao.id}
+                            {t("reunioes.card.id", { id: reuniao.id })}
                           </span>
                         </div>
                         <div className="flex gap-1.5 shrink-0">
                           {isOrganizador && (
                             <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-tertiary/15 text-tertiary uppercase tracking-wider">
-                              Organizador
+                              {t("reunioes.card.organizador")}
                             </span>
                           )}
                           <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider ${STATUS_MEETING[reuniao.status]?.cls ?? "bg-veu/10 text-white"}`}>
-                            {STATUS_MEETING[reuniao.status]?.label ?? reuniao.status}
+                            {STATUS_MEETING[reuniao.status] ? t(STATUS_MEETING[reuniao.status].rotuloKey) : reuniao.status}
                           </span>
                         </div>
                       </div>
@@ -700,11 +705,11 @@ function AbaReunioes({ irParaVotacao }) {
                       <div className="space-y-1 pt-1 border-t border-veu/5">
                         <p className="flex items-center gap-1.5 text-[11px] text-on-surface-variant">
                           <Icone name="schedule" className="text-xs text-primary" />
-                          Início: {fmt(reuniao.dataHoraInicio)}
+                          {t("reunioes.card.inicio", { data: fmt(reuniao.dataHoraInicio) })}
                         </p>
                         <p className="flex items-center gap-1.5 text-[11px] text-on-surface-variant">
                           <Icone name="event_available" className="text-xs text-primary" />
-                          Fim: {fmt(reuniao.dataHoraFim)}
+                          {t("reunioes.card.fim", { data: fmt(reuniao.dataHoraFim) })}
                         </p>
                       </div>
 
@@ -719,11 +724,11 @@ function AbaReunioes({ irParaVotacao }) {
                     {!isOrganizador && meuConvidado && reuniao.status === "AGENDADA" && (
                       <div className="flex items-center justify-between gap-2 bg-veu/5 p-2 rounded-xl border border-veu/5">
                         <div className="flex flex-col">
-                          <span className="text-[9px] text-on-surface-variant font-semibold uppercase tracking-wider">Sua Presença</span>
+                          <span className="text-[9px] text-on-surface-variant font-semibold uppercase tracking-wider">{t("reunioes.card.suaPresenca")}</span>
                           <span className={`text-[10px] font-bold ${
                             meuStatusPresenca === 'CONFIRMADO' ? 'text-primary' : meuStatusPresenca === 'RECUSADO' ? 'text-error' : 'text-secondary'
                           }`}>
-                            {ATTENDANCE_LABEL[meuStatusPresenca] || meuStatusPresenca}
+                            {ATTENDANCE_LABEL[meuStatusPresenca] ? t(ATTENDANCE_LABEL[meuStatusPresenca]) : meuStatusPresenca}
                           </span>
                         </div>
                         <div className="flex gap-1">
@@ -737,7 +742,7 @@ function AbaReunioes({ irParaVotacao }) {
                             }`}
                           >
                             <Icone name="check" className="text-xs" />
-                            Confirmar
+                            {t("comum:acoes.confirmar")}
                           </button>
                           <button
                             type="button"
@@ -749,7 +754,7 @@ function AbaReunioes({ irParaVotacao }) {
                             }`}
                           >
                             <Icone name="close" className="text-xs" />
-                            Recusar
+                            {t("reunioes.card.recusar")}
                           </button>
                         </div>
                       </div>
@@ -763,7 +768,7 @@ function AbaReunioes({ irParaVotacao }) {
                           className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary hover:underline cursor-pointer"
                         >
                           <Icone name="edit" className="text-xs" />
-                          Editar
+                          {t("comum:acoes.editar")}
                         </button>
                       )}
                       {isOrganizador && (
@@ -780,13 +785,13 @@ function AbaReunioes({ irParaVotacao }) {
                                 if (el) el.scrollIntoView({ behavior: 'smooth' });
                               }, 100);
                             } catch {
-                              mostrarNotificacao("Erro ao abrir ata.", "erro");
+                              mostrarNotificacao(t("reunioes.toast.erroAbrirAta"), "erro");
                             }
                           }}
                           className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary hover:underline cursor-pointer"
                         >
                           <Icone name="description" className="text-xs" />
-                          Criar Ata
+                          {t("reunioes.card.criarAta")}
                         </button>
                       )}
                       <button
@@ -801,12 +806,12 @@ function AbaReunioes({ irParaVotacao }) {
                               if (el) el.scrollIntoView({ behavior: 'smooth' });
                             }, 100);
                           } catch {
-                            mostrarNotificacao("Erro ao carregar detalhes da reunião.", "erro");
+                            mostrarNotificacao(t("reunioes.toast.erroDetalhes"), "erro");
                           }
                         }}
                         className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary hover:underline cursor-pointer"
                       >
-                        Ver detalhes
+                        {t("comum:acoes.verDetalhes")}
                         <Icone name="arrow_forward" className="text-xs" />
                       </button>
                     </div>
@@ -825,7 +830,7 @@ function AbaReunioes({ irParaVotacao }) {
                 <div className="flex items-center gap-2">
                   <span className="font-semibold text-on-surface">{detalhe.titulo}</span>
                   <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${STATUS_MEETING[detalhe.status]?.cls ?? ""}`}>
-                    {STATUS_MEETING[detalhe.status]?.label ?? detalhe.status}
+                    {STATUS_MEETING[detalhe.status] ? t(STATUS_MEETING[detalhe.status].rotuloKey) : detalhe.status}
                   </span>
                 </div>
                 {detalhe.descricao && (
@@ -833,10 +838,10 @@ function AbaReunioes({ irParaVotacao }) {
                 )}
                 <div className="flex flex-wrap gap-4 text-xs text-on-surface-variant mt-1">
                   <span className="flex items-center gap-1">
-                    <Icone name="schedule" className="text-sm" /> Início: {fmt(detalhe.dataHoraInicio)}
+                    <Icone name="schedule" className="text-sm" /> {t("reunioes.card.inicio", { data: fmt(detalhe.dataHoraInicio) })}
                   </span>
                   <span className="flex items-center gap-1">
-                    <Icone name="event_available" className="text-sm" /> Fim: {fmt(detalhe.dataHoraFim)}
+                    <Icone name="event_available" className="text-sm" /> {t("reunioes.card.fim", { data: fmt(detalhe.dataHoraFim) })}
                   </span>
                   {detalhe.googleMeetLink && (
                     <JoinMeetingButton reuniao={detalhe} usuarioId={usuario?.id}
@@ -852,20 +857,20 @@ function AbaReunioes({ irParaVotacao }) {
                         onClick={() => iniciarEdicao(detalhe)}
                         className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition text-xs font-semibold cursor-pointer"
                       >
-                        <Icone name="edit" className="text-sm" /> Editar
+                        <Icone name="edit" className="text-sm" /> {t("comum:acoes.editar")}
                       </button>
                     )}
                     <button
                       onClick={() => finalizar(detalhe.id)}
                       className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-secondary/10 text-secondary hover:bg-secondary/20 transition text-xs font-semibold cursor-pointer"
                     >
-                      <Icone name="check_circle" className="text-sm" /> Finalizar
+                      <Icone name="check_circle" className="text-sm" /> {t("acoes.finalizar")}
                     </button>
                     <button
                       onClick={() => cancelar(detalhe.id)}
                       className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-error/10 text-error hover:bg-error/20 transition text-xs font-semibold cursor-pointer"
                     >
-                      <Icone name="cancel" className="text-sm" /> Cancelar
+                      <Icone name="cancel" className="text-sm" /> {t("comum:acoes.cancelar")}
                     </button>
                   </>
                 )}
@@ -873,7 +878,7 @@ function AbaReunioes({ irParaVotacao }) {
                   onClick={() => setDetalhe(null)}
                   className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-surface-container-highest/50 text-on-surface-variant hover:bg-surface-container-highest hover:text-on-surface transition text-xs font-semibold cursor-pointer border border-veu/5"
                 >
-                  <Icone name="close" className="text-sm font-bold" /> Fechar
+                  <Icone name="close" className="text-sm font-bold" /> {t("comum:acoes.fechar")}
                 </button>
               </div>
             </div>
@@ -882,18 +887,18 @@ function AbaReunioes({ irParaVotacao }) {
             <div className="p-5 space-y-4">
               <h4 className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider flex items-center gap-2">
                 <Icone name="people" className="text-base text-primary" />
-                Convidados e Presenças ({detalhe.convidados?.length || 0})
+                {t("reunioes.detalhe.convidados", { total: detalhe.convidados?.length || 0 })}
               </h4>
               
               {(!detalhe.convidados || detalhe.convidados.length === 0) ? (
-                <p className="text-xs text-on-surface-variant italic pl-1">Nenhum convidado nesta reunião.</p>
+                <p className="text-xs text-on-surface-variant italic pl-1">{t("reunioes.detalhe.nenhumConvidado")}</p>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {detalhe.convidados.map((convidado) => {
                     const usr = todosUsuarios.find((u) => u.id === convidado.usuarioId);
-                    const nome = usr ? usr.nome : `Usuário ID #${convidado.usuarioId}`;
+                    const nome = usr ? usr.nome : t("reunioes.detalhe.usuarioId", { id: convidado.usuarioId });
                     const detalhesResidencia = usr 
-                      ? `Bloco ${usr.bloco || "—"} · Apt ${usr.apartamento || "—"}` 
+                      ? t("reunioes.form.blocoApt", { bloco: usr.bloco || "—", apt: usr.apartamento || "—" })
                       : "";
                     
                     return (
@@ -913,7 +918,7 @@ function AbaReunioes({ irParaVotacao }) {
                               ? "bg-error/10 text-error border border-error/20"
                               : "bg-secondary/10 text-secondary border border-secondary/20"
                           }`}>
-                            {ATTENDANCE_LABEL[convidado.status] || convidado.status}
+                            {ATTENDANCE_LABEL[convidado.status] ? t(ATTENDANCE_LABEL[convidado.status]) : convidado.status}
                           </span>
                         </div>
 
@@ -931,7 +936,7 @@ function AbaReunioes({ irParaVotacao }) {
             {carregandoAta ? (
               <div className="p-5 text-center text-xs text-on-surface-variant flex items-center justify-center gap-2 border-t border-veu/5">
                 <Icone name="sync" className="text-sm animate-spin text-primary" />
-                Carregando Ata...
+                {t("reunioes.ata.carregando")}
               </div>
             ) : ataReuniao ? (
               /* Visualização e edição da Ata Existente */
@@ -939,14 +944,14 @@ function AbaReunioes({ irParaVotacao }) {
                 <div className="flex items-center justify-between">
                   <h4 className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider flex items-center gap-2">
                     <Icone name="description" className="text-base text-primary" />
-                    Ata da Reunião
+                    {t("reunioes.ata.titulo")}
                   </h4>
                   {detalhe.idOrganizador === usuario?.id && !escrevendoAta && (
                     <button
                       onClick={() => setEscrevendoAta(true)}
                       className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition text-xs font-semibold cursor-pointer"
                     >
-                      <Icone name="edit" className="text-sm" /> Editar Ata
+                      <Icone name="edit" className="text-sm" /> {t("reunioes.ata.editar")}
                     </button>
                   )}
                 </div>
@@ -955,18 +960,18 @@ function AbaReunioes({ irParaVotacao }) {
                   /* Form de Edição da Ata */
                   <form onSubmit={salvarAtaInline} className="space-y-4 bg-veu/5 rounded-2xl p-4 border border-veu/5 animate-fade-in">
                     <TextArea
-                      label="Tópicos Discutidos"
+                      label={t("reunioes.ata.topicos")}
                       value={ataForm.topicosDiscutidos}
                       onChange={(e) => setAtaForm((p) => ({ ...p, topicosDiscutidos: e.target.value }))}
-                      placeholder="Liste os tópicos principais discutidos..."
+                      placeholder={t("reunioes.ata.topicosPlaceholder")}
                       rows={3}
                       required
                     />
                     <TextArea
-                      label="Decisões Tomadas"
+                      label={t("reunioes.ata.decisoes")}
                       value={ataForm.decisoesTomadas}
                       onChange={(e) => setAtaForm((p) => ({ ...p, decisoesTomadas: e.target.value }))}
-                      placeholder="Liste as decisões e resoluções acordadas..."
+                      placeholder={t("reunioes.ata.decisoesPlaceholder")}
                       rows={3}
                       required
                     />
@@ -977,10 +982,10 @@ function AbaReunioes({ irParaVotacao }) {
                         onClick={() => setEscrevendoAta(false)}
                         className="px-4 py-2 rounded-xl text-xs font-semibold text-on-surface-variant hover:text-on-surface hover:bg-veu/5 transition cursor-pointer"
                       >
-                        Cancelar
+                        {t("comum:acoes.cancelar")}
                       </button>
                       <Botao type="submit" disabled={salvandoAta} style={{ width: "auto", paddingLeft: "1.5rem", paddingRight: "1.5rem" }}>
-                        {salvandoAta ? "Salvando..." : "Salvar Ata"}
+                        {salvandoAta ? t("acoes.salvando") : t("reunioes.ata.salvar")}
                       </Botao>
                     </div>
                   </form>
@@ -988,21 +993,21 @@ function AbaReunioes({ irParaVotacao }) {
                   /* Detalhes da Ata */
                   <div className="bg-veu/5 border border-veu/5 rounded-2xl p-4 space-y-3">
                     <div>
-                      <p className="text-[10px] text-on-surface-variant uppercase font-semibold tracking-wider">Tópicos Discutidos</p>
+                      <p className="text-[10px] text-on-surface-variant uppercase font-semibold tracking-wider">{t("reunioes.ata.topicos")}</p>
                       <p className="text-xs text-on-surface leading-relaxed whitespace-pre-wrap">{ataReuniao.topicosDiscutidos}</p>
                     </div>
                     <div className="pt-2 border-t border-veu/5">
-                      <p className="text-[10px] text-on-surface-variant uppercase font-semibold tracking-wider">Decisões Tomadas</p>
+                      <p className="text-[10px] text-on-surface-variant uppercase font-semibold tracking-wider">{t("reunioes.ata.decisoes")}</p>
                       <p className="text-xs text-on-surface leading-relaxed whitespace-pre-wrap">{ataReuniao.decisoesTomadas}</p>
                     </div>
                     <div className="pt-2 border-t border-veu/5">
-                      <p className="text-[10px] text-on-surface-variant uppercase font-semibold tracking-wider">Presentes na Reunião</p>
+                      <p className="text-[10px] text-on-surface-variant uppercase font-semibold tracking-wider">{t("reunioes.ata.presentes")}</p>
                       <div className="flex flex-wrap gap-1.5 mt-1">
                         {(ataReuniao.idPresentes || []).map((id) => {
                           const usr = todosUsuarios.find((u) => u.id === id);
                           return (
                             <span key={id} className="px-2 py-0.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-[10px] font-medium">
-                              {usr ? usr.nome : `ID #${id}`}
+                              {usr ? usr.nome : t("reunioes.ata.idPresente", { id })}
                             </span>
                           );
                         })}
@@ -1010,7 +1015,7 @@ function AbaReunioes({ irParaVotacao }) {
                     </div>
                     {ataReuniao.dataPublicacao && (
                       <p className="text-[10px] text-on-surface-variant/60 italic pt-1">
-                        Publicada em: {fmt(ataReuniao.dataPublicacao)}
+                        {t("reunioes.ata.publicadaEm", { data: fmt(ataReuniao.dataPublicacao) })}
                       </p>
                     )}
                   </div>
@@ -1023,7 +1028,7 @@ function AbaReunioes({ irParaVotacao }) {
                   <div className="flex items-center justify-between">
                     <h4 className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider flex items-center gap-2">
                       <Icone name="description" className="text-base text-primary" />
-                      Ata da Reunião
+                      {t("reunioes.ata.titulo")}
                     </h4>
                     {!escrevendoAta && (
                       <button
@@ -1043,7 +1048,7 @@ function AbaReunioes({ irParaVotacao }) {
                         }}
                         className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-primary text-on-primary hover:bg-primary-hover shadow-lg shadow-primary/20 hover:shadow-primary/30 transition text-xs font-semibold cursor-pointer"
                       >
-                        <Icone name="add" className="text-sm font-bold" /> Criar Ata
+                        <Icone name="add" className="text-sm font-bold" /> {t("reunioes.ata.criar")}
                       </button>
                     )}
                   </div>
@@ -1051,18 +1056,18 @@ function AbaReunioes({ irParaVotacao }) {
                   {escrevendoAta && (
                     <form onSubmit={salvarAtaInline} className="space-y-4 bg-veu/5 rounded-2xl p-4 border border-veu/5 animate-fade-in">
                       <TextArea
-                        label="Tópicos Discutidos"
+                        label={t("reunioes.ata.topicos")}
                         value={ataForm.topicosDiscutidos}
                         onChange={(e) => setAtaForm((p) => ({ ...p, topicosDiscutidos: e.target.value }))}
-                        placeholder="Liste os tópicos principais discutidos..."
+                        placeholder={t("reunioes.ata.topicosPlaceholder")}
                         rows={3}
                         required
                       />
                       <TextArea
-                        label="Decisões Tomadas"
+                        label={t("reunioes.ata.decisoes")}
                         value={ataForm.decisoesTomadas}
                         onChange={(e) => setAtaForm((p) => ({ ...p, decisoesTomadas: e.target.value }))}
-                        placeholder="Liste as decisões e resoluções acordadas..."
+                        placeholder={t("reunioes.ata.decisoesPlaceholder")}
                         rows={3}
                         required
                       />
@@ -1073,10 +1078,10 @@ function AbaReunioes({ irParaVotacao }) {
                           onClick={() => setEscrevendoAta(false)}
                           className="px-4 py-2 rounded-xl text-xs font-semibold text-on-surface-variant hover:text-on-surface hover:bg-veu/5 transition cursor-pointer"
                         >
-                          Cancelar
+                          {t("comum:acoes.cancelar")}
                         </button>
                         <Botao type="submit" disabled={salvandoAta} style={{ width: "auto", paddingLeft: "1.5rem", paddingRight: "1.5rem" }}>
-                          {salvandoAta ? "Salvando..." : "Salvar Ata"}
+                          {salvandoAta ? t("acoes.salvando") : t("reunioes.ata.salvar")}
                         </Botao>
                       </div>
                     </form>
@@ -1115,14 +1120,14 @@ function AbaReunioes({ irParaVotacao }) {
                 onClick={() => setConfirmModal({ aberto: false })}
                 className="px-4 py-2.5 rounded-xl text-xs font-semibold text-on-surface-variant hover:text-on-surface hover:bg-veu/5 transition cursor-pointer"
               >
-                Cancelar
+                {t("comum:acoes.cancelar")}
               </button>
               <button
                 type="button"
                 onClick={confirmModal.onConfirmar}
                 className="px-5 py-2.5 rounded-xl text-xs font-semibold bg-primary text-on-primary hover:bg-primary-hover shadow-lg shadow-primary/20 hover:shadow-primary/30 transition cursor-pointer"
               >
-                Confirmar
+                {t("comum:acoes.confirmar")}
               </button>
             </div>
           </div>
@@ -1141,6 +1146,7 @@ function AbaReunioes({ irParaVotacao }) {
 const EMPTY_ATA = { topicosDiscutidos: "", decisoesTomadas: "", idPresentes: "" };
 
 function AbaAtas() {
+  const { t } = useTranslation("reunioes");
   const [meetingId, setMeetingId] = useState("");
   const [detalhe, setDetalhe] = useState(null);
   const [buscando, setBuscando] = useState(false);
@@ -1170,7 +1176,7 @@ function AbaAtas() {
         idPresentes: (res.data.idPresentes || []).join(", "),
       });
     } catch {
-      setErroDetalhe("Ata não encontrada para esta reunião. Você pode criar uma.");
+      setErroDetalhe(t("atas.naoEncontrada"));
     } finally {
       setBuscando(false);
     }
@@ -1195,7 +1201,7 @@ function AbaAtas() {
       setDetalhe(res.data);
       setModo("");
     } catch (e) {
-      setErro(e.response?.data?.message || "Erro ao salvar ata.");
+      setErro(e.response?.data?.message || t("atas.erroSalvar"));
     } finally {
       setSalvando(false);
     }
@@ -1204,12 +1210,12 @@ function AbaAtas() {
   return (
     <div className="space-y-6">
       <div className="glass-panel rounded-3xl p-6 space-y-4">
-        <h2 className="font-headline text-xl font-bold text-on-surface">Atas de Reunião</h2>
+        <h2 className="font-headline text-xl font-bold text-on-surface">{t("atas.titulo")}</h2>
 
         {/* Busca */}
         <div className="flex gap-2">
           <div className="flex-1">
-            <Campo label="ID da Reunião" type="number" value={meetingId} onChange={(e) => setMeetingId(e.target.value)} placeholder="Digite o ID da reunião" />
+            <Campo label={t("atas.idReuniao")} type="number" value={meetingId} onChange={(e) => setMeetingId(e.target.value)} placeholder={t("atas.idPlaceholder")} />
           </div>
           <button
             onClick={buscarAta}
@@ -1217,7 +1223,7 @@ function AbaAtas() {
             className="self-end mb-0.5 flex items-center gap-1 px-4 py-2 rounded-xl bg-primary/10 text-primary hover:bg-primary/20 transition text-sm font-semibold cursor-pointer"
           >
             <Icone name="search" className="text-base" />
-            {buscando ? "..." : "Buscar"}
+            {buscando ? "..." : t("comum:acoes.buscar")}
           </button>
         </div>
 
@@ -1228,7 +1234,7 @@ function AbaAtas() {
               onClick={() => { setModo("criar"); setErroDetalhe(""); setForm(EMPTY_ATA); }}
               className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition text-xs font-semibold cursor-pointer"
             >
-              <Icone name="add" className="text-sm" /> Criar Ata
+              <Icone name="add" className="text-sm" /> {t("atas.criar")}
             </button>
           </div>
         )}
@@ -1238,26 +1244,26 @@ function AbaAtas() {
           <div className="bg-surface-container-highest/20 rounded-xl border border-veu/10 p-4 space-y-3">
             <div className="flex items-center justify-between">
               <p className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider">
-                Ata da Reunião #{detalhe.meetingId}
+                {t("atas.tituloId", { id: detalhe.meetingId })}
               </p>
               <button
                 onClick={() => setModo("editar")}
                 className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition text-xs font-semibold cursor-pointer"
               >
-                <Icone name="edit" className="text-sm" /> Editar
+                <Icone name="edit" className="text-sm" /> {t("comum:acoes.editar")}
               </button>
             </div>
             <div className="space-y-2">
               <div>
-                <p className="text-xs text-on-surface-variant mb-0.5">Tópicos Discutidos</p>
+                <p className="text-xs text-on-surface-variant mb-0.5">{t("reunioes.ata.topicos")}</p>
                 <p className="text-sm text-on-surface">{detalhe.topicosDiscutidos}</p>
               </div>
               <div>
-                <p className="text-xs text-on-surface-variant mb-0.5">Decisões Tomadas</p>
+                <p className="text-xs text-on-surface-variant mb-0.5">{t("reunioes.ata.decisoes")}</p>
                 <p className="text-sm text-on-surface">{detalhe.decisoesTomadas}</p>
               </div>
               <div>
-                <p className="text-xs text-on-surface-variant mb-0.5">Presentes (IDs)</p>
+                <p className="text-xs text-on-surface-variant mb-0.5">{t("atas.presentesIds")}</p>
                 <div className="flex flex-wrap gap-1">
                   {(detalhe.idPresentes || []).map((id) => (
                     <span key={id} className="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-xs">
@@ -1268,7 +1274,7 @@ function AbaAtas() {
               </div>
               {detalhe.dataPublicacao && (
                 <p className="text-xs text-on-surface-variant">
-                  Publicada em: {fmt(detalhe.dataPublicacao)}
+                  {t("reunioes.ata.publicadaEm", { data: fmt(detalhe.dataPublicacao) })}
                 </p>
               )}
             </div>
@@ -1280,7 +1286,7 @@ function AbaAtas() {
           <form onSubmit={salvarAta} className="bg-surface-container-highest/20 rounded-xl p-4 space-y-3 border border-veu/10">
             <div className="flex items-center justify-between">
               <h3 className="font-semibold text-on-surface text-sm">
-                {modo === "criar" ? "Nova Ata" : "Editar Ata"}
+                {modo === "criar" ? t("atas.nova") : t("atas.editar")}
               </h3>
               <button type="button" onClick={() => setModo("")}
                 className="text-on-surface-variant hover:text-on-surface">
@@ -1288,11 +1294,11 @@ function AbaAtas() {
               </button>
             </div>
             {erro && <p className="text-error text-xs">{erro}</p>}
-            <TextArea label="Tópicos Discutidos" name="topicosDiscutidos" value={form.topicosDiscutidos} onChange={handleForm} rows={3} placeholder="Liste os tópicos discutidos" required />
-            <TextArea label="Decisões Tomadas" name="decisoesTomadas" value={form.decisoesTomadas} onChange={handleForm} rows={3} placeholder="Liste as decisões tomadas" required />
+            <TextArea label={t("reunioes.ata.topicos")} name="topicosDiscutidos" value={form.topicosDiscutidos} onChange={handleForm} rows={3} placeholder={t("atas.topicosPlaceholder")} required />
+            <TextArea label={t("reunioes.ata.decisoes")} name="decisoesTomadas" value={form.decisoesTomadas} onChange={handleForm} rows={3} placeholder={t("atas.decisoesPlaceholder")} required />
 
             <Botao type="submit" disabled={salvando}>
-              {salvando ? "Salvando..." : modo === "criar" ? "Registrar Ata" : "Salvar Alterações"}
+              {salvando ? t("acoes.salvando") : modo === "criar" ? t("atas.registrar") : t("acoes.salvarAlteracoes")}
             </Botao>
           </form>
         )}

@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "../../contexts/AuthContext";
 import { redirectPorPerfil } from "../../utils/perfis";
 
 export function AuthCallback() {
+  const { t } = useTranslation("auth");
   const { completarOAuth } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -27,7 +29,7 @@ export function AuthCallback() {
         navigate(redirectPorPerfil(usuario?.perfil), { replace: true });
       })
       .catch(() => {
-        setErro("Não foi possível concluir o login com Google.");
+        setErro(t("callback.erro"));
       });
     // Roda uma única vez: o código já foi consumido na primeira execução.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -43,7 +45,7 @@ export function AuthCallback() {
             onClick={() => navigate("/login", { replace: true })}
             className="text-primary font-semibold hover:underline"
           >
-            Voltar ao login
+            {t("geral.voltarLogin")}
           </button>
         </div>
       </div>
@@ -52,7 +54,7 @@ export function AuthCallback() {
 
   return (
     <div className="min-h-screen flex items-center justify-center text-on-surface-variant">
-      Concluindo login...
+      {t("callback.concluindo")}
     </div>
   );
 }

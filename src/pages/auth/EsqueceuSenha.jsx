@@ -8,7 +8,7 @@ import { Botao } from "../../components/botoes/Botao";
 import { Icone } from "../../components/icones/Icone";
 
 export function EsqueceuSenha() {
-  const { t } = useTranslation();
+  const { t } = useTranslation("auth");
   const { esqueciSenha } = useAuth();
   const [enviado, setEnviado] = useState(false);
   const [erro, setErro] = useState("");
@@ -23,7 +23,7 @@ export function EsqueceuSenha() {
     const email = form.get("email-recuperacao")?.trim();
 
     if (!email) {
-      setErro("Informe seu e-mail.");
+      setErro(t("recovery.erros.emailVazio"));
       setCarregando(false);
       return;
     }
@@ -32,7 +32,7 @@ export function EsqueceuSenha() {
       await esqueciSenha(email);
       setEnviado(true);
     } catch (err) {
-      setErro(err.response?.data?.mensagem || "Erro ao enviar e-mail.");
+      setErro(err.response?.data?.mensagem || t("recovery.erros.falha"));
     } finally {
       setCarregando(false);
     }
@@ -60,6 +60,7 @@ export function EsqueceuSenha() {
               <br />
               <Trans
                 i18nKey="recovery.concierge"
+                t={t}
                 components={{
                   span: (
                     <span className="text-secondary cursor-pointer hover:underline" />
@@ -92,9 +93,9 @@ export function EsqueceuSenha() {
               {enviado ? (
                 <div className="text-center space-y-3 py-4">
                   <Icone name="mark_email_read" className="text-primary text-4xl" />
-                  <p className="text-on-surface font-semibold">E-mail enviado!</p>
+                  <p className="text-on-surface font-semibold">{t("recovery.enviado.titulo")}</p>
                   <p className="text-on-surface-variant text-sm">
-                    Se o e-mail estiver cadastrado, voce recebera um link de recuperacao.
+                    {t("recovery.enviado.texto")}
                   </p>
                 </div>
               ) : (
@@ -114,7 +115,7 @@ export function EsqueceuSenha() {
 
                   <div className="pt-1">
                     <Botao type="submit" disabled={carregando}>
-                      {carregando ? "Enviando..." : t("recovery.submit")}
+                      {carregando ? t("recovery.enviando") : t("recovery.submit")}
                       {!carregando && <Icone name="arrow_forward" className="text-xl" />}
                     </Botao>
                   </div>

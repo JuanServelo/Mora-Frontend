@@ -1,0 +1,103 @@
+{
+  "publico": {
+    "todos": "Everyone",
+    "moradores": "Residents",
+    "funcionarios": "Staff"
+  },
+  "admin": {
+    "cabecalho": {
+      "painelAdministrativo": "Admin Panel",
+      "comunicados": "Condominium",
+      "doCondominio": "announcements",
+      "subtitulo": "Publish announcements and track who has confirmed reading them."
+    },
+    "abas": {
+      "avisos": "Announcements",
+      "leitura": "Read receipts"
+    },
+    "imagem": {
+      "label": "Image (optional)",
+      "alt": "Announcement image",
+      "remover": "Remove image",
+      "escolher": "Choose image",
+      "formatos": "JPG, PNG or WebP · up to 5 MB",
+      "erroEnvio": "Could not upload the image."
+    },
+    "semCondominio": "Your user is not linked to a condominium, so there are no announcements to manage.",
+    "novo": "New Announcement",
+    "editar": "Edit Announcement",
+    "form": {
+      "titulo": "Title",
+      "tituloPlaceholder": "e.g. Pool maintenance",
+      "mensagem": "Message",
+      "mensagemPlaceholder": "Write the announcement...",
+      "inicioExibicao": "Show from",
+      "fimExibicao": "Show until",
+      "publicoAlvo": "Audience",
+      "autor": "Author",
+      "autorPlaceholder": "Author name (optional)",
+      "publicar": "Publish (show to residents during the period)",
+      "salvarAlteracoes": "Save changes",
+      "criar": "Create announcement",
+      "erroPeriodo": "Enter a valid display period.",
+      "erroSalvar": "Failed to save announcement."
+    },
+    "excluir": {
+      "titulo": "Delete announcement",
+      "mensagem": "Are you sure you want to delete \"{{titulo}}\"? This action cannot be undone.",
+      "confirmar": "Yes, delete"
+    },
+    "resumo": {
+      "total": "Total announcements",
+      "vigentes": "Active now",
+      "encerrados": "Ended / draft"
+    },
+    "status": {
+      "vigente": "Active",
+      "foraDoPeriodo": "Out of period",
+      "rascunho": "Draft"
+    },
+    "lista": {
+      "mensagem": "Message",
+      "encerrar": "End",
+      "vazio": "No announcements yet.",
+      "carregando": "Loading announcements..."
+    },
+    "leitura": {
+      "erroCarregar": "Could not load the announcements.",
+      "vazioTitulo": "No active announcements",
+      "vazioDescricao": "Publish an announcement in the other tab to track here who has confirmed reading it.",
+      "ate": "until {{data}}",
+      "confirmacoes": "confirmations",
+      "carregandoDestinatarios": "Loading recipients…",
+      "erroRelatorio": "Could not load the report.",
+      "deTotalConfirmaram": " of {{total}} confirmed",
+      "usuario": "user {{id}}"
+    }
+  },
+  "morador": {
+    "titulo": "Announcements",
+    "pendentes_one": "{{count}} announcement you haven't opened yet",
+    "pendentes_other": "{{count}} announcements you haven't opened yet",
+    "emDia": "You're all caught up",
+    "filtros": {
+      "novos": "New",
+      "lidos": "Read",
+      "todos": "All"
+    },
+    "vazio": {
+      "novos": "No new announcements",
+      "lidos": "You haven't read any announcements yet",
+      "todos": "No active announcements",
+      "dicaNovos": "The ones you've opened are under “Read”.",
+      "dicaOutros": "Announcements from the management show up here."
+    },
+    "erroCarregar": "Could not load the announcements.",
+    "erroLeitura": "Could not record the read receipt.",
+    "cartao": {
+      "ate": "until {{data}}",
+      "comImagem": " · with image",
+      "leituraRegistrada": "Read on {{data}}"
+    }
+  }
+}

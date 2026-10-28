@@ -6,6 +6,8 @@ import { Botao } from "../../components/botoes/Botao";
 import { useToast } from "../../contexts/ToastContext";
 import { useConfirm } from "../../contexts/ConfirmContext";
 import { useAuth } from "../../contexts/AuthContext";
+import { useTranslation } from "react-i18next";
+import { idiomaAtual } from "../../i18n";
 
 function TextArea({ label, ...props }) {
   return (
@@ -24,12 +26,13 @@ function TextArea({ label, ...props }) {
 }
 
 const STATUS_POLL = {
-  ABERTA: { label: "Aberta", cls: "bg-primary/10 text-primary" },
-  ENCERRADA: { label: "Encerrada", cls: "bg-secondary/10 text-secondary" },
-  CANCELADA: { label: "Cancelada", cls: "bg-error/10 text-error" },
+  ABERTA: { rotuloKey: "status.votacao.aberta", siglaKey: "status.votacaoSigla.aberta", cls: "bg-primary/10 text-primary" },
+  ENCERRADA: { rotuloKey: "status.votacao.encerrada", siglaKey: "status.votacaoSigla.encerrada", cls: "bg-secondary/10 text-secondary" },
+  CANCELADA: { rotuloKey: "status.votacao.cancelada", siglaKey: "status.votacaoSigla.cancelada", cls: "bg-error/10 text-error" },
 };
 
 export function GerenciarVotacoes() {
+  const { t } = useTranslation("reunioes");
   const toast = useToast();
   const confirm = useConfirm();
   const { usuario } = useAuth();
@@ -62,9 +65,9 @@ export function GerenciarVotacoes() {
     try {
       const res = await pollApi.listar({ condominioId: usuario.condominioId });
       setResultadosBusca(res.data || []);
-      if (res.data.length === 0) setErroDetalhe("Nenhuma votação encontrada no condomínio.");
+      if (res.data.length === 0) setErroDetalhe(t("votacoes.nenhuma"));
     } catch (e) {
-      setErroDetalhe("Erro ao buscar votações.");
+      setErroDetalhe(t("votacoes.erroBuscar"));
       setResultadosBusca([]);
     } finally {
       setBuscando(false);
@@ -93,10 +96,10 @@ export function GerenciarVotacoes() {
       await pollApi.criar(payload);
       setForm({ titulo: "", descricao: "", opcoes: "", dataHoraFim: "" });
       setCriando(false);
-      toast.success("Votação criada!");
+      toast.success(t("votacoes.toast.criada"));
       buscarPollsDoCondominio();
     } catch (e) {
-      setErro(e.response?.data?.message || "Erro ao criar votação.");
+      setErro(e.response?.data?.message || t("votacoes.toast.erroCriar"));
     } finally {
       setSalvando(false);
     }
@@ -107,19 +110,19 @@ export function GerenciarVotacoes() {
   async function encerrarPoll() {
     if (!detalhe) return;
     const ok = await confirm({
-      titulo: "Encerrar votação",
-      mensagem: "Deseja encerrar esta votação?",
-      confirmarTexto: "Encerrar",
+      titulo: t("votacoes.confirmar.titulo"),
+      mensagem: t("votacoes.confirmar.mensagem"),
+      confirmarTexto: t("votacoes.encerrar"),
       variante: "danger",
     });
     if (!ok) return;
     try {
       await pollApi.encerrar(detalhe.id);
       setDetalhe((p) => (p ? { ...p, status: "ENCERRADA" } : p));
-      toast.success("Votação encerrada!");
+      toast.success(t("votacoes.toast.encerrada"));
       buscarPollsDoCondominio();
     } catch {
-      toast.error("Erro ao encerrar votação.");
+      toast.error(t("votacoes.toast.erroEncerrar"));
     }
   }
 
@@ -134,9 +137,9 @@ export function GerenciarVotacoes() {
       setVoteForm({ pollOptionId: "" });
       const res = await pollApi.buscar(detalhe.id);
       setDetalhe(res.data);
-      toast.success("Voto registrado!");
+      toast.success(t("votacoes.toast.votoRegistrado"));
     } catch (e) {
-      toast.error(e.response?.data?.message || "Erro ao registrar voto.");
+      toast.error(e.response?.data?.message || t("votacoes.toast.erroVoto"));
     } finally {
       setVotando(false);
     }
@@ -148,12 +151,12 @@ export function GerenciarVotacoes() {
         <header className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
             <p className="text-on-surface-variant text-xs font-semibold uppercase tracking-widest mb-1">
-              Painel Administrativo
+              {t("cabecalho.painelAdministrativo")}
             </p>
             <h1 className="font-headline text-4xl font-extrabold tracking-tight text-on-surface">
-              Gestão de{" "}
+              {t("cabecalho.gestaoDe")}{" "}
               <span className="bg-gradient-to-r from-primary to-tertiary bg-clip-text text-transparent">
-                Votações
+                {t("cabecalho.votacoes")}
               </span>
             </h1>
           </div>
@@ -161,26 +164,26 @@ export function GerenciarVotacoes() {
 
         <div className="glass-panel rounded-3xl p-6 space-y-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <h2 className="font-headline text-xl font-bold text-on-surface">Votações</h2>
+            <h2 className="font-headline text-xl font-bold text-on-surface">{t("votacoes.titulo")}</h2>
             <button
               onClick={() => { setCriando(!criando); setErro(""); }}
               className="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary/10 text-primary hover:bg-primary/20 transition text-sm font-semibold cursor-pointer"
             >
               <Icone name={criando ? "close" : "add"} className="text-base" />
-              {criando ? "Cancelar" : "Nova Votação"}
+              {criando ? t("comum:acoes.cancelar") : t("votacoes.nova")}
             </button>
           </div>
 
           {criando && (
             <form onSubmit={salvarPoll} className="bg-surface-container-highest/20 rounded-xl p-4 space-y-3 border border-veu/10">
-              <h3 className="font-semibold text-on-surface text-sm">Nova Votação</h3>
+              <h3 className="font-semibold text-on-surface text-sm">{t("votacoes.nova")}</h3>
               {erro && <p className="text-error text-xs">{erro}</p>}
-              <Campo label="Título" name="titulo" value={form.titulo} onChange={handleForm} placeholder="Ex: Aprovação do orçamento" required />
-              <TextArea label="Descrição" name="descricao" value={form.descricao} onChange={handleForm} rows={2} placeholder="Descrição da votação" />
-              <Campo label="Data de Encerramento (opcional)" name="dataHoraFim" type="datetime-local" value={form.dataHoraFim} onChange={handleForm} />
-              <Campo label="Opções (separadas por vírgula)" name="opcoes" value={form.opcoes} onChange={handleForm} placeholder="ex: Sim, Não, Abstenção" required />
+              <Campo label={t("votacoes.form.titulo")} name="titulo" value={form.titulo} onChange={handleForm} placeholder={t("votacoes.form.tituloPlaceholder")} required />
+              <TextArea label={t("votacoes.form.descricao")} name="descricao" value={form.descricao} onChange={handleForm} rows={2} placeholder={t("votacoes.form.descricaoPlaceholder")} />
+              <Campo label={t("votacoes.form.dataEncerramento")} name="dataHoraFim" type="datetime-local" value={form.dataHoraFim} onChange={handleForm} />
+              <Campo label={t("votacoes.form.opcoes")} name="opcoes" value={form.opcoes} onChange={handleForm} placeholder={t("votacoes.form.opcoesPlaceholder")} required />
               <Botao type="submit" disabled={salvando}>
-                {salvando ? "Salvando..." : "Criar Votação"}
+                {salvando ? t("acoes.salvando") : t("votacoes.form.criar")}
               </Botao>
             </form>
           )}
@@ -188,7 +191,7 @@ export function GerenciarVotacoes() {
           <div className="space-y-4">
             <div className="flex flex-col md:flex-row gap-4">
               <div className="flex-1 space-y-1">
-                <Campo label="Buscar votação por Título" type="text" value={buscaTitulo} onChange={(e) => setBuscaTitulo(e.target.value)} placeholder="Digite o título da votação" />
+                <Campo label={t("votacoes.buscarLabel")} type="text" value={buscaTitulo} onChange={(e) => setBuscaTitulo(e.target.value)} placeholder={t("votacoes.buscarPlaceholder")} />
               </div>
             </div>
             {erroDetalhe && <p className="text-error text-xs">{erroDetalhe}</p>}
@@ -196,7 +199,7 @@ export function GerenciarVotacoes() {
 
           {resultadosBusca.length > 0 && !detalhe && (
             <div className="space-y-2">
-              <h3 className="font-semibold text-sm text-on-surface">Votações do Condomínio</h3>
+              <h3 className="font-semibold text-sm text-on-surface">{t("votacoes.doCondominio")}</h3>
               {resultadosBusca
                 .filter(p => p.titulo.toLowerCase().includes(buscaTitulo.toLowerCase()))
                 .map(poll => (
@@ -204,7 +207,7 @@ export function GerenciarVotacoes() {
                   <div>
                     <div className="flex items-center gap-2">
                       <span className="text-sm font-bold text-on-surface">{poll.titulo}</span>
-                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${STATUS_POLL[poll.status]?.cls ?? ""}`}>{poll.status}</span>
+                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${STATUS_POLL[poll.status]?.cls ?? ""}`}>{STATUS_POLL[poll.status] ? t(STATUS_POLL[poll.status].siglaKey) : poll.status}</span>
                     </div>
                   </div>
                   <Icone name="chevron_right" className="text-on-surface-variant hidden sm:block" />
@@ -220,7 +223,7 @@ export function GerenciarVotacoes() {
                   <div className="flex items-center gap-2">
                     <span className="font-semibold text-on-surface">{detalhe.titulo}</span>
                     <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${STATUS_POLL[detalhe.status]?.cls ?? ""}`}>
-                      {STATUS_POLL[detalhe.status]?.label ?? detalhe.status}
+                      {STATUS_POLL[detalhe.status] ? t(STATUS_POLL[detalhe.status].rotuloKey) : detalhe.status}
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
@@ -228,14 +231,14 @@ export function GerenciarVotacoes() {
                       onClick={() => setDetalhe(null)}
                       className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-surface-container-highest/50 text-on-surface hover:bg-surface-container-highest transition text-xs font-semibold cursor-pointer"
                     >
-                      <Icone name="arrow_back" className="text-sm" /> Voltar
+                      <Icone name="arrow_back" className="text-sm" /> {t("comum:acoes.voltar")}
                     </button>
                     {detalhe.status === "ABERTA" && (
                       <button
                         onClick={encerrarPoll}
                         className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-error/10 text-error hover:bg-error/20 transition text-xs font-semibold cursor-pointer"
                       >
-                        <Icone name="lock" className="text-sm" /> Encerrar
+                        <Icone name="lock" className="text-sm" /> {t("votacoes.encerrar")}
                       </button>
                     )}
                   </div>
@@ -245,13 +248,13 @@ export function GerenciarVotacoes() {
                 )}
                 {detalhe.dataHoraFim && (
                   <p className="text-on-surface-variant text-xs mt-1">
-                    <span className="font-semibold">Encerramento:</span> {new Date(detalhe.dataHoraFim).toLocaleString("pt-BR")}
+                    <span className="font-semibold">{t("votacoes.encerramento")}</span> {new Date(detalhe.dataHoraFim).toLocaleString(idiomaAtual())}
                   </p>
                 )}
 
                 {detalhe.opcoes?.length > 0 && (
                   <div className="space-y-2 pt-2">
-                    <p className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider">Opções</p>
+                    <p className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider">{t("votacoes.opcoes")}</p>
                     <div className="flex flex-col gap-2">
                       {(() => {
                         const totalVotos = detalhe.opcoes.reduce((acc, op) => acc + (op.quantidadeVotos || 0), 0);
@@ -286,7 +289,7 @@ export function GerenciarVotacoes() {
                                 <span className="text-sm font-medium">{op.descricao}</span>
                               </div>
                               {mostraResultados && (
-                                <span className="relative z-10 text-xs font-bold text-on-surface-variant">{pct}% ({votos} votos)</span>
+                                <span className="relative z-10 text-xs font-bold text-on-surface-variant">{t("votacoes.resultado", { pct, count: votos })}</span>
                               )}
                             </button>
                           );

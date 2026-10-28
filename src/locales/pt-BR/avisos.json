@@ -1,0 +1,103 @@
+{
+  "publico": {
+    "todos": "Todos",
+    "moradores": "Moradores",
+    "funcionarios": "Funcionários"
+  },
+  "admin": {
+    "cabecalho": {
+      "painelAdministrativo": "Painel Administrativo",
+      "comunicados": "Comunicados",
+      "doCondominio": "do condomínio",
+      "subtitulo": "Publique avisos e acompanhe quem já confirmou a leitura."
+    },
+    "abas": {
+      "avisos": "Avisos",
+      "leitura": "Confirmação de leitura"
+    },
+    "imagem": {
+      "label": "Imagem (opcional)",
+      "alt": "Imagem do aviso",
+      "remover": "Remover imagem",
+      "escolher": "Escolher imagem",
+      "formatos": "JPG, PNG ou WebP · até 5 MB",
+      "erroEnvio": "Não foi possível enviar a imagem."
+    },
+    "semCondominio": "Seu usuário não está vinculado a um condomínio, então não há avisos para gerenciar.",
+    "novo": "Novo Aviso",
+    "editar": "Editar Aviso",
+    "form": {
+      "titulo": "Título",
+      "tituloPlaceholder": "Ex: Manutenção da piscina",
+      "mensagem": "Mensagem",
+      "mensagemPlaceholder": "Escreva o comunicado...",
+      "inicioExibicao": "Início da exibição",
+      "fimExibicao": "Fim da exibição",
+      "publicoAlvo": "Público-alvo",
+      "autor": "Autor",
+      "autorPlaceholder": "Nome do autor (opcional)",
+      "publicar": "Publicar (exibir aos moradores dentro do período)",
+      "salvarAlteracoes": "Salvar alterações",
+      "criar": "Criar aviso",
+      "erroPeriodo": "Informe um período de exibição válido.",
+      "erroSalvar": "Erro ao salvar aviso."
+    },
+    "excluir": {
+      "titulo": "Excluir aviso",
+      "mensagem": "Tem certeza que deseja excluir \"{{titulo}}\"? Essa ação não pode ser desfeita.",
+      "confirmar": "Sim, excluir"
+    },
+    "resumo": {
+      "total": "Total de avisos",
+      "vigentes": "Vigentes agora",
+      "encerrados": "Encerrados / rascunho"
+    },
+    "status": {
+      "vigente": "Vigente",
+      "foraDoPeriodo": "Fora do período",
+      "rascunho": "Rascunho"
+    },
+    "lista": {
+      "mensagem": "Mensagem",
+      "encerrar": "Encerrar",
+      "vazio": "Nenhum aviso cadastrado.",
+      "carregando": "Carregando avisos..."
+    },
+    "leitura": {
+      "erroCarregar": "Não foi possível carregar os comunicados.",
+      "vazioTitulo": "Nenhum aviso ativo",
+      "vazioDescricao": "Publique um aviso na aba ao lado para acompanhar aqui quem confirmou a leitura.",
+      "ate": "até {{data}}",
+      "confirmacoes": "confirmações",
+      "carregandoDestinatarios": "Carregando destinatários…",
+      "erroRelatorio": "Não foi possível carregar o relatório.",
+      "deTotalConfirmaram": " de {{total}} confirmaram",
+      "usuario": "usuário {{id}}"
+    }
+  },
+  "morador": {
+    "titulo": "Avisos",
+    "pendentes_one": "{{count}} aviso que você ainda não abriu",
+    "pendentes_other": "{{count}} avisos que você ainda não abriu",
+    "emDia": "Você está em dia com os comunicados",
+    "filtros": {
+      "novos": "Novos",
+      "lidos": "Já lidos",
+      "todos": "Todos"
+    },
+    "vazio": {
+      "novos": "Nenhum aviso novo",
+      "lidos": "Você ainda não leu nenhum aviso",
+      "todos": "Nenhum aviso ativo",
+      "dicaNovos": "Os que você já abriu ficam em “Já lidos”.",
+      "dicaOutros": "Comunicados da administração aparecem aqui."
+    },
+    "erroCarregar": "Não foi possível carregar os avisos.",
+    "erroLeitura": "Não foi possível registrar a leitura.",
+    "cartao": {
+      "ate": "até {{data}}",
+      "comImagem": " · com imagem",
+      "leituraRegistrada": "Leitura registrada em {{data}}"
+    }
+  }
+}

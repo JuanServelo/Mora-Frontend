@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { veiculoApi, moradorApi, vagaApi, funcionarioApi } from "../../services/portariaApi";
 import { Icone } from "../../components/icones/Icone";
 import { Campo } from "../../components/campos/Campo";
@@ -7,19 +8,20 @@ import { useToast } from "../../contexts/ToastContext";
 import { useConfirm } from "../../contexts/ConfirmContext";
 import { useAuth } from "../../contexts/AuthContext";
 import { PERFIS, podeAcessarAdmin } from "../../utils/perfis";
+import { idiomaAtual } from "../../i18n";
 
 // ─── Tipos de veículo (RN-02) ─────────────────────────────────────
 const TIPOS_VEICULO = [
-  { value: "MORADOR",    label: "Morador",   icon: "person",        desc: "Vinculado a morador com vaga fixa" },
-  { value: "VISITANTE",  label: "Visitante",  icon: "person_add",   desc: "Vaga escolhida na entrada" },
-  { value: "FUNCIONARIO", label: "Serviço",   icon: "local_shipping", desc: "Funcionário, sem vaga" },
+  { value: "MORADOR",    rotuloKey: "gerenciar.tipos.morador.rotulo",     icon: "person",         descKey: "gerenciar.tipos.morador.descricao" },
+  { value: "VISITANTE",  rotuloKey: "gerenciar.tipos.visitante.rotulo",   icon: "person_add",     descKey: "gerenciar.tipos.visitante.descricao" },
+  { value: "FUNCIONARIO", rotuloKey: "gerenciar.tipos.funcionario.rotulo", icon: "local_shipping", descKey: "gerenciar.tipos.funcionario.descricao" },
 ];
 
 // ─── Estado visual da vaga ────────────────────────────────────────
 const ESTADO_VAGA = {
-  LIVRE:     { label: "Livre",     cls: "text-green-600 bg-green-50 dark:bg-green-900/20 dark:text-green-400" },
-  VINCULADA: { label: "Vinculada", cls: "text-amber-600 bg-amber-50 dark:bg-amber-900/20 dark:text-amber-400" },
-  OCUPADA:   { label: "Ocupada",   cls: "text-error bg-error/10" },
+  LIVRE:     { rotuloKey: "gerenciar.estadoVaga.livre",     cls: "text-green-600 bg-green-50 dark:bg-green-900/20 dark:text-green-400" },
+  VINCULADA: { rotuloKey: "gerenciar.estadoVaga.vinculada", cls: "text-amber-600 bg-amber-50 dark:bg-amber-900/20 dark:text-amber-400" },
+  OCUPADA:   { rotuloKey: "gerenciar.estadoVaga.ocupada",   cls: "text-error bg-error/10" },
 };
 
 function estadoDaVaga(vaga, veiculos) {
@@ -34,8 +36,9 @@ const STATUS_STYLE = {
   SAIU:   "bg-outline-variant/20 text-on-surface-variant",
 };
 
-function labelTipo(tipo) {
-  return TIPOS_VEICULO.find((t) => t.value === tipo)?.label ?? tipo ?? "—";
+function labelTipo(tipo, t) {
+  const rotuloKey = TIPOS_VEICULO.find((x) => x.value === tipo)?.rotuloKey;
+  return rotuloKey ? t(rotuloKey) : tipo ?? "—";
 }
 function iconeTipo(tipo) {
   return TIPOS_VEICULO.find((t) => t.value === tipo)?.icon ?? "directions_car";
@@ -55,6 +58,7 @@ const labelCls =
 
 // ─── Formulário de cadastro / edição ─────────────────────────────
 function FormVeiculo({ moradores, vagas, funcionarios, veiculos, inicial, onSalvar, onCancelar, salvando, podeEscolherTipo }) {
+  const { t } = useTranslation("veiculos");
   const tipoInicial = inicial?.tipoProprietario ?? "MORADOR";
 
   const [form, setForm] = useState(
@@ -98,17 +102,17 @@ function FormVeiculo({ moradores, vagas, funcionarios, veiculos, inicial, onSalv
   function validar() {
     const e = {};
     if (!form.placa.trim()) {
-      e.placa = "Placa é obrigatória.";
+      e.placa = t("gerenciar.form.erros.placaObrigatoria");
     } else if (!placaValida(form.placa)) {
-      e.placa = "Formato inválido. Use AAA9999 ou AAA9A99 (Mercosul).";
+      e.placa = t("gerenciar.form.erros.placaInvalida");
     }
     if (!form.proprietarioId) {
-      if (isMorador)   e.proprietarioId = "Morador vinculado é obrigatório.";
-      if (isVisitante) e.proprietarioId = "Morador anfitrião é obrigatório.";
-      if (isServico)   e.proprietarioId = "Funcionário vinculado é obrigatório.";
+      if (isMorador)   e.proprietarioId = t("gerenciar.form.erros.moradorObrigatorio");
+      if (isVisitante) e.proprietarioId = t("gerenciar.form.erros.anfitriaoObrigatorio");
+      if (isServico)   e.proprietarioId = t("gerenciar.form.erros.funcionarioObrigatorio");
     }
     if (isMorador && !form.vagaId) {
-      e.vagaId = "Vaga é obrigatória para veículo de Morador.";
+      e.vagaId = t("gerenciar.form.erros.vagaObrigatoria");
     }
     setErros(e);
     if (Object.keys(e).length > 0) {
@@ -147,27 +151,30 @@ function FormVeiculo({ moradores, vagas, funcionarios, veiculos, inicial, onSalv
       {/* Tipo de veículo */}
       {podeEscolherTipo && (
         <div className="space-y-2">
-          <label className={labelCls}>Tipo de veículo <span className="text-error">*</span></label>
+          <label className={labelCls}>{t("gerenciar.form.tipoVeiculo")} <span className="text-error">*</span></label>
           <div className="flex gap-2 flex-wrap">
-            {TIPOS_VEICULO.map((t) => (
+            {TIPOS_VEICULO.map((tp) => (
               <button
-                key={t.value}
+                key={tp.value}
                 type="button"
-                aria-pressed={tipo === t.value}
-                onClick={() => set("tipo", t.value)}
+                aria-pressed={tipo === tp.value}
+                onClick={() => set("tipo", tp.value)}
                 className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all border cursor-pointer ${
-                  tipo === t.value
+                  tipo === tp.value
                     ? "bg-primary/10 border-primary/30 text-primary"
                     : "border-outline-variant/20 text-on-surface-variant hover:border-primary/20"
                 }`}
               >
-                <Icone name={t.icon} className="text-base" />
-                {t.label}
+                <Icone name={tp.icon} className="text-base" />
+                {t(tp.rotuloKey)}
               </button>
             ))}
           </div>
           <p className="text-xs text-on-surface-variant ml-1">
-            {TIPOS_VEICULO.find((t) => t.value === tipo)?.desc}
+            {(() => {
+              const descKey = TIPOS_VEICULO.find((tp) => tp.value === tipo)?.descKey;
+              return descKey ? t(descKey) : null;
+            })()}
           </p>
         </div>
       )}
@@ -177,7 +184,7 @@ function FormVeiculo({ moradores, vagas, funcionarios, veiculos, inicial, onSalv
         <div>
           <Campo
             id="placa"
-            label={<>Placa <span className="text-error">*</span></>}
+            label={<>{t("gerenciar.form.placa")} <span className="text-error">*</span></>}
             placeholder="ABC1D23"
             icon="credit_card"
             value={form.placa}
@@ -190,8 +197,8 @@ function FormVeiculo({ moradores, vagas, funcionarios, veiculos, inicial, onSalv
         </div>
         <Campo
           id="modelo"
-          label="Modelo"
-          placeholder="Ex: Fiat Uno, Honda CB500"
+          label={t("gerenciar.form.modelo")}
+          placeholder={t("gerenciar.form.modeloPlaceholder")}
           icon="directions_car"
           value={form.modelo}
           onChange={(e) => set("modelo", e.target.value)}
@@ -202,16 +209,16 @@ function FormVeiculo({ moradores, vagas, funcionarios, veiculos, inicial, onSalv
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <Campo
           id="cor"
-          label="Cor"
-          placeholder="Ex: Prata, Preto"
+          label={t("gerenciar.form.cor")}
+          placeholder={t("gerenciar.form.corPlaceholder")}
           icon="palette"
           value={form.cor}
           onChange={(e) => set("cor", e.target.value)}
         />
         <Campo
           id="obs"
-          label="Observações"
-          placeholder="Observações gerais"
+          label={t("gerenciar.form.observacoes")}
+          placeholder={t("gerenciar.form.observacoesPlaceholder")}
           icon="notes"
           value={form.obs}
           onChange={(e) => set("obs", e.target.value)}
@@ -223,7 +230,7 @@ function FormVeiculo({ moradores, vagas, funcionarios, veiculos, inicial, onSalv
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-2">
             <label htmlFor="proprietarioId" className={labelCls}>
-              Morador <span className="text-error">*</span>
+              {t("gerenciar.form.morador")} <span className="text-error">*</span>
             </label>
             <select
               id="proprietarioId"
@@ -232,10 +239,10 @@ function FormVeiculo({ moradores, vagas, funcionarios, veiculos, inicial, onSalv
               aria-required="true"
               className={`${selectCls} ${erros.proprietarioId ? "ring-2 ring-error/60" : ""}`}
             >
-              <option value="">— Selecione —</option>
+              <option value="">{t("gerenciar.form.selecione")}</option>
               {moradores.map((m) => (
                 <option key={m.id} value={m.id}>
-                  {m.nome}{m.apartamentoNumero ? ` · Apto ${m.apartamentoNumero}` : ""}
+                  {m.nome}{m.apartamentoNumero ? ` · ${t("gerenciar.apto", { numero: m.apartamentoNumero })}` : ""}
                 </option>
               ))}
             </select>
@@ -244,7 +251,7 @@ function FormVeiculo({ moradores, vagas, funcionarios, veiculos, inicial, onSalv
 
           <div className="space-y-2">
             <label htmlFor="vagaId" className={labelCls}>
-              Vaga <span className="text-error">*</span>
+              {t("gerenciar.form.vaga")} <span className="text-error">*</span>
             </label>
             <select
               id="vagaId"
@@ -253,20 +260,20 @@ function FormVeiculo({ moradores, vagas, funcionarios, veiculos, inicial, onSalv
               aria-required="true"
               className={`${selectCls} ${erros.vagaId ? "ring-2 ring-error/60" : ""}`}
             >
-              <option value="">— Selecione —</option>
+              <option value="">{t("gerenciar.form.selecione")}</option>
               {vagasFiltradas.map((v) => (
                 <option key={v.id} value={v.id} disabled={v.estado === "OCUPADA"}>
-                  Vaga {v.numero}
+                  {t("gerenciar.vagaNumero", { numero: v.numero })}
                   {v.localizacao ? ` · ${v.localizacao}` : ""}
-                  {v.apartamentoNumero ? ` · Apto ${v.apartamentoNumero}` : ""}
-                  {" "}· {ESTADO_VAGA[v.estado]?.label ?? v.estado}
+                  {v.apartamentoNumero ? ` · ${t("gerenciar.apto", { numero: v.apartamentoNumero })}` : ""}
+                  {" "}· {ESTADO_VAGA[v.estado] ? t(ESTADO_VAGA[v.estado].rotuloKey) : v.estado}
                 </option>
               ))}
             </select>
             {erros.vagaId && <p role="alert" className="text-error text-xs ml-1">{erros.vagaId}</p>}
             {form.proprietarioId && vagasFiltradas.length === 0 && (
               <p className="text-xs text-on-surface-variant ml-1">
-                Nenhuma vaga vinculada ao apartamento deste morador.
+                {t("gerenciar.form.nenhumaVagaApto")}
               </p>
             )}
           </div>
@@ -276,7 +283,7 @@ function FormVeiculo({ moradores, vagas, funcionarios, veiculos, inicial, onSalv
       {isVisitante && (
         <div className="space-y-2">
           <label htmlFor="proprietarioId" className={labelCls}>
-            Morador anfitrião <span className="text-error">*</span>
+            {t("gerenciar.form.moradorAnfitriao")} <span className="text-error">*</span>
           </label>
           <select
             id="proprietarioId"
@@ -285,16 +292,16 @@ function FormVeiculo({ moradores, vagas, funcionarios, veiculos, inicial, onSalv
             aria-required="true"
             className={`${selectCls} ${erros.proprietarioId ? "ring-2 ring-error/60" : ""}`}
           >
-            <option value="">— Selecione o morador que recebe a visita —</option>
+            <option value="">{t("gerenciar.form.selecioneAnfitriao")}</option>
             {moradores.map((m) => (
               <option key={m.id} value={m.id}>
-                {m.nome}{m.apartamentoNumero ? ` · Apto ${m.apartamentoNumero}` : ""}
+                {m.nome}{m.apartamentoNumero ? ` · ${t("gerenciar.apto", { numero: m.apartamentoNumero })}` : ""}
               </option>
             ))}
           </select>
           {erros.proprietarioId && <p role="alert" className="text-error text-xs ml-1">{erros.proprietarioId}</p>}
           <p className="text-xs text-on-surface-variant ml-1">
-            A vaga será escolhida no momento da entrada.
+            {t("gerenciar.form.vagaNaEntrada")}
           </p>
         </div>
       )}
@@ -302,7 +309,7 @@ function FormVeiculo({ moradores, vagas, funcionarios, veiculos, inicial, onSalv
       {isServico && (
         <div className="space-y-2">
           <label htmlFor="proprietarioId" className={labelCls}>
-            Funcionário <span className="text-error">*</span>
+            {t("gerenciar.form.funcionario")} <span className="text-error">*</span>
           </label>
           <select
             id="proprietarioId"
@@ -311,7 +318,7 @@ function FormVeiculo({ moradores, vagas, funcionarios, veiculos, inicial, onSalv
             aria-required="true"
             className={`${selectCls} ${erros.proprietarioId ? "ring-2 ring-error/60" : ""}`}
           >
-            <option value="">— Selecione —</option>
+            <option value="">{t("gerenciar.form.selecione")}</option>
             {funcionarios.map((f) => (
               <option key={f.id} value={f.id}>
                 {f.nome}{f.cargo ? ` · ${f.cargo}` : ""}
@@ -321,14 +328,14 @@ function FormVeiculo({ moradores, vagas, funcionarios, veiculos, inicial, onSalv
           {erros.proprietarioId && <p role="alert" className="text-error text-xs ml-1">{erros.proprietarioId}</p>}
           <div className="flex items-start gap-2 px-4 py-3 rounded-xl bg-surface-container-highest/30 text-on-surface-variant text-xs">
             <Icone name="info" className="text-primary text-base shrink-0 mt-0.5" />
-            <span>Veículos de serviço não ocupam vaga. A entrada pode ser registrada a qualquer momento.</span>
+            <span>{t("gerenciar.form.servicoInfo")}</span>
           </div>
         </div>
       )}
 
       <div className="flex flex-col sm:flex-row gap-3 pt-1">
         <Botao type="submit" disabled={salvando}>
-          {salvando ? "Salvando…" : inicial ? "Salvar Alterações" : "Cadastrar Veículo"}
+          {salvando ? t("comum:acoes.salvando") : inicial ? t("gerenciar.form.salvarAlteracoes") : t("gerenciar.form.cadastrar")}
           <Icone name={inicial ? "check" : "add"} className="text-xl" />
         </Botao>
         <button
@@ -336,7 +343,7 @@ function FormVeiculo({ moradores, vagas, funcionarios, veiculos, inicial, onSalv
           onClick={onCancelar}
           className="flex-1 py-3 rounded-xl border border-outline-variant/30 text-on-surface-variant hover:text-on-surface transition-colors text-sm font-medium cursor-pointer"
         >
-          Cancelar
+          {t("comum:acoes.cancelar")}
         </button>
       </div>
     </form>
@@ -345,6 +352,7 @@ function FormVeiculo({ moradores, vagas, funcionarios, veiculos, inicial, onSalv
 
 // ─── Modal: vaga na entrada de Visitante ─────────────────────────
 function ModalVagaEntrada({ veiculo, vagas, veiculos, onConfirmar, onFechar, salvando }) {
+  const { t } = useTranslation("veiculos");
   const [vagaId, setVagaId] = useState("");
 
   const vagasComEstado = useMemo(
@@ -358,7 +366,7 @@ function ModalVagaEntrada({ veiculo, vagas, veiculos, onConfirmar, onFechar, sal
       <div className="glass-panel rounded-3xl p-5 sm:p-6 w-full max-w-md space-y-5">
         <div className="flex items-start justify-between gap-3">
           <h3 className="font-headline text-lg font-bold text-on-surface min-w-0">
-            Escolher Vaga — {veiculo.placa}
+            {t("gerenciar.modalEntrada.titulo", { placa: veiculo.placa })}
           </h3>
           <button onClick={onFechar} className="shrink-0 text-on-surface-variant hover:text-on-surface cursor-pointer">
             <Icone name="close" className="text-xl" />
@@ -366,28 +374,28 @@ function ModalVagaEntrada({ veiculo, vagas, veiculos, onConfirmar, onFechar, sal
         </div>
 
         <p className="text-sm text-on-surface-variant">
-          Veículo de visitante. Selecione uma vaga livre para esta entrada.
+          {t("gerenciar.modalEntrada.descricao")}
         </p>
 
         <div className="space-y-2">
-          <label className={labelCls}>Vaga <span className="text-error">*</span></label>
+          <label className={labelCls}>{t("gerenciar.form.vaga")} <span className="text-error">*</span></label>
           <select
             value={vagaId}
             onChange={(e) => setVagaId(e.target.value)}
             className={selectCls}
             aria-required="true"
           >
-            <option value="">— Selecione uma vaga livre —</option>
+            <option value="">{t("gerenciar.modalEntrada.selecioneLivre")}</option>
             {vagasLivres.map((v) => (
               <option key={v.id} value={v.id}>
-                Vaga {v.numero}
+                {t("gerenciar.vagaNumero", { numero: v.numero })}
                 {v.localizacao ? ` · ${v.localizacao}` : ""}
-                {v.apartamentoNumero ? ` · Apto ${v.apartamentoNumero}` : ""}
+                {v.apartamentoNumero ? ` · ${t("gerenciar.apto", { numero: v.apartamentoNumero })}` : ""}
               </option>
             ))}
           </select>
           {vagasLivres.length === 0 && (
-            <p className="text-xs text-error ml-1">Não há vagas livres no momento.</p>
+            <p className="text-xs text-error ml-1">{t("gerenciar.modalEntrada.semVagasLivres")}</p>
           )}
         </div>
 
@@ -396,14 +404,14 @@ function ModalVagaEntrada({ veiculo, vagas, veiculos, onConfirmar, onFechar, sal
             onClick={() => onConfirmar(vagaId)}
             disabled={!vagaId || salvando || vagasLivres.length === 0}
           >
-            {salvando ? "Registrando…" : "Registrar Entrada"}
+            {salvando ? t("gerenciar.modalEntrada.registrando") : t("gerenciar.modalEntrada.registrarEntrada")}
             <Icone name="login" className="text-xl" />
           </Botao>
           <button
             onClick={onFechar}
             className="flex-1 py-3 rounded-xl border border-outline-variant/30 text-on-surface-variant hover:text-on-surface transition-colors text-sm font-medium cursor-pointer"
           >
-            Cancelar
+            {t("comum:acoes.cancelar")}
           </button>
         </div>
       </div>
@@ -413,6 +421,7 @@ function ModalVagaEntrada({ veiculo, vagas, veiculos, onConfirmar, onFechar, sal
 
 // ─── Modal de alterar vaga ────────────────────────────────────────
 function ModalAlterarVaga({ veiculo, vagas, veiculos, moradores, onSalvar, onFechar, salvando }) {
+  const { t } = useTranslation("veiculos");
   const [vagaId, setVagaId] = useState(veiculo.vagaId ?? "");
 
   const vagasComEstado = useMemo(
@@ -433,7 +442,7 @@ function ModalAlterarVaga({ veiculo, vagas, veiculos, moradores, onSalvar, onFec
       <div className="glass-panel rounded-3xl p-5 sm:p-6 w-full max-w-md space-y-5">
         <div className="flex items-start justify-between gap-3">
           <h3 className="font-headline text-lg font-bold text-on-surface min-w-0">
-            Alterar Vaga — {veiculo.placa}
+            {t("gerenciar.modalAlterarVaga.titulo", { placa: veiculo.placa })}
           </h3>
           <button onClick={onFechar} className="shrink-0 text-on-surface-variant hover:text-on-surface cursor-pointer">
             <Icone name="close" className="text-xl" />
@@ -441,14 +450,14 @@ function ModalAlterarVaga({ veiculo, vagas, veiculos, moradores, onSalvar, onFec
         </div>
 
         <div className="space-y-2">
-          <label className={labelCls}>Nova Vaga</label>
+          <label className={labelCls}>{t("gerenciar.modalAlterarVaga.novaVaga")}</label>
           <select value={vagaId} onChange={(e) => setVagaId(e.target.value)} className={selectCls}>
-            {veiculo.tipoProprietario === "FUNCIONARIO" && <option value="">— Sem vaga —</option>}
+            {veiculo.tipoProprietario === "FUNCIONARIO" && <option value="">{t("gerenciar.modalAlterarVaga.semVaga")}</option>}
             {vagasFiltradas.map((v) => (
               <option key={v.id} value={v.id} disabled={v.estado === "OCUPADA" && v.id !== veiculo.vagaId}>
-                Vaga {v.numero}
+                {t("gerenciar.vagaNumero", { numero: v.numero })}
                 {v.localizacao ? ` · ${v.localizacao}` : ""}
-                {" "}· {ESTADO_VAGA[v.estado]?.label ?? v.estado}
+                {" "}· {ESTADO_VAGA[v.estado] ? t(ESTADO_VAGA[v.estado].rotuloKey) : v.estado}
               </option>
             ))}
           </select>
@@ -456,14 +465,14 @@ function ModalAlterarVaga({ veiculo, vagas, veiculos, moradores, onSalvar, onFec
 
         <div className="flex gap-3">
           <Botao onClick={() => onSalvar(vagaId)} disabled={salvando}>
-            {salvando ? "Salvando…" : "Confirmar"}
+            {salvando ? t("comum:acoes.salvando") : t("comum:acoes.confirmar")}
             <Icone name="check" className="text-xl" />
           </Botao>
           <button
             onClick={onFechar}
             className="flex-1 py-3 rounded-xl border border-outline-variant/30 text-on-surface-variant hover:text-on-surface transition-colors text-sm font-medium cursor-pointer"
           >
-            Cancelar
+            {t("comum:acoes.cancelar")}
           </button>
         </div>
       </div>
@@ -473,6 +482,7 @@ function ModalAlterarVaga({ veiculo, vagas, veiculos, moradores, onSalvar, onFec
 
 // ─── Cartão de veículo ────────────────────────────────────────────
 function CartaoVeiculo({ veiculo, vagas, veiculos, onEntrada, onSaida, onAlterarVaga, onEditar, podeEditar }) {
+  const { t } = useTranslation("veiculos");
   const dentro = veiculo.status === "DENTRO";
   const isServico  = veiculo.tipoProprietario === "FUNCIONARIO";
   const isVisitante = veiculo.tipoProprietario === "VISITANTE";
@@ -489,43 +499,43 @@ function CartaoVeiculo({ veiculo, vagas, veiculos, onEntrada, onSaida, onAlterar
           <div className="flex flex-wrap items-center gap-2">
             <p className="font-headline text-lg font-bold text-on-surface">{veiculo.placa}</p>
             <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider ${STATUS_STYLE[veiculo.status]}`}>
-              {dentro ? "Dentro" : "Fora"}
+              {dentro ? t("gerenciar.cartao.dentro") : t("gerenciar.cartao.fora")}
             </span>
             <span className="px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-surface-container-highest/50 text-on-surface-variant">
-              {labelTipo(veiculo.tipoProprietario)}
+              {labelTipo(veiculo.tipoProprietario, t)}
             </span>
             {semVaga && (
               <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider bg-error/10 text-error">
-                Sem vaga
+                {t("gerenciar.cartao.semVaga")}
               </span>
             )}
           </div>
           <p className="text-on-surface-variant text-sm">
-            {[veiculo.modelo, veiculo.cor].filter(Boolean).join(" · ") || "Sem informações adicionais"}
+            {[veiculo.modelo, veiculo.cor].filter(Boolean).join(" · ") || t("gerenciar.cartao.semInfo")}
           </p>
           {veiculo.vagaNumero && (
             <p className="text-xs text-on-surface-variant mt-0.5">
               <Icone name="local_parking" className="text-sm mr-0.5" />
-              Vaga {veiculo.vagaNumero}
+              {t("gerenciar.vagaNumero", { numero: veiculo.vagaNumero })}
               {veiculo.vagaLocalizacao ? ` · ${veiculo.vagaLocalizacao}` : ""}
-              {veiculo.apartamentoNumero ? ` · Apto ${veiculo.apartamentoNumero}` : ""}
+              {veiculo.apartamentoNumero ? ` · ${t("gerenciar.apto", { numero: veiculo.apartamentoNumero })}` : ""}
               {(() => {
                 const vg = vagas.find((v) => v.id === veiculo.vagaId);
                 const est = vg ? estadoDaVaga(vg, veiculos) : null;
                 return est ? (
                   <span className={`ml-1.5 px-1.5 py-0.5 rounded text-[10px] font-semibold ${ESTADO_VAGA[est]?.cls}`}>
-                    {ESTADO_VAGA[est]?.label}
+                    {ESTADO_VAGA[est] ? t(ESTADO_VAGA[est].rotuloKey) : null}
                   </span>
                 ) : null;
               })()}
             </p>
           )}
           {isVisitante && !dentro && (
-            <p className="text-xs text-on-surface-variant mt-0.5">Vaga atribuída na entrada</p>
+            <p className="text-xs text-on-surface-variant mt-0.5">{t("gerenciar.cartao.vagaAtribuidaEntrada")}</p>
           )}
           {dentro && veiculo.dataEntrada && (
             <p className="text-xs text-on-surface-variant mt-0.5">
-              Entrou: {new Date(veiculo.dataEntrada).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })}
+              {t("gerenciar.cartao.entrou", { data: new Date(veiculo.dataEntrada).toLocaleString(idiomaAtual(), { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" }) })}
             </p>
           )}
         </div>
@@ -535,7 +545,7 @@ function CartaoVeiculo({ veiculo, vagas, veiculos, onEntrada, onSaida, onAlterar
             <button
               onClick={() => onEntrada(veiculo)}
               disabled={semVaga}
-              title={semVaga ? "Vincule uma vaga antes de registrar entrada" : undefined}
+              title={semVaga ? t("gerenciar.cartao.vincularVagaAntes") : undefined}
               className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-semibold border transition-all ${
                 semVaga
                   ? "border-outline-variant/20 text-outline-variant cursor-not-allowed opacity-50"
@@ -543,7 +553,7 @@ function CartaoVeiculo({ veiculo, vagas, veiculos, onEntrada, onSaida, onAlterar
               }`}
             >
               <Icone name="login" className="text-base" />
-              Entrada
+              {t("gerenciar.cartao.entrada")}
             </button>
           ) : (
             <button
@@ -551,7 +561,7 @@ function CartaoVeiculo({ veiculo, vagas, veiculos, onEntrada, onSaida, onAlterar
               className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-semibold border border-secondary/30 text-secondary hover:bg-secondary/10 transition-all cursor-pointer"
             >
               <Icone name="logout" className="text-base" />
-              Saída
+              {t("gerenciar.cartao.saida")}
             </button>
           )}
           {!isVisitante && (
@@ -560,7 +570,7 @@ function CartaoVeiculo({ veiculo, vagas, veiculos, onEntrada, onSaida, onAlterar
               className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-semibold border border-outline-variant/30 text-on-surface-variant hover:text-on-surface hover:border-primary/30 transition-all cursor-pointer"
             >
               <Icone name="local_parking" className="text-base" />
-              Vaga
+              {t("gerenciar.cartao.vaga")}
             </button>
           )}
           {podeEditar && (
@@ -579,11 +589,12 @@ function CartaoVeiculo({ veiculo, vagas, veiculos, onEntrada, onSaida, onAlterar
 
 // ─── Legenda de estado das vagas ──────────────────────────────────
 function LegendaVagas() {
+  const { t } = useTranslation("veiculos");
   return (
     <div className="flex flex-wrap gap-3 text-xs">
-      {Object.entries(ESTADO_VAGA).map(([key, { label, cls }]) => (
+      {Object.entries(ESTADO_VAGA).map(([key, { rotuloKey, cls }]) => (
         <span key={key} className={`px-2.5 py-1 rounded-full font-semibold ${cls}`}>
-          {label}
+          {t(rotuloKey)}
         </span>
       ))}
     </div>
@@ -592,6 +603,7 @@ function LegendaVagas() {
 
 // ─── Página principal ─────────────────────────────────────────────
 export function GerenciarVeiculos() {
+  const { t } = useTranslation("veiculos");
   const toast = useToast();
   const confirm = useConfirm();
   const { usuario } = useAuth();
@@ -644,11 +656,11 @@ export function GerenciarVeiculos() {
 
       setFuncionarios(funcRes.data || []);
     } catch {
-      toast.error("Erro ao carregar dados.");
+      toast.error(t("gerenciar.toast.erroCarregar"));
     } finally {
       setCarregando(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => { carregar(); }, [carregar]);
 
@@ -658,10 +670,10 @@ export function GerenciarVeiculos() {
       const res = await veiculoApi.cadastrar(dados);
       setVeiculos((prev) => [res.data, ...prev]);
       setCriando(false);
-      toast.success("Veículo cadastrado com sucesso.");
+      toast.success(t("gerenciar.toast.cadastrado"));
     } catch (err) {
       const msg = err.response?.data?.erro ?? err.response?.data?.mensagem ?? err.response?.data?.message;
-      toast.error(msg || "Erro ao cadastrar veículo.");
+      toast.error(msg || t("gerenciar.toast.erroCadastrar"));
     } finally {
       setSalvando(false);
     }
@@ -673,10 +685,10 @@ export function GerenciarVeiculos() {
       const res = await veiculoApi.atualizar(editando.id, dados);
       setVeiculos((prev) => prev.map((v) => (v.id === editando.id ? res.data : v)));
       setEditando(null);
-      toast.success("Veículo atualizado.");
+      toast.success(t("gerenciar.toast.atualizado"));
     } catch (err) {
       const msg = err.response?.data?.erro ?? err.response?.data?.mensagem ?? err.response?.data?.message;
-      toast.error(msg || "Erro ao atualizar veículo.");
+      toast.error(msg || t("gerenciar.toast.erroAtualizar"));
     } finally {
       setSalvando(false);
     }
@@ -691,10 +703,10 @@ export function GerenciarVeiculos() {
     try {
       const res = await veiculoApi.registrarEntrada(veiculo.id);
       setVeiculos((prev) => prev.map((v) => (v.id === veiculo.id ? res.data : v)));
-      toast.success(`Entrada de ${veiculo.placa} registrada.`);
+      toast.success(t("gerenciar.toast.entradaRegistrada", { placa: veiculo.placa }));
     } catch (err) {
       const msg = err.response?.data?.erro ?? err.response?.data?.mensagem ?? err.response?.data?.message;
-      toast.error(msg || "Erro ao registrar entrada.");
+      toast.error(msg || t("gerenciar.toast.erroEntrada"));
     }
   }
 
@@ -705,10 +717,10 @@ export function GerenciarVeiculos() {
       const res = await veiculoApi.registrarEntrada(entradaVisitante.id, vagaId);
       setVeiculos((prev) => prev.map((v) => (v.id === entradaVisitante.id ? res.data : v)));
       setEntradaVisitante(null);
-      toast.success(`Entrada de ${entradaVisitante.placa} registrada.`);
+      toast.success(t("gerenciar.toast.entradaRegistrada", { placa: entradaVisitante.placa }));
     } catch (err) {
       const msg = err.response?.data?.erro ?? err.response?.data?.mensagem ?? err.response?.data?.message;
-      toast.error(msg || "Erro ao registrar entrada.");
+      toast.error(msg || t("gerenciar.toast.erroEntrada"));
     } finally {
       setSalvando(false);
     }
@@ -718,10 +730,10 @@ export function GerenciarVeiculos() {
     try {
       const res = await veiculoApi.registrarSaida(veiculo.id);
       setVeiculos((prev) => prev.map((v) => (v.id === veiculo.id ? res.data : v)));
-      toast.success(`Saída de ${veiculo.placa} registrada.`);
+      toast.success(t("gerenciar.toast.saidaRegistrada", { placa: veiculo.placa }));
     } catch (err) {
       const msg = err.response?.data?.erro ?? err.response?.data?.mensagem ?? err.response?.data?.message;
-      toast.error(msg || "Erro ao registrar saída.");
+      toast.error(msg || t("gerenciar.toast.erroSaida"));
     }
   }
 
@@ -731,10 +743,10 @@ export function GerenciarVeiculos() {
       const res = await veiculoApi.alterarVaga(alterandoVaga.id, vagaId || null);
       setVeiculos((prev) => prev.map((v) => (v.id === alterandoVaga.id ? res.data : v)));
       setAlterandoVaga(null);
-      toast.success("Vaga alterada com sucesso.");
+      toast.success(t("gerenciar.toast.vagaAlterada"));
     } catch (err) {
       const msg = err.response?.data?.erro ?? err.response?.data?.mensagem ?? err.response?.data?.message;
-      toast.error(msg || "Erro ao alterar vaga.");
+      toast.error(msg || t("gerenciar.toast.erroAlterarVaga"));
     } finally {
       setSalvando(false);
     }
@@ -772,12 +784,12 @@ export function GerenciarVeiculos() {
         <header className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
             <p className="text-on-surface-variant text-xs font-semibold uppercase tracking-widest mb-1">
-              {isDoorman ? "Portaria" : "Painel Administrativo"}
+              {isDoorman ? t("gerenciar.pagina.sobretituloPortaria") : t("gerenciar.pagina.sobretituloAdmin")}
             </p>
             <h1 className="font-headline text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-on-surface">
-              Gerenciar{" "}
+              {t("gerenciar.pagina.titulo")}{" "}
               <span className="bg-gradient-to-r from-primary to-tertiary bg-clip-text text-transparent">
-                Veículos
+                {t("gerenciar.pagina.tituloDestaque")}
               </span>
             </h1>
           </div>
@@ -792,14 +804,14 @@ export function GerenciarVeiculos() {
               }`}
             >
               <Icone name={criando ? "close" : "add"} className="text-xl" />
-              {criando ? "Cancelar" : "Novo Veículo"}
+              {criando ? t("comum:acoes.cancelar") : t("gerenciar.pagina.novoVeiculo")}
             </button>
 
             <div className="flex gap-3">
               {[
-                { label: "Total",    value: veiculos.length, color: "text-on-surface" },
-                { label: "Dentro",   value: dentro,          color: "text-primary" },
-                { label: "Sem Vaga", value: semVaga,         color: "text-error" },
+                { label: t("gerenciar.pagina.resumo.total"),   value: veiculos.length, color: "text-on-surface" },
+                { label: t("gerenciar.pagina.resumo.dentro"),  value: dentro,          color: "text-primary" },
+                { label: t("gerenciar.pagina.resumo.semVaga"), value: semVaga,         color: "text-error" },
               ].map((s) => (
                 <div key={s.label} className="glass-panel rounded-2xl px-4 sm:px-5 py-3 text-center flex-1 sm:flex-none min-w-[92px]">
                   <p className={`text-2xl font-headline font-bold ${s.color}`}>{s.value}</p>
@@ -817,7 +829,7 @@ export function GerenciarVeiculos() {
               <div className="w-10 h-10 shrink-0 rounded-xl bg-primary/10 flex items-center justify-center">
                 <Icone name="add" className="text-primary" />
               </div>
-              <h2 className="font-headline text-xl font-bold text-on-surface">Novo Veículo</h2>
+              <h2 className="font-headline text-xl font-bold text-on-surface">{t("gerenciar.pagina.novoVeiculo")}</h2>
             </div>
             <FormVeiculo
               moradores={moradoresForm}
@@ -840,7 +852,7 @@ export function GerenciarVeiculos() {
                 <Icone name="edit" className="text-secondary" />
               </div>
               <h2 className="font-headline text-xl font-bold text-on-surface">
-                Editar Veículo — {editando.placa}
+                {t("gerenciar.pagina.editarVeiculo", { placa: editando.placa })}
               </h2>
             </div>
             <FormVeiculo
@@ -871,7 +883,7 @@ export function GerenciarVeiculos() {
           <div className="flex-1 max-w-sm">
             <Campo
               id="busca"
-              placeholder="Placa, modelo, cor ou vaga..."
+              placeholder={t("gerenciar.pagina.buscaPlaceholder")}
               icon="search"
               value={busca}
               onChange={(e) => setBusca(e.target.value)}
@@ -887,7 +899,7 @@ export function GerenciarVeiculos() {
                   filtroStatus === s ? "bg-primary/15 text-primary" : "text-on-surface-variant hover:text-on-surface"
                 }`}
               >
-                {s === "TODOS" ? "Todos" : s === "DENTRO" ? "Dentro" : "Fora"}
+                {s === "TODOS" ? t("comum:estado.todos") : s === "DENTRO" ? t("gerenciar.cartao.dentro") : t("gerenciar.pagina.filtroFora")}
               </button>
             ))}
           </div>
@@ -901,7 +913,7 @@ export function GerenciarVeiculos() {
                   filtroTipo === tp ? "bg-primary/15 text-primary" : "text-on-surface-variant hover:text-on-surface"
                 }`}
               >
-                {tp === "TODOS" ? "Todos" : TIPOS_VEICULO.find((t) => t.value === tp)?.label ?? tp}
+                {tp === "TODOS" ? t("comum:estado.todos") : labelTipo(tp, t)}
               </button>
             ))}
           </div>
@@ -913,11 +925,11 @@ export function GerenciarVeiculos() {
         {/* Lista */}
         {carregando ? (
           <div className="glass-panel rounded-3xl p-6 sm:p-10 text-center text-on-surface-variant">
-            Carregando veículos...
+            {t("gerenciar.pagina.carregando")}
           </div>
         ) : filtrados.length === 0 ? (
           <div className="glass-panel rounded-3xl p-6 sm:p-10 text-center text-on-surface-variant">
-            Nenhum veículo encontrado.
+            {t("gerenciar.pagina.vazio")}
           </div>
         ) : (
           <div className="space-y-3">

@@ -1,0 +1,131 @@
+{
+  "pagina": {
+    "secao": "Front desk",
+    "titulo": "Key Control",
+    "carregando": "Loading…",
+    "erroCarregar": "Couldn't load the keys.",
+    "stats": {
+      "total": "Total",
+      "disponiveis": "Available",
+      "retiradas": "Checked out"
+    },
+    "abas": {
+      "cadastro": "Key Registry",
+      "historico": "History"
+    }
+  },
+  "tipos": {
+    "MORADOR": "Resident",
+    "FUNCIONARIO": "Staff",
+    "TERCEIRO": "Contractor"
+  },
+  "retirar": {
+    "titulo": "Check Out Key",
+    "chave": "Key:",
+    "tipoResponsavel": "Holder type",
+    "carregando": {
+      "MORADOR": "Loading residents…",
+      "FUNCIONARIO": "Loading staff…",
+      "TERCEIRO": "Loading contractors…"
+    },
+    "vazio": {
+      "MORADOR": "No residents registered.",
+      "FUNCIONARIO": "No staff registered.",
+      "TERCEIRO": "No contractors registered."
+    },
+    "selecione": "Select…",
+    "registrando": "Saving…",
+    "confirmar": "Confirm Checkout",
+    "erros": {
+      "carregarLista": "Couldn't load the list.",
+      "selecioneResponsavel": "Select the holder.",
+      "responsavelInvalido": "Invalid holder. Please select again.",
+      "registrar": "Couldn't record the checkout."
+    },
+    "toastRegistrada": "Checkout of \"{{nome}}\" recorded."
+  },
+  "cadastro": {
+    "titulo": "New Key",
+    "local": "Location",
+    "selecioneLocal": "Select the location…",
+    "blocos": "Buildings",
+    "areasComuns": "Common Areas",
+    "nome": "Key name",
+    "nomePlaceholder": "e.g. Original, Copy 1, Spare…",
+    "descricao": "Description (optional)",
+    "descricaoPlaceholder": "Additional notes…",
+    "cadastrando": "Adding…",
+    "cadastrar": "Add Key",
+    "erros": {
+      "selecioneLocal": "Select the location.",
+      "informeNome": "Enter the key name.",
+      "cadastrar": "Couldn't add the key.",
+      "excluir": "Couldn't delete the key.",
+      "devolucao": "Error recording the return."
+    },
+    "toast": {
+      "cadastrada": "Key added.",
+      "excluida": "Key deleted.",
+      "devolucao": "Return of \"{{nome}}\" recorded."
+    },
+    "confirmarExclusao": "Delete the key \"{{nome}}\"?"
+  },
+  "lista": {
+    "titulo": "Building Keys",
+    "vazio": "No keys registered.",
+    "tipoLocal": {
+      "bloco": "Building",
+      "areaComum": "Common Area"
+    },
+    "status": {
+      "disponivel": "Available",
+      "retirada": "Checked out"
+    },
+    "com": "With:",
+    "desde": "Since:",
+    "retirar": "Check out",
+    "excluir": "Delete",
+    "registrando": "Saving…",
+    "registrarDevolucao": "Record Return"
+  },
+  "historico": {
+    "selecionarChave": "Select Key",
+    "selecioneUmaChave": "Select a key…",
+    "semChave": {
+      "titulo": "Select a key above",
+      "descricao": "Its current status and activity will appear here."
+    },
+    "disponivel": "Available",
+    "emPosse": "Held by {{nome}} ({{perfil}}) since {{data}}",
+    "filtros": "Filters",
+    "limparFiltros": "Clear filters",
+    "dataInicial": "Start date (optional)",
+    "dataFinal": "End date",
+    "quemRetirou": "Checked out by",
+    "buscaParcial": "Partial match…",
+    "perfil": "Role",
+    "status": "Status",
+    "todos": "All",
+    "statusMov": {
+      "EM_ABERTO": "Open",
+      "DEVOLVIDA": "Returned"
+    },
+    "aplicar": "Apply",
+    "carregando": "Loading…",
+    "vazio": "No activity found for the selected filters.",
+    "colunas": {
+      "quemRetirou": "Checked out by",
+      "perfil": "Role",
+      "dataRetirada": "Checkout date",
+      "horaRetirada": "Out time",
+      "dataDevolucao": "Return date",
+      "horaDevolucao": "Return time",
+      "status": "Status",
+      "registradoPor": "Recorded by"
+    },
+    "devolver": "Return",
+    "erroCarregar": "Couldn't load the history.",
+    "toastDevolucao": "Return recorded.",
+    "erroDevolucao": "Error recording the return."
+  }
+}

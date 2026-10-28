@@ -1,3 +1,5 @@
+import i18n from '../i18n';
+
 /**
  * Perfis de acesso — espelho de services/auth-api/constants/perfis.js.
  * Modelo simplificado: 6 perfis em 3 camadas.
@@ -34,30 +36,44 @@ export function podeAprovarReserva(perfil) {
   return PERFIS_APROVAM_RESERVA.includes(perfil);
 }
 
+/**
+ * Opção de perfil para listas e selects. O `label` é um getter: o texto sai do
+ * i18n na hora da leitura, no idioma em uso, e não no carregamento do módulo.
+ */
+function opcaoPerfil(value) {
+  return {
+    value,
+    labelKey: `layout:perfis.${value}`,
+    get label() {
+      return i18n.t(`layout:perfis.${value}`);
+    },
+  };
+}
+
 export const TODOS_PERFIS = [
-  { value: PERFIS.ADMIN_GERAL, label: 'Admin Geral' },
-  { value: PERFIS.ADMIN_SINDICO, label: 'Admin Síndico' },
-  { value: PERFIS.PORTEIRO, label: 'Porteiro' },
-  { value: PERFIS.MORADOR, label: 'Morador' },
-  { value: PERFIS.DONO_ALUGUEL, label: 'Dono Aluguel' },
-  { value: PERFIS.CONVIDADO, label: 'Convidado' },
+  opcaoPerfil(PERFIS.ADMIN_GERAL),
+  opcaoPerfil(PERFIS.ADMIN_SINDICO),
+  opcaoPerfil(PERFIS.PORTEIRO),
+  opcaoPerfil(PERFIS.MORADOR),
+  opcaoPerfil(PERFIS.DONO_ALUGUEL),
+  opcaoPerfil(PERFIS.CONVIDADO),
 ];
 
 /** Perfis oferecidos ao Admin Geral ao montar a gestão de um condomínio. */
 export const PERFIS_CADASTRO_PLATAFORMA = [
-  { value: PERFIS.ADMIN_SINDICO, label: 'Admin Síndico' },
+  opcaoPerfil(PERFIS.ADMIN_SINDICO),
 ];
 
 export const PERFIS_CADASTRO_CONDOMINIO = [
-  { value: PERFIS.ADMIN_SINDICO, label: 'Admin Síndico' },
-  { value: PERFIS.PORTEIRO, label: 'Porteiro' },
-  { value: PERFIS.MORADOR, label: 'Morador' },
-  { value: PERFIS.DONO_ALUGUEL, label: 'Dono Aluguel' },
+  opcaoPerfil(PERFIS.ADMIN_SINDICO),
+  opcaoPerfil(PERFIS.PORTEIRO),
+  opcaoPerfil(PERFIS.MORADOR),
+  opcaoPerfil(PERFIS.DONO_ALUGUEL),
 ];
 
 export const PERFIS_CADASTRO_UNIDADE = [
-  { value: PERFIS.MORADOR, label: 'Morador' },
-  { value: PERFIS.CONVIDADO, label: 'Convidado' },
+  opcaoPerfil(PERFIS.MORADOR),
+  opcaoPerfil(PERFIS.CONVIDADO),
 ];
 
 /** Matriz: perfil do ator → perfis que pode cadastrar via convite. */

@@ -1,5 +1,6 @@
 // src/components/sidebar/Sidebar.jsx
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Icone } from "../icones/Icone";
 import { FotoUsuario } from "../avatar/FotoUsuario";
 import { useAuth } from "../../contexts/AuthContext";
@@ -10,40 +11,41 @@ import { linksDoPerfil } from "../../utils/menuAdmin";
 import moraLogo3 from "../../assets/Mora3.png";
 
 const MORADOR_LINKS = [
-  { to: "/inicio", label: "Início", icon: "home" },
-  { to: "/conversas", label: "Conversas", icon: "forum" },
-  { label: "Cobranças", to: "/financeiro", icon: "payments" },
-  { label: "Espaços", to: "/espacos", icon: "apartment", modulo: "areas_comuns" },
-  { label: "Entregas", to: "/entregas", icon: "inventory_2", modulo: "entregas" },
-  { label: "Reuniões", to: "/reunioes", icon: "groups", modulo: "reunioes" },
-  { label: "Reclamações", to: "/reclamacoes", icon: "report", modulo: "reclamacoes" },
-  { label: "Comunicados", to: "/avisos", icon: "campaign", modulo: "comunicacao" },
-  { label: "Conhecimento", to: "/faq", icon: "library_books", modulo: "conhecimento" },
-  { label: "Votações", to: "/votacoes", icon: "how_to_vote", modulo: "votacoes" },
-  { label: "Veículos", to: "/meus-veiculos", icon: "directions_car", modulo: "veiculos" },
+  { to: "/inicio", rotuloKey: "sidebar.links.inicio", icon: "home" },
+  { to: "/conversas", rotuloKey: "sidebar.links.conversas", icon: "forum" },
+  { rotuloKey: "sidebar.links.cobrancas", to: "/financeiro", icon: "payments" },
+  { rotuloKey: "sidebar.links.espacos", to: "/espacos", icon: "apartment", modulo: "areas_comuns" },
+  { rotuloKey: "sidebar.links.entregas", to: "/entregas", icon: "inventory_2", modulo: "entregas" },
+  { rotuloKey: "sidebar.links.reunioes", to: "/reunioes", icon: "groups", modulo: "reunioes" },
+  { rotuloKey: "sidebar.links.reclamacoes", to: "/reclamacoes", icon: "report", modulo: "reclamacoes" },
+  { rotuloKey: "sidebar.links.comunicados", to: "/avisos", icon: "campaign", modulo: "comunicacao" },
+  { rotuloKey: "sidebar.links.conhecimento", to: "/faq", icon: "library_books", modulo: "conhecimento" },
+  { rotuloKey: "sidebar.links.votacoes", to: "/votacoes", icon: "how_to_vote", modulo: "votacoes" },
+  { rotuloKey: "sidebar.links.veiculos", to: "/meus-veiculos", icon: "directions_car", modulo: "veiculos" },
 ];
 
 // Telas do porteiro (mesmo layout de Sidebar dos admins).
 const PORTEIRO_LINKS = [
-  { to: "/inicio", label: "Início", icon: "home" },
+  { to: "/inicio", rotuloKey: "sidebar.links.inicio", icon: "home" },
   // Cadastro de visitante na chegada é tela de portaria, como Entradas e
   // Saídas: sem o módulo, as duas somem juntas.
-  { to: "/atendimento", label: "Cadastros", icon: "waving_hand", modulo: "portaria" },
-  { to: "/entradas-e-saidas", label: "Entradas e Saídas", icon: "swap_horiz", modulo: "portaria" },
-  { to: "/portaria/entregas", label: "Entregas", icon: "inventory_2", modulo: "entregas" },
-  { to: "/chaves", label: "Chaves", icon: "vpn_key", modulo: "chaves" },
+  { to: "/atendimento", rotuloKey: "sidebar.links.cadastros", icon: "waving_hand", modulo: "portaria" },
+  { to: "/entradas-e-saidas", rotuloKey: "sidebar.links.entradasSaidas", icon: "swap_horiz", modulo: "portaria" },
+  { to: "/portaria/entregas", rotuloKey: "sidebar.links.entregas", icon: "inventory_2", modulo: "entregas" },
+  { to: "/chaves", rotuloKey: "sidebar.links.chaves", icon: "vpn_key", modulo: "chaves" },
   // O porteiro consulta a agenda e registra reserva no balcão; a tela já traz
   // as abas de operação para o perfil dele.
-  { to: "/espacos", label: "Espaços", icon: "deck", modulo: "areas_comuns" },
-  { to: "/usuarios", label: "Usuários do Condomínio", icon: "groups" },
-  { to: "/conversas", label: "Conversas", icon: "forum" },
+  { to: "/espacos", rotuloKey: "sidebar.links.espacos", icon: "deck", modulo: "areas_comuns" },
+  { to: "/usuarios", rotuloKey: "sidebar.links.usuariosCondominio", icon: "groups" },
+  { to: "/conversas", rotuloKey: "sidebar.links.conversas", icon: "forum" },
   // O porteiro é destinatário dos avisos de público FUNCIONARIOS. Sem esta
   // entrada ele recebia comunicado que não tinha como abrir — a rota existe,
   // mas só a navbar dos moradores levava até ela.
-  { to: "/avisos", label: "Avisos", icon: "campaign", modulo: "comunicacao" },
+  { to: "/avisos", rotuloKey: "sidebar.links.avisos", icon: "campaign", modulo: "comunicacao" },
 ];
 
 export function Sidebar({ aberta = false, aoFechar }) {
+  const { t } = useTranslation("layout");
   const { pathname } = useLocation();
   const { usuario, logout } = useAuth();
   const { modulosAtivos, hasModulo } = usePlano();
@@ -61,12 +63,12 @@ export function Sidebar({ aberta = false, aoFechar }) {
     links = PORTEIRO_LINKS.filter((l) => !l.modulo || hasModulo(l.modulo));
   } else if (isAdmin) {
     links = [
-      ...(isGeral ? [] : [{ to: "/inicio", label: "Início", icon: "home" }]),
+      ...(isGeral ? [] : [{ to: "/inicio", rotuloKey: "sidebar.links.inicio", icon: "home" }]),
       ...linksDoPerfil(perfil, modulosAtivos),
     ];
   } else {
     if (isRestrito) {
-      links = [{ to: "/inicio", label: "Início", icon: "home" }];
+      links = [{ to: "/inicio", rotuloKey: "sidebar.links.inicio", icon: "home" }];
     } else {
       links = MORADOR_LINKS.filter((l) => !l.modulo || hasModulo(l.modulo));
     }
@@ -76,12 +78,12 @@ export function Sidebar({ aberta = false, aoFechar }) {
   const telaInicial = isGeral ? "/adm/geral" : "/inicio";
 
   const subtitulo = isDoorman
-    ? "Portaria"
+    ? t("sidebar.subtitulo.portaria")
     : isGeral
-      ? "Plataforma"
+      ? t("sidebar.subtitulo.plataforma")
       : isAdmin
-        ? "Administrativo"
-        : "Condomínio";
+        ? t("sidebar.subtitulo.administrativo")
+        : t("sidebar.subtitulo.condominio");
 
   async function handleLogout() {
     await logout();
@@ -106,7 +108,7 @@ export function Sidebar({ aberta = false, aoFechar }) {
       <div className="flex items-center gap-3 px-5 py-4 border-b border-veu/5">
         <button
           onClick={aoFechar}
-          aria-label="Fechar menu"
+          aria-label={t("sidebar.fecharMenu")}
           className="lg:hidden p-1 -ml-1 rounded-lg text-on-surface-variant hover:bg-veu/5 cursor-pointer"
         >
           <Icone name="close" />
@@ -118,7 +120,7 @@ export function Sidebar({ aberta = false, aoFechar }) {
         >
           <img src={moraLogo3} alt="Mora" className="h-7 w-auto" />
           <div>
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-on-surface-variant">Painel</p>
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-on-surface-variant">{t("sidebar.painel")}</p>
             <p className="text-sm font-bold text-on-surface leading-tight">{subtitulo}</p>
           </div>
         </Link>
@@ -143,7 +145,7 @@ export function Sidebar({ aberta = false, aoFechar }) {
                 ${active ? "bg-primary/15" : "bg-surface-container-highest/50 group-hover:bg-primary/10"}`}>
                 <Icone name={link.icon} className={`text-base ${active ? "text-primary" : "group-hover:text-primary"}`} />
               </div>
-              <span className="text-sm font-semibold leading-tight">{link.label}</span>
+              <span className="text-sm font-semibold leading-tight">{link.rotuloKey ? t(link.rotuloKey) : link.label}</span>
 
               {/* O chamado que um morador abre com a administracao nao gera
                   notificacao — nao ha participante da gestao a quem endereca-la.
@@ -181,7 +183,7 @@ export function Sidebar({ aberta = false, aoFechar }) {
           >
             <Icone name="notifications_active" className="text-primary text-base" />
             <span className="text-xs text-primary font-semibold flex-1">
-              {naoLidas} notificaç{naoLidas === 1 ? "ão" : "ões"}
+              {t("sidebar.notificacoes", { count: naoLidas })}
             </span>
             <span className="w-5 h-5 rounded-full bg-error text-white text-[10px] font-bold flex items-center justify-center">
               {naoLidas > 9 ? "9+" : naoLidas}
@@ -201,7 +203,7 @@ export function Sidebar({ aberta = false, aoFechar }) {
             />
           </div>
           <div className="min-w-0">
-            <p className="text-sm font-semibold text-on-surface truncate leading-tight">{usuario?.nome || "Admin"}</p>
+            <p className="text-sm font-semibold text-on-surface truncate leading-tight">{usuario?.nome || t("sidebar.usuarioPadrao")}</p>
             <p className="text-xs text-on-surface-variant truncate leading-tight">{usuario?.email}</p>
           </div>
         </Link>
@@ -212,7 +214,7 @@ export function Sidebar({ aberta = false, aoFechar }) {
           <div className="w-8 h-8 rounded-lg bg-surface-container-highest/50 group-hover:bg-red-500/10 flex items-center justify-center shrink-0 transition-all">
             <Icone name="logout" className="text-base" />
           </div>
-          <span className="text-sm font-semibold">Sair</span>
+          <span className="text-sm font-semibold">{t("comum:acoes.sair")}</span>
         </button>
       </div>
     </aside>

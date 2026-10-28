@@ -1,4 +1,5 @@
 import { lazy, Suspense } from "react";
+import { useTranslation } from "react-i18next";
 
 // Recharts pesa ~420 KB. Carregar sob demanda evita que morador e porteiro
 // baixem a biblioteca de gráficos só para abrir a própria tela inicial.
@@ -7,11 +8,12 @@ const IndexAdminGeral = lazy(() =>
 );
 
 export function IndexAdminGeralLazy() {
+  const { t } = useTranslation("paineis");
   return (
     <Suspense
       fallback={
         <div className="min-h-screen flex items-center justify-center text-on-surface-variant">
-          Carregando...
+          {t("carregando")}
         </div>
       }
     >

@@ -7,6 +7,8 @@
  * 1.700 linhas com meia dúzia de serviços simulados.
  */
 
+import i18n, { idiomaAtual } from "../../i18n";
+
 const PLACA_REGEX = /^[A-Z]{3}[0-9]{4}$|^[A-Z]{3}[0-9][A-Z][0-9]{2}$/;
 
 export function errMsg(err) {
@@ -22,12 +24,12 @@ export function formatarCpfMask(cpf) {
 
 export function fmtData(iso) {
   if (!iso) return "—";
-  return new Date(iso).toLocaleDateString("pt-BR");
+  return new Date(iso).toLocaleDateString(idiomaAtual());
 }
 
 export function fmtHora(iso) {
   if (!iso) return "—";
-  return new Date(iso).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+  return new Date(iso).toLocaleTimeString(idiomaAtual(), { hour: "2-digit", minute: "2-digit" });
 }
 
 export function fmtDuracao(entradaEm) {
@@ -50,7 +52,9 @@ export function hoje() {
 
 export function unidadeLabel(unidadeId, apartamentoId, apartamentoNumero, blocoNome, apartamentoMap) {
   if (apartamentoNumero) {
-    return blocoNome ? `${blocoNome} - Apto ${apartamentoNumero}` : `Apto ${apartamentoNumero}`;
+    return blocoNome
+      ? i18n.t("portaria:unidade.blocoApto", { bloco: blocoNome, numero: apartamentoNumero })
+      : i18n.t("portaria:unidade.apto", { numero: apartamentoNumero });
   }
   if (unidadeId && apartamentoMap[unidadeId]) return apartamentoMap[unidadeId];
   if (apartamentoId && apartamentoMap[apartamentoId]) return apartamentoMap[apartamentoId];

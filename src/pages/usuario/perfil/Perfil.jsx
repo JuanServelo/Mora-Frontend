@@ -60,15 +60,16 @@ const ITENS_CONTA = [
 ];
 
 const TITULOS_VIEW = {
-  detalhes: "Detalhes da Conta",
-  privacidade: "Privacidade e Segurança",
-  aparencia: "Aparência",
-  familia: "Ocupantes da unidade",
-  cobranca: "Histórico de Cobrança",
+  detalhes: "views.detalhes",
+  privacidade: "views.privacidade",
+  aparencia: "views.aparencia",
+  familia: "views.familia",
+  cobranca: "views.cobranca",
 };
 
 export function Perfil() {
   const { t } = useTranslation();
+  const { t: tp } = useTranslation("perfil");
   const { usuario, logout } = useAuth();
   const navigate = useNavigate();
   const [activeView, setActiveView] = useState(null);
@@ -162,7 +163,7 @@ export function Perfil() {
                 )}
                 <h3 className="font-headline text-xl font-semibold text-on-surface">
                   {activeView ? (
-                    TITULOS_VIEW[activeView]
+                    tp(TITULOS_VIEW[activeView])
                   ) : (
                     t("perfil.config.titulo")
                   )}
@@ -194,10 +195,10 @@ export function Perfil() {
                             </div>
                             <div>
                               <div className="text-on-surface font-semibold text-base lg:text-lg">
-                                {t(item.titleId)}
+                                {t(item.titleId, { defaultValue: tp(`itens.${item.id}.titulo`) })}
                               </div>
                               <div className="text-on-surface-variant text-sm">
-                                {t(item.descId)}
+                                {t(item.descId, { defaultValue: tp(`itens.${item.id}.desc`) })}
                               </div>
                             </div>
                           </div>

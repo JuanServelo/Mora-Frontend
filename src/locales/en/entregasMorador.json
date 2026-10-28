@@ -1,0 +1,95 @@
+{
+  "status": {
+    "pendente": "Pending",
+    "retirada": "Picked up"
+  },
+  "erros": {
+    "marcarRetirada": "Couldn't mark as picked up. Please try again."
+  },
+  "header": {
+    "secao": "Services",
+    "tituloOperador": "Package ",
+    "tituloMorador": "My ",
+    "destaque": "Packages",
+    "descOperador": "Log incoming packages for residents and staff.",
+    "unidade": "{{bloco}} · Apt {{apartamento}}"
+  },
+  "stats": {
+    "total": "Total",
+    "pendentes": "Pending",
+    "retiradas": "Picked up"
+  },
+  "filtros": {
+    "titulo": "Filters",
+    "limpar": "Clear filters",
+    "buscar": "Search",
+    "buscarPlaceholder": "Description or sender...",
+    "status": "Status",
+    "opcoes": {
+      "todas": "All",
+      "pendentes": "Pending",
+      "retiradas": "Picked up"
+    },
+    "exibindo": "Showing",
+    "deTotal_one": "of {{count}} package",
+    "deTotal_other": "of {{count}} packages"
+  },
+  "lista": {
+    "carregando": "Loading...",
+    "vazio": {
+      "titulo": "No packages found.",
+      "desc": "When a package is logged for your apartment, it will show up here."
+    },
+    "semFiltro": "No packages match the filters.",
+    "encomenda": "Package",
+    "recebidaEm": "Received on {{data}}"
+  },
+  "detalhes": {
+    "remetente": "Sender",
+    "recebidaEm": "Received on",
+    "retiradaEm": "Picked up on",
+    "descricao": "Description",
+    "observacoes": "Notes",
+    "recebidaPor": "Picked up by",
+    "marcarRetirada": "Mark as picked up"
+  },
+  "registrar": {
+    "titulo": "Log package",
+    "registrando": "Logging…",
+    "erros": {
+      "destinatario": "Select the package recipient.",
+      "descricao": "Describe the package (e.g. box, envelope).",
+      "salvar": "Couldn't log the package."
+    },
+    "destinatario": "Recipient",
+    "tipos": {
+      "morador": "Resident",
+      "funcionario": "Staff"
+    },
+    "nenhumMorador": "No active residents",
+    "nenhumFuncionario": "No active staff members",
+    "selecione": "Select…",
+    "semUnidade": "This resident has no unit on file; the package will be linked to their name only.",
+    "campos": {
+      "descricao": "Description",
+      "descricaoPlaceholder": "E.g. medium box, envelope",
+      "remetente": "Sender",
+      "remetentePlaceholder": "E.g. Amazon",
+      "recebidaEm": "Received on",
+      "observacoes": "Notes",
+      "opcional": "(optional)",
+      "observacoesPlaceholder": "E.g. fragile, left at the gatehouse"
+    }
+  },
+  "retirada": {
+    "titulo": "Confirm pickup",
+    "por": "Picked up by",
+    "data": "Pickup date",
+    "dica": "Received on {{data}} — the date can't be earlier.",
+    "erros": {
+      "informe": "Enter the pickup date.",
+      "futura": "The pickup date can't be in the future.",
+      "anterior": "The pickup date can't be before the date it was received."
+    }
+  }
+}

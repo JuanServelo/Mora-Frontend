@@ -1,3 +1,4 @@
+import i18n from "../i18n";
 import { PERFIS } from "./perfis";
 
 /**
@@ -18,151 +19,142 @@ const PLATAFORMA = [PERFIS.ADMIN_GERAL];
 const CONDOMINIO = [PERFIS.ADMIN_SINDICO];
 const AMBOS = [PERFIS.ADMIN_GERAL, PERFIS.ADMIN_SINDICO];
 
+/**
+ * Rótulo e descrição são getters: o texto sai do i18n na hora em que alguém
+ * lê `l.label`, no idioma em uso, e não fica congelado no carregamento do
+ * módulo. Quem consome a lista continua lendo `label` e `description`.
+ */
+function item(chave, def) {
+  return {
+    ...def,
+    labelKey: `layout:menuAdmin.${chave}.rotulo`,
+    get label() {
+      return i18n.t(`layout:menuAdmin.${chave}.rotulo`);
+    },
+    get description() {
+      return i18n.t(`layout:menuAdmin.${chave}.descricao`);
+    },
+  };
+}
+
 export const ADM_LINKS = [
   // ── Plataforma
-  {
+  item("painelGeral", {
     to: "/adm/geral",
-    label: "Painel Geral",
     icon: "space_dashboard",
-    description: "Indicadores da plataforma",
     perfis: PLATAFORMA,
-  },
-  {
+  }),
+  item("clientes", {
     to: "/adm/condominios",
-    label: "Clientes",
     icon: "domain",
-    description: "Gestão de condomínios contratantes",
     perfis: PLATAFORMA,
-  },
-  {
+  }),
+  item("planos", {
     to: "/adm/planos",
-    label: "Planos",
     icon: "workspace_premium",
-    description: "Planos comerciais",
     perfis: PLATAFORMA,
-  },
+  }),
 
   // ── Compartilhadas: o Admin Geral usa para montar um cliente novo
   // Sem `modulo` — infraestrutura, sempre visível.
-  {
+  item("usuarios", {
     to: "/adm/usuarios",
-    label: "Usuários",
     icon: "manage_accounts",
-    description: "Cadastro e convites",
     perfis: AMBOS,
-  },
-  {
+  }),
+  item("estruturas", {
     to: "/adm/estruturas",
-    label: "Estruturas",
     icon: "apartment",
-    description: "Blocos, apartamentos e áreas comuns",
     perfis: AMBOS,
-  },
-  {
+  }),
+  item("perfis", {
     to: "/adm/perfis",
-    label: "Perfis",
     icon: "verified_user",
-    description: "Permissões por perfil",
     perfis: AMBOS,
-  },
+  }),
 
   // ── Operação do condomínio: não é trabalho de quem opera a plataforma
   // Sem `modulo`: o painel junta vários módulos, e cada bloco já vem vazio
   // quando o dele não está disponível.
-  {
+  item("painel", {
     to: "/adm/painel",
-    label: "Painel",
     icon: "monitoring",
-    description: "Indicadores operacionais e estratégicos",
     perfis: CONDOMINIO,
-  },
+  }),
   // Sem `modulo` — o síndico precisa sempre ver seu plano.
-  {
+  item("meuPlano", {
     to: "/adm/meu-plano",
-    label: "Meu Plano",
     icon: "workspace_premium",
-    description: "Plano contratado e módulos disponíveis",
     perfis: CONDOMINIO,
-  },
-  {
+  }),
+  item("reservas", {
     // Fora de /adm porque é a mesma tela do morador, com as abas de operação
     // a mais. Sem esta entrada o síndico não tem como chegar à fila de
     // aprovação: a barra lateral dele troca os links de morador pelos
     // administrativos.
     to: "/espacos",
-    label: "Reservas",
     icon: "event_available",
-    description: "Agenda dos espaços e aprovações",
     perfis: CONDOMINIO,
     modulo: "areas_comuns",
-  },
-  {
+  }),
+  item("financeiro", {
     to: "/adm/financeiro",
-    label: "Financeiro",
     modulo: "financeiro",
     icon: "payments",
-    description: "Taxas, rateio e cobranças",
     perfis: CONDOMINIO,
-  },
-  {
+  }),
+  item("funcionarios", {
     to: "/adm/funcionarios",
-    label: "Funcionários",
     icon: "badge",
-    description: "Situação funcional, turnos e liberações",
     perfis: CONDOMINIO,
     modulo: "portaria",
-  },
-  {
+  }),
+  item("reunioes", {
     to: "/adm/reunioes",
-    label: "Reuniões",
     icon: "groups",
-    description: "Assembleias e atas",
     perfis: CONDOMINIO,
     modulo: "reunioes",
-  },
-  {
+  }),
+  item("votacoes", {
     to: "/adm/votacoes",
-    label: "Votações",
     icon: "how_to_vote",
-    description: "Votações e enquetes do condomínio",
     perfis: CONDOMINIO,
     modulo: "votacoes",
-  },
-  {
+  }),
+  item("reclamacoes", {
     to: "/adm/reclamacoes",
-    label: "Reclamações",
     icon: "report",
-    description: "Ocorrências dos moradores",
     perfis: CONDOMINIO,
     modulo: "reclamacoes",
-  },
-  {
+  }),
+  item("ordensServico", {
+    // Mesmo módulo das reclamações: a OS é o desdobramento da ocorrência.
+    to: "/adm/ordens-servico",
+    icon: "construction",
+    perfis: CONDOMINIO,
+    modulo: "reclamacoes",
+  }),
+  item("conversas", {
     // Nao e rota /adm, e nao precisa ser: a tela e a mesma do morador, e quem
     // decide o que cada perfil enxerga e o servico. Fica aqui so para aparecer
     // na barra lateral de quem usa o layout administrativo.
     to: "/conversas",
-    label: "Conversas",
     modulo: "comunicacao",
     icon: "forum",
-    description: "Chamados dos moradores",
     perfis: CONDOMINIO,
-  },
-  {
+  }),
+  item("comunicados", {
     to: "/adm/comunicados",
-    label: "Comunicados",
     modulo: "comunicacao",
     icon: "campaign",
-    description: "Quem confirmou a leitura dos avisos",
     perfis: CONDOMINIO,
-  },
-  {
+  }),
+  item("conhecimento", {
     to: "/adm/conhecimento",
-    label: "Conhecimento",
     icon: "library_books",
-    description: "Base de conhecimento e FAQ",
     perfis: CONDOMINIO,
     modulo: "conhecimento",
-  },
+  }),
 ];
 
 /**

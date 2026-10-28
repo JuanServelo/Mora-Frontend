@@ -1,0 +1,51 @@
+{
+  "atalhos": {
+    "avisos": { "label": "Notices", "desc": "Announcements from management" },
+    "conversas": { "label": "Messages", "desc": "Talk to management" },
+    "notificacoes": { "label": "Notifications", "desc": "Bills, packages and notices you've received" },
+    "cobrancas": { "label": "Bills", "desc": "Invoices, boleto and PIX" },
+    "espacos": { "label": "Spaces", "desc": "Book common areas" },
+    "entregas": { "label": "Packages", "desc": "Packages at the front desk" },
+    "convidados": { "label": "Guests", "desc": "Authorize visitor entry" },
+    "veiculos": { "label": "My vehicles", "desc": "Your unit's cars and parking spaces" },
+    "reclamacoes": { "label": "Complaints", "desc": "Open or track requests" },
+    "comodidades": { "label": "Amenities", "desc": "Leisure and wellness in the building" }
+  },
+  "servicos": {
+    "titulo": "Building services",
+    "desc": "What the building offers. Official details are with management and in the house rules.",
+    "acessar": "Open"
+  },
+  "aviso": {
+    "vigencia": "valid from {{inicio}} to {{fim}}",
+    "marcadoLido": "Closing this will mark the notice as read.",
+    "entendi": "Got it"
+  },
+  "saudacao": {
+    "morador": "Resident",
+    "condominio": "Building",
+    "ola": "Hi,",
+    "desc": "Your building hub: bookings, communication and everything you need in one place."
+  },
+  "avisos": {
+    "titulo": "Notices",
+    "ate": "Until {{data}}"
+  },
+  "restrito": "Your user isn't linked to a unit yet. Once management links it, the building shortcuts will show up here.",
+  "acessoRapido": {
+    "titulo": "Quick access",
+    "descAdmin": "Shortcuts to the building's admin areas",
+    "desc": "Shortcuts to the most used areas of the app",
+    "meuPerfil": "My profile",
+    "abrir": "Open"
+  },
+  "ajuda": {
+    "titulo": "Need help from management?",
+    "desc": "Use complaints for requests or talk to management directly. Official notices appear at the top of this page.",
+    "botao": "Go to complaints"
+  },
+  "faq": {
+    "abrir": "Open FAQ",
+    "rotulo": "FAQ"
+  }
+}

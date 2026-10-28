@@ -1,0 +1,220 @@
+{
+  "carregando": "Carregando...",
+  "tiposSerie": {
+    "barras": "Barras",
+    "linhas": "Linhas",
+    "area": "Área",
+    "combinado": "Barras + linha",
+    "rosca": "Rosca"
+  },
+  "larguras": {
+    "metade": "Metade",
+    "inteira": "Inteira"
+  },
+  "alturas": {
+    "baixa": "Baixa",
+    "media": "Média",
+    "alta": "Alta"
+  },
+  "cores": {
+    "agua": "Água",
+    "turquesa": "Turquesa",
+    "dourado": "Dourado",
+    "coral": "Coral",
+    "ardosia": "Ardósia",
+    "lavanda": "Lavanda"
+  },
+  "personalizavel": {
+    "toast": {
+      "salvo": "Painel salvo. Ele vai aparecer assim sempre que você entrar.",
+      "erroSalvar": "Não foi possível salvar o painel."
+    },
+    "instrucaoAntes": "Arraste para reordenar. Em",
+    "instrucaoDepois": "mude tamanho, gráfico e cor.",
+    "restaurarPadrao": "Restaurar padrão",
+    "personalizar": "Personalizar",
+    "todosEscondidos": "Todos os blocos estão escondidos. Clique em <strong>Personalizar</strong> para escolher o que ver.",
+    "bloco": {
+      "moverAntes": "Mover para antes",
+      "moverDepois": "Mover para depois",
+      "opcoes": "Opções do bloco",
+      "esconder": "Esconder",
+      "mostrar": "Mostrar"
+    },
+    "opcoes": {
+      "largura": "Largura",
+      "altura": "Altura",
+      "tipoGrafico": "Tipo de gráfico",
+      "cor": "Cor",
+      "automatica": "Automática",
+      "corAutomatica": "Cor automática",
+      "auto": "Auto",
+      "corNomeada": "Cor {{cor}}"
+    }
+  },
+  "filtro": {
+    "titulo": "Filtros",
+    "periodo": "Período",
+    "meses": "{{n}} meses",
+    "clientes": "Clientes",
+    "status": {
+      "todos": "Todos",
+      "ativos": "Ativos",
+      "inativos": "Inativos"
+    },
+    "plano": "Plano (receita)",
+    "planoAria": "Filtrar a receita por plano",
+    "atualizando": "atualizando…"
+  },
+  "receitaClientes": {
+    "titulo": "Receita por cliente",
+    "verClientes": "Ver clientes",
+    "colunas": {
+      "cliente": "Cliente",
+      "plano": "Plano",
+      "mensalidade": "Mensalidade",
+      "acumulado": "Acumulado"
+    },
+    "semPlano": "sem plano contratado",
+    "aviso": "O acumulado é uma estimativa — mensalidade × meses de vigência. Não há histórico de pagamento das assinaturas."
+  },
+  "grafico": {
+    "semDados": "Sem dados suficientes ainda."
+  },
+  "geral": {
+    "erroCarregar": "Não foi possível carregar os indicadores da plataforma.",
+    "carregandoReceita": "Carregando receita…",
+    "erroReceita": "Não foi possível carregar a receita das assinaturas.",
+    "cabecalho": {
+      "sobretitulo": "Painel Administrativo",
+      "titulo": "Visão",
+      "tituloDestaque": "Geral",
+      "subtitulo": "Indicadores de todos os condomínios da plataforma.",
+      "gerenciarClientes": "Gerenciar clientes"
+    },
+    "blocos": {
+      "condominiosAtivos": "Condomínios ativos",
+      "condominiosCadastrados": "de {{total}} cadastrados",
+      "novos30": "Novos em 30 dias",
+      "usuariosAtivos": "Usuários ativos",
+      "usuariosNaPlataforma": "de {{total}} na plataforma",
+      "mediaPorCondominio": "Média por condomínio",
+      "convitesPendentes": "Convites pendentes",
+      "ocorrenciasAbertas": "Ocorrências abertas",
+      "ocorrenciasRegistradas": "de {{total}} registradas",
+      "ocorrenciasIndisponivel": "ocorrencias-service indisponível",
+      "receitaMensal": "Receita mensal",
+      "assinaturaAtiva": "{{n}} assinatura ativa",
+      "assinaturasAtivas": "{{n}} assinaturas ativas",
+      "variacaoMesAnterior": "{{variacao}}% vs. mês anterior",
+      "projecaoAnual": "Projeção anual",
+      "projecaoSub": "Receita mensal × 12",
+      "ticketMedio": "Ticket médio",
+      "ticketSub": "Por cliente ativo",
+      "semPlano": "Clientes sem plano",
+      "semPlanoSub": "Não estão sendo cobrados",
+      "todosComAssinatura": "Todos com assinatura",
+      "evolucaoReceita": "Evolução da receita",
+      "evolucaoDescricao": "Receita mensal recorrente nos últimos {{meses}} meses",
+      "evolucaoVazio": "Nenhuma assinatura ativa no período.",
+      "serieReceita": "Receita",
+      "receitaPorPlano": "Receita por plano",
+      "receitaPorPlanoDescricao": "Quanto cada plano representa do total",
+      "receitaPorPlanoVazio": "Nenhuma assinatura ativa.",
+      "tooltipAssinaturas": "{{valor}} · {{n}} assinatura(s)",
+      "receitaPorCliente": "Receita por cliente",
+      "crescimento": "Crescimento da carteira",
+      "crescimentoDescricao": "Condomínios criados por mês e total acumulado",
+      "crescimentoVazio": "Nenhum condomínio criado no período.",
+      "serieCriados": "Criados no mês",
+      "serieAcumulado": "Acumulado",
+      "porPerfil": "Usuários por perfil",
+      "porPerfilDescricao": "Distribuição entre os perfis",
+      "porCondominio": "Usuários por condomínio",
+      "porCondominioDescricao": "Dez maiores — clique para abrir o cliente",
+      "porCondominioVazio": "Nenhum usuário vinculado a condomínio ainda.",
+      "serieUsuarios": "Usuários"
+    }
+  },
+  "condominio": {
+    "abas": {
+      "operacional": {
+        "label": "Operacional",
+        "descricao": "O que pede ação agora"
+      },
+      "estrategico": {
+        "label": "Estratégico",
+        "descricao": "Como o condomínio vem andando"
+      }
+    },
+    "fontes": {
+      "portaria": "portaria (entregas, reservas, acessos)",
+      "usuarios": "usuários",
+      "ocorrencias": "ocorrências e ordens de serviço",
+      "comunicacao": "avisos e conversas",
+      "financeiro": "financeiro"
+    },
+    "avisoFontes": "Parte dos números não pôde ser carregada agora: {{fontes}}. O resto do painel está atualizado.",
+    "cabecalho": {
+      "sobretitulo": "Síndico",
+      "titulo": "Painel do",
+      "tituloDestaque": "condomínio"
+    },
+    "janela": "{{n}} meses",
+    "erroCarregar": "Não foi possível carregar o painel.",
+    "carregando": "Carregando painel...",
+    "operacional": {
+      "reservasAprovar": "Reservas para aprovar",
+      "primeiroPrazo": "Primeiro prazo: {{data}}",
+      "ocorrenciasAbertas": "Ocorrências abertas",
+      "semAtendimento": "{{n}} sem atendimento",
+      "osAtrasadas": "Ordens de serviço atrasadas",
+      "osSub": "{{criticas}} crítica(s) · {{prazo}}",
+      "noPrazo": "{{percentual}}% no prazo",
+      "nenhumaConcluida": "nenhuma concluída",
+      "conversasNova": "Conversas com mensagem nova",
+      "emAberto": "{{n}} em aberto",
+      "faturasAtraso": "Faturas em atraso",
+      "faturasAtrasoMes": "Faturas em atraso no mês",
+      "recebidos": "{{valor}} recebidos",
+      "entregas": "Entregas na portaria",
+      "maisAntiga": "Mais antiga: {{data}}",
+      "visitantes": "Visitantes no condomínio",
+      "atendimentos": "Atendimentos na portaria",
+      "atendimentosAbertos": "Atendimentos abertos na portaria",
+      "avisos": "Avisos vigentes",
+      "leituraAvisos": "Leitura dos avisos"
+    },
+    "leitura": {
+      "titulo": "Leitura dos avisos vigentes",
+      "descricao": "Quem confirmou a leitura, contra quem deveria ler pelo público do aviso. Os menos lidos primeiro.",
+      "nenhumAviso": "Nenhum aviso vigente agora.",
+      "percentual": "{{leituras}} de {{destinatarios}} · {{percentual}}%",
+      "leituras": "{{n}} leituras"
+    },
+    "estrategico": {
+      "reservas": "Reservas por mês",
+      "reservasDescricao": "Aprovadas, pendentes e concluídas — canceladas e recusadas ficam de fora",
+      "reservasVazio": "Nenhuma reserva no período.",
+      "serieReservas": "Reservas",
+      "ocorrencias": "Ocorrências abertas e resolvidas",
+      "tempoMedio": "Tempo médio até resolver: {{dias}} dia(s)",
+      "ocorrenciasDescricao": "Abertas pela data de registro, resolvidas pela data da resolução",
+      "ocorrenciasVazio": "Nenhuma ocorrência no período.",
+      "serieAbertas": "Abertas",
+      "serieResolvidas": "Resolvidas",
+      "inadimplencia": "Inadimplência por competência",
+      "inadimplenciaDescricao": "Percentual de faturas do mês que estão em atraso",
+      "inadimplenciaVazio": "Nenhuma fatura emitida no período.",
+      "serieEmAtraso": "Em atraso",
+      "multas": "Multas por mês",
+      "multasDescricao": "Aplicadas e canceladas pela data de aplicação",
+      "multasVazio": "Nenhuma multa no período.",
+      "serieAplicadas": "Aplicadas",
+      "serieCanceladas": "Canceladas",
+      "areas": "Áreas mais reservadas",
+      "categorias": "Ocorrências por categoria",
+      "rankingVazio": "Sem registros no período."
+    }
+  }
+}

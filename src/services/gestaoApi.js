@@ -49,6 +49,11 @@ export const gestaoApi = {
   painelEstrategico(meses = 6) {
     return gestao.get("/api/gestao/painel/estrategico", { params: { meses } });
   },
+
+  /** Cotação do dólar (PTAX), para a tela em inglês mostrar valores aproximados em US$. */
+  cambio() {
+    return gestao.get("/api/gestao/cambio");
+  },
 };
 
 export default gestaoApi;

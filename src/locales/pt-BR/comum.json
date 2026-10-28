@@ -1,0 +1,56 @@
+{
+  "acoes": {
+    "salvar": "Salvar",
+    "salvando": "Salvando…",
+    "cancelar": "Cancelar",
+    "confirmar": "Confirmar",
+    "fechar": "Fechar",
+    "editar": "Editar",
+    "excluir": "Excluir",
+    "remover": "Remover",
+    "adicionar": "Adicionar",
+    "criar": "Criar",
+    "enviar": "Enviar",
+    "enviando": "Enviando…",
+    "voltar": "Voltar",
+    "continuar": "Continuar",
+    "buscar": "Buscar",
+    "filtrar": "Filtrar",
+    "limparFiltro": "limpar filtro",
+    "atualizar": "Atualizar",
+    "verDetalhes": "Ver detalhes",
+    "verTodos": "Ver todos",
+    "tentarNovamente": "Tentar novamente",
+    "sair": "Sair",
+    "sim": "Sim",
+    "nao": "Não"
+  },
+  "estado": {
+    "carregando": "Carregando…",
+    "semResultados": "Nenhum resultado encontrado.",
+    "indisponivel": "Dado indisponível agora.",
+    "erroInesperado": "Algo deu errado. Tente novamente.",
+    "obrigatorio": "Obrigatório",
+    "opcional": "opcional",
+    "todos": "Todos",
+    "todas": "Todas",
+    "nenhum": "Nenhum",
+    "ativo": "Ativo",
+    "inativo": "Inativo"
+  },
+  "tempo": {
+    "agora": "agora mesmo",
+    "minutosAtras": "{{n}} min atrás",
+    "horasAtras": "{{n}}h atrás",
+    "diasAtras": "{{n}}d atrás",
+    "hoje": "Hoje",
+    "ontem": "Ontem",
+    "meses_one": "{{count}} mês",
+    "meses_other": "{{count}} meses"
+  },
+  "idioma": {
+    "titulo": "Idioma",
+    "descricao": "Muda os textos, as datas e os valores do sistema. Vale neste aparelho e neste navegador.",
+    "seletor": "Idioma"
+  }
+}

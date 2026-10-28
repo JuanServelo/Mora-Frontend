@@ -1,0 +1,235 @@
+{
+  "status": {
+    "pendente": "Pending",
+    "aprovada": "Approved",
+    "recusada": "Declined",
+    "expirada": "Expired",
+    "cancelada": "Cancelled",
+    "concluida": "Completed"
+  },
+  "periodo": "{{inicio}} to {{fim}}",
+  "cabecalho": {
+    "sobretitulo": "Bookings",
+    "titulo": "Spaces",
+    "tituloDestaque": "& Bookings",
+    "subtituloSelecionado": "Schedule for the selected space.",
+    "subtituloEscolha": "Pick a space to see its schedule and book it."
+  },
+  "abas": {
+    "agenda": "Schedule",
+    "minhas": "My bookings",
+    "aprovacoes": "Approvals",
+    "historico": "History"
+  },
+  "erros": {
+    "carregarAreas": "Couldn't load the common areas.",
+    "carregarAgenda": "Couldn't load this space's schedule.",
+    "cancelar": "Couldn't cancel the booking.",
+    "carregarMinhas": "Couldn't load your bookings.",
+    "aprovarLote": "Couldn't approve the selected bookings.",
+    "carregarHistorico": "Couldn't load the booking history.",
+    "criar": "Couldn't create the booking.",
+    "aprovar": "Couldn't approve the booking.",
+    "recusar": "Couldn't decline the booking."
+  },
+  "cancelamento": {
+    "confirmar": "Cancel the booking for {{periodo}}?\n\nThe entire booking will be cancelled.",
+    "sucesso": "Booking cancelled."
+  },
+  "minhas": {
+    "vazioTitulo": "You haven't booked any space yet",
+    "vazioDescricao": "Pick a space in the Schedule tab to make your first booking.",
+    "espacoPadrao": "Space"
+  },
+  "aprovacoes": {
+    "vazio": "No requests awaiting approval.",
+    "aguardando_one": "{{count}} request awaiting a decision",
+    "aguardando_other": "{{count}} requests awaiting a decision",
+    "desmarcarTodas": "Deselect all",
+    "selecionarTodas": "Select all",
+    "aprovar": "Approve",
+    "aprovarQtd": "Approve ({{n}})",
+    "selecionarReserva": "Select booking for {{nome}}",
+    "responsavelPadrao": "holder",
+    "decidirAte": "Decide by {{prazo}}",
+    "aprovadas_one": "{{count}} booking approved.",
+    "aprovadas_other": "{{count}} bookings approved."
+  },
+  "historico": {
+    "filtros": "Filters",
+    "incluirFuturas": "Include upcoming bookings",
+    "limparFiltros": "Clear filters",
+    "campos": {
+      "espaco": "Space",
+      "de": "From",
+      "ate": "To",
+      "situacao": "Status",
+      "responsavel": "Holder"
+    },
+    "placeholderNome": "Name…",
+    "vazio": "No bookings recorded in this condominium yet.",
+    "semResultado": "No bookings match the selected filters.",
+    "encontradas_one": "{{count}} booking found",
+    "encontradas_other": "{{count}} bookings found",
+    "colunas": {
+      "espaco": "Space",
+      "responsavel": "Holder",
+      "tipo": "Type",
+      "inicio": "Start",
+      "fim": "End",
+      "situacao": "Status",
+      "decididoPor": "Decided by"
+    },
+    "tipoEvento": "Event",
+    "tipoMorador": "Resident",
+    "automatica": "Automatic",
+    "prazoExpirado": "Deadline passed"
+  },
+  "selecao": {
+    "vazio": "No common areas available for booking right now.",
+    "pessoas_one": "{{count}} person",
+    "pessoas_other": "{{count}} people",
+    "capacidadeNaoInformada": "Capacity not provided",
+    "localizacaoNaoInformada": "Location not provided",
+    "verAgenda": "View schedule"
+  },
+  "nova": {
+    "titulo": "New booking",
+    "tipoReserva": "Booking type",
+    "tipos": {
+      "morador": "Resident",
+      "evento": "Condominium event"
+    },
+    "unidade": "Block / Apartment",
+    "selecioneUnidade": "Select the unit…",
+    "apto": "Apt {{numero}}",
+    "semMoradorAtivo": " — no active resident",
+    "suaUnidade": "Your unit",
+    "vinculadaCadastro": "Linked to your profile",
+    "funcionarioResponsavel": "Staff member in charge",
+    "moradorResponsavel": "Resident in charge",
+    "selecione": "Select…",
+    "unidadeSemMorador": "This unit has no active resident and can't hold a booking.",
+    "descricaoEvento": "Event description",
+    "dataInicio": "Start date",
+    "horaInicio": "Start time",
+    "dataFim": "End date",
+    "horaFim": "End time",
+    "terminaDiaSeguinte": "This booking ends the next day: {{inicio}} → {{fim}}",
+    "avisoFuncionamento": "This space has opening hours. Bookings outside them are declined.",
+    "observacoes": "Notes",
+    "opcional": "(optional)",
+    "criando": "Creating…",
+    "criar": "Create booking",
+    "erros": {
+      "horario": "Enter the start and end times.",
+      "fimAntesInicio": "The booking must end after it starts.",
+      "passado": "You can't book a past date or time.",
+      "descricaoEvento": "Enter the event description.",
+      "unidade": "Select the unit in charge.",
+      "funcionario": "Select the staff member in charge.",
+      "morador": "Select the resident in charge."
+    },
+    "toast": {
+      "pendente": "Request sent. The booking will be confirmed once the building manager approves it.",
+      "criada": "Booking created."
+    }
+  },
+  "detalhe": {
+    "tituloEvento": "Condominium event",
+    "tituloMorador": "Resident booking",
+    "inicio": "Start:",
+    "fim": "End:",
+    "responsavel": "Holder:",
+    "evento": "Event:",
+    "confirmadaPor": "Confirmed by:",
+    "confirmacaoAutomatica": "automatic confirmation",
+    "aguardandoAntes": "Awaiting the building manager's approval. With no decision by",
+    "aguardandoDepois": ", the request expires and the time slot becomes free again.",
+    "recusadaPor": "Declined by:",
+    "canceladaPor": "Cancelled by:",
+    "historicoDecisoes": "Decision history",
+    "sistema": "system",
+    "motivoRecusa": "Reason for declining",
+    "motivoPlaceholder": "E.g.: space under maintenance on this date.",
+    "motivoVisivel": "The reason is visible to whoever made the request.",
+    "cancelarReserva": "Cancel booking",
+    "confirmarRecusa": "Confirm decline",
+    "recusar": "Decline",
+    "aprovar": "Approve",
+    "toast": {
+      "aprovada": "Booking approved.",
+      "recusada": "Booking declined.",
+      "motivoObrigatorio": "Enter the reason for declining - it is visible to whoever made the request."
+    }
+  },
+  "agenda": {
+    "hoje": "Today",
+    "periodoAnterior": "Previous period",
+    "proximoPeriodo": "Next period",
+    "mes": "Month",
+    "semana": "Week",
+    "novaReserva": "New booking",
+    "aguardandoAprovacao": "Awaiting approval",
+    "confirmada": "Confirmed",
+    "trocarEspaco": "Change space",
+    "vazio": "No bookings in this period.",
+    "fechado": "Closed",
+    "diaTodo": "All day · {{nome}}",
+    "mais": "+{{n}} more",
+    "evento": "Event",
+    "rotuloMes": "{{mes}} {{ano}}",
+    "rotuloSemanaMesmoMes": "{{mes}} {{ini}}–{{fim}}, {{ano}}",
+    "rotuloSemana": "{{mesIni}} {{ini}} – {{mesFim}} {{fim}}, {{ano}}",
+    "semRestricao": "No time restrictions",
+    "fechadoTodosDias": "Closed every day",
+    "diasCurtos": {
+      "dom": "Sun",
+      "seg": "Mon",
+      "ter": "Tue",
+      "qua": "Wed",
+      "qui": "Thu",
+      "sex": "Fri",
+      "sab": "Sat"
+    }
+  },
+  "funcionamento": {
+    "titulo": "Opening hours",
+    "dias": {
+      "domingo": "Sunday",
+      "segunda": "Monday",
+      "terca": "Tuesday",
+      "quarta": "Wednesday",
+      "quinta": "Thursday",
+      "sexta": "Friday",
+      "sabado": "Saturday"
+    },
+    "migrado": "This space was automatically migrated to “no time restrictions”. Review the setup if it has opening hours.",
+    "modos": {
+      "semRestricao": {
+        "titulo": "No time restrictions",
+        "descricao": "Bookings 24/7, every day"
+      },
+      "horariosDefinidos": {
+        "titulo": "Set hours",
+        "descricao": "A time window per weekday"
+      }
+    },
+    "aplicarTodos": "Apply to every day",
+    "aplicarUteis": "Apply to weekdays",
+    "fechado": "Closed",
+    "ate": "to",
+    "viraDia": "ends the next day",
+    "explicacaoMeiaNoite": "A closing time earlier than the opening time means the window runs past midnight — Saturday 18:00 to 02:00 ends on Sunday.",
+    "salvar": "Save opening hours",
+    "erros": {
+      "carregar": "Couldn't load the opening hours.",
+      "umDiaAberto": "At least one day must be open.",
+      "iguais": "On {{dia}}, opening and closing times can't be the same. For 24 hours, use \"no time restrictions\".",
+      "salvar": "Couldn't save the opening hours."
+    },
+    "toast": {
+      "atualizado": "Opening hours updated."
+    }
+  }
+}

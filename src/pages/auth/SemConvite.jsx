@@ -1,8 +1,10 @@
 import { Link, useSearchParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Icone } from "../../components/icones/Icone";
 import { AtivacaoContaForm } from "../../components/auth/AtivacaoContaForm";
 
 export function SemConvite() {
+  const { t } = useTranslation("auth");
   const [searchParams] = useSearchParams();
   const origemGoogle = searchParams.get("origem") === "google";
 
@@ -16,36 +18,36 @@ export function SemConvite() {
             </div>
             <div>
               <h1 className="text-2xl font-headline font-bold text-on-surface">
-                Acesso somente por convite
+                {t("semConvite.titulo")}
               </h1>
               <p className="text-on-surface-variant text-sm mt-2 leading-relaxed">
                 {origemGoogle
-                  ? "Seu e-mail do Google ainda não está cadastrado no Mora. Para entrar, você precisa de um convite enviado pelo síndico ou administrador do condomínio."
-                  : "O Mora funciona com convites. Peça ao síndico ou administrador do seu condomínio para enviar um convite ao seu e-mail."}
+                  ? t("semConvite.textoGoogle")
+                  : t("semConvite.texto")}
               </p>
             </div>
           </div>
 
           <div className="rounded-2xl bg-surface-container-highest/40 border border-outline-variant/15 p-4 mb-6 space-y-3">
-            <p className="text-on-surface text-sm font-semibold">Como funciona</p>
+            <p className="text-on-surface text-sm font-semibold">{t("semConvite.comoFunciona")}</p>
             <ol className="text-on-surface-variant text-sm space-y-2 list-decimal list-inside">
-              <li>O administrador cria um convite para o seu e-mail</li>
-              <li>Você recebe o código por e-mail (ou diretamente com o responsável)</li>
-              <li>Informe o código abaixo e conclua seu cadastro</li>
+              <li>{t("semConvite.passos.convite")}</li>
+              <li>{t("semConvite.passos.codigo")}</li>
+              <li>{t("semConvite.passos.concluir")}</li>
             </ol>
           </div>
 
           <AtivacaoContaForm
-            tituloPasso1="Ativar com código de convite"
-            subtituloPasso1="Digite o código que você recebeu para continuar."
-            subtituloPasso2="Preencha seus dados para concluir o cadastro."
+            tituloPasso1={t("semConvite.passo1Titulo")}
+            subtituloPasso1={t("semConvite.passo1Subtitulo")}
+            subtituloPasso2={t("geral.subtituloConcluir")}
           />
         </div>
 
         <p className="text-center text-sm text-on-surface-variant">
-          Já tem conta?{" "}
+          {t("geral.jaTemConta")}{" "}
           <Link to="/login" className="text-primary font-bold hover:underline">
-            Entrar
+            {t("geral.entrar")}
           </Link>
         </p>
       </div>

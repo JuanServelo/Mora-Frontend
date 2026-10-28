@@ -1,6 +1,7 @@
 // src/components/adm/financeiro/PainelContratos.jsx
 // Síndico: contratos de locação das unidades (RF-15).
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { Trans, useTranslation } from "react-i18next";
 import { Icone } from "../../icones/Icone";
 import { useAuth } from "../../../contexts/AuthContext";
 import { useToast } from "../../../contexts/ToastContext";
@@ -21,13 +22,14 @@ import { hojeCampo, mensagemDe } from "../../../utils/financeiroTela";
  * vai para quem a transferência diz — e a tela precisa deixar isso claro.
  */
 export function AvisoDivergencia({ contrato, nomeDe }) {
+  const { t } = useTranslation("financeiro");
   const d = contrato.divergencia;
   if (!contrato.ativo) return null;
   if (d === null || d === undefined) {
     return (
       <p className="text-xs text-on-surface-variant flex items-center gap-1.5">
         <Icone name="help" className="text-sm" />
-        Não foi possível conferir quem recebe a fatura desta unidade agora.
+        {t("contratos.divergencia.semConferir")}
       </p>
     );
   }
@@ -36,9 +38,15 @@ export function AvisoDivergencia({ contrato, nomeDe }) {
     <div className="rounded-xl p-3 border border-secondary/25 bg-secondary/5 text-xs text-on-surface flex gap-2">
       <Icone name="warning" className="text-secondary text-base shrink-0" />
       <span>
-        Pelo contrato, a taxa é paga por <strong>{nomeDe(d.responsavelEsperadoId)}</strong>, mas a fatura
-        está indo para <strong>{d.responsavelAtualId ? nomeDe(d.responsavelAtualId) : "ninguém"}</strong>.
-        Para mudar, use a transferência de responsabilidade financeira da unidade.
+        <Trans
+          t={t}
+          i18nKey="contratos.divergencia.texto"
+          values={{
+            esperado: nomeDe(d.responsavelEsperadoId),
+            atual: d.responsavelAtualId ? nomeDe(d.responsavelAtualId) : t("contratos.divergencia.ninguem"),
+          }}
+          components={{ b: <strong /> }}
+        />
       </span>
     </div>
   );
@@ -50,6 +58,7 @@ const VAZIO = {
 };
 
 export function PainelContratos() {
+  const { t } = useTranslation("financeiro");
   const { usuario } = useAuth();
   const toast = useToast();
   const confirm = useConfirm();
@@ -70,11 +79,11 @@ export function PainelContratos() {
       const { data } = await financeiroApi.listarContratos();
       setContratos(data.contratos ?? []);
     } catch (err) {
-      toast.error(mensagemDe(err, "Não foi possível carregar os contratos."));
+      toast.error(mensagemDe(err, t("contratos.toast.erroCarregar")));
     } finally {
       setCarregando(false);
     }
-  }, [toast]);
+  }, [toast, t]);
 
   useEffect(() => { carregar(); }, [carregar]);
 
@@ -89,14 +98,14 @@ export function PainelContratos() {
   }, [usuario?.condominioId]);
 
   const nomeUnidade = useMemo(() => {
-    const mapa = new Map(unidades.map((u) => [u.id, `Apto ${u.numero}${u.blocoNome ? ` · ${u.blocoNome}` : ""}`]));
-    return (id) => mapa.get(id) ?? "Unidade";
-  }, [unidades]);
+    const mapa = new Map(unidades.map((u) => [u.id, `${t("multas.apto", { numero: u.numero })}${u.blocoNome ? ` · ${u.blocoNome}` : ""}`]));
+    return (id) => mapa.get(id) ?? t("multas.unidade");
+  }, [unidades, t]);
 
   const nomeDe = useMemo(() => {
     const mapa = new Map(usuarios.map((u) => [u.id, u.nome]));
-    return (id) => (id ? mapa.get(id) ?? `Usuário ${id}` : "—");
-  }, [usuarios]);
+    return (id) => (id ? mapa.get(id) ?? t("contratos.usuario", { id }) : "—");
+  }, [usuarios, t]);
 
   async function escolherUnidade(unidadeId) {
     setForm((f) => ({ ...f, unidadeId, proprietarioUsuarioId: "", inquilinoUsuarioId: "" }));
@@ -120,11 +129,11 @@ export function PainelContratos() {
         fim: form.fim || null,
         valorAluguel: form.valorAluguel || null,
       });
-      toast.success("Contrato cadastrado.");
+      toast.success(t("contratos.toast.cadastrado"));
       setNovo(false);
       carregar();
     } catch (err) {
-      toast.error(mensagemDe(err, "Não foi possível cadastrar o contrato."));
+      toast.error(mensagemDe(err, t("contratos.toast.erroCadastrar")));
     } finally {
       setSalvando(false);
     }
@@ -132,18 +141,18 @@ export function PainelContratos() {
 
   async function encerrar(contrato) {
     const ok = await confirm({
-      titulo: "Encerrar contrato",
-      mensagem: `O contrato de ${nomeUnidade(contrato.unidadeId)} deixa de ser vigente hoje.`,
-      confirmarTexto: "Encerrar",
+      titulo: t("contratos.encerrar.titulo"),
+      mensagem: t("contratos.encerrar.mensagem", { unidade: nomeUnidade(contrato.unidadeId) }),
+      confirmarTexto: t("contratos.encerrar.botao"),
       variante: "danger",
     });
     if (!ok) return;
     try {
       await financeiroApi.encerrarContrato(contrato.id);
-      toast.success("Contrato encerrado.");
+      toast.success(t("contratos.toast.encerrado"));
       carregar();
     } catch (err) {
-      toast.error(mensagemDe(err, "Não foi possível encerrar o contrato."));
+      toast.error(mensagemDe(err, t("contratos.toast.erroEncerrar")));
     }
   }
 
@@ -151,19 +160,18 @@ export function PainelContratos() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-sm text-on-surface-variant max-w-2xl">
-          Registro do que proprietário e inquilino combinaram. Quem recebe a fatura continua sendo
-          definido pela responsabilidade financeira da unidade.
+          {t("contratos.descricao")}
         </p>
         <button onClick={() => { setForm({ ...VAZIO, inicio: hojeCampo() }); setMoradores([]); setNovo(true); }} className={BOTAO_PRIMARIO}>
           <Icone name="add" className="text-lg" />
-          Novo contrato
+          {t("contratos.novo")}
         </button>
       </div>
 
       {carregando ? (
-        <Carregando texto="Carregando contratos..." />
+        <Carregando texto={t("contratos.carregando")} />
       ) : contratos.length === 0 ? (
-        <Vazio icone="contract" texto="Nenhum contrato de locação cadastrado." />
+        <Vazio icone="contract" texto={t("contratos.vazio")} />
       ) : (
         <div className="space-y-3">
           {contratos.map((c) => (
@@ -172,18 +180,18 @@ export function PainelContratos() {
                 <div className="min-w-0">
                   <p className="font-semibold text-on-surface">{nomeUnidade(c.unidadeId)}</p>
                   <p className="text-xs text-on-surface-variant mt-0.5">
-                    Proprietário: {nomeDe(c.proprietarioUsuarioId)} · Inquilino: {nomeDe(c.inquilinoUsuarioId)}
+                    {t("contratos.lista.partes", { proprietario: nomeDe(c.proprietarioUsuarioId), inquilino: nomeDe(c.inquilinoUsuarioId) })}
                   </p>
                   <p className="text-xs text-on-surface-variant">
-                    {formatarData(c.inicio)} até {c.fim ? formatarData(c.fim) : "sem data de fim"}
-                    {c.valorAluguelCentavos != null && ` · aluguel ${formatarBRL(c.valorAluguelCentavos)}`}
-                    {` · taxa paga pelo ${c.responsavelTaxas === "INQUILINO" ? "inquilino" : "proprietário"}`}
+                    {t("contratos.lista.periodo", { inicio: formatarData(c.inicio), fim: c.fim ? formatarData(c.fim) : t("contratos.lista.semFim") })}
+                    {c.valorAluguelCentavos != null && ` · ${t("contratos.lista.aluguel", { valor: formatarBRL(c.valorAluguelCentavos) })}`}
+                    {` · ${c.responsavelTaxas === "INQUILINO" ? t("contratos.lista.taxaInquilino") : t("contratos.lista.taxaProprietario")}`}
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Selo texto={c.ativo ? "Vigente" : "Encerrado"} tom={c.ativo ? "ok" : "neutro"} />
+                  <Selo texto={c.ativo ? t("contratos.lista.vigente") : t("contratos.lista.encerrado")} tom={c.ativo ? "ok" : "neutro"} />
                   {c.ativo && (
-                    <button onClick={() => encerrar(c)} className={BOTAO_SECUNDARIO}>Encerrar</button>
+                    <button onClick={() => encerrar(c)} className={BOTAO_SECUNDARIO}>{t("contratos.encerrar.botao")}</button>
                   )}
                 </div>
               </div>
@@ -194,34 +202,34 @@ export function PainelContratos() {
       )}
 
       {novo && (
-        <Janela titulo="Novo contrato de locação" aoFechar={() => setNovo(false)}>
+        <Janela titulo={t("contratos.form.titulo")} aoFechar={() => setNovo(false)}>
           <div>
-            <label className={ROTULO}>Unidade</label>
+            <label className={ROTULO}>{t("multas.form.unidade")}</label>
             <select value={form.unidadeId} onChange={(e) => escolherUnidade(e.target.value)} className={CAMPO}>
-              <option value="">Selecione</option>
+              <option value="">{t("multas.form.selecione")}</option>
               {unidades.map((u) => <option key={u.id} value={u.id}>{nomeUnidade(u.id)}</option>)}
             </select>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className={ROTULO}>Proprietário</label>
+              <label className={ROTULO}>{t("contratos.form.proprietario")}</label>
               <select
                 value={form.proprietarioUsuarioId} disabled={!form.unidadeId}
                 onChange={(e) => setForm((f) => ({ ...f, proprietarioUsuarioId: e.target.value }))}
                 className={CAMPO}
               >
-                <option value="">Selecione</option>
+                <option value="">{t("multas.form.selecione")}</option>
                 {moradores.map((p) => <option key={p.id} value={p.id}>{p.nome}</option>)}
               </select>
             </div>
             <div>
-              <label className={ROTULO}>Inquilino</label>
+              <label className={ROTULO}>{t("contratos.form.inquilino")}</label>
               <select
                 value={form.inquilinoUsuarioId} disabled={!form.unidadeId}
                 onChange={(e) => setForm((f) => ({ ...f, inquilinoUsuarioId: e.target.value }))}
                 className={CAMPO}
               >
-                <option value="">Selecione</option>
+                <option value="">{t("multas.form.selecione")}</option>
                 {moradores.filter((p) => String(p.id) !== form.proprietarioUsuarioId)
                   .map((p) => <option key={p.id} value={p.id}>{p.nome}</option>)}
               </select>
@@ -229,40 +237,40 @@ export function PainelContratos() {
           </div>
           {form.unidadeId && moradores.length === 0 && (
             <p className="text-xs text-on-surface-variant">
-              Esta unidade não tem moradores vinculados. Vincule proprietário e inquilino em Usuários antes.
+              {t("contratos.form.semMoradores")}
             </p>
           )}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className={ROTULO}>Início</label>
+              <label className={ROTULO}>{t("contratos.form.inicio")}</label>
               <input type="date" value={form.inicio} onChange={(e) => setForm((f) => ({ ...f, inicio: e.target.value }))} className={CAMPO} />
             </div>
             <div>
-              <label className={ROTULO}>Fim (opcional)</label>
+              <label className={ROTULO}>{t("contratos.form.fim")}</label>
               <input type="date" min={form.inicio} value={form.fim} onChange={(e) => setForm((f) => ({ ...f, fim: e.target.value }))} className={CAMPO} />
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className={ROTULO}>Aluguel (R$, opcional)</label>
+              <label className={ROTULO}>{t("contratos.form.aluguel")}</label>
               <input type="text" inputMode="decimal" placeholder="0,00" value={form.valorAluguel} onChange={(e) => setForm((f) => ({ ...f, valorAluguel: e.target.value }))} className={CAMPO} />
             </div>
             <div>
-              <label className={ROTULO}>Quem paga a taxa</label>
+              <label className={ROTULO}>{t("contratos.form.quemPaga")}</label>
               <select value={form.responsavelTaxas} onChange={(e) => setForm((f) => ({ ...f, responsavelTaxas: e.target.value }))} className={CAMPO}>
-                <option value="INQUILINO">Inquilino</option>
-                <option value="PROPRIETARIO">Proprietário</option>
+                <option value="INQUILINO">{t("contratos.form.inquilino")}</option>
+                <option value="PROPRIETARIO">{t("contratos.form.proprietario")}</option>
               </select>
             </div>
           </div>
           <div className="flex gap-3">
-            <button onClick={() => setNovo(false)} className={`${BOTAO_SECUNDARIO} flex-1`}>Cancelar</button>
+            <button onClick={() => setNovo(false)} className={`${BOTAO_SECUNDARIO} flex-1`}>{t("comum:acoes.cancelar")}</button>
             <button
               onClick={salvar}
               disabled={salvando || !form.unidadeId || !form.proprietarioUsuarioId || !form.inicio}
               className={`${BOTAO_PRIMARIO} flex-1`}
             >
-              {salvando ? "Salvando..." : "Cadastrar"}
+              {salvando ? t("geral.salvando") : t("contratos.form.cadastrar")}
             </button>
           </div>
         </Janela>

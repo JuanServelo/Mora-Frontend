@@ -1,0 +1,246 @@
+{
+  "gerenciar": {
+    "tipos": {
+      "morador": { "rotulo": "Morador", "descricao": "Vinculado a morador com vaga fixa" },
+      "visitante": { "rotulo": "Visitante", "descricao": "Vaga escolhida na entrada" },
+      "funcionario": { "rotulo": "Serviço", "descricao": "Funcionário, sem vaga" }
+    },
+    "estadoVaga": {
+      "livre": "Livre",
+      "vinculada": "Vinculada",
+      "ocupada": "Ocupada"
+    },
+    "apto": "Apto {{numero}}",
+    "vagaNumero": "Vaga {{numero}}",
+    "form": {
+      "tipoVeiculo": "Tipo de veículo",
+      "placa": "Placa",
+      "modelo": "Modelo",
+      "modeloPlaceholder": "Ex: Fiat Uno, Honda CB500",
+      "cor": "Cor",
+      "corPlaceholder": "Ex: Prata, Preto",
+      "observacoes": "Observações",
+      "observacoesPlaceholder": "Observações gerais",
+      "morador": "Morador",
+      "vaga": "Vaga",
+      "selecione": "— Selecione —",
+      "nenhumaVagaApto": "Nenhuma vaga vinculada ao apartamento deste morador.",
+      "moradorAnfitriao": "Morador anfitrião",
+      "selecioneAnfitriao": "— Selecione o morador que recebe a visita —",
+      "vagaNaEntrada": "A vaga será escolhida no momento da entrada.",
+      "funcionario": "Funcionário",
+      "servicoInfo": "Veículos de serviço não ocupam vaga. A entrada pode ser registrada a qualquer momento.",
+      "salvarAlteracoes": "Salvar Alterações",
+      "cadastrar": "Cadastrar Veículo",
+      "erros": {
+        "placaObrigatoria": "Placa é obrigatória.",
+        "placaInvalida": "Formato inválido. Use AAA9999 ou AAA9A99 (Mercosul).",
+        "moradorObrigatorio": "Morador vinculado é obrigatório.",
+        "anfitriaoObrigatorio": "Morador anfitrião é obrigatório.",
+        "funcionarioObrigatorio": "Funcionário vinculado é obrigatório.",
+        "vagaObrigatoria": "Vaga é obrigatória para veículo de Morador."
+      }
+    },
+    "modalEntrada": {
+      "titulo": "Escolher Vaga — {{placa}}",
+      "descricao": "Veículo de visitante. Selecione uma vaga livre para esta entrada.",
+      "selecioneLivre": "— Selecione uma vaga livre —",
+      "semVagasLivres": "Não há vagas livres no momento.",
+      "registrando": "Registrando…",
+      "registrarEntrada": "Registrar Entrada"
+    },
+    "modalAlterarVaga": {
+      "titulo": "Alterar Vaga — {{placa}}",
+      "novaVaga": "Nova Vaga",
+      "semVaga": "— Sem vaga —"
+    },
+    "cartao": {
+      "dentro": "Dentro",
+      "fora": "Fora",
+      "semVaga": "Sem vaga",
+      "semInfo": "Sem informações adicionais",
+      "vagaAtribuidaEntrada": "Vaga atribuída na entrada",
+      "entrou": "Entrou: {{data}}",
+      "vincularVagaAntes": "Vincule uma vaga antes de registrar entrada",
+      "entrada": "Entrada",
+      "saida": "Saída",
+      "vaga": "Vaga"
+    },
+    "pagina": {
+      "sobretituloPortaria": "Portaria",
+      "sobretituloAdmin": "Painel Administrativo",
+      "titulo": "Gerenciar",
+      "tituloDestaque": "Veículos",
+      "novoVeiculo": "Novo Veículo",
+      "editarVeiculo": "Editar Veículo — {{placa}}",
+      "resumo": {
+        "total": "Total",
+        "dentro": "Dentro",
+        "semVaga": "Sem Vaga"
+      },
+      "buscaPlaceholder": "Placa, modelo, cor ou vaga...",
+      "filtroFora": "Fora",
+      "carregando": "Carregando veículos...",
+      "vazio": "Nenhum veículo encontrado."
+    },
+    "toast": {
+      "erroCarregar": "Erro ao carregar dados.",
+      "cadastrado": "Veículo cadastrado com sucesso.",
+      "erroCadastrar": "Erro ao cadastrar veículo.",
+      "atualizado": "Veículo atualizado.",
+      "erroAtualizar": "Erro ao atualizar veículo.",
+      "entradaRegistrada": "Entrada de {{placa}} registrada.",
+      "erroEntrada": "Erro ao registrar entrada.",
+      "saidaRegistrada": "Saída de {{placa}} registrada.",
+      "erroSaida": "Erro ao registrar saída.",
+      "vagaAlterada": "Vaga alterada com sucesso.",
+      "erroAlterarVaga": "Erro ao alterar vaga."
+    }
+  },
+  "meus": {
+    "cabecalho": {
+      "sobretitulo": "Minha Unidade",
+      "titulo": "Meus",
+      "tituloDestaque": "Veículos",
+      "descricao": "Veículos da sua unidade, pessoas vinculadas e situação das vagas."
+    },
+    "convidados": {
+      "titulo": "Para liberar o veículo de um visitante, use Meus convidados.",
+      "descricao": "A pré-liberação é sempre do visitante, com o veículo como parte dela."
+    },
+    "erroCarregar": "Não foi possível carregar os veículos da sua unidade.",
+    "desvincular": {
+      "confirmarUltimo": "Você é o último vínculo do veículo {{placa}}.\n\nAo confirmar, ele será REMOVIDO do cadastro da unidade e a vaga será liberada. O histórico de acessos é preservado.",
+      "confirmarApenasMeu": "Remover apenas o SEU vínculo com o veículo {{placa}}?\n\nEle continuará cadastrado para as outras pessoas da unidade.",
+      "sucesso": "Desvinculação registrada.",
+      "erro": "Não foi possível desvincular o veículo."
+    },
+    "lista": {
+      "titulo": "Meus veículos",
+      "cadastrar": "Cadastrar veículo",
+      "vazio": "Nenhum veículo cadastrado na sua unidade. Use “Cadastrar veículo” para incluir o primeiro."
+    },
+    "vagas": {
+      "titulo": "Vagas da minha unidade",
+      "vazio": "Sua unidade não possui vagas cadastradas. A administração do condomínio faz esse cadastro.",
+      "colunas": {
+        "vaga": "Vaga",
+        "situacao": "Situação",
+        "ocupadaPor": "Ocupada por",
+        "origem": "Origem"
+      },
+      "ocupada": "Ocupada",
+      "livre": "Livre",
+      "visitante": "Visitante",
+      "morador": "Morador",
+      "nota": "A situação considera quem está no condomínio agora: uma vaga atribuída a um veículo que saiu aparece como livre. Veículo de visitante é somente leitura."
+    },
+    "cartao": {
+      "modeloNaoInformado": "Modelo não informado",
+      "dentro": "Dentro do condomínio",
+      "fora": "Fora do condomínio",
+      "vaga": "Vaga:",
+      "semVaga": "Sem vaga",
+      "pessoasVinculadas": "Pessoas vinculadas:",
+      "pessoas": "Pessoas",
+      "tituloSaidaAntes": "Registre a saída do veículo antes de desvinculá-lo",
+      "tituloRemoveVeiculo": "Remove o veículo do cadastro da unidade",
+      "tituloRemoveVinculo": "Remove apenas o seu vínculo",
+      "removerVeiculo": "Remover veículo",
+      "desvincularMe": "Desvincular-me",
+      "avisoDentro": "Para desvincular, registre primeiro a saída do veículo na portaria."
+    },
+    "modal": {
+      "tituloEditar": "Editar {{placa}}",
+      "tituloCadastrar": "Cadastrar veículo",
+      "placaBloqueadaAntes": "A placa",
+      "placaBloqueadaDepois": "não pode ser alterada. Se estiver errada, remova o veículo e cadastre novamente — editá-la faria o histórico de acessos apontar para o carro errado.",
+      "placa": "Placa",
+      "modelo": "Modelo",
+      "modeloPlaceholder": "Ex.: Civic",
+      "cor": "Cor",
+      "corPlaceholder": "Ex.: Prata",
+      "vaga": "Vaga",
+      "opcional": "(opcional)",
+      "semVaga": "Sem vaga",
+      "opcaoVaga": "Vaga {{numero}}",
+      "apenasVagasUnidade": "Apenas vagas da sua unidade aparecem aqui.",
+      "pessoasVinculadas": "Pessoas vinculadas",
+      "erroPessoas": "Não foi possível carregar as pessoas da unidade. O veículo será vinculado a você.",
+      "observacoes": "Observações",
+      "salvarAlteracoes": "Salvar alterações",
+      "cadastrar": "Cadastrar",
+      "erros": {
+        "placaInvalida": "Placa inválida. Use o formato AAA-9999 ou AAA9A99 (Mercosul).",
+        "selecionePessoa": "Selecione ao menos uma pessoa para vincular ao veículo.",
+        "salvar": "Não foi possível salvar o veículo."
+      },
+      "toast": {
+        "atualizado": "Veículo {{placa}} atualizado.",
+        "cadastrado": "Veículo cadastrado."
+      }
+    },
+    "pessoas": {
+      "titulo": "Pessoas vinculadas",
+      "veiculo": "Veículo",
+      "vinculadas": "Vinculadas ({{n}})",
+      "tituloUltimo": "É o último vínculo — use “Remover veículo” no cartão",
+      "tituloRemover": "Remover vínculo",
+      "avisoUltimo": "Último vínculo não pode ser removido aqui — sem vínculo o veículo ficaria órfão. Use “Remover veículo” no cartão.",
+      "adicionar": "Adicionar da minha unidade",
+      "todasVinculadas": "Todas as pessoas da unidade já estão vinculadas.",
+      "vincular": "Vincular",
+      "confirmarRemover": "Remover o vínculo de {{nome}} com o veículo {{placa}}?",
+      "toast": {
+        "vinculada": "Pessoa vinculada ao veículo.",
+        "erroVincular": "Não foi possível vincular a pessoa.",
+        "removido": "Vínculo removido.",
+        "erroRemover": "Não foi possível remover o vínculo."
+      }
+    }
+  },
+  "vagas": {
+    "status": {
+      "ativa": "Ativa",
+      "inativa": "Inativa"
+    },
+    "cabecalho": {
+      "sobretitulo": "Painel Administrativo",
+      "titulo": "Vagas de",
+      "tituloDestaque": "Garagem",
+      "novaVaga": "Nova Vaga"
+    },
+    "resumo": {
+      "ativas": "Ativas",
+      "inativas": "Inativas"
+    },
+    "form": {
+      "titulo": "Cadastrar Nova Vaga",
+      "numero": "Número da vaga",
+      "numeroPlaceholder": "Ex: 12",
+      "localizacao": "Localização",
+      "localizacaoPlaceholder": "Ex: Setor A - Térreo",
+      "tipo": "Tipo",
+      "selecioneTipo": "Selecione um tipo",
+      "tipos": {
+        "coberta": "Coberta",
+        "descoberta": "Descoberta"
+      },
+      "apartamento": "Apartamento (opcional)",
+      "nenhumApartamento": "Nenhum apartamento",
+      "opcaoApartamento": "{{numero}} - Bloco {{bloco}}",
+      "erroCadastrar": "Erro ao cadastrar vaga. Tente novamente.",
+      "cadastrando": "Cadastrando...",
+      "cadastrar": "Cadastrar vaga"
+    },
+    "buscaPlaceholder": "Buscar por identificador ou unidade...",
+    "cartao": {
+      "vagaNumero": "Vaga {{numero}}",
+      "apt": "Apt {{numero}}",
+      "semApartamento": "Sem apartamento",
+      "mudarStatus": "Mudar status:",
+      "marcarComo": "Marcar como {{status}}"
+    },
+    "vazio": "Nenhuma vaga encontrada."
+  }
+}

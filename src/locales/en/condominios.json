@@ -1,0 +1,130 @@
+{
+  "status": {
+    "ativo": "active",
+    "inativo": "inactive"
+  },
+  "seletor": {
+    "rotulo": "Condominium:",
+    "placeholder": "— Select a condominium —"
+  },
+  "form": {
+    "campos": {
+      "id": "ID / Slug *",
+      "nome": "Client name *",
+      "email": "Email",
+      "telefone": "Phone",
+      "endereco": "Address"
+    },
+    "placeholders": {
+      "id": "e.g. cond-jardim-europa",
+      "nome": "Jardim Europa Condominium",
+      "email": "contact@condominium.com",
+      "endereco": "100 Flower St — São Paulo, SP"
+    },
+    "erros": {
+      "idObrigatorio": "ID is required.",
+      "nomeObrigatorio": "Name is required.",
+      "cnpjIncompleto": "Incomplete CNPJ (14 digits).",
+      "cnpjInvalido": "Invalid CNPJ.",
+      "telefoneInvalido": "Invalid phone number (10 or 11 digits)."
+    },
+    "botoes": {
+      "criar": "Create client",
+      "salvarAlteracoes": "Save changes"
+    }
+  },
+  "lista": {
+    "cabecalho": {
+      "painel": "Admin Panel",
+      "gerenciar": "Manage",
+      "clientes": "Clients"
+    },
+    "novoCliente": "New client",
+    "resumo": {
+      "total": "Total",
+      "ativos": "Active"
+    },
+    "kpi": {
+      "receitaMensal": "Monthly revenue",
+      "clientesComPlano_one": "{{count}} client on a plan",
+      "clientesComPlano_other": "{{count}} clients on a plan",
+      "projecaoAnual": "Annual projection",
+      "projecaoAnualSub": "Monthly revenue × 12",
+      "ticketMedio": "Average ticket",
+      "ticketMedioSub": "Per active client",
+      "semPlano": "No plan",
+      "naoCobrados": "Not being billed",
+      "todosComAssinatura": "All subscribed"
+    },
+    "buscaPlaceholder": "Search by name, ID or CNPJ...",
+    "vazio": "No clients found.",
+    "colunas": {
+      "plano": "Plan",
+      "semPlano": "no plan",
+      "mensalidade": "Monthly fee",
+      "email": "Email"
+    },
+    "toast": {
+      "erroCarregar": "Failed to load clients.",
+      "criado": "Client created successfully.",
+      "erroCriar": "Failed to create client."
+    }
+  },
+  "detalhe": {
+    "abas": {
+      "dados": "Details",
+      "plano": "Plan",
+      "usuarios": "Users",
+      "resumo": "Summary"
+    },
+    "status": {
+      "ativo": "ACTIVE",
+      "inativo": "INACTIVE"
+    },
+    "acoes": {
+      "desativar": "Deactivate",
+      "reativar": "Reactivate"
+    },
+    "confirmar": {
+      "desativarTitulo": "Deactivate client",
+      "reativarTitulo": "Reactivate client",
+      "desativarMensagem": "Deactivate \"{{nome}}\"? Data is kept and access is suspended.",
+      "reativarMensagem": "Reactivate \"{{nome}}\"?"
+    },
+    "toast": {
+      "atualizado": "Client updated.",
+      "erroSalvar": "Failed to save.",
+      "desativado": "Client deactivated.",
+      "reativado": "Client reactivated."
+    },
+    "erros": {
+      "carregar": "Couldn't load this client.",
+      "carregarUsuarios": "Couldn't load the users.",
+      "alterarStatus": "Couldn't change the status.",
+      "naoEncontrado": "Client not found."
+    },
+    "voltarLista": "Back to list",
+    "kpi": {
+      "usuarios": "Users",
+      "ativos": "Active",
+      "convitesPendentes": "Pending invites",
+      "ocorrencias": "Incidents"
+    },
+    "dados": {
+      "nome": "Name",
+      "identificador": "Identifier",
+      "cnpj": "CNPJ",
+      "email": "Email",
+      "telefone": "Phone",
+      "endereco": "Address"
+    },
+    "usuarios": {
+      "vazio": "No users linked to this client."
+    },
+    "resumo": {
+      "porPerfil": "Users by role",
+      "porSituacao": "Users by status",
+      "indisponivel": "Summary unavailable right now."
+    }
+  }
+}

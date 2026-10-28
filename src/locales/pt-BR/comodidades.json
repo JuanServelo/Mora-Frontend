@@ -1,0 +1,17 @@
+{
+  "cabecalho": {
+    "sobretitulo": "Lazer e bem-estar",
+    "titulo": "Comodidades",
+    "tituloDestaque": "do condomínio",
+    "descricao": "Textos institucionais em public/data/comodidades.json. Para áreas reserváveis cadastradas pela gestão, use Espaços."
+  },
+  "reservarEspacos": "Reservar espaços",
+  "erroCarregar": "Não foi possível carregar a lista de comodidades.",
+  "vazio": "Nenhum item em comodidades.json ou arquivo vazio.",
+  "regimento": {
+    "titulo": "Regimento e boa convivência",
+    "descricao": "Horários e normas de uso seguem o regimento interno e deliberações da assembleia.",
+    "portaria": "Portaria / regulamento",
+    "assembleias": "Assembleias e atas"
+  }
+}

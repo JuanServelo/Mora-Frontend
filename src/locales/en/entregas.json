@@ -1,0 +1,95 @@
+{
+  "cabecalho": {
+    "secao": "Admin Panel",
+    "tituloPrefixo": "Package",
+    "tituloDestaque": "Deliveries",
+    "nova": "New Delivery"
+  },
+  "stats": {
+    "total": "Total",
+    "pendentes": "Pending",
+    "retiradas": "Picked up"
+  },
+  "status": {
+    "PENDENTE": "Pending",
+    "RETIRADA": "Picked up"
+  },
+  "unidade": {
+    "apt": "Apt {{numero}}"
+  },
+  "filtros": {
+    "titulo": "Filters",
+    "limpar": "Clear filters",
+    "status": "Status",
+    "todos": "All",
+    "bloco": "Building",
+    "todosBlocos": "All buildings",
+    "apartamento": "Apartment",
+    "destinatario": "Recipient",
+    "nomePlaceholder": "Name...",
+    "recebimentoDe": "Received — from",
+    "recebimentoAte": "Received — to",
+    "retiradaDe": "Picked up — from",
+    "retiradaAte": "Picked up — to"
+  },
+  "lista": {
+    "exibindo": "Showing <destaque>{{filtradas}}</destaque> of {{total}} deliveries",
+    "carregando": "Loading...",
+    "vazio": "No deliveries found.",
+    "recebida": "Received",
+    "retirada": "Picked up"
+  },
+  "moradores": {
+    "nenhumVinculado": "No residents linked to apartment {{apartamento}}.",
+    "selecione": "Select the resident"
+  },
+  "erros": {
+    "cadastrar": "Error adding the delivery.",
+    "atualizar": "Error updating the delivery.",
+    "selecioneRecebedor": "Select who picked up the package.",
+    "informeDataRetirada": "Enter the pickup date.",
+    "retiradaFutura": "The pickup date can't be in the future.",
+    "retiradaAnterior": "The pickup date can't be before the received date.",
+    "recebimentoDataFutura": "The received date can't be in the future.",
+    "retiradaDataFutura": "The pickup date can't be in the future."
+  },
+  "retirada": {
+    "titulo": "Confirm pickup",
+    "encomenda": "Package",
+    "quemRetirou": "Picked up by",
+    "dataRetirada": "Pickup date",
+    "recebidaEm": "Received on {{data}} — the pickup date can't be earlier.",
+    "confirmar": "Confirm pickup"
+  },
+  "form": {
+    "destinatario": "Recipient",
+    "selecioneMorador": "Select a resident",
+    "bloco": "Building",
+    "apartamento": "Apartment",
+    "preenchidoAutomaticamente": "Filled in automatically",
+    "descricao": "Description",
+    "descricaoPlaceholder": "e.g. Amazon box, certified letter, etc.",
+    "remetente": "Sender",
+    "remetentePlaceholder": "e.g. Post office, Mercado Livre, etc.",
+    "dataRecebimento": "Received date",
+    "status": "Status",
+    "dataRetirada": "Pickup date",
+    "recebidaPor": "Picked up by",
+    "observacoes": "Notes",
+    "observacoesPlaceholder": "Optional",
+    "salvarAlteracoes": "Save changes",
+    "cadastrar": "Add delivery"
+  },
+  "detalhes": {
+    "destinatario": "Recipient",
+    "bloco": "Building",
+    "apartamento": "Apartment",
+    "remetente": "Sender",
+    "descricao": "Description",
+    "recebidaEm": "Received on",
+    "retiradaEm": "Picked up on",
+    "observacoes": "Notes",
+    "recebidaPor": "Picked up by",
+    "marcarRetirada": "Mark as picked up"
+  }
+}

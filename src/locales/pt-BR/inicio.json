@@ -1,0 +1,51 @@
+{
+  "atalhos": {
+    "avisos": { "label": "Avisos", "desc": "Comunicados da administração" },
+    "conversas": { "label": "Conversas", "desc": "Falar com a administração" },
+    "notificacoes": { "label": "Notificações", "desc": "Cobranças, entregas e avisos recebidos" },
+    "cobrancas": { "label": "Cobranças", "desc": "Faturas, boleto e PIX" },
+    "espacos": { "label": "Espaços", "desc": "Reservar áreas comuns" },
+    "entregas": { "label": "Entregas", "desc": "Encomendas na portaria" },
+    "convidados": { "label": "Convidados", "desc": "Autorizar a entrada de visitantes" },
+    "veiculos": { "label": "Meus veículos", "desc": "Carros e vagas da sua unidade" },
+    "reclamacoes": { "label": "Reclamações", "desc": "Abrir ou acompanhar chamados" },
+    "comodidades": { "label": "Comodidades", "desc": "Lazer e bem-estar do condomínio" }
+  },
+  "servicos": {
+    "titulo": "Serviços do prédio",
+    "desc": "O que o condomínio oferece. Detalhes oficiais com a administração e no regimento.",
+    "acessar": "Acessar"
+  },
+  "aviso": {
+    "vigencia": "vigente de {{inicio}} a {{fim}}",
+    "marcadoLido": "Ao fechar, o aviso será marcado como lido.",
+    "entendi": "Entendi"
+  },
+  "saudacao": {
+    "morador": "Morador",
+    "condominio": "Condomínio",
+    "ola": "Olá,",
+    "desc": "Central do seu condomínio: reservas, comunicação e tudo o que você precisa em um só lugar."
+  },
+  "avisos": {
+    "titulo": "Avisos",
+    "ate": "Até {{data}}"
+  },
+  "restrito": "Seu usuário ainda não está vinculado a uma unidade. Assim que a administração fizer o vínculo, os atalhos do condomínio aparecem aqui.",
+  "acessoRapido": {
+    "titulo": "Acesso rápido",
+    "descAdmin": "Atalhos para as áreas administrativas do condomínio",
+    "desc": "Atalhos para as áreas mais usadas do app",
+    "meuPerfil": "Meu perfil",
+    "abrir": "Abrir"
+  },
+  "ajuda": {
+    "titulo": "Precisa de ajuda da administração?",
+    "desc": "Use reclamações para chamados ou converse direto com a administração. Os avisos oficiais aparecem no topo desta página.",
+    "botao": "Ir para reclamações"
+  },
+  "faq": {
+    "abrir": "Abrir FAQ",
+    "rotulo": "FAQ"
+  }
+}

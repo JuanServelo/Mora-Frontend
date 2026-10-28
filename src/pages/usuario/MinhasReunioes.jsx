@@ -7,9 +7,12 @@ import { useToast } from "../../contexts/ToastContext";
 import { useAuth } from "../../contexts/AuthContext";
 import { confirmarPresencaLocal, filtrarReunioes } from "../../utils/meetings";
 
-const fmt = (data) => new Date(data).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" });
+const fmt = (data) => new Date(data).toLocaleString(idiomaAtual(), { dateStyle: "short", timeStyle: "short" });
+import { useTranslation } from "react-i18next";
+import { idiomaAtual } from "../../i18n";
 
 export function MinhasReunioes() {
+  const { t } = useTranslation("reunioes");
   const toast = useToast();
   const { usuario } = useAuth();
   const [reunioes, setReunioes] = useState([]);

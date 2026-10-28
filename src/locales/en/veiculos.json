@@ -1,0 +1,246 @@
+{
+  "gerenciar": {
+    "tipos": {
+      "morador": { "rotulo": "Resident", "descricao": "Linked to a resident with an assigned space" },
+      "visitante": { "rotulo": "Visitor", "descricao": "Space chosen on entry" },
+      "funcionario": { "rotulo": "Service", "descricao": "Staff member, no space" }
+    },
+    "estadoVaga": {
+      "livre": "Free",
+      "vinculada": "Assigned",
+      "ocupada": "Occupied"
+    },
+    "apto": "Apt {{numero}}",
+    "vagaNumero": "Space {{numero}}",
+    "form": {
+      "tipoVeiculo": "Vehicle type",
+      "placa": "License plate",
+      "modelo": "Model",
+      "modeloPlaceholder": "E.g.: Fiat Uno, Honda CB500",
+      "cor": "Color",
+      "corPlaceholder": "E.g.: Silver, Black",
+      "observacoes": "Notes",
+      "observacoesPlaceholder": "General notes",
+      "morador": "Resident",
+      "vaga": "Parking space",
+      "selecione": "— Select —",
+      "nenhumaVagaApto": "No parking space linked to this resident's apartment.",
+      "moradorAnfitriao": "Host resident",
+      "selecioneAnfitriao": "— Select the resident receiving the visit —",
+      "vagaNaEntrada": "The parking space will be chosen on entry.",
+      "funcionario": "Staff member",
+      "servicoInfo": "Service vehicles don't take a parking space. Entry can be logged at any time.",
+      "salvarAlteracoes": "Save Changes",
+      "cadastrar": "Register Vehicle",
+      "erros": {
+        "placaObrigatoria": "License plate is required.",
+        "placaInvalida": "Invalid format. Use AAA9999 or AAA9A99 (Mercosur).",
+        "moradorObrigatorio": "A linked resident is required.",
+        "anfitriaoObrigatorio": "A host resident is required.",
+        "funcionarioObrigatorio": "A linked staff member is required.",
+        "vagaObrigatoria": "A parking space is required for resident vehicles."
+      }
+    },
+    "modalEntrada": {
+      "titulo": "Choose Space — {{placa}}",
+      "descricao": "Visitor vehicle. Select a free parking space for this entry.",
+      "selecioneLivre": "— Select a free space —",
+      "semVagasLivres": "There are no free spaces right now.",
+      "registrando": "Logging…",
+      "registrarEntrada": "Log Entry"
+    },
+    "modalAlterarVaga": {
+      "titulo": "Change Space — {{placa}}",
+      "novaVaga": "New Space",
+      "semVaga": "— No space —"
+    },
+    "cartao": {
+      "dentro": "Inside",
+      "fora": "Out",
+      "semVaga": "No space",
+      "semInfo": "No additional details",
+      "vagaAtribuidaEntrada": "Space assigned on entry",
+      "entrou": "Entered: {{data}}",
+      "vincularVagaAntes": "Assign a parking space before logging entry",
+      "entrada": "Entry",
+      "saida": "Exit",
+      "vaga": "Space"
+    },
+    "pagina": {
+      "sobretituloPortaria": "Front Desk",
+      "sobretituloAdmin": "Admin Panel",
+      "titulo": "Manage",
+      "tituloDestaque": "Vehicles",
+      "novoVeiculo": "New Vehicle",
+      "editarVeiculo": "Edit Vehicle — {{placa}}",
+      "resumo": {
+        "total": "Total",
+        "dentro": "Inside",
+        "semVaga": "No Space"
+      },
+      "buscaPlaceholder": "Plate, model, color or space...",
+      "filtroFora": "Out",
+      "carregando": "Loading vehicles...",
+      "vazio": "No vehicles found."
+    },
+    "toast": {
+      "erroCarregar": "Error loading data.",
+      "cadastrado": "Vehicle registered successfully.",
+      "erroCadastrar": "Error registering vehicle.",
+      "atualizado": "Vehicle updated.",
+      "erroAtualizar": "Error updating vehicle.",
+      "entradaRegistrada": "Entry logged for {{placa}}.",
+      "erroEntrada": "Error logging entry.",
+      "saidaRegistrada": "Exit logged for {{placa}}.",
+      "erroSaida": "Error logging exit.",
+      "vagaAlterada": "Parking space changed successfully.",
+      "erroAlterarVaga": "Error changing parking space."
+    }
+  },
+  "meus": {
+    "cabecalho": {
+      "sobretitulo": "My Unit",
+      "titulo": "My",
+      "tituloDestaque": "Vehicles",
+      "descricao": "Your unit's vehicles, linked people and parking space status."
+    },
+    "convidados": {
+      "titulo": "To pre-authorize a visitor's vehicle, use My guests.",
+      "descricao": "Pre-authorization always belongs to the visitor, with the vehicle as part of it."
+    },
+    "erroCarregar": "Couldn't load your unit's vehicles.",
+    "desvincular": {
+      "confirmarUltimo": "You are the last person linked to vehicle {{placa}}.\n\nIf you confirm, it will be REMOVED from the unit's records and its parking space will be freed. The access history is kept.",
+      "confirmarApenasMeu": "Remove only YOUR link to vehicle {{placa}}?\n\nIt will remain registered for the other people in the unit.",
+      "sucesso": "Unlink recorded.",
+      "erro": "Couldn't unlink the vehicle."
+    },
+    "lista": {
+      "titulo": "My vehicles",
+      "cadastrar": "Register vehicle",
+      "vazio": "No vehicles registered in your unit. Use “Register vehicle” to add the first one."
+    },
+    "vagas": {
+      "titulo": "My unit's parking spaces",
+      "vazio": "Your unit has no registered parking spaces. The condominium management handles this.",
+      "colunas": {
+        "vaga": "Space",
+        "situacao": "Status",
+        "ocupadaPor": "Occupied by",
+        "origem": "Source"
+      },
+      "ocupada": "Occupied",
+      "livre": "Free",
+      "visitante": "Visitor",
+      "morador": "Resident",
+      "nota": "Status reflects who is in the condominium right now: a space assigned to a vehicle that has left shows as free. Visitor vehicles are read-only."
+    },
+    "cartao": {
+      "modeloNaoInformado": "Model not provided",
+      "dentro": "Inside the condominium",
+      "fora": "Outside the condominium",
+      "vaga": "Space:",
+      "semVaga": "No space",
+      "pessoasVinculadas": "Linked people:",
+      "pessoas": "People",
+      "tituloSaidaAntes": "Log the vehicle's exit before unlinking it",
+      "tituloRemoveVeiculo": "Removes the vehicle from the unit's records",
+      "tituloRemoveVinculo": "Removes only your link",
+      "removerVeiculo": "Remove vehicle",
+      "desvincularMe": "Unlink me",
+      "avisoDentro": "To unlink, first log the vehicle's exit at the front desk."
+    },
+    "modal": {
+      "tituloEditar": "Edit {{placa}}",
+      "tituloCadastrar": "Register vehicle",
+      "placaBloqueadaAntes": "The plate",
+      "placaBloqueadaDepois": "can't be changed. If it's wrong, remove the vehicle and register it again — editing it would point the access history to the wrong car.",
+      "placa": "License plate",
+      "modelo": "Model",
+      "modeloPlaceholder": "E.g.: Civic",
+      "cor": "Color",
+      "corPlaceholder": "E.g.: Silver",
+      "vaga": "Parking space",
+      "opcional": "(optional)",
+      "semVaga": "No space",
+      "opcaoVaga": "Space {{numero}}",
+      "apenasVagasUnidade": "Only your unit's parking spaces appear here.",
+      "pessoasVinculadas": "Linked people",
+      "erroPessoas": "Couldn't load the people in your unit. The vehicle will be linked to you.",
+      "observacoes": "Notes",
+      "salvarAlteracoes": "Save changes",
+      "cadastrar": "Register",
+      "erros": {
+        "placaInvalida": "Invalid plate. Use the format AAA-9999 or AAA9A99 (Mercosur).",
+        "selecionePessoa": "Select at least one person to link to the vehicle.",
+        "salvar": "Couldn't save the vehicle."
+      },
+      "toast": {
+        "atualizado": "Vehicle {{placa}} updated.",
+        "cadastrado": "Vehicle registered."
+      }
+    },
+    "pessoas": {
+      "titulo": "Linked people",
+      "veiculo": "Vehicle",
+      "vinculadas": "Linked ({{n}})",
+      "tituloUltimo": "This is the last link — use “Remove vehicle” on the card",
+      "tituloRemover": "Remove link",
+      "avisoUltimo": "The last link can't be removed here — without a link the vehicle would be orphaned. Use “Remove vehicle” on the card.",
+      "adicionar": "Add from my unit",
+      "todasVinculadas": "Everyone in the unit is already linked.",
+      "vincular": "Link",
+      "confirmarRemover": "Remove {{nome}}'s link to vehicle {{placa}}?",
+      "toast": {
+        "vinculada": "Person linked to the vehicle.",
+        "erroVincular": "Couldn't link the person.",
+        "removido": "Link removed.",
+        "erroRemover": "Couldn't remove the link."
+      }
+    }
+  },
+  "vagas": {
+    "status": {
+      "ativa": "Active",
+      "inativa": "Inactive"
+    },
+    "cabecalho": {
+      "sobretitulo": "Admin Panel",
+      "titulo": "Garage",
+      "tituloDestaque": "Parking Spaces",
+      "novaVaga": "New Space"
+    },
+    "resumo": {
+      "ativas": "Active",
+      "inativas": "Inactive"
+    },
+    "form": {
+      "titulo": "Register New Space",
+      "numero": "Space number",
+      "numeroPlaceholder": "E.g.: 12",
+      "localizacao": "Location",
+      "localizacaoPlaceholder": "E.g.: Sector A - Ground floor",
+      "tipo": "Type",
+      "selecioneTipo": "Select a type",
+      "tipos": {
+        "coberta": "Covered",
+        "descoberta": "Uncovered"
+      },
+      "apartamento": "Apartment (optional)",
+      "nenhumApartamento": "No apartment",
+      "opcaoApartamento": "{{numero}} - Block {{bloco}}",
+      "erroCadastrar": "Error registering the space. Please try again.",
+      "cadastrando": "Registering...",
+      "cadastrar": "Register space"
+    },
+    "buscaPlaceholder": "Search by identifier or unit...",
+    "cartao": {
+      "vagaNumero": "Space {{numero}}",
+      "apt": "Apt {{numero}}",
+      "semApartamento": "No apartment",
+      "mudarStatus": "Change status:",
+      "marcarComo": "Mark as {{status}}"
+    },
+    "vazio": "No parking spaces found."
+  }
+}

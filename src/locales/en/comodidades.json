@@ -1,0 +1,17 @@
+{
+  "cabecalho": {
+    "sobretitulo": "Leisure & wellness",
+    "titulo": "Condominium",
+    "tituloDestaque": "amenities",
+    "descricao": "Informational texts live in public/data/comodidades.json. For bookable areas set up by management, use Spaces."
+  },
+  "reservarEspacos": "Book spaces",
+  "erroCarregar": "Couldn't load the amenities list.",
+  "vazio": "No items in comodidades.json, or the file is empty.",
+  "regimento": {
+    "titulo": "House rules & good neighborliness",
+    "descricao": "Hours and usage rules follow the internal regulations and assembly decisions.",
+    "portaria": "Front desk / regulations",
+    "assembleias": "Assemblies & minutes"
+  }
+}

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { condominiosApi } from "../../services/condominiosApi";
 import { gestaoApi } from "../../services/gestaoApi";
 import { FormCondominio } from "../../components/adm/FormCondominio";
@@ -12,10 +13,10 @@ import { labelPerfil } from "../../utils/perfis";
 import { mascararCnpj, mascararTelefone } from "../../utils/masks";
 
 const ABAS = [
-  { id: "dados", label: "Dados", icon: "badge" },
-  { id: "plano", label: "Plano", icon: "workspace_premium" },
-  { id: "usuarios", label: "Usuários", icon: "group" },
-  { id: "resumo", label: "Resumo", icon: "analytics" },
+  { id: "dados", rotuloKey: "detalhe.abas.dados", icon: "badge" },
+  { id: "plano", rotuloKey: "detalhe.abas.plano", icon: "workspace_premium" },
+  { id: "usuarios", rotuloKey: "detalhe.abas.usuarios", icon: "group" },
+  { id: "resumo", rotuloKey: "detalhe.abas.resumo", icon: "analytics" },
 ];
 
 const STATUS_STYLE = {
@@ -24,6 +25,7 @@ const STATUS_STYLE = {
 };
 
 export function DetalheCondominio() {
+  const { t } = useTranslation("condominios");
   const { id } = useParams();
   const navigate = useNavigate();
   const toast = useToast();
@@ -48,11 +50,11 @@ export function DetalheCondominio() {
       setCondominio(c.condominio ?? c);
       setResumo(r?.resumo ?? null);
     } catch {
-      setErro("Não foi possível carregar este cliente.");
+      setErro(t("detalhe.erros.carregar"));
     } finally {
       setCarregando(false);
     }
-  }, [id]);
+  }, [id, t]);
 
   useEffect(() => {
     carregar();
@@ -63,28 +65,28 @@ export function DetalheCondominio() {
     condominiosApi
       .listarUsuarios(id)
       .then((res) => setUsuarios(res.data.usuarios ?? []))
-      .catch(() => toast.error("Não foi possível carregar os usuários."));
-  }, [aba, id, usuarios.length, toast]);
+      .catch(() => toast.error(t("detalhe.erros.carregarUsuarios")));
+  }, [aba, id, usuarios.length, toast, t]);
 
   async function salvar(dados) {
     try {
       const res = await condominiosApi.atualizar(id, dados);
       setCondominio(res.data.condominio ?? { ...condominio, ...dados });
       setEditando(false);
-      toast.success("Cliente atualizado.");
+      toast.success(t("detalhe.toast.atualizado"));
     } catch (e) {
-      toast.error(e.response?.data?.mensagem ?? "Erro ao salvar.");
+      toast.error(e.response?.data?.mensagem ?? t("detalhe.toast.erroSalvar"));
     }
   }
 
   async function alternarStatus() {
     const desativando = condominio.status === "active";
     const ok = await confirm({
-      titulo: desativando ? "Desativar cliente" : "Reativar cliente",
+      titulo: desativando ? t("detalhe.confirmar.desativarTitulo") : t("detalhe.confirmar.reativarTitulo"),
       mensagem: desativando
-        ? `Desativar "${condominio.nome}"? Os dados são preservados e o acesso é suspenso.`
-        : `Reativar "${condominio.nome}"?`,
-      confirmarTexto: desativando ? "Desativar" : "Reativar",
+        ? t("detalhe.confirmar.desativarMensagem", { nome: condominio.nome })
+        : t("detalhe.confirmar.reativarMensagem", { nome: condominio.nome }),
+      confirmarTexto: desativando ? t("detalhe.acoes.desativar") : t("detalhe.acoes.reativar"),
       variante: desativando ? "danger" : "default",
     });
     if (!ok) return;
@@ -93,9 +95,9 @@ export function DetalheCondominio() {
       const fn = desativando ? condominiosApi.desativar : condominiosApi.ativar;
       await fn(id);
       setCondominio({ ...condominio, status: desativando ? "inactive" : "active" });
-      toast.success(desativando ? "Cliente desativado." : "Cliente reativado.");
+      toast.success(desativando ? t("detalhe.toast.desativado") : t("detalhe.toast.reativado"));
     } catch {
-      toast.error("Não foi possível alterar o status.");
+      toast.error(t("detalhe.erros.alterarStatus"));
     }
   }
 
@@ -115,13 +117,13 @@ export function DetalheCondominio() {
       <div className="min-h-screen w-full pt-4 pb-20 px-6">
         <div className="max-w-6xl mx-auto glass-panel rounded-3xl p-8 text-center space-y-4">
           <Icone name="error" className="text-error text-3xl" />
-          <p className="text-error font-medium">{erro || "Cliente não encontrado."}</p>
+          <p className="text-error font-medium">{erro || t("detalhe.erros.naoEncontrado")}</p>
           <button
             type="button"
             onClick={() => navigate("/adm/condominios")}
             className="text-primary font-semibold hover:underline"
           >
-            Voltar para a lista
+            {t("detalhe.voltarLista")}
           </button>
         </div>
       </div>
@@ -137,13 +139,13 @@ export function DetalheCondominio() {
           className="flex items-center gap-1 text-on-surface-variant hover:text-on-surface text-sm transition"
         >
           <Icone name="arrow_back" className="text-base" />
-          Clientes
+          {t("lista.cabecalho.clientes")}
         </button>
 
         <header className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
             <p className="text-on-surface-variant text-xs font-semibold uppercase tracking-widest mb-1">
-              Painel Administrativo
+              {t("lista.cabecalho.painel")}
             </p>
             <div className="flex items-center gap-3 flex-wrap">
               <h1 className="font-headline text-4xl font-extrabold tracking-tight text-on-surface">
@@ -154,7 +156,7 @@ export function DetalheCondominio() {
                   STATUS_STYLE[condominio.status] ?? ""
                 }`}
               >
-                {condominio.status === "active" ? "ATIVO" : "INATIVO"}
+                {condominio.status === "active" ? t("detalhe.status.ativo") : t("detalhe.status.inativo")}
               </span>
             </div>
             <p className="text-on-surface-variant text-sm mt-1 font-mono">{condominio.id}</p>
@@ -170,7 +172,7 @@ export function DetalheCondominio() {
               className="px-5 py-3 rounded-2xl border border-primary/30 text-primary hover:bg-primary/10 transition flex items-center gap-2 font-medium"
             >
               <Icone name={editando ? "close" : "edit"} />
-              {editando ? "Cancelar" : "Editar"}
+              {editando ? t("comum:acoes.cancelar") : t("comum:acoes.editar")}
             </button>
             <button
               type="button"
@@ -182,17 +184,17 @@ export function DetalheCondominio() {
               }`}
             >
               <Icone name={condominio.status === "active" ? "block" : "check_circle"} />
-              {condominio.status === "active" ? "Desativar" : "Reativar"}
+              {condominio.status === "active" ? t("detalhe.acoes.desativar") : t("detalhe.acoes.reativar")}
             </button>
           </div>
         </header>
 
         {resumo && (
           <section className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <CartaoKpi valor={resumo.usuarios.total} label="Usuários" tom="primary" icone="group" />
-            <CartaoKpi valor={resumo.usuarios.ativos} label="Ativos" tom="tertiary" icone="check_circle" />
-            <CartaoKpi valor={resumo.convitesPendentes} label="Convites pendentes" tom="secondary" icone="mail" />
-            <CartaoKpi valor={resumo.ocorrencias} label="Ocorrências" tom="neutro" icone="report" />
+            <CartaoKpi valor={resumo.usuarios.total} label={t("detalhe.kpi.usuarios")} tom="primary" icone="group" />
+            <CartaoKpi valor={resumo.usuarios.ativos} label={t("detalhe.kpi.ativos")} tom="tertiary" icone="check_circle" />
+            <CartaoKpi valor={resumo.convitesPendentes} label={t("detalhe.kpi.convitesPendentes")} tom="secondary" icone="mail" />
+            <CartaoKpi valor={resumo.ocorrencias ?? "—"} label={t("detalhe.kpi.ocorrencias")} tom="neutro" icone="report" />
           </section>
         )}
 
@@ -209,7 +211,7 @@ export function DetalheCondominio() {
               }`}
             >
               <Icone name={a.icon} className="text-base" />
-              {a.label}
+              {t(a.rotuloKey)}
             </button>
           ))}
         </nav>
@@ -226,12 +228,12 @@ export function DetalheCondominio() {
             ) : (
               <dl className="grid sm:grid-cols-2 gap-x-8 gap-y-5">
                 {[
-                  ["Nome", condominio.nome],
-                  ["Identificador", condominio.id],
-                  ["CNPJ", condominio.cnpj ? mascararCnpj(condominio.cnpj) : "—"],
-                  ["E-mail", condominio.email || "—"],
-                  ["Telefone", condominio.telefone ? mascararTelefone(condominio.telefone) : "—"],
-                  ["Endereço", condominio.endereco || "—"],
+                  [t("detalhe.dados.nome"), condominio.nome],
+                  [t("detalhe.dados.identificador"), condominio.id],
+                  [t("detalhe.dados.cnpj"), condominio.cnpj ? mascararCnpj(condominio.cnpj) : "—"],
+                  [t("detalhe.dados.email"), condominio.email || "—"],
+                  [t("detalhe.dados.telefone"), condominio.telefone ? mascararTelefone(condominio.telefone) : "—"],
+                  [t("detalhe.dados.endereco"), condominio.endereco || "—"],
                 ].map(([rotulo, valor]) => (
                   <div key={rotulo}>
                     <dt className="text-on-surface-variant text-xs uppercase tracking-wider mb-1">
@@ -253,7 +255,7 @@ export function DetalheCondominio() {
           <section className="glass-panel rounded-3xl p-6">
             {usuarios.length === 0 ? (
               <p className="text-on-surface-variant text-center py-8">
-                Nenhum usuário vinculado a este cliente.
+                {t("detalhe.usuarios.vazio")}
               </p>
             ) : (
               <ul className="divide-y divide-outline-variant/10">
@@ -289,7 +291,7 @@ export function DetalheCondominio() {
             {resumo ? (
               <div className="space-y-6">
                 <div>
-                  <h3 className="text-on-surface font-semibold mb-3">Usuários por perfil</h3>
+                  <h3 className="text-on-surface font-semibold mb-3">{t("detalhe.resumo.porPerfil")}</h3>
                   <div className="flex flex-wrap gap-2">
                     {Object.entries(resumo.usuarios.porPerfil).map(([perfil, total]) => (
                       <span
@@ -302,7 +304,7 @@ export function DetalheCondominio() {
                   </div>
                 </div>
                 <div>
-                  <h3 className="text-on-surface font-semibold mb-3">Usuários por situação</h3>
+                  <h3 className="text-on-surface font-semibold mb-3">{t("detalhe.resumo.porSituacao")}</h3>
                   <div className="flex flex-wrap gap-2">
                     {Object.entries(resumo.usuarios.porStatus).map(([status, total]) => (
                       <span
@@ -317,7 +319,7 @@ export function DetalheCondominio() {
               </div>
             ) : (
               <p className="text-on-surface-variant text-center py-8">
-                Resumo indisponível no momento.
+                {t("detalhe.resumo.indisponivel")}
               </p>
             )}
           </section>

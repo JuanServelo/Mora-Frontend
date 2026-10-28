@@ -1,5 +1,7 @@
 // src/pages/adm/GerenciarEstruturas.jsx
 import { useState, useEffect, useMemo } from "react";
+import { useTranslation } from "react-i18next";
+import i18n from "../../i18n";
 import { blocoApi, apartamentoApi, areaComunApi } from "../../services/estruturasApi";
 import { vagaApi } from "../../services/portariaApi";
 import { condominiosApi } from "../../services/condominiosApi";
@@ -24,6 +26,7 @@ const selectCls = "w-full bg-surface-container-highest/40 border-none rounded-xl
 
 // ════════════════════════════════════════════
 export function GerenciarEstruturas() {
+  const { t } = useTranslation("estruturas");
   const { usuario } = useAuth();
   const isGerente = usuario?.perfil === PERFIS.ADMIN_GERAL;
 
@@ -62,8 +65,8 @@ export function GerenciarEstruturas() {
       <div className="min-h-screen w-full pt-4 pb-20 px-4 sm:px-6 flex items-center justify-center">
         <div className="glass-panel rounded-3xl p-6 sm:p-10 text-center max-w-md">
           <Icone name="domain" className="text-primary text-4xl mb-4" />
-          <h2 className="font-headline text-xl font-bold text-on-surface mb-2">Nenhum cliente encontrado</h2>
-          <p className="text-on-surface-variant text-sm">Crie um cliente em <strong>Clientes</strong> antes de gerenciar estruturas.</p>
+          <h2 className="font-headline text-xl font-bold text-on-surface mb-2">{t("pagina.semCliente")}</h2>
+          <p className="text-on-surface-variant text-sm">{t("pagina.semClienteAntes")}<strong>{t("pagina.semClienteLink")}</strong>{t("pagina.semClienteDepois")}</p>
         </div>
       </div>
     );
@@ -76,12 +79,12 @@ export function GerenciarEstruturas() {
         <header className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
             <p className="text-on-surface-variant text-xs font-semibold uppercase tracking-widest mb-1">
-              Painel Administrativo
+              {t("pagina.painel")}
             </p>
             <h1 className="font-headline text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-on-surface">
-              Estruturas{" "}
+              {t("pagina.estruturas")}{" "}
               <span className="bg-gradient-to-r from-primary to-tertiary bg-clip-text text-transparent">
-                Físicas
+                {t("pagina.fisicas")}
               </span>
             </h1>
           </div>
@@ -94,7 +97,7 @@ export function GerenciarEstruturas() {
               <Icone name="domain" className="text-primary text-lg" />
             </div>
             <p className="text-xs font-semibold uppercase tracking-widest text-on-surface-variant">
-              Cliente
+              {t("pagina.cliente")}
             </p>
           </div>
 
@@ -115,9 +118,9 @@ export function GerenciarEstruturas() {
         {/* Sub-navbar de abas */}
         <div className="glass-panel rounded-2xl p-1.5 flex flex-wrap gap-1 w-full sm:w-fit">
           {[
-            { id: "blocos", label: "Blocos & Apartamentos", icon: "apartment" },
-            { id: "areas-comuns", label: "Áreas Comuns", icon: "pool" },
-            ...(modulosCondominio.includes("vagas") ? [{ id: "vagas", label: "Vagas", icon: "local_parking" }] : []),
+            { id: "blocos", rotuloKey: "abas.blocos", icon: "apartment" },
+            { id: "areas-comuns", rotuloKey: "abas.areasComuns", icon: "pool" },
+            ...(modulosCondominio.includes("vagas") ? [{ id: "vagas", rotuloKey: "abas.vagas", icon: "local_parking" }] : []),
           ].map((tab) => (
             <button
               key={tab.id}
@@ -129,7 +132,7 @@ export function GerenciarEstruturas() {
               }`}
             >
               <Icone name={tab.icon} className="text-lg" />
-              {tab.label}
+              {t(tab.rotuloKey)}
             </button>
           ))}
         </div>
@@ -153,6 +156,7 @@ export function GerenciarEstruturas() {
 // ABA: BLOCOS
 // ════════════════════════════════════════════
 function AbaBlocos({ condominioId }) {
+  const { t } = useTranslation("estruturas");
   const toast = useToast();
   const [blocos, setBlocos] = useState([]);
   const [carregando, setCarregando] = useState(true);
@@ -180,9 +184,9 @@ function AbaBlocos({ condominioId }) {
       const res = await blocoApi.cadastrar({ ...dados, condominioId });
       setBlocos((prev) => [res.data, ...prev]);
       setCriando(false);
-      toast.success("Bloco criado com sucesso.");
+      toast.success(t("blocos.toast.criado"));
     } catch (err) {
-      toast.error(err.response?.data?.erro || "Erro ao criar bloco.");
+      toast.error(err.response?.data?.erro || t("blocos.toast.erroCriar"));
     }
   }
 
@@ -190,10 +194,10 @@ function AbaBlocos({ condominioId }) {
     try {
       const res = await blocoApi.atualizar(id, dados);
       setBlocos((prev) => prev.map((b) => (b.id === id ? res.data : b)));
-      toast.success("Bloco atualizado.");
+      toast.success(t("blocos.toast.atualizado"));
       return res.data;
     } catch (err) {
-      toast.error(err.response?.data?.erro || "Erro ao atualizar bloco.");
+      toast.error(err.response?.data?.erro || t("blocos.toast.erroAtualizar"));
       return null;
     }
   }
@@ -208,9 +212,9 @@ function AbaBlocos({ condominioId }) {
       setBlocos((prev) =>
         prev.map((b) => (b.id === bloco.id ? { ...b, ativo: !b.ativo } : b)),
       );
-      toast.success(bloco.ativo ? "Bloco desativado." : "Bloco reativado.");
+      toast.success(bloco.ativo ? t("blocos.toast.desativado") : t("blocos.toast.reativado"));
     } catch (err) {
-      toast.error(err.response?.data?.erro || "Erro ao alterar status do bloco.");
+      toast.error(err.response?.data?.erro || t("blocos.toast.erroStatus"));
     }
   }
 
@@ -239,15 +243,15 @@ function AbaBlocos({ condominioId }) {
         <div className="flex flex-wrap gap-3 w-full sm:w-auto">
           <div className="glass-panel rounded-2xl px-4 sm:px-5 py-3 text-center flex-1 sm:flex-none min-w-[92px]">
             <p className="text-2xl font-headline font-bold text-on-surface">{blocos.length}</p>
-            <p className="text-on-surface-variant text-xs uppercase tracking-wider">Total</p>
+            <p className="text-on-surface-variant text-xs uppercase tracking-wider">{t("resumo.total")}</p>
           </div>
           <div className="glass-panel rounded-2xl px-4 sm:px-5 py-3 text-center flex-1 sm:flex-none min-w-[92px]">
             <p className="text-2xl font-headline font-bold text-primary">{blocos.filter((b) => b.ativo).length}</p>
-            <p className="text-on-surface-variant text-xs uppercase tracking-wider">Ativos</p>
+            <p className="text-on-surface-variant text-xs uppercase tracking-wider">{t("resumo.ativos")}</p>
           </div>
           <div className="glass-panel rounded-2xl px-4 sm:px-5 py-3 text-center flex-1 sm:flex-none min-w-[92px]">
             <p className="text-2xl font-headline font-bold text-error">{blocos.filter((b) => !b.ativo).length}</p>
-            <p className="text-on-surface-variant text-xs uppercase tracking-wider">Inativos</p>
+            <p className="text-on-surface-variant text-xs uppercase tracking-wider">{t("resumo.inativos")}</p>
           </div>
         </div>
         <button
@@ -257,7 +261,7 @@ function AbaBlocos({ condominioId }) {
           }`}
         >
           <Icone name={criando ? "close" : "add"} className="text-xl" />
-          {criando ? "Cancelar" : "Novo Bloco"}
+          {criando ? t("comum:acoes.cancelar") : t("blocos.novo")}
         </button>
       </div>
 
@@ -268,7 +272,7 @@ function AbaBlocos({ condominioId }) {
             <div className="w-10 h-10 shrink-0 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
               <Icone name="apartment" className="text-primary" />
             </div>
-            <h2 className="font-headline text-xl font-bold text-on-surface">Novo Bloco</h2>
+            <h2 className="font-headline text-xl font-bold text-on-surface">{t("blocos.novo")}</h2>
           </div>
           <FormBloco onSalvar={handleCriar} onCancelar={() => setCriando(false)} />
         </div>
@@ -278,7 +282,7 @@ function AbaBlocos({ condominioId }) {
       <div className="max-w-md">
         <Campo
           id="busca-bloco"
-          placeholder="Buscar por nome ou descrição..."
+          placeholder={t("blocos.buscaPlaceholder")}
           icon="search"
           value={busca}
           onChange={(e) => setBusca(e.target.value)}
@@ -287,11 +291,11 @@ function AbaBlocos({ condominioId }) {
 
       {/* Lista */}
       {carregando ? (
-        <div className="glass-panel rounded-3xl p-6 sm:p-10 text-center text-on-surface-variant">Carregando...</div>
+        <div className="glass-panel rounded-3xl p-6 sm:p-10 text-center text-on-surface-variant">{t("geral.carregando")}</div>
       ) : (
         <div className="space-y-3">
           {filtrados.length === 0 && (
-            <div className="glass-panel rounded-3xl p-6 sm:p-10 text-center text-on-surface-variant">Nenhum bloco encontrado.</div>
+            <div className="glass-panel rounded-3xl p-6 sm:p-10 text-center text-on-surface-variant">{t("blocos.vazio")}</div>
           )}
           {filtrados.map((bloco) => (
             <div key={bloco.id} className="glass-panel rounded-3xl overflow-hidden">
@@ -308,8 +312,8 @@ function AbaBlocos({ condominioId }) {
                 </div>
                 <div className="hidden sm:flex gap-6 text-sm shrink-0">
                   {[
-                    { label: "Andares", value: bloco.andares ?? "—" },
-                    { label: "Apts/Andar", value: bloco.apartamentosPorAndar ?? "—" },
+                    { label: t("campos.andares"), value: bloco.andares ?? "—" },
+                    { label: t("campos.aptsAndar"), value: bloco.apartamentosPorAndar ?? "—" },
                   ].map((col) => (
                     <div key={col.label} className="text-center">
                       <p className="text-on-surface-variant text-xs uppercase tracking-wider">{col.label}</p>
@@ -318,10 +322,10 @@ function AbaBlocos({ condominioId }) {
                   ))}
                 </div>
                 <span className={`shrink-0 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider ${statusStyle(bloco.ativo)}`}>
-                  {bloco.ativo ? "ativo" : "inativo"}
+                  {bloco.ativo ? t("status.ativo") : t("status.inativo")}
                 </span>
                 <span className="hidden md:flex items-center gap-1 text-primary text-sm font-semibold shrink-0">
-                  Ver apartamentos
+                  {t("blocos.verApartamentos")}
                   <Icone name="chevron_right" className="text-lg" />
                 </span>
                 <Icone name="chevron_right" className="text-outline shrink-0 md:hidden" />
@@ -351,15 +355,16 @@ export const MAX_ANTECEDENCIA_HORAS = 8760;
 export function descreverAntecedencia(valor) {
   const horas = Number(valor || 0);
   if (!Number.isFinite(horas) || horas <= 0) {
-    return "Sem exigência: o morador pode reservar para qualquer horário futuro.";
+    return i18n.t("estruturas:antecedencia.semExigencia");
   }
   const texto = horas % 24 === 0
-    ? `${horas / 24} ${horas / 24 === 1 ? "dia" : "dias"}`
-    : `${horas} ${horas === 1 ? "hora" : "horas"}`;
-  return `O morador precisa pedir com ${texto} de antecedência. Síndico e admin não são barrados.`;
+    ? i18n.t("estruturas:antecedencia.dias", { count: horas / 24 })
+    : i18n.t("estruturas:antecedencia.horas", { count: horas });
+  return i18n.t("estruturas:antecedencia.exige", { texto });
 }
 
 function FormBloco({ inicial, onSalvar, onCancelar }) {
+  const { t } = useTranslation("estruturas");
   const [form, setForm] = useState({
     nome: inicial?.nome || "",
     sigla: inicial?.sigla || "",
@@ -381,21 +386,21 @@ function FormBloco({ inicial, onSalvar, onCancelar }) {
     const aptsAndar = form.apartamentosPorAndar ? Number(form.apartamentosPorAndar) : null;
 
     if (!form.nome.trim()) {
-      novosErros.nome = "Nome é obrigatório.";
+      novosErros.nome = t("validacao.nomeObrigatorio");
     }
     if (!form.andares) {
-      novosErros.andares = "Quantidade de andares é obrigatória.";
+      novosErros.andares = t("validacao.andaresObrigatorio");
     } else if (andares < 1) {
-      novosErros.andares = "Informe um número inteiro maior que zero.";
+      novosErros.andares = t("validacao.inteiroPositivo");
     } else if (andares > MAX_ANDARES) {
-      novosErros.andares = `O número máximo de andares permitido é ${MAX_ANDARES}.`;
+      novosErros.andares = t("validacao.maxAndares", { max: MAX_ANDARES });
     }
     if (!form.apartamentosPorAndar) {
-      novosErros.apartamentosPorAndar = "Apartamentos por andar é obrigatório.";
+      novosErros.apartamentosPorAndar = t("validacao.aptosPorAndarObrigatorio");
     } else if (aptsAndar < 1) {
-      novosErros.apartamentosPorAndar = "Informe um número inteiro maior que zero.";
+      novosErros.apartamentosPorAndar = t("validacao.inteiroPositivo");
     } else if (aptsAndar > MAX_APTOS_POR_ANDAR) {
-      novosErros.apartamentosPorAndar = `O número máximo de apartamentos por andar é ${MAX_APTOS_POR_ANDAR}.`;
+      novosErros.apartamentosPorAndar = t("validacao.maxAptosPorAndar", { max: MAX_APTOS_POR_ANDAR });
     }
 
     if (Object.keys(novosErros).length > 0) {
@@ -411,16 +416,16 @@ function FormBloco({ inicial, onSalvar, onCancelar }) {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <Campo id="bloco-nome" label="Nome" placeholder="Ex: Bloco A" required value={form.nome} onChange={(e) => set("nome", e.target.value)} error={erros.nome} />
-        <Campo id="bloco-sigla" label="Sigla" placeholder="Ex: A" optional value={form.sigla} onChange={(e) => set("sigla", e.target.value)} />
-        <Campo id="bloco-descricao" label="Descrição" placeholder="Ex: Torre principal" optional value={form.descricao} onChange={(e) => set("descricao", e.target.value)} />
-        <Campo id="bloco-andares" label="Andares" type="number" min="1" max={MAX_ANDARES} placeholder="Ex: 10" required value={form.andares} onChange={(e) => set("andares", e.target.value)} error={erros.andares} />
-        <Campo id="bloco-aptsandar" label="Aptos por andar" type="number" min="1" max={MAX_APTOS_POR_ANDAR} placeholder="Ex: 4" required value={form.apartamentosPorAndar} onChange={(e) => set("apartamentosPorAndar", e.target.value)} error={erros.apartamentosPorAndar} />
+        <Campo id="bloco-nome" label={t("campos.nome")} placeholder={t("placeholders.blocoNome")} required value={form.nome} onChange={(e) => set("nome", e.target.value)} error={erros.nome} />
+        <Campo id="bloco-sigla" label={t("campos.sigla")} placeholder={t("placeholders.blocoSigla")} optional value={form.sigla} onChange={(e) => set("sigla", e.target.value)} />
+        <Campo id="bloco-descricao" label={t("campos.descricao")} placeholder={t("placeholders.blocoDescricao")} optional value={form.descricao} onChange={(e) => set("descricao", e.target.value)} />
+        <Campo id="bloco-andares" label={t("campos.andares")} type="number" min="1" max={MAX_ANDARES} placeholder={t("placeholders.andares")} required value={form.andares} onChange={(e) => set("andares", e.target.value)} error={erros.andares} />
+        <Campo id="bloco-aptsandar" label={t("campos.aptosPorAndar")} type="number" min="1" max={MAX_APTOS_POR_ANDAR} placeholder={t("placeholders.aptosPorAndar")} required value={form.apartamentosPorAndar} onChange={(e) => set("apartamentosPorAndar", e.target.value)} error={erros.apartamentosPorAndar} />
       </div>
       <div className="flex gap-3 pt-2">
-        <Botao type="submit">{inicial ? "Salvar alterações" : "Cadastrar bloco"}</Botao>
+        <Botao type="submit">{inicial ? t("acoes.salvarAlteracoes") : t("blocos.cadastrar")}</Botao>
         <button type="button" onClick={onCancelar} className="flex-1 py-4 rounded-full border border-outline-variant/30 text-on-surface-variant hover:bg-veu/5 font-semibold transition-all cursor-pointer">
-          Cancelar
+          {t("comum:acoes.cancelar")}
         </button>
       </div>
     </form>
@@ -428,15 +433,16 @@ function FormBloco({ inicial, onSalvar, onCancelar }) {
 }
 
 function DetalhesBloco({ bloco, onEditar, onToggleAtivo }) {
+  const { t } = useTranslation("estruturas");
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: "Nome", value: bloco.nome },
-          { label: "Sigla", value: bloco.sigla || "—" },
-          { label: "Descrição", value: bloco.descricao },
-          { label: "Andares", value: bloco.andares ?? "—" },
-          { label: "Apts/Andar", value: bloco.apartamentosPorAndar ?? "—" },
+          { label: t("campos.nome"), value: bloco.nome },
+          { label: t("campos.sigla"), value: bloco.sigla || "—" },
+          { label: t("campos.descricao"), value: bloco.descricao },
+          { label: t("campos.andares"), value: bloco.andares ?? "—" },
+          { label: t("campos.aptsAndar"), value: bloco.apartamentosPorAndar ?? "—" },
         ].map((item) => (
           <div key={item.label} className="bg-surface-container-highest/20 rounded-xl p-3">
             <p className="text-on-surface-variant text-xs uppercase tracking-wider mb-1">{item.label}</p>
@@ -446,7 +452,7 @@ function DetalhesBloco({ bloco, onEditar, onToggleAtivo }) {
       </div>
       <div className="flex flex-col sm:flex-row gap-3 pt-1">
         <button onClick={onEditar} className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-primary/30 text-primary hover:bg-primary/10 text-sm font-semibold transition-all cursor-pointer">
-          <Icone name="edit" className="text-lg" /> Editar
+          <Icone name="edit" className="text-lg" /> {t("comum:acoes.editar")}
         </button>
         <button
           onClick={onToggleAtivo}
@@ -455,7 +461,7 @@ function DetalhesBloco({ bloco, onEditar, onToggleAtivo }) {
           }`}
         >
           <Icone name={bloco.ativo ? "do_not_disturb_on" : "check_circle"} className="text-lg" />
-          {bloco.ativo ? "Desativar" : "Ativar"}
+          {bloco.ativo ? t("acoes.desativar") : t("acoes.ativar")}
         </button>
       </div>
     </div>
@@ -466,6 +472,7 @@ function DetalhesBloco({ bloco, onEditar, onToggleAtivo }) {
 // DRILL-DOWN: APARTAMENTOS DE UM BLOCO (+ convite)
 // ════════════════════════════════════════════
 function VistaApartamentos({ bloco, condominioId, onVoltar, onEditarBloco, onToggleAtivoBloco }) {
+  const { t } = useTranslation("estruturas");
   const toast = useToast();
   const [apartamentos, setApartamentos] = useState([]);
   const [carregando, setCarregando] = useState(true);
@@ -492,10 +499,10 @@ function VistaApartamentos({ bloco, condominioId, onVoltar, onEditarBloco, onTog
       const res = await apartamentoApi.cadastrar(dados, bloco.id);
       setApartamentos((prev) => [{ ...res.data, blocoNome: res.data.blocoNome ?? bloco.nome }, ...prev]);
       setCriando(false);
-      toast.success("Apartamento cadastrado.");
+      toast.success(t("apartamentos.toast.cadastrado"));
     } catch (err) {
       const d = err.response?.data;
-      setErroCriar(d?.erro || (d?.erros ? Object.values(d.erros).join("; ") : null) || "Erro ao criar apartamento.");
+      setErroCriar(d?.erro || (d?.erros ? Object.values(d.erros).join("; ") : null) || t("apartamentos.toast.erroCriar"));
     }
   }
 
@@ -507,10 +514,10 @@ function VistaApartamentos({ bloco, condominioId, onVoltar, onEditarBloco, onTog
         prev.map((a) => (a.id === id ? { ...res.data, blocoNome: res.data.blocoNome ?? bloco.nome } : a)),
       );
       setEditando(null);
-      toast.success("Apartamento atualizado.");
+      toast.success(t("apartamentos.toast.atualizado"));
     } catch (err) {
       const d = err.response?.data;
-      setErroEditar(d?.erro || (d?.erros ? Object.values(d.erros).join("; ") : null) || "Erro ao atualizar apartamento.");
+      setErroEditar(d?.erro || (d?.erros ? Object.values(d.erros).join("; ") : null) || t("apartamentos.toast.erroAtualizar"));
     }
   }
 
@@ -531,7 +538,7 @@ function VistaApartamentos({ bloco, condominioId, onVoltar, onEditarBloco, onTog
         onClick={onVoltar}
         className="flex items-center gap-1.5 text-on-surface-variant hover:text-on-surface text-sm font-semibold w-fit transition-colors cursor-pointer"
       >
-        <Icone name="arrow_back" className="text-lg" /> Voltar para blocos
+        <Icone name="arrow_back" className="text-lg" /> {t("apartamentos.voltarBlocos")}
       </button>
 
       {/* Cabeçalho do bloco */}
@@ -544,14 +551,14 @@ function VistaApartamentos({ bloco, condominioId, onVoltar, onEditarBloco, onTog
           <p className="text-on-surface-variant text-sm truncate">{bloco.descricao}</p>
         </div>
         <span className={`shrink-0 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider ${statusStyle(bloco.ativo)}`}>
-          {bloco.ativo ? "ativo" : "inativo"}
+          {bloco.ativo ? t("status.ativo") : t("status.inativo")}
         </span>
         <div className="flex gap-2 shrink-0">
           <button
             onClick={() => setEditandoBloco((v) => !v)}
             className="flex items-center gap-1.5 px-4 py-2 rounded-xl border border-primary/30 text-primary hover:bg-primary/10 text-sm font-semibold transition-all cursor-pointer"
           >
-            <Icone name="edit" className="text-base" /> Editar bloco
+            <Icone name="edit" className="text-base" /> {t("blocos.editar")}
           </button>
           <button
             onClick={onToggleAtivoBloco}
@@ -560,7 +567,7 @@ function VistaApartamentos({ bloco, condominioId, onVoltar, onEditarBloco, onTog
             }`}
           >
             <Icone name={bloco.ativo ? "do_not_disturb_on" : "check_circle"} className="text-base" />
-            {bloco.ativo ? "Desativar" : "Ativar"}
+            {bloco.ativo ? t("acoes.desativar") : t("acoes.ativar")}
           </button>
         </div>
       </div>
@@ -580,11 +587,11 @@ function VistaApartamentos({ bloco, condominioId, onVoltar, onEditarBloco, onTog
         <div className="flex flex-wrap gap-3 w-full sm:w-auto">
           <div className="glass-panel rounded-2xl px-4 sm:px-5 py-3 text-center flex-1 sm:flex-none min-w-[92px]">
             <p className="text-2xl font-headline font-bold text-on-surface">{apartamentos.length}</p>
-            <p className="text-on-surface-variant text-xs uppercase tracking-wider">Apartamentos</p>
+            <p className="text-on-surface-variant text-xs uppercase tracking-wider">{t("resumo.apartamentos")}</p>
           </div>
           <div className="glass-panel rounded-2xl px-4 sm:px-5 py-3 text-center flex-1 sm:flex-none min-w-[92px]">
             <p className="text-2xl font-headline font-bold text-primary">{apartamentos.filter((a) => a.ativo).length}</p>
-            <p className="text-on-surface-variant text-xs uppercase tracking-wider">Ativos</p>
+            <p className="text-on-surface-variant text-xs uppercase tracking-wider">{t("resumo.ativos")}</p>
           </div>
         </div>
         <button
@@ -594,7 +601,7 @@ function VistaApartamentos({ bloco, condominioId, onVoltar, onEditarBloco, onTog
           }`}
         >
           <Icone name={criando ? "close" : "add"} className="text-xl" />
-          {criando ? "Cancelar" : "Novo Apartamento"}
+          {criando ? t("comum:acoes.cancelar") : t("apartamentos.novo")}
         </button>
       </div>
 
@@ -604,7 +611,7 @@ function VistaApartamentos({ bloco, condominioId, onVoltar, onEditarBloco, onTog
             <div className="w-10 h-10 shrink-0 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
               <Icone name="door_front" className="text-primary" />
             </div>
-            <h2 className="font-headline text-xl font-bold text-on-surface">Novo Apartamento em {bloco.nome}</h2>
+            <h2 className="font-headline text-xl font-bold text-on-surface">{t("apartamentos.novoEm", { bloco: bloco.nome })}</h2>
           </div>
           <FormApartamento
             blocos={[bloco]}
@@ -618,11 +625,11 @@ function VistaApartamentos({ bloco, condominioId, onVoltar, onEditarBloco, onTog
 
       {/* Lista de apartamentos */}
       {carregando ? (
-        <div className="glass-panel rounded-3xl p-6 sm:p-10 text-center text-on-surface-variant">Carregando...</div>
+        <div className="glass-panel rounded-3xl p-6 sm:p-10 text-center text-on-surface-variant">{t("geral.carregando")}</div>
       ) : (
         <div className="space-y-3">
           {apartamentos.length === 0 && (
-            <div className="glass-panel rounded-3xl p-6 sm:p-10 text-center text-on-surface-variant">Nenhum apartamento neste bloco ainda.</div>
+            <div className="glass-panel rounded-3xl p-6 sm:p-10 text-center text-on-surface-variant">{t("apartamentos.vazioBloco")}</div>
           )}
           {apartamentos.map((apt) => (
             <div key={apt.id} className="glass-panel rounded-3xl overflow-hidden">
@@ -634,13 +641,13 @@ function VistaApartamentos({ bloco, condominioId, onVoltar, onEditarBloco, onTog
                   <Icone name="door_front" className="text-primary" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-on-surface font-semibold truncate">Apt {apt.numero}</p>
+                  <p className="text-on-surface font-semibold truncate">{t("apartamentos.apt", { numero: apt.numero })}</p>
                   <p className="text-on-surface-variant text-sm truncate">
-                    {apt.andar != null ? `${apt.andar}º andar` : "—"}{apt.quartos ? ` · ${apt.quartos} quartos` : ""}
+                    {apt.andar != null ? t("apartamentos.andarOrdinal", { andar: apt.andar }) : "—"}{apt.quartos ? ` · ${t("apartamentos.quartos", { count: apt.quartos })}` : ""}
                   </p>
                 </div>
                 <span className={`shrink-0 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider ${statusStyle(apt.ativo)}`}>
-                  {apt.ativo ? "ativo" : "inativo"}
+                  {apt.ativo ? t("status.ativo") : t("status.inativo")}
                 </span>
                 <Icone
                   name="expand_more"
@@ -684,6 +691,7 @@ const PERFIS_UNIDADE_CONVITE = [
 ];
 
 function ConviteEstrutura({ apartamento, bloco, condominioId }) {
+  const { t } = useTranslation("estruturas");
   const { usuario } = useAuth();
   const toast = useToast();
   const opcoes = perfisCadastroDisponiveis(usuario?.perfil).filter((p) =>
@@ -698,7 +706,7 @@ function ConviteEstrutura({ apartamento, bloco, condominioId }) {
   if (opcoes.length === 0) {
     return (
       <p className="text-sm text-on-surface-variant">
-        Seu perfil não pode emitir convites de morador para esta unidade.
+        {t("convite.semPermissao")}
       </p>
     );
   }
@@ -719,14 +727,14 @@ function ConviteEstrutura({ apartamento, bloco, condominioId }) {
       });
       setResultado(res.data);
       if (res.data.emailEnviado === false) {
-        toast.warning(res.data.avisoEmail || "Convite criado — envie o link manualmente.", {
-          detalhe: `Código: ${res.data.convite.codigo}`,
+        toast.warning(res.data.avisoEmail || t("convite.toast.semEmail"), {
+          detalhe: t("convite.toast.codigo", { codigo: res.data.convite.codigo }),
         });
       } else {
-        toast.success("Convite enviado.");
+        toast.success(t("convite.toast.enviado"));
       }
     } catch (err) {
-      toast.error(err.response?.data?.mensagem || "Erro ao gerar convite.");
+      toast.error(err.response?.data?.mensagem || t("convite.toast.erro"));
     } finally {
       setEnviando(false);
     }
@@ -743,21 +751,21 @@ function ConviteEstrutura({ apartamento, bloco, condominioId }) {
       <div className="space-y-4">
         <div className="flex items-center gap-2 text-primary">
           <Icone name="check_circle" className="text-xl" />
-          <p className="font-semibold">Convite gerado para Apt {apartamento.numero} · {bloco.nome}</p>
+          <p className="font-semibold">{t("convite.gerado", { numero: apartamento.numero, bloco: bloco.nome })}</p>
         </div>
         {!resultado.emailEnviado && (
           <p className="text-xs text-secondary bg-secondary/10 rounded-xl px-3 py-2">
-            O e-mail automático não está configurado — copie e envie o link abaixo manualmente.
+            {t("convite.emailNaoConfigurado")}
           </p>
         )}
         <div className="space-y-2">
-          <p className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant">Código</p>
+          <p className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant">{t("convite.codigo")}</p>
           <p className="font-mono text-lg font-bold text-on-surface bg-surface-container-highest/40 rounded-xl px-4 py-3 w-fit tracking-widest">
             {resultado.convite.codigo}
           </p>
         </div>
         <div className="space-y-2">
-          <p className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant">Link de ativação</p>
+          <p className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant">{t("convite.linkAtivacao")}</p>
           <div className="flex gap-2">
             <input
               readOnly
@@ -769,7 +777,7 @@ function ConviteEstrutura({ apartamento, bloco, condominioId }) {
               className="shrink-0 px-4 rounded-xl border border-primary/30 text-primary hover:bg-primary/10 text-sm font-semibold cursor-pointer flex items-center gap-1.5"
             >
               <Icone name={copiado ? "check" : "content_copy"} className="text-base" />
-              {copiado ? "Copiado" : "Copiar"}
+              {copiado ? t("convite.copiado") : t("convite.copiar")}
             </button>
           </div>
         </div>
@@ -777,7 +785,7 @@ function ConviteEstrutura({ apartamento, bloco, condominioId }) {
           onClick={() => { setResultado(null); setEmail(""); }}
           className="text-sm font-semibold text-primary hover:underline cursor-pointer"
         >
-          Gerar outro convite
+          {t("convite.gerarOutro")}
         </button>
       </div>
     );
@@ -787,11 +795,11 @@ function ConviteEstrutura({ apartamento, bloco, condominioId }) {
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="flex items-center gap-2 mb-1">
         <Icone name="person_add" className="text-primary text-lg" />
-        <p className="font-headline font-bold text-on-surface">Convidar morador para esta unidade</p>
+        <p className="font-headline font-bold text-on-surface">{t("convite.titulo")}</p>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant ml-1">Tipo de morador</label>
+          <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant ml-1">{t("convite.tipoMorador")}</label>
           <select
             value={perfil}
             onChange={(e) => setPerfil(e.target.value)}
@@ -804,16 +812,16 @@ function ConviteEstrutura({ apartamento, bloco, condominioId }) {
         </div>
         <Campo
           id={`convite-email-${apartamento.id}`}
-          label="E-mail do convidado"
+          label={t("campos.emailConvidado")}
           type="email"
-          placeholder="pessoa@email.com"
+          placeholder={t("placeholders.emailConvidado")}
           icon="mail"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
       </div>
       <Botao type="submit" disabled={enviando}>
-        {enviando ? "Gerando…" : "Gerar convite"}
+        {enviando ? t("convite.gerando") : t("convite.gerar")}
         <Icone name="link" className="text-xl" />
       </Botao>
     </form>
@@ -824,6 +832,7 @@ function ConviteEstrutura({ apartamento, bloco, condominioId }) {
 // ABA: APARTAMENTOS (avulsa — mantida como referência/reuso)
 // ════════════════════════════════════════════
 function AbaApartamentos({ condominioId }) {
+  const { t } = useTranslation("estruturas");
   const [apartamentos, setApartamentos] = useState([]);
   const [blocos, setBlocos] = useState([]);
   const [carregando, setCarregando] = useState(true);
@@ -866,7 +875,7 @@ function AbaApartamentos({ condominioId }) {
     } catch (err) {
       const d = err.response?.data;
       console.error("[cadastrar] erro backend:", d);
-      setErroCriar(d?.erro || (d?.erros ? Object.values(d.erros).join("; ") : null) || "Erro ao criar apartamento.");
+      setErroCriar(d?.erro || (d?.erros ? Object.values(d.erros).join("; ") : null) || t("apartamentos.toast.erroCriar"));
     }
   }
 
@@ -878,7 +887,7 @@ function AbaApartamentos({ condominioId }) {
       setEditando(null);
     } catch (err) {
       const d = err.response?.data;
-      setErroEditar(d?.erro || (d?.erros ? Object.values(d.erros).join("; ") : null) || "Erro ao atualizar apartamento.");
+      setErroEditar(d?.erro || (d?.erros ? Object.values(d.erros).join("; ") : null) || t("apartamentos.toast.erroAtualizar"));
     }
   }
 
@@ -904,15 +913,15 @@ function AbaApartamentos({ condominioId }) {
         <div className="flex flex-wrap gap-3 w-full sm:w-auto">
           <div className="glass-panel rounded-2xl px-4 sm:px-5 py-3 text-center flex-1 sm:flex-none min-w-[92px]">
             <p className="text-2xl font-headline font-bold text-on-surface">{apartamentos.length}</p>
-            <p className="text-on-surface-variant text-xs uppercase tracking-wider">Total</p>
+            <p className="text-on-surface-variant text-xs uppercase tracking-wider">{t("resumo.total")}</p>
           </div>
           <div className="glass-panel rounded-2xl px-4 sm:px-5 py-3 text-center flex-1 sm:flex-none min-w-[92px]">
             <p className="text-2xl font-headline font-bold text-primary">{apartamentos.filter((a) => a.ativo).length}</p>
-            <p className="text-on-surface-variant text-xs uppercase tracking-wider">Ativos</p>
+            <p className="text-on-surface-variant text-xs uppercase tracking-wider">{t("resumo.ativos")}</p>
           </div>
           <div className="glass-panel rounded-2xl px-4 sm:px-5 py-3 text-center flex-1 sm:flex-none min-w-[92px]">
             <p className="text-2xl font-headline font-bold text-error">{apartamentos.filter((a) => !a.ativo).length}</p>
-            <p className="text-on-surface-variant text-xs uppercase tracking-wider">Inativos</p>
+            <p className="text-on-surface-variant text-xs uppercase tracking-wider">{t("resumo.inativos")}</p>
           </div>
         </div>
         <button
@@ -922,7 +931,7 @@ function AbaApartamentos({ condominioId }) {
           }`}
         >
           <Icone name={criando ? "close" : "add"} className="text-xl" />
-          {criando ? "Cancelar" : "Novo Apartamento"}
+          {criando ? t("comum:acoes.cancelar") : t("apartamentos.novo")}
         </button>
       </div>
 
@@ -933,7 +942,7 @@ function AbaApartamentos({ condominioId }) {
             <div className="w-10 h-10 shrink-0 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
               <Icone name="door_front" className="text-primary" />
             </div>
-            <h2 className="font-headline text-xl font-bold text-on-surface">Novo Apartamento</h2>
+            <h2 className="font-headline text-xl font-bold text-on-surface">{t("apartamentos.novo")}</h2>
           </div>
           <FormApartamento blocos={blocos} onSalvar={handleCriar} onCancelar={() => { setCriando(false); setErroCriar(""); }} erro={erroCriar} />
         </div>
@@ -944,7 +953,7 @@ function AbaApartamentos({ condominioId }) {
         <div className="flex-1">
           <Campo
             id="busca-apt"
-            placeholder="Buscar por número ou andar..."
+            placeholder={t("apartamentos.buscaPlaceholder")}
             icon="search"
             value={busca}
             onChange={(e) => setBusca(e.target.value)}
@@ -956,7 +965,7 @@ function AbaApartamentos({ condominioId }) {
             onChange={(e) => setFiltroBlocoId(e.target.value)}
             className="w-full bg-surface-container-highest/40 border-none rounded-xl py-4 px-4 text-on-surface focus:ring-2 focus:ring-primary/50 focus:outline-none backdrop-blur-sm transition-all"
           >
-            <option value="todos">Todos os blocos</option>
+            <option value="todos">{t("apartamentos.todosBlocos")}</option>
             {blocos.map((b) => (
               <option key={b.id} value={b.id}>{b.nome}</option>
             ))}
@@ -966,11 +975,11 @@ function AbaApartamentos({ condominioId }) {
 
       {/* Lista */}
       {carregando ? (
-        <div className="glass-panel rounded-3xl p-6 sm:p-10 text-center text-on-surface-variant">Carregando...</div>
+        <div className="glass-panel rounded-3xl p-6 sm:p-10 text-center text-on-surface-variant">{t("geral.carregando")}</div>
       ) : (
         <div className="space-y-3">
           {filtrados.length === 0 && (
-            <div className="glass-panel rounded-3xl p-6 sm:p-10 text-center text-on-surface-variant">Nenhum apartamento encontrado.</div>
+            <div className="glass-panel rounded-3xl p-6 sm:p-10 text-center text-on-surface-variant">{t("apartamentos.vazio")}</div>
           )}
           {filtrados.map((apt) => (
             <div key={apt.id} className="glass-panel rounded-3xl overflow-hidden">
@@ -982,13 +991,13 @@ function AbaApartamentos({ condominioId }) {
                   <Icone name="door_front" className="text-primary" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-on-surface font-semibold truncate">Apt {apt.numero}</p>
+                  <p className="text-on-surface font-semibold truncate">{t("apartamentos.apt", { numero: apt.numero })}</p>
                   <p className="text-on-surface-variant text-sm truncate">{apt.blocoNome ?? "—"}</p>
                 </div>
                 <div className="hidden sm:flex gap-6 text-sm shrink-0">
                   {[
-                    { label: "Andar", value: apt.andar ?? "—" },
-                    { label: "Quartos", value: apt.quartos ?? "—" },
+                    { label: t("campos.andar"), value: apt.andar ?? "—" },
+                    { label: t("campos.quartos"), value: apt.quartos ?? "—" },
                   ].map((col) => (
                     <div key={col.label} className="text-center">
                       <p className="text-on-surface-variant text-xs uppercase tracking-wider">{col.label}</p>
@@ -997,7 +1006,7 @@ function AbaApartamentos({ condominioId }) {
                   ))}
                 </div>
                 <span className={`shrink-0 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider ${statusStyle(apt.ativo)}`}>
-                  {apt.ativo ? "ativo" : "inativo"}
+                  {apt.ativo ? t("status.ativo") : t("status.inativo")}
                 </span>
                 <Icone
                   name="expand_more"
@@ -1029,6 +1038,7 @@ function AbaApartamentos({ condominioId }) {
 }
 
 function FormApartamento({ inicial, blocos, apartamentos = [], onSalvar, onCancelar, erro }) {
+  const { t } = useTranslation("estruturas");
   const blocoAtual = blocos[0] ?? null;
   const blocoId = blocoAtual?.id ?? "";
 
@@ -1061,21 +1071,21 @@ function FormApartamento({ inicial, blocos, apartamentos = [], onSalvar, onCance
 
   function validate() {
     const e = {};
-    if (!form.numero.trim()) e.numero = "Número é obrigatório.";
-    if (!form.andar) e.andar = "Andar é obrigatório.";
+    if (!form.numero.trim()) e.numero = t("validacao.numeroObrigatorio");
+    if (!form.andar) e.andar = t("validacao.andarObrigatorio");
 
     const quartos = form.quartos !== "" ? Number(form.quartos) : null;
     if (quartos === null) {
-      e.quartos = "Quantidade de quartos é obrigatória.";
+      e.quartos = t("validacao.quartosObrigatorio");
     } else if (!Number.isInteger(quartos) || quartos < MIN_QUARTOS || quartos > MAX_QUARTOS) {
-      e.quartos = `A quantidade de quartos deve estar entre ${MIN_QUARTOS} e ${MAX_QUARTOS}.`;
+      e.quartos = t("validacao.quartosFaixa", { min: MIN_QUARTOS, max: MAX_QUARTOS });
     }
 
     const area = form.areaMxComTotal !== "" ? Number(form.areaMxComTotal) : null;
     if (area === null) {
-      e.areaMxComTotal = "Área total é obrigatória.";
+      e.areaMxComTotal = t("validacao.areaTotalObrigatoria");
     } else if (area < MIN_AREA_M2 || area > MAX_AREA_M2) {
-      e.areaMxComTotal = `A área total deve estar entre ${MIN_AREA_M2} e ${MAX_AREA_M2} m².`;
+      e.areaMxComTotal = t("validacao.areaTotalFaixa", { min: MIN_AREA_M2, max: MAX_AREA_M2 });
     }
 
     return e;
@@ -1128,7 +1138,7 @@ function FormApartamento({ inicial, blocos, apartamentos = [], onSalvar, onCance
         {/* Bloco — somente leitura (RN-03) */}
         <div className="space-y-2">
           <p className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant ml-1">
-            Bloco <span className="text-red-500">*</span>
+            {t("campos.bloco")} <span className="text-red-500">*</span>
           </p>
           <div className="w-full bg-surface-container-highest/20 rounded-xl py-4 px-4 text-on-surface flex items-center gap-2 border border-outline-variant/10">
             <Icone name="apartment" className="text-primary text-lg shrink-0" />
@@ -1136,15 +1146,15 @@ function FormApartamento({ inicial, blocos, apartamentos = [], onSalvar, onCance
           </div>
         </div>
 
-        <Campo id="apt-numero" label="Número" placeholder="Ex: 101" required value={form.numero} onChange={(e) => set("numero", e.target.value)} error={erros.numero} />
+        <Campo id="apt-numero" label={t("campos.numero")} placeholder={t("placeholders.aptNumero")} required value={form.numero} onChange={(e) => set("numero", e.target.value)} error={erros.numero} />
 
         {/* Andar */}
         <div className="space-y-2">
           <label htmlFor="apt-andar" className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant ml-1">
-            Andar <span className="text-red-500">*</span>
+            {t("campos.andar")} <span className="text-red-500">*</span>
             {limitePorAndar && (
               <span className="font-normal normal-case tracking-normal text-on-surface-variant/60">
-                {" "}(máx. {limitePorAndar}/andar)
+                {" "}{t("apartamentos.maxPorAndar", { max: limitePorAndar })}
               </span>
             )}
           </label>
@@ -1156,14 +1166,14 @@ function FormApartamento({ inicial, blocos, apartamentos = [], onSalvar, onCance
               aria-required="true"
               className={`w-full bg-surface-container-highest/40 border-none rounded-xl py-4 px-4 text-on-surface focus:ring-2 focus:ring-primary/50 focus:outline-none backdrop-blur-sm transition-all disabled:opacity-40 ${erros.andar ? "ring-2 ring-error/60" : ""}`}
             >
-              <option value="">Selecione o andar</option>
+              <option value="">{t("apartamentos.selecioneAndar")}</option>
               {andarOptions.map((n) => {
                 const count = countPorAndar[n] || 0;
                 const editandoEsteAndar = inicial?.andar === n;
                 const cheio = limitePorAndar && count >= limitePorAndar && !editandoEsteAndar;
                 return (
                   <option key={n} value={n} disabled={cheio}>
-                    {n}º andar{cheio ? " — lotado" : count > 0 ? ` (${count}/${limitePorAndar ?? "?"})` : ""}
+                    {t("apartamentos.andarOrdinal", { andar: n })}{cheio ? ` — ${t("apartamentos.lotado")}` : count > 0 ? ` (${count}/${limitePorAndar ?? "?"})` : ""}
                   </option>
                 );
               })}
@@ -1173,7 +1183,7 @@ function FormApartamento({ inicial, blocos, apartamentos = [], onSalvar, onCance
               id="apt-andar"
               type="number"
               min="1"
-              placeholder="Ex: 1"
+              placeholder={t("placeholders.andar")}
               aria-required="true"
               value={form.andar}
               onChange={(e) => set("andar", e.target.value)}
@@ -1183,20 +1193,20 @@ function FormApartamento({ inicial, blocos, apartamentos = [], onSalvar, onCance
           {erros.andar && <p className="text-xs text-error ml-1">{erros.andar}</p>}
         </div>
 
-        <Campo id="apt-quartos" label="Quartos" type="number" min={MIN_QUARTOS} max={MAX_QUARTOS} step="1" placeholder="Ex: 2" required value={form.quartos} onChange={(e) => set("quartos", e.target.value)} error={erros.quartos} />
-        <Campo id="apt-area" label="Área total (m²)" type="number" min={MIN_AREA_M2} max={MAX_AREA_M2} step="0.01" placeholder="Ex: 65.50" required value={form.areaMxComTotal} onChange={(e) => set("areaMxComTotal", e.target.value)} error={erros.areaMxComTotal} />
-        <Campo id="apt-obs" label="Observações" placeholder="Opcional" optional value={form.observacoes} onChange={(e) => set("observacoes", e.target.value)} />
+        <Campo id="apt-quartos" label={t("campos.quartos")} type="number" min={MIN_QUARTOS} max={MAX_QUARTOS} step="1" placeholder={t("placeholders.quartos")} required value={form.quartos} onChange={(e) => set("quartos", e.target.value)} error={erros.quartos} />
+        <Campo id="apt-area" label={t("campos.areaTotal")} type="number" min={MIN_AREA_M2} max={MAX_AREA_M2} step="0.01" placeholder={t("placeholders.areaApt")} required value={form.areaMxComTotal} onChange={(e) => set("areaMxComTotal", e.target.value)} error={erros.areaMxComTotal} />
+        <Campo id="apt-obs" label={t("campos.observacoes")} placeholder={t("placeholders.opcional")} optional value={form.observacoes} onChange={(e) => set("observacoes", e.target.value)} />
       </div>
       {erro && <p className="text-error text-xs">{erro}</p>}
       {todosLotados && !inicial && (
         <p className="text-xs text-on-surface-variant bg-surface-container-highest/30 rounded-xl px-4 py-3">
-          Todos os andares deste bloco já atingiram o limite de apartamentos.
+          {t("apartamentos.todosLotados")}
         </p>
       )}
       <div className="flex gap-3 pt-2">
-        <Botao type="submit" disabled={todosLotados && !inicial}>{inicial ? "Salvar alterações" : "Cadastrar apartamento"}</Botao>
+        <Botao type="submit" disabled={todosLotados && !inicial}>{inicial ? t("acoes.salvarAlteracoes") : t("apartamentos.cadastrar")}</Botao>
         <button type="button" onClick={onCancelar} className="flex-1 py-4 rounded-full border border-outline-variant/30 text-on-surface-variant hover:bg-veu/5 font-semibold transition-all cursor-pointer">
-          Cancelar
+          {t("comum:acoes.cancelar")}
         </button>
       </div>
     </form>
@@ -1204,16 +1214,17 @@ function FormApartamento({ inicial, blocos, apartamentos = [], onSalvar, onCance
 }
 
 function DetalhesApartamento({ apt, onEditar, onToggleAtivo }) {
+  const { t } = useTranslation("estruturas");
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
         {[
-          { label: "Bloco", value: apt.blocoNome ?? "—" },
-          { label: "Número", value: apt.numero },
-          { label: "Andar", value: apt.andar ?? "—" },
-          { label: "Quartos", value: apt.quartos ?? "—" },
-          { label: "Área (m²)", value: apt.areaMxComTotal ?? "—" },
-          { label: "Observações", value: apt.observacoes || "—" },
+          { label: t("campos.bloco"), value: apt.blocoNome ?? "—" },
+          { label: t("campos.numero"), value: apt.numero },
+          { label: t("campos.andar"), value: apt.andar ?? "—" },
+          { label: t("campos.quartos"), value: apt.quartos ?? "—" },
+          { label: t("campos.areaM2"), value: apt.areaMxComTotal ?? "—" },
+          { label: t("campos.observacoes"), value: apt.observacoes || "—" },
         ].map((item) => (
           <div key={item.label} className="bg-surface-container-highest/20 rounded-xl p-3">
             <p className="text-on-surface-variant text-xs uppercase tracking-wider mb-1">{item.label}</p>
@@ -1223,7 +1234,7 @@ function DetalhesApartamento({ apt, onEditar, onToggleAtivo }) {
       </div>
       <div className="flex flex-col sm:flex-row gap-3 pt-1">
         <button onClick={onEditar} className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-primary/30 text-primary hover:bg-primary/10 text-sm font-semibold transition-all cursor-pointer">
-          <Icone name="edit" className="text-lg" /> Editar
+          <Icone name="edit" className="text-lg" /> {t("comum:acoes.editar")}
         </button>
         <button
           onClick={onToggleAtivo}
@@ -1232,7 +1243,7 @@ function DetalhesApartamento({ apt, onEditar, onToggleAtivo }) {
           }`}
         >
           <Icone name={apt.ativo ? "do_not_disturb_on" : "check_circle"} className="text-lg" />
-          {apt.ativo ? "Desativar" : "Ativar"}
+          {apt.ativo ? t("acoes.desativar") : t("acoes.ativar")}
         </button>
       </div>
     </div>
@@ -1243,6 +1254,7 @@ function DetalhesApartamento({ apt, onEditar, onToggleAtivo }) {
 // ABA: ÁREAS COMUNS
 // ════════════════════════════════════════════
 function AbaAreasComuns({ condominioId, condominioNome }) {
+  const { t } = useTranslation("estruturas");
   const toast = useToast();
   const [areas, setAreas] = useState([]);
   const [carregando, setCarregando] = useState(true);
@@ -1275,9 +1287,9 @@ function AbaAreasComuns({ condominioId, condominioNome }) {
       const res = await areaComunApi.cadastrar({ ...dados, condominioId });
       setAreas((prev) => [res.data, ...prev]);
       setCriando(false);
-      toast.success("Área comum criada com sucesso.");
+      toast.success(t("areas.toast.criada"));
     } catch (err) {
-      toast.error(err.response?.data?.erro || "Erro ao criar área comum.");
+      toast.error(err.response?.data?.erro || t("areas.toast.erroCriar"));
     }
   }
 
@@ -1286,9 +1298,9 @@ function AbaAreasComuns({ condominioId, condominioNome }) {
       const res = await areaComunApi.atualizar(id, dados);
       setAreas((prev) => prev.map((a) => (a.id === id ? res.data : a)));
       setEditando(null);
-      toast.success("Área comum atualizada.");
+      toast.success(t("areas.toast.atualizada"));
     } catch (err) {
-      toast.error(err.response?.data?.erro || "Erro ao atualizar área comum.");
+      toast.error(err.response?.data?.erro || t("areas.toast.erroAtualizar"));
     }
   }
 
@@ -1302,9 +1314,9 @@ function AbaAreasComuns({ condominioId, condominioNome }) {
       setAreas((prev) =>
         prev.map((a) => (a.id === area.id ? { ...a, ativo: !a.ativo } : a)),
       );
-      toast.success(area.ativo ? "Área desativada." : "Área reativada.");
+      toast.success(area.ativo ? t("areas.toast.desativada") : t("areas.toast.reativada"));
     } catch (err) {
-      toast.error(err.response?.data?.erro || "Erro ao alterar status da área comum.");
+      toast.error(err.response?.data?.erro || t("areas.toast.erroStatus"));
     }
   }
 
@@ -1317,15 +1329,15 @@ function AbaAreasComuns({ condominioId, condominioNome }) {
         <div className="flex flex-wrap gap-3 w-full sm:w-auto">
           <div className="glass-panel rounded-2xl px-4 sm:px-5 py-3 text-center flex-1 sm:flex-none min-w-[92px]">
             <p className="text-2xl font-headline font-bold text-on-surface">{areas.length}</p>
-            <p className="text-on-surface-variant text-xs uppercase tracking-wider">Total</p>
+            <p className="text-on-surface-variant text-xs uppercase tracking-wider">{t("resumo.total")}</p>
           </div>
           <div className="glass-panel rounded-2xl px-4 sm:px-5 py-3 text-center flex-1 sm:flex-none min-w-[92px]">
             <p className="text-2xl font-headline font-bold text-primary">{areas.filter((a) => a.ativo).length}</p>
-            <p className="text-on-surface-variant text-xs uppercase tracking-wider">Ativas</p>
+            <p className="text-on-surface-variant text-xs uppercase tracking-wider">{t("resumo.ativas")}</p>
           </div>
           <div className="glass-panel rounded-2xl px-4 sm:px-5 py-3 text-center flex-1 sm:flex-none min-w-[92px]">
             <p className="text-2xl font-headline font-bold text-secondary">{areas.filter((a) => a.podeReservar).length}</p>
-            <p className="text-on-surface-variant text-xs uppercase tracking-wider">Reserváveis</p>
+            <p className="text-on-surface-variant text-xs uppercase tracking-wider">{t("resumo.reservaveis")}</p>
           </div>
         </div>
         <button
@@ -1335,7 +1347,7 @@ function AbaAreasComuns({ condominioId, condominioNome }) {
           }`}
         >
           <Icone name={criando ? "close" : "add"} className="text-xl" />
-          {criando ? "Cancelar" : "Nova Área Comum"}
+          {criando ? t("comum:acoes.cancelar") : t("areas.nova")}
         </button>
       </div>
 
@@ -1346,7 +1358,7 @@ function AbaAreasComuns({ condominioId, condominioNome }) {
             <div className="w-10 h-10 shrink-0 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
               <Icone name="pool" className="text-primary" />
             </div>
-            <h2 className="font-headline text-xl font-bold text-on-surface">Nova Área Comum</h2>
+            <h2 className="font-headline text-xl font-bold text-on-surface">{t("areas.nova")}</h2>
           </div>
           <FormAreaComum onSalvar={handleCriar} onCancelar={() => setCriando(false)} condominioNome={condominioNome} />
         </div>
@@ -1357,7 +1369,7 @@ function AbaAreasComuns({ condominioId, condominioNome }) {
         <div className="flex-1">
           <Campo
             id="busca-area"
-            placeholder="Buscar por nome ou localização..."
+            placeholder={t("areas.buscaPlaceholder")}
             icon="search"
             value={busca}
             onChange={(e) => setBusca(e.target.value)}
@@ -1369,9 +1381,9 @@ function AbaAreasComuns({ condominioId, condominioNome }) {
             onChange={(e) => setFiltroTipo(e.target.value)}
             className="w-full bg-surface-container-highest/40 border-none rounded-xl py-4 px-4 text-on-surface focus:ring-2 focus:ring-primary/50 focus:outline-none backdrop-blur-sm transition-all"
           >
-            <option value="todos">Todos os tipos</option>
-            {tiposPresentes.map((t) => (
-              <option key={t} value={t}>{t.replace(/_/g, " ")}</option>
+            <option value="todos">{t("areas.todosTipos")}</option>
+            {tiposPresentes.map((tipo) => (
+              <option key={tipo} value={tipo}>{t(`tiposArea.${tipo}`, { defaultValue: tipo.replace(/_/g, " ") })}</option>
             ))}
           </select>
         </div>
@@ -1379,11 +1391,11 @@ function AbaAreasComuns({ condominioId, condominioNome }) {
 
       {/* Lista */}
       {carregando ? (
-        <div className="glass-panel rounded-3xl p-6 sm:p-10 text-center text-on-surface-variant">Carregando...</div>
+        <div className="glass-panel rounded-3xl p-6 sm:p-10 text-center text-on-surface-variant">{t("geral.carregando")}</div>
       ) : (
         <div className="space-y-3">
           {filtrados.length === 0 && (
-            <div className="glass-panel rounded-3xl p-6 sm:p-10 text-center text-on-surface-variant">Nenhuma área comum encontrada.</div>
+            <div className="glass-panel rounded-3xl p-6 sm:p-10 text-center text-on-surface-variant">{t("areas.vazio")}</div>
           )}
           {filtrados.map((area) => (
             <div key={area.id} className="glass-panel rounded-3xl overflow-hidden">
@@ -1396,20 +1408,20 @@ function AbaAreasComuns({ condominioId, condominioNome }) {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-on-surface font-semibold truncate">{area.nome}</p>
-                  <p className="text-on-surface-variant text-sm truncate">{area.tipo?.replace(/_/g, " ")} {area.localizacao ? `· ${area.localizacao}` : ""}</p>
+                  <p className="text-on-surface-variant text-sm truncate">{area.tipo ? t(`tiposArea.${area.tipo}`, { defaultValue: area.tipo.replace(/_/g, " ") }) : ""} {area.localizacao ? `· ${area.localizacao}` : ""}</p>
                 </div>
                 <div className="hidden sm:flex gap-6 text-sm shrink-0">
                   {[
-                    { label: "Capacidade", value: area.capacidadeMaxima ?? "—" },
-                    { label: "Área (m²)", value: area.area ?? "—" },
-                    { label: "Reservável", value: area.podeReservar ? "Sim" : "Não" },
+                    { label: t("campos.capacidade"), value: area.capacidadeMaxima ?? "—" },
+                    { label: t("campos.areaM2"), value: area.area ?? "—" },
+                    { label: t("campos.reservavel"), value: area.podeReservar ? t("comum:acoes.sim") : t("comum:acoes.nao") },
           ...(area.podeReservar
-            ? [{ label: "Aprovação", value: area.exigeAprovacao ? "Síndico" : "Automática" },
-                         { label: "Antecedência", value: area.antecedenciaMinimaHoras > 0 ? `${area.antecedenciaMinimaHoras}h` : "Nenhuma" }]
+            ? [{ label: t("campos.aprovacao"), value: area.exigeAprovacao ? t("areas.aprovacaoSindico") : t("areas.aprovacaoAutomatica") },
+                         { label: t("campos.antecedencia"), value: area.antecedenciaMinimaHoras > 0 ? t("areas.horasCurto", { horas: area.antecedenciaMinimaHoras }) : t("areas.antecedenciaNenhuma") }]
             : []),
                     ...(area.podeReservar
-                      ? [{ label: "Aprovação", value: area.exigeAprovacao ? "Síndico" : "Automática" },
-                         { label: "Antecedência", value: area.antecedenciaMinimaHoras > 0 ? `${area.antecedenciaMinimaHoras}h` : "Nenhuma" }]
+                      ? [{ label: t("campos.aprovacao"), value: area.exigeAprovacao ? t("areas.aprovacaoSindico") : t("areas.aprovacaoAutomatica") },
+                         { label: t("campos.antecedencia"), value: area.antecedenciaMinimaHoras > 0 ? t("areas.horasCurto", { horas: area.antecedenciaMinimaHoras }) : t("areas.antecedenciaNenhuma") }]
                       : []),
                   ].map((col) => (
                     <div key={col.label} className="text-center">
@@ -1419,7 +1431,7 @@ function AbaAreasComuns({ condominioId, condominioNome }) {
                   ))}
                 </div>
                 <span className={`shrink-0 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider ${statusStyle(area.ativo)}`}>
-                  {area.ativo ? "ativa" : "inativa"}
+                  {area.ativo ? t("status.ativa") : t("status.inativa")}
                 </span>
                 <Icone
                   name="expand_more"
@@ -1446,7 +1458,7 @@ function AbaAreasComuns({ condominioId, condominioNome }) {
                           className="mt-3 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold border border-outline-variant/30 text-on-surface-variant hover:bg-veu/5 transition-all cursor-pointer"
                         >
                           <Icone name="schedule" className="text-base" />
-                          Horário de funcionamento
+                          {t("areas.horarioFuncionamento")}
                         </button>
                       )}
                     </>
@@ -1469,6 +1481,7 @@ function AbaAreasComuns({ condominioId, condominioNome }) {
 }
 
 function FormAreaComum({ inicial, onSalvar, onCancelar, condominioNome }) {
+  const { t } = useTranslation("estruturas");
   const [form, setForm] = useState({
     nome: inicial?.nome || "",
     tipo: inicial?.tipo || TIPOS_AREA[0],
@@ -1490,25 +1503,25 @@ function FormAreaComum({ inicial, onSalvar, onCancelar, condominioNome }) {
 
   function validate() {
     const e = {};
-    if (!form.nome.trim()) e.nome = "Nome é obrigatório.";
+    if (!form.nome.trim()) e.nome = t("validacao.nomeObrigatorio");
 
     const capacidade = form.capacidadeMaxima !== "" ? Number(form.capacidadeMaxima) : null;
     if (capacidade === null) {
-      e.capacidadeMaxima = "Capacidade máxima é obrigatória.";
+      e.capacidadeMaxima = t("validacao.capacidadeObrigatoria");
     } else if (!Number.isInteger(capacidade) || capacidade < MIN_CAPACIDADE || capacidade > MAX_CAPACIDADE) {
-      e.capacidadeMaxima = `A capacidade máxima deve estar entre ${MIN_CAPACIDADE} e ${MAX_CAPACIDADE} pessoas.`;
+      e.capacidadeMaxima = t("validacao.capacidadeFaixa", { min: MIN_CAPACIDADE, max: MAX_CAPACIDADE });
     }
 
     const antecedencia = Number(form.antecedenciaMinimaHoras || 0);
     if (!Number.isInteger(antecedencia) || antecedencia < 0 || antecedencia > MAX_ANTECEDENCIA_HORAS) {
-      e.antecedenciaMinimaHoras = `Informe de 0 a ${MAX_ANTECEDENCIA_HORAS} horas (0 = sem exigência).`;
+      e.antecedenciaMinimaHoras = t("validacao.antecedenciaFaixa", { max: MAX_ANTECEDENCIA_HORAS });
     }
 
     const area = form.area !== "" ? Number(form.area) : null;
     if (area === null) {
-      e.area = "Área é obrigatória.";
+      e.area = t("validacao.areaObrigatoria");
     } else if (area < MIN_AREA_COMUM_M2 || area > MAX_AREA_COMUM_M2) {
-      e.area = `A área deve estar entre ${MIN_AREA_COMUM_M2} e ${MAX_AREA_COMUM_M2} m².`;
+      e.area = t("validacao.areaFaixa", { min: MIN_AREA_COMUM_M2, max: MAX_AREA_COMUM_M2 });
     }
 
     return e;
@@ -1540,7 +1553,7 @@ function FormAreaComum({ inicial, onSalvar, onCancelar, condominioNome }) {
         {condominioNome && (
           <div className="space-y-2">
             <p className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant ml-1">
-              Condomínio <span className="text-red-500">*</span>
+              {t("campos.condominio")} <span className="text-red-500">*</span>
             </p>
             <div className="w-full bg-surface-container-highest/20 rounded-xl py-4 px-4 text-on-surface flex items-center gap-2 border border-outline-variant/10">
               <Icone name="domain" className="text-primary text-lg shrink-0" />
@@ -1549,11 +1562,11 @@ function FormAreaComum({ inicial, onSalvar, onCancelar, condominioNome }) {
           </div>
         )}
 
-        <Campo id="area-nome" label="Nome" placeholder="Ex: Piscina Principal" required value={form.nome} onChange={(e) => set("nome", e.target.value)} error={erros.nome} />
+        <Campo id="area-nome" label={t("campos.nome")} placeholder={t("placeholders.areaNome")} required value={form.nome} onChange={(e) => set("nome", e.target.value)} error={erros.nome} />
 
         <div className="space-y-2">
           <label htmlFor="area-tipo" className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant ml-1">
-            Tipo
+            {t("campos.tipo")}
           </label>
           <select
             id="area-tipo"
@@ -1561,17 +1574,17 @@ function FormAreaComum({ inicial, onSalvar, onCancelar, condominioNome }) {
             onChange={(e) => set("tipo", e.target.value)}
             className={selectCls}
           >
-            {TIPOS_AREA.map((t) => (
-              <option key={t} value={t}>{t.replace(/_/g, " ")}</option>
+            {TIPOS_AREA.map((tipo) => (
+              <option key={tipo} value={tipo}>{t(`tiposArea.${tipo}`)}</option>
             ))}
           </select>
         </div>
 
-        <Campo id="area-cap" label="Capacidade máxima (pessoas)" type="number" min={MIN_CAPACIDADE} max={MAX_CAPACIDADE} step="1" placeholder="Ex: 50" required value={form.capacidadeMaxima} onChange={(e) => set("capacidadeMaxima", e.target.value)} error={erros.capacidadeMaxima} />
-        <Campo id="area-m2" label="Área (m²)" type="number" min={MIN_AREA_COMUM_M2} max={MAX_AREA_COMUM_M2} step="0.01" placeholder="Ex: 120.00" required value={form.area} onChange={(e) => set("area", e.target.value)} error={erros.area} />
-        <Campo id="area-desc" label="Descrição" placeholder="Descreva a área comum" optional value={form.descricao} onChange={(e) => set("descricao", e.target.value)} />
-        <Campo id="area-local" label="Localização" placeholder="Ex: Térreo, ao lado da portaria" optional value={form.localizacao} onChange={(e) => set("localizacao", e.target.value)} />
-        <Campo id="area-obs" label="Observações" placeholder="Informações adicionais" optional value={form.observacoes} onChange={(e) => set("observacoes", e.target.value)} />
+        <Campo id="area-cap" label={t("campos.capacidadeMaxima")} type="number" min={MIN_CAPACIDADE} max={MAX_CAPACIDADE} step="1" placeholder={t("placeholders.capacidade")} required value={form.capacidadeMaxima} onChange={(e) => set("capacidadeMaxima", e.target.value)} error={erros.capacidadeMaxima} />
+        <Campo id="area-m2" label={t("campos.areaM2")} type="number" min={MIN_AREA_COMUM_M2} max={MAX_AREA_COMUM_M2} step="0.01" placeholder={t("placeholders.areaComum")} required value={form.area} onChange={(e) => set("area", e.target.value)} error={erros.area} />
+        <Campo id="area-desc" label={t("campos.descricao")} placeholder={t("placeholders.areaDescricao")} optional value={form.descricao} onChange={(e) => set("descricao", e.target.value)} />
+        <Campo id="area-local" label={t("campos.localizacao")} placeholder={t("placeholders.areaLocalizacao")} optional value={form.localizacao} onChange={(e) => set("localizacao", e.target.value)} />
+        <Campo id="area-obs" label={t("campos.observacoes")} placeholder={t("placeholders.areaObservacoes")} optional value={form.observacoes} onChange={(e) => set("observacoes", e.target.value)} />
 
         <div className="flex items-center gap-3 mt-4">
           <button
@@ -1582,7 +1595,7 @@ function FormAreaComum({ inicial, onSalvar, onCancelar, condominioNome }) {
           >
             <span className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all duration-200 ${form.podeReservar ? "left-7" : "left-1"}`} />
           </button>
-          <span className="text-sm text-on-surface-variant font-medium">Permite reservas</span>
+          <span className="text-sm text-on-surface-variant font-medium">{t("areas.permiteReservas")}</span>
         </div>
 
         {/* Só faz sentido onde há reserva; escondido, o toggle ficaria ligado
@@ -1599,11 +1612,10 @@ function FormAreaComum({ inicial, onSalvar, onCancelar, condominioNome }) {
             </button>
             <div className="min-w-0">
               <span className="text-sm text-on-surface-variant font-medium block">
-                Exige aprovação do síndico
+                {t("areas.exigeAprovacao")}
               </span>
               <span className="text-xs text-on-surface-variant/80">
-                As solicitações ficam pendentes até serem aprovadas e expiram 24h antes do início
-                se ninguém decidir.
+                {t("areas.exigeAprovacaoDescricao")}
               </span>
             </div>
           </div>
@@ -1615,7 +1627,7 @@ function FormAreaComum({ inicial, onSalvar, onCancelar, condominioNome }) {
           <div className="sm:col-span-2">
             <Campo
               id="area-antecedencia"
-              label="Antecedência mínima para reservar (horas)"
+              label={t("campos.antecedenciaMinima")}
               type="number"
               min={0}
               max={MAX_ANTECEDENCIA_HORAS}
@@ -1633,9 +1645,9 @@ function FormAreaComum({ inicial, onSalvar, onCancelar, condominioNome }) {
         )}
       </div>
       <div className="flex gap-3 pt-2">
-        <Botao type="submit">{inicial ? "Salvar alterações" : "Cadastrar área comum"}</Botao>
+        <Botao type="submit">{inicial ? t("acoes.salvarAlteracoes") : t("areas.cadastrar")}</Botao>
         <button type="button" onClick={onCancelar} className="flex-1 py-4 rounded-full border border-outline-variant/30 text-on-surface-variant hover:bg-veu/5 font-semibold transition-all cursor-pointer">
-          Cancelar
+          {t("comum:acoes.cancelar")}
         </button>
       </div>
     </form>
@@ -1643,18 +1655,19 @@ function FormAreaComum({ inicial, onSalvar, onCancelar, condominioNome }) {
 }
 
 function DetalhesAreaComum({ area, onEditar, onToggleAtivo }) {
+  const { t } = useTranslation("estruturas");
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
         {[
-          { label: "Nome", value: area.nome },
-          { label: "Tipo", value: area.tipo?.replace(/_/g, " ") },
-          { label: "Localização", value: area.localizacao || "—" },
-          { label: "Capacidade", value: area.capacidadeMaxima ?? "—" },
-          { label: "Área (m²)", value: area.area ?? "—" },
-          { label: "Reservável", value: area.podeReservar ? "Sim" : "Não" },
-          { label: "Descrição", value: area.descricao || "—" },
-          { label: "Observações", value: area.observacoes || "—" },
+          { label: t("campos.nome"), value: area.nome },
+          { label: t("campos.tipo"), value: area.tipo ? t(`tiposArea.${area.tipo}`, { defaultValue: area.tipo.replace(/_/g, " ") }) : area.tipo },
+          { label: t("campos.localizacao"), value: area.localizacao || "—" },
+          { label: t("campos.capacidade"), value: area.capacidadeMaxima ?? "—" },
+          { label: t("campos.areaM2"), value: area.area ?? "—" },
+          { label: t("campos.reservavel"), value: area.podeReservar ? t("comum:acoes.sim") : t("comum:acoes.nao") },
+          { label: t("campos.descricao"), value: area.descricao || "—" },
+          { label: t("campos.observacoes"), value: area.observacoes || "—" },
         ].map((item) => (
           <div key={item.label} className="bg-surface-container-highest/20 rounded-xl p-3">
             <p className="text-on-surface-variant text-xs uppercase tracking-wider mb-1">{item.label}</p>
@@ -1664,7 +1677,7 @@ function DetalhesAreaComum({ area, onEditar, onToggleAtivo }) {
       </div>
       <div className="flex flex-col sm:flex-row gap-3 pt-1">
         <button onClick={onEditar} className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-primary/30 text-primary hover:bg-primary/10 text-sm font-semibold transition-all cursor-pointer">
-          <Icone name="edit" className="text-lg" /> Editar
+          <Icone name="edit" className="text-lg" /> {t("comum:acoes.editar")}
         </button>
         <button
           onClick={onToggleAtivo}
@@ -1673,7 +1686,7 @@ function DetalhesAreaComum({ area, onEditar, onToggleAtivo }) {
           }`}
         >
           <Icone name={area.ativo ? "do_not_disturb_on" : "check_circle"} className="text-lg" />
-          {area.ativo ? "Desativar" : "Ativar"}
+          {area.ativo ? t("acoes.desativar") : t("acoes.ativar")}
         </button>
       </div>
     </div>
@@ -1684,6 +1697,7 @@ function DetalhesAreaComum({ area, onEditar, onToggleAtivo }) {
 // ABA: VAGAS
 // ════════════════════════════════════════════
 function AbaVagas({ condominioId }) {
+  const { t } = useTranslation("estruturas");
   const [vagas, setVagas] = useState([]);
   const [apartamentos, setApartamentos] = useState([]);
   const [carregando, setCarregando] = useState(true);
@@ -1731,7 +1745,7 @@ function AbaVagas({ condominioId }) {
       setCriando(false);
     } catch (err) {
       const d = err.response?.data;
-      setErroCriar(d?.mensagem || d?.message || "Erro ao criar vaga.");
+      setErroCriar(d?.mensagem || d?.message || t("vagas.erroCriar"));
     }
   }
 
@@ -1743,7 +1757,7 @@ function AbaVagas({ condominioId }) {
       setEditando(null);
     } catch (err) {
       const d = err.response?.data;
-      setErroEditar(d?.mensagem || d?.message || "Erro ao atualizar vaga.");
+      setErroEditar(d?.mensagem || d?.message || t("vagas.erroAtualizar"));
     }
   }
 
@@ -1769,15 +1783,15 @@ function AbaVagas({ condominioId }) {
         <div className="flex flex-wrap gap-3 w-full sm:w-auto">
           <div className="glass-panel rounded-2xl px-4 sm:px-5 py-3 text-center flex-1 sm:flex-none min-w-[92px]">
             <p className="text-2xl font-headline font-bold text-on-surface">{vagas.length}</p>
-            <p className="text-on-surface-variant text-xs uppercase tracking-wider">Total</p>
+            <p className="text-on-surface-variant text-xs uppercase tracking-wider">{t("resumo.total")}</p>
           </div>
           <div className="glass-panel rounded-2xl px-4 sm:px-5 py-3 text-center flex-1 sm:flex-none min-w-[92px]">
             <p className="text-2xl font-headline font-bold text-primary">{vagas.filter((v) => v.ativa).length}</p>
-            <p className="text-on-surface-variant text-xs uppercase tracking-wider">Ativas</p>
+            <p className="text-on-surface-variant text-xs uppercase tracking-wider">{t("resumo.ativas")}</p>
           </div>
           <div className="glass-panel rounded-2xl px-4 sm:px-5 py-3 text-center flex-1 sm:flex-none min-w-[92px]">
             <p className="text-2xl font-headline font-bold text-error">{vagas.filter((v) => !v.ativa).length}</p>
-            <p className="text-on-surface-variant text-xs uppercase tracking-wider">Inativas</p>
+            <p className="text-on-surface-variant text-xs uppercase tracking-wider">{t("resumo.inativas")}</p>
           </div>
         </div>
         <button
@@ -1787,7 +1801,7 @@ function AbaVagas({ condominioId }) {
           }`}
         >
           <Icone name={criando ? "close" : "add"} className="text-xl" />
-          {criando ? "Cancelar" : "Nova Vaga"}
+          {criando ? t("comum:acoes.cancelar") : t("vagas.nova")}
         </button>
       </div>
 
@@ -1798,7 +1812,7 @@ function AbaVagas({ condominioId }) {
             <div className="w-10 h-10 shrink-0 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
               <Icone name="local_parking" className="text-primary" />
             </div>
-            <h2 className="font-headline text-xl font-bold text-on-surface">Nova Vaga</h2>
+            <h2 className="font-headline text-xl font-bold text-on-surface">{t("vagas.nova")}</h2>
           </div>
           <FormVaga
             apartamentos={apartamentos}
@@ -1814,7 +1828,7 @@ function AbaVagas({ condominioId }) {
         <div className="flex-1">
           <Campo
             id="busca-vaga"
-            placeholder="Buscar por número ou localização..."
+            placeholder={t("vagas.buscaPlaceholder")}
             icon="search"
             value={busca}
             onChange={(e) => setBusca(e.target.value)}
@@ -1826,8 +1840,8 @@ function AbaVagas({ condominioId }) {
             onChange={(e) => setFiltroAptId(e.target.value)}
             className="w-full bg-surface-container-highest/40 border-none rounded-xl py-4 px-4 text-on-surface focus:ring-2 focus:ring-primary/50 focus:outline-none backdrop-blur-sm transition-all"
           >
-            <option value="todos">Todos</option>
-            <option value="sem-apt">Sem apartamento</option>
+            <option value="todos">{t("vagas.todos")}</option>
+            <option value="sem-apt">{t("vagas.semApartamento")}</option>
             {apartamentos.map((a) => (
               <option key={a.id} value={a.id}>{formatarUnidade(a.blocoNome, a.numero)}</option>
             ))}
@@ -1837,11 +1851,11 @@ function AbaVagas({ condominioId }) {
 
       {/* Lista */}
       {carregando ? (
-        <div className="glass-panel rounded-3xl p-6 sm:p-10 text-center text-on-surface-variant">Carregando...</div>
+        <div className="glass-panel rounded-3xl p-6 sm:p-10 text-center text-on-surface-variant">{t("geral.carregando")}</div>
       ) : (
         <div className="space-y-3">
           {filtrados.length === 0 && (
-            <div className="glass-panel rounded-3xl p-6 sm:p-10 text-center text-on-surface-variant">Nenhuma vaga encontrada.</div>
+            <div className="glass-panel rounded-3xl p-6 sm:p-10 text-center text-on-surface-variant">{t("vagas.vazio")}</div>
           )}
           {filtrados.map((vaga) => (
             <div key={vaga.id} className="glass-panel rounded-3xl overflow-hidden">
@@ -1853,7 +1867,7 @@ function AbaVagas({ condominioId }) {
                   <Icone name="local_parking" className="text-primary" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-on-surface font-semibold truncate">Vaga {vaga.numero}</p>
+                  <p className="text-on-surface font-semibold truncate">{t("vagas.vaga", { numero: vaga.numero })}</p>
                   <p className="text-on-surface-variant text-sm truncate">
                     {formatarUnidade(aptMap[vaga.apartamentoId]?.blocoNome, aptMap[vaga.apartamentoId]?.numero ?? vaga.apartamentoNumero)}
                     {vaga.localizacao ? ` · ${vaga.localizacao}` : ""}
@@ -1861,8 +1875,8 @@ function AbaVagas({ condominioId }) {
                 </div>
                 <div className="hidden sm:flex gap-6 text-sm shrink-0">
                   {[
-                    { label: "Tipo", value: vaga.tipo || "—" },
-                    { label: "Apartamento", value: formatarUnidade(aptMap[vaga.apartamentoId]?.blocoNome, aptMap[vaga.apartamentoId]?.numero ?? vaga.apartamentoNumero) },
+                    { label: t("campos.tipo"), value: vaga.tipo || "—" },
+                    { label: t("campos.apartamento"), value: formatarUnidade(aptMap[vaga.apartamentoId]?.blocoNome, aptMap[vaga.apartamentoId]?.numero ?? vaga.apartamentoNumero) },
                   ].map((col) => (
                     <div key={col.label} className="text-center">
                       <p className="text-on-surface-variant text-xs uppercase tracking-wider">{col.label}</p>
@@ -1871,7 +1885,7 @@ function AbaVagas({ condominioId }) {
                   ))}
                 </div>
                 <span className={`shrink-0 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider ${statusStyle(vaga.ativa)}`}>
-                  {vaga.ativa ? "ativa" : "inativa"}
+                  {vaga.ativa ? t("status.ativa") : t("status.inativa")}
                 </span>
                 <Icone
                   name="expand_more"
@@ -1908,6 +1922,7 @@ function AbaVagas({ condominioId }) {
 }
 
 function FormVaga({ inicial, apartamentos, onSalvar, onCancelar, erro }) {
+  const { t } = useTranslation("estruturas");
   const [form, setForm] = useState({
     numero: inicial?.numero || "",
     localizacao: inicial?.localizacao || "",
@@ -1927,39 +1942,39 @@ function FormVaga({ inicial, apartamentos, onSalvar, onCancelar, erro }) {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <Campo
           id="vaga-numero"
-          label="Número"
-          placeholder="Ex: 12"
+          label={t("campos.numero")}
+          placeholder={t("placeholders.vagaNumero")}
           required
           value={form.numero}
           onChange={(e) => set("numero", e.target.value)}
         />
         <Campo
           id="vaga-local"
-          label="Localização"
-          placeholder="Ex: Setor A - Térreo"
+          label={t("campos.localizacao")}
+          placeholder={t("placeholders.vagaLocalizacao")}
           value={form.localizacao}
           onChange={(e) => set("localizacao", e.target.value)}
         />
         <div className="space-y-2">
-          <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant ml-1">Tipo</label>
+          <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant ml-1">{t("campos.tipo")}</label>
           <select
             value={form.tipo}
             onChange={(e) => set("tipo", e.target.value)}
             className="w-full bg-surface-container-highest/40 border-none rounded-xl py-4 px-4 text-on-surface focus:ring-2 focus:ring-primary/50 focus:outline-none backdrop-blur-sm transition-all"
           >
-            <option value="">Selecione um tipo</option>
-            <option value="Coberta">Coberta</option>
-            <option value="Descoberta">Descoberta</option>
+            <option value="">{t("vagas.selecioneTipo")}</option>
+            <option value="Coberta">{t("vagas.tipos.coberta")}</option>
+            <option value="Descoberta">{t("vagas.tipos.descoberta")}</option>
           </select>
         </div>
         <div className="space-y-2">
-          <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant ml-1">Apartamento (opcional)</label>
+          <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant ml-1">{t("vagas.apartamentoOpcional")}</label>
           <select
             value={aptId}
             onChange={(e) => setAptId(e.target.value)}
             className="w-full bg-surface-container-highest/40 border-none rounded-xl py-4 px-4 text-on-surface focus:ring-2 focus:ring-primary/50 focus:outline-none backdrop-blur-sm transition-all"
           >
-            <option value="">Sem apartamento</option>
+            <option value="">{t("vagas.semApartamento")}</option>
             {apartamentos.map((a) => (
               <option key={a.id} value={a.id}>{formatarUnidade(a.blocoNome, a.numero)}</option>
             ))}
@@ -1968,13 +1983,13 @@ function FormVaga({ inicial, apartamentos, onSalvar, onCancelar, erro }) {
       </div>
       {erro && <p className="text-error text-xs">{erro}</p>}
       <div className="flex gap-3 pt-2">
-        <Botao type="submit">{inicial ? "Salvar alterações" : "Cadastrar vaga"}</Botao>
+        <Botao type="submit">{inicial ? t("acoes.salvarAlteracoes") : t("vagas.cadastrar")}</Botao>
         <button
           type="button"
           onClick={onCancelar}
           className="flex-1 py-4 rounded-full border border-outline-variant/30 text-on-surface-variant hover:bg-veu/5 font-semibold transition-all cursor-pointer"
         >
-          Cancelar
+          {t("comum:acoes.cancelar")}
         </button>
       </div>
     </form>
@@ -1982,14 +1997,15 @@ function FormVaga({ inicial, apartamentos, onSalvar, onCancelar, erro }) {
 }
 
 function DetalhesVaga({ vaga, blocoNome, onEditar, onToggleAtivo }) {
+  const { t } = useTranslation("estruturas");
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: "Número", value: vaga.numero },
-          { label: "Tipo", value: vaga.tipo || "—" },
-          { label: "Localização", value: vaga.localizacao || "—" },
-          { label: "Apartamento", value: formatarUnidade(blocoNome, vaga.apartamentoNumero) },
+          { label: t("campos.numero"), value: vaga.numero },
+          { label: t("campos.tipo"), value: vaga.tipo || "—" },
+          { label: t("campos.localizacao"), value: vaga.localizacao || "—" },
+          { label: t("campos.apartamento"), value: formatarUnidade(blocoNome, vaga.apartamentoNumero) },
         ].map((item) => (
           <div key={item.label} className="bg-surface-container-highest/20 rounded-xl p-3">
             <p className="text-on-surface-variant text-xs uppercase tracking-wider mb-1">{item.label}</p>
@@ -2002,7 +2018,7 @@ function DetalhesVaga({ vaga, blocoNome, onEditar, onToggleAtivo }) {
           onClick={onEditar}
           className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-primary/30 text-primary hover:bg-primary/10 text-sm font-semibold transition-all cursor-pointer"
         >
-          <Icone name="edit" className="text-lg" /> Editar
+          <Icone name="edit" className="text-lg" /> {t("comum:acoes.editar")}
         </button>
         <button
           onClick={onToggleAtivo}
@@ -2011,7 +2027,7 @@ function DetalhesVaga({ vaga, blocoNome, onEditar, onToggleAtivo }) {
           }`}
         >
           <Icone name={vaga.ativa ? "do_not_disturb_on" : "check_circle"} className="text-lg" />
-          {vaga.ativa ? "Desativar" : "Ativar"}
+          {vaga.ativa ? t("acoes.desativar") : t("acoes.ativar")}
         </button>
       </div>
     </div>

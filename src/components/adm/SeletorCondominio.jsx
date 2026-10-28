@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Icone } from "../icones/Icone";
 
 const SELECT_CLS =
@@ -26,6 +27,7 @@ export function SeletorCondominio({
   readonlyClassName,
   nomeAlternativo,
 }) {
+  const { t } = useTranslation("condominios");
   const nomeSelecionado =
     condominios.find((c) => c.id === value)?.nome ?? nomeAlternativo ?? value ?? "—";
 
@@ -37,7 +39,7 @@ export function SeletorCondominio({
       <div className="flex items-center gap-2 px-4 py-3 rounded-xl bg-surface-container-highest/30">
         <Icone name="domain" className="text-primary text-base shrink-0" />
         <span className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant mr-1">
-          Condomínio:
+          {t("seletor.rotulo")}
         </span>
         <span className="text-sm font-semibold text-on-surface">{nomeSelecionado}</span>
       </div>
@@ -51,7 +53,7 @@ export function SeletorCondominio({
       required
       className={selectClassName ?? SELECT_CLS}
     >
-      <option value="">— Selecione o condomínio —</option>
+      <option value="">{t("seletor.placeholder")}</option>
       {condominios.map((c) => (
         <option key={c.id} value={c.id}>{c.nome}</option>
       ))}

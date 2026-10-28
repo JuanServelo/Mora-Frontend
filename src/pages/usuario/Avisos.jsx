@@ -6,11 +6,13 @@ import { useNotificacoes } from "../../contexts/NotificacoesContext";
 import { formatarData } from "../../utils/datas";
 import { useAuth } from "../../contexts/AuthContext";
 import { usePlano } from "../../contexts/PlanoContext";
+import { useTranslation } from "react-i18next";
+import { idiomaAtual } from "../../i18n";
 
 const FILTROS = [
-  { id: "novos", rotulo: "Novos" },
-  { id: "lidos", rotulo: "Já lidos" },
-  { id: "todos", rotulo: "Todos" },
+  { id: "novos", rotuloKey: "morador.filtros.novos" },
+  { id: "lidos", rotuloKey: "morador.filtros.lidos" },
+  { id: "todos", rotuloKey: "morador.filtros.todos" },
 ];
 
 /**
@@ -28,6 +30,7 @@ export function Avisos() {
   const { usuario } = useAuth();
   const { hasModulo, carregando: planoCarregando } = usePlano();
   const podeLerAvisos = usuario?.perfil === "ADMIN_GERAL" || hasModulo("comunicacao");
+  const { t } = useTranslation("avisos");
   const { buscar: recarregarSino } = useNotificacoes();
 
   const [avisos, setAvisos] = useState([]);
@@ -43,11 +46,11 @@ export function Avisos() {
       setAvisos(data.avisos ?? []);
       setErro("");
     } catch (e) {
-      setErro(e.response?.data?.mensagem ?? "Não foi possível carregar os avisos.");
+      setErro(e.response?.data?.mensagem ?? t("morador.erroCarregar"));
     } finally {
       setCarregando(false);
     }
-  }, [podeLerAvisos, usuario?.id, usuario?.condominioId]);
+  }, [podeLerAvisos, usuario?.id, usuario?.condominioId, t]);
 
   useEffect(() => { carregar(); }, [carregar]);
 
@@ -94,7 +97,7 @@ export function Avisos() {
       );
       recarregarSino();
     } catch (e) {
-      setErro(e.response?.data?.mensagem ?? "Não foi possível registrar a leitura.");
+      setErro(e.response?.data?.mensagem ?? t("morador.erroLeitura"));
     }
   }
 
@@ -107,11 +110,11 @@ export function Avisos() {
     <div className="min-h-screen w-full pt-4 pb-24 px-4 sm:px-6">
       <div className="max-w-2xl mx-auto space-y-6">
         <header className="pt-2">
-          <h1 className="font-headline text-3xl font-bold text-on-surface">Avisos</h1>
+          <h1 className="font-headline text-3xl font-bold text-on-surface">{t("morador.titulo")}</h1>
           <p className="text-on-surface-variant text-sm mt-1">
             {pendentes > 0
-              ? `${pendentes} aviso${pendentes > 1 ? "s" : ""} que você ainda não abriu`
-              : "Você está em dia com os comunicados"}
+              ? t("morador.pendentes", { count: pendentes })
+              : t("morador.emDia")}
           </p>
         </header>
 
@@ -126,7 +129,7 @@ export function Avisos() {
                   : "text-on-surface-variant hover:text-on-surface hover:bg-veu/5"
               }`}
             >
-              {f.rotulo}
+              {t(f.rotuloKey)}
               {f.id === "novos" && pendentes > 0 && (
                 <span className="min-w-5 h-5 px-1.5 rounded-full bg-primary text-on-primary text-[10px] font-bold flex items-center justify-center">
                   {pendentes}
@@ -143,7 +146,7 @@ export function Avisos() {
           </div>
         )}
 
-        {carregando && <p className="text-sm text-on-surface-variant">Carregando…</p>}
+        {carregando && <p className="text-sm text-on-surface-variant">{t("comum:estado.carregando")}</p>}
 
         {!carregando && visiveis.length === 0 && !erro && (
           <div className="glass-panel rounded-3xl py-20 flex flex-col items-center gap-4 text-center px-6">
@@ -153,15 +156,15 @@ export function Avisos() {
             <div>
               <p className="font-semibold text-on-surface mb-1">
                 {filtro === "novos"
-                  ? "Nenhum aviso novo"
+                  ? t("morador.vazio.novos")
                   : filtro === "lidos"
-                    ? "Você ainda não leu nenhum aviso"
-                    : "Nenhum aviso ativo"}
+                    ? t("morador.vazio.lidos")
+                    : t("morador.vazio.todos")}
               </p>
               <p className="text-xs text-on-surface-variant">
                 {filtro === "novos"
-                  ? "Os que você já abriu ficam em “Já lidos”."
-                  : "Comunicados da administração aparecem aqui."}
+                  ? t("morador.vazio.dicaNovos")
+                  : t("morador.vazio.dicaOutros")}
               </p>
             </div>
           </div>
@@ -181,6 +184,7 @@ export function Avisos() {
 }
 
 function CartaoAviso({ aviso, aberto, aoAlternar }) {
+  const { t } = useTranslation("avisos");
   return (
     <article
       className={`glass-panel rounded-3xl overflow-hidden transition ${
@@ -209,8 +213,8 @@ function CartaoAviso({ aviso, aberto, aoAlternar }) {
           </h2>
           <p className="text-[11px] text-on-surface-variant mt-0.5">
             {aviso.autor ? `${aviso.autor} · ` : ""}
-            até {formatarData(aviso.dataFim)}
-            {aviso.imagemUrl && " · com imagem"}
+            {t("morador.cartao.ate", { data: formatarData(aviso.dataFim) })}
+            {aviso.imagemUrl && t("morador.cartao.comImagem")}
           </p>
         </div>
 
@@ -243,10 +247,11 @@ function CartaoAviso({ aviso, aberto, aoAlternar }) {
                   dataFim, que são datas puras. Recortar o ISO de um timestamp
                   mostraria a hora em UTC — três horas à frente, e o dia errado
                   perto da meia-noite. */}
-              Leitura registrada em{" "}
-              {new Date(aviso.lidoEm).toLocaleString("pt-BR", {
-                day: "2-digit", month: "2-digit", year: "numeric",
-                hour: "2-digit", minute: "2-digit",
+              {t("morador.cartao.leituraRegistrada", {
+                data: new Date(aviso.lidoEm).toLocaleString(idiomaAtual(), {
+                  day: "2-digit", month: "2-digit", year: "numeric",
+                  hour: "2-digit", minute: "2-digit",
+                }),
               })}
             </p>
           )}

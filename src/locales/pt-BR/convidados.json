@@ -1,0 +1,105 @@
+{
+  "header": {
+    "secao": "Minha Unidade",
+    "titulo": "Meus",
+    "destaque": "Convidados"
+  },
+  "abas": {
+    "convidados": "Convidados",
+    "preAutorizacoes": "Pré-autorizações"
+  },
+  "semPermissao": "Apenas o responsável financeiro da unidade pode gerenciar permissões de convidados.",
+  "toggle": {
+    "bloquear": "Bloquear entrada",
+    "permitir": "Permitir entrada"
+  },
+  "cartao": {
+    "cpf": "CPF: {{cpf}}",
+    "dentro": "Dentro",
+    "fora": "Fora",
+    "permissao": {
+      "titulo": "Permissão de entrada",
+      "permitida": "Portaria pode registrar a entrada",
+      "negada": "Portaria não pode registrar a entrada"
+    },
+    "ultimoRegistro": "Último registro:"
+  },
+  "lista": {
+    "erroCarregar": "Erro ao carregar convidados.",
+    "erroAlterar": "Erro ao alterar permissão.",
+    "info": "Ative a permissão de entrada para que a portaria possa registrar o acesso do seu convidado.",
+    "carregando": "Carregando convidados...",
+    "vazio": {
+      "titulo": "Você não possui convidados cadastrados.",
+      "desc": "Solicite ao administrador o cadastro de convidados para sua unidade."
+    },
+    "resumo": {
+      "convidados_one": "{{count}} convidado",
+      "convidados_other": "{{count}} convidados",
+      "autorizados_one": "{{count}} autorizado",
+      "autorizados_other": "{{count}} autorizados"
+    }
+  },
+  "pre": {
+    "status": {
+      "aguardando": "Aguardando",
+      "utilizada": "Utilizada",
+      "expirada": "Expirada",
+      "cancelada": "Cancelada"
+    },
+    "erros": {
+      "nome": "Informe o nome completo do visitante.",
+      "cpf": "CPF inválido. Verifique os dígitos informados.",
+      "periodo": "Informe o período de validade.",
+      "fimAntesInicio": "A data de fim não pode ser anterior à data de início.",
+      "passado": "A validade não pode terminar no passado.",
+      "placa": "Placa inválida. Use o formato AAA-9999 ou AAA9A99 (Mercosul)."
+    },
+    "toast": {
+      "criada": "Pré-liberação criada.",
+      "erroCriar": "Erro ao criar a pré-liberação.",
+      "cancelada": "Pré-liberação cancelada.",
+      "erroCancelar": "Erro ao cancelar a pré-liberação."
+    },
+    "confirmarCancelar": "Cancelar a pré-liberação de {{nome}}?",
+    "unidade": {
+      "apto": "Apto {{numero}}",
+      "vinculada": "Vinculada ao seu cadastro"
+    },
+    "info": "A pré-liberação permite que a portaria libere a entrada de um visitante específico durante o período indicado, sem precisar da sua presença. Se ele vier de carro, inclua o veículo aqui mesmo — a vaga é conferida na chegada, não reservada.",
+    "nova": "Nova pré-liberação",
+    "campos": {
+      "nome": "Nome completo",
+      "nomePlaceholder": "Nome do visitante",
+      "cpf": "CPF",
+      "telefone": "Telefone",
+      "morador": "Morador responsável",
+      "voce": "Você",
+      "unidade": "Unidade",
+      "validoDe": "Válido a partir de",
+      "validoAte": "Válido até",
+      "observacoes": "Observações",
+      "opcional": "(opcional)",
+      "observacoesPlaceholder": "Ex: visita de médico, prestador de serviço..."
+    },
+    "veiculo": {
+      "viraDeCarro": "Virá de carro",
+      "semVaga": "Sua unidade não possui vagas cadastradas. O visitante poderá entrar apenas a pé.",
+      "placa": "Placa",
+      "modelo": "Modelo",
+      "modeloPlaceholder": "Ex.: Civic",
+      "cor": "Cor",
+      "corPlaceholder": "Ex.: Prata",
+      "avisoVaga": "A pré-liberação não reserva a vaga: a disponibilidade é conferida na chegada."
+    },
+    "criando": "Criando…",
+    "criar": "Criar pré-liberação",
+    "vazio": "Nenhuma pré-liberação registrada. Crie uma para que a portaria libere a entrada do seu visitante sem precisar da sua presença.",
+    "item": {
+      "cpf": "CPF {{cpf}}",
+      "validade": "Válida de {{inicio}} a {{fim}}"
+    },
+    "cancelando": "Cancelando…",
+    "cancelar": "Cancelar pré-liberação"
+  }
+}
