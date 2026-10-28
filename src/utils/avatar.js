@@ -1,4 +1,4 @@
-const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:3001";
+import { GATEWAY_URL as API_BASE } from "../services/gateway";
 
 /**
  * Endereço completo da foto de perfil.

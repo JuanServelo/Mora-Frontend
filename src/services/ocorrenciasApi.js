@@ -1,18 +1,16 @@
 import axios from "axios";
+import { GATEWAY_URL } from "./gateway";
 
 /**
  * Client do ocorrencias-service: reclamações, ordens de serviço e fornecedores.
  *
- * O serviço é o Java, na 8095. Em desenvolvimento a chamada passa pelo proxy
- * `/ocorrencias-api` do Vite, que remove o prefixo antes de encaminhar — o
- * Traefik faz o mesmo em produção com `/api/ocorrencias`, então os caminhos
- * aqui são os mesmos nos dois ambientes.
+ * As chamadas passam pelo Gateway no prefixo `/api/ocorrencias`.
  *
  * Antes as reclamações viviam no auth-api (`/api/reclamacoes`); migraram para
  * cá junto com as ordens de serviço (D27).
  */
 const ocorrencias = axios.create({
-  baseURL: import.meta.env.VITE_OCORRENCIAS_API_URL || "/ocorrencias-api",
+  baseURL: `${GATEWAY_URL}/api/ocorrencias`,
 });
 
 ocorrencias.interceptors.request.use((config) => {

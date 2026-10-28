@@ -1,13 +1,14 @@
 import axios from "axios";
+import { GATEWAY_URL } from "./gateway";
 
 /**
  * Client do gestao-geral-service, que consolida os dados da plataforma.
  *
- * Instância própria porque é outro serviço, em outra porta. O interceptor de
+ * Instância própria com a mesma origem do gateway. O interceptor de
  * token é o mesmo padrão de services/api.js.
  */
 const gestao = axios.create({
-  baseURL: import.meta.env.VITE_GESTAO_API_URL || "http://localhost:3002",
+  baseURL: GATEWAY_URL,
 });
 
 gestao.interceptors.request.use((config) => {

@@ -1,8 +1,9 @@
 // src/services/planApi.js
 import axios from "axios";
+import { GATEWAY_URL } from "./gateway";
 
 const planHttp = axios.create({
-  baseURL: import.meta.env.VITE_PLAN_API_URL || "http://localhost:8093",
+  baseURL: GATEWAY_URL,
 });
 
 planHttp.interceptors.request.use((config) => {

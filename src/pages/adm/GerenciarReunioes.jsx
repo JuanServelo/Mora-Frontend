@@ -14,7 +14,6 @@ import { MeetingFilters } from "../../components/meetings/MeetingFilters";
 import { confirmarPresencaLocal, filtrarReunioes } from "../../utils/meetings";
 import { useTranslation } from "react-i18next";
 import { idiomaAtual } from "../../i18n";
-import { formatarData } from "../../utils/datas";
 
 function TextArea({ label, ...props }) {
   return (

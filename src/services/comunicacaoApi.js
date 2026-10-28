@@ -1,12 +1,11 @@
 import axios from "axios";
+import { GATEWAY_URL } from "./gateway";
 
 /**
  * Client do comunicacao-service.
  *
- * O serviço é o Java, na 8094. Em desenvolvimento a chamada passa pelo proxy
- * `/comunicacao-api` do Vite, que remove o prefixo antes de encaminhar — o
- * Traefik faz o mesmo em produção com `/api/comunicacao`, então os caminhos
- * aqui são os mesmos nos dois ambientes.
+ * As chamadas usam /api/comunicacao no gateway em todos os ambientes.
+ * O Traefik remove o prefixo antes de encaminhar ao serviço Java.
  *
  * A caixa de notificações vinha do financeiro-service. Mudou de lugar porque a
  * caixa é **do usuário**, não de um serviço: ela mistura fatura, aviso e
@@ -14,7 +13,7 @@ import axios from "axios";
  * ordenar sozinha.
  */
 const comunicacao = axios.create({
-  baseURL: import.meta.env.VITE_COMUNICACAO_API_URL || "/comunicacao-api",
+  baseURL: `${GATEWAY_URL}/api/comunicacao`,
 });
 
 comunicacao.interceptors.request.use((config) => {

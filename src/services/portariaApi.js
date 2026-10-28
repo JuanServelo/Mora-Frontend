@@ -1,8 +1,9 @@
 // src/services/portariaApi.js
 import axios from "axios";
+import { GATEWAY_URL } from "./gateway";
 
 const portariaApi = axios.create({
-  baseURL: import.meta.env.VITE_PORTARIA_API_URL || "/portaria-api",
+  baseURL: `${GATEWAY_URL}/api/portaria`,
 });
 
 portariaApi.interceptors.request.use((config) => {

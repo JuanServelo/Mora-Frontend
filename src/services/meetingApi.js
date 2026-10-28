@@ -1,8 +1,9 @@
 // src/services/meetingApi.js
 import axios from "axios";
+import { GATEWAY_URL } from "./gateway";
 
 const meetingHttp = axios.create({
-  baseURL: import.meta.env.VITE_MEETING_API_URL || "http://localhost:8091",
+  baseURL: GATEWAY_URL,
   withCredentials: true,
 });
 
