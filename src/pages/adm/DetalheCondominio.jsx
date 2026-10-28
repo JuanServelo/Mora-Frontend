@@ -192,7 +192,7 @@ export function DetalheCondominio() {
             <CartaoKpi valor={resumo.usuarios.total} label="Usuários" tom="primary" icone="group" />
             <CartaoKpi valor={resumo.usuarios.ativos} label="Ativos" tom="tertiary" icone="check_circle" />
             <CartaoKpi valor={resumo.convitesPendentes} label="Convites pendentes" tom="secondary" icone="mail" />
-            <CartaoKpi valor={resumo.ocorrencias} label="Ocorrências" tom="neutro" icone="report" />
+            <CartaoKpi valor={resumo.ocorrencias ?? "—"} label="Ocorrências" tom="neutro" icone="report" />
           </section>
         )}
 

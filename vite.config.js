@@ -99,6 +99,12 @@ export default defineConfig({
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/comunicacao-api/, ""),
       },
+      // O ocorrencias-service: reclamações, ordens de serviço e fornecedores.
+      "/ocorrencias-api": {
+        target: "http://localhost:8095",
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/ocorrencias-api/, ""),
+      },
     },
   },
 });

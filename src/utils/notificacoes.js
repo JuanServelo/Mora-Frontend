@@ -76,6 +76,25 @@ const TIPOS = {
     cor: "bg-secondary/15 text-secondary",
     destino: () => "/meus-veiculos",
   },
+
+  // ── ocorrencias ─────────────────────────────────────────
+  // Chegam pela fila: o ocorrencias-service publica, o comunicacao grava.
+  OCORRENCIA_RESPONDIDA: {
+    icone: "report",
+    cor: "bg-primary/15 text-primary",
+    destino: () => "/reclamacoes",
+  },
+  ORDEM_SERVICO_ABERTA: {
+    icone: "construction",
+    cor: "bg-tertiary/15 text-tertiary",
+    destino: () => "/reclamacoes",
+  },
+  // Esta vai para o síndico que abriu a OS.
+  ORDEM_SERVICO_ATRASADA: {
+    icone: "alarm",
+    cor: "bg-error/15 text-error",
+    destino: (n) => (n?.referenciaId ? `/adm/ordens-servico?os=${n.referenciaId}` : "/adm/ordens-servico"),
+  },
 };
 
 const PADRAO = {
@@ -114,5 +133,6 @@ export const ROTULO_ORIGEM = {
   comunicacao: "Mensagens",
   portaria: "Portaria",
   gestao: "Gestão",
+  ocorrencias: "Ocorrências",
   plataforma: "Mora",
 };

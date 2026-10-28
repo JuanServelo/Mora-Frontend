@@ -22,7 +22,7 @@ const STATUS = [
   { valor: "inactive", rotulo: "Inativos" },
 ];
 
-export function FiltroPainel({ filtros, aoMudar, carregando }) {
+export function FiltroPainel({ filtros, aoMudar, carregando, planos, plano, aoMudarPlano }) {
   // Atualização funcional, não `{ ...filtros }`: o objeto do closure é o da
   // renderização anterior, e duas mudanças antes de um novo render fariam a
   // segunda descartar a primeira.
@@ -58,6 +58,25 @@ export function FiltroPainel({ filtros, aoMudar, carregando }) {
           </Opcao>
         ))}
       </Grupo>
+
+      {/* Só recorta os blocos de receita. A lista vem do backend sempre
+          completa, mesmo com filtro ativo — montada da base já filtrada, o
+          seletor ficaria preso na escolha. */}
+      {planos?.length > 1 && (
+        <Grupo rotulo="Plano (receita)">
+          <select
+            value={plano}
+            onChange={(e) => aoMudarPlano(e.target.value)}
+            aria-label="Filtrar a receita por plano"
+            className="bg-surface-container-highest/40 border-none rounded-lg py-1.5 px-2 text-xs font-semibold text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/50 cursor-pointer"
+          >
+            <option value="todos">Todos</option>
+            {planos.map((p) => (
+              <option key={p} value={p}>{p}</option>
+            ))}
+          </select>
+        </Grupo>
+      )}
 
       {/* Sinaliza que os números na tela ainda são os do filtro anterior. */}
       {carregando && (

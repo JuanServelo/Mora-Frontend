@@ -64,6 +64,7 @@ function tituloDaRota(pathname) {
     "/adm/financeiro": "Financeiro",
     "/adm/reunioes": "Reuniões",
     "/adm/reclamacoes": "Reclamações",
+    "/adm/ordens-servico": "Ordens de Serviço",
     "/adm/comunicados": "Comunicados",
     "/adm/conhecimento": "Conhecimento",
     "/adm/meu-plano": "Meu Plano",

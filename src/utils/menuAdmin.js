@@ -136,6 +136,15 @@ export const ADM_LINKS = [
     modulo: "reclamacoes",
   },
   {
+    // Mesmo módulo das reclamações: a OS é o desdobramento da ocorrência.
+    to: "/adm/ordens-servico",
+    label: "Ordens de Serviço",
+    icon: "construction",
+    description: "Manutenção corretiva e preventiva",
+    perfis: CONDOMINIO,
+    modulo: "reclamacoes",
+  },
+  {
     // Nao e rota /adm, e nao precisa ser: a tela e a mesma do morador, e quem
     // decide o que cada perfil enxerga e o servico. Fica aqui so para aparecer
     // na barra lateral de quem usa o layout administrativo.

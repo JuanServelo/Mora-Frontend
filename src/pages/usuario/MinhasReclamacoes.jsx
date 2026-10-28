@@ -1,9 +1,18 @@
 // src/pages/usuario/MinhasReclamacoes.jsx
 import { useState, useEffect } from "react";
-import { reclamacoesApi } from "../../services/reclamacoesApi";
+import { reclamacoesApi, mensagemDeErro } from "../../services/ocorrenciasApi";
 import { Icone } from "../../components/icones/Icone";
 import { Campo } from "../../components/campos/Campo";
 import { Botao } from "../../components/botoes/Botao";
+import {
+  CATEGORIAS,
+  rotuloCategoria,
+  statusReclamacao,
+  statusOs,
+  tempoDaOcorrencia,
+  dataHora,
+} from "../../utils/ocorrencias";
+import { formatarData } from "../../utils/datas";
 
 // ─── helpers ────────────────────────────────
 function TextArea({ label, ...props }) {
@@ -22,48 +31,12 @@ function TextArea({ label, ...props }) {
   );
 }
 
-const CATEGORIAS = [
-  "BARULHO",
-  "INFRAESTRUTURA",
-  "LIMPEZA",
-  "GARAGEM",
-  "ANIMAIS",
-  "ELEVADORES",
-  "ILUMINACAO",
-  "ELETRICA",
-  "HIDRAULICA",
-  "PINTURA",
-  "JARDINAGEM",
-  "SUGESTAO_MELHORIA",
-  "OUTROS",
-];
-
-const STATUS_COLOR = {
-  PENDENTE: "bg-tertiary/10 text-tertiary",
-  EM_ANALISE: "bg-primary/10 text-primary",
-  RESOLVIDO: "bg-primary/10 text-primary",
-};
-
-const STATUS_ICON = {
-  PENDENTE: "schedule",
-  EM_ANALISE: "manage_search",
-  RESOLVIDO: "check_circle",
-};
-
-const catLabel = (c) =>
-  c
-    .replace(/_/g, " ")
-    .toLowerCase()
-    .replace(/\b\w/g, (l) => l.toUpperCase());
+const FORM_VAZIO = { categoria: "BARULHO", descricao: "", anexoUrl: "" };
 
 // ─── Aba: Abrir Reclamação ───────────────────
 function AbaNovaReclamacao({ onCriada }) {
-  const [form, setForm] = useState({
-    category: "BARULHO",
-    description: "",
-    attachmentUrl: "",
-  });
-  const [enviado, setEnviado] = useState(false);
+  const [form, setForm] = useState(FORM_VAZIO);
+  const [criada, setCriada] = useState(null);
   const [erro, setErro] = useState("");
   const [enviando, setEnviando] = useState(false);
 
@@ -77,21 +50,21 @@ function AbaNovaReclamacao({ onCriada }) {
     setErro("");
     setEnviando(true);
     try {
-      const res = await reclamacoesApi.criar({
-        category: form.category,
-        description: form.description.trim(),
-        attachmentUrl: form.attachmentUrl?.trim() || undefined,
+      const res = await reclamacoesApi.registrar({
+        categoria: form.categoria,
+        descricao: form.descricao.trim(),
+        anexoUrl: form.anexoUrl?.trim() || undefined,
       });
-      onCriada(res.data.reclamacao);
-      setEnviado(true);
+      onCriada(res.data);
+      setCriada(res.data);
     } catch (err) {
-      setErro(err.response?.data?.mensagem || "Não foi possível enviar a reclamação.");
+      setErro(mensagemDeErro(err, "Não foi possível enviar a reclamação."));
     } finally {
       setEnviando(false);
     }
   };
 
-  if (enviado) {
+  if (criada) {
     return (
       <div className="glass-panel rounded-2xl py-16 flex flex-col items-center gap-4 text-center">
         <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
@@ -99,13 +72,14 @@ function AbaNovaReclamacao({ onCriada }) {
         </div>
         <h2 className="font-headline text-2xl font-bold text-on-surface">Reclamação registrada!</h2>
         <p className="text-on-surface-variant text-sm max-w-sm">
-          Sua reclamação foi enviada com sucesso. Acompanhe o status pela aba{" "}
-          <strong>Minhas Reclamações</strong>.
+          Protocolo <strong className="font-mono text-on-surface">{criada.protocolo}</strong>. Acompanhe o
+          andamento pela aba <strong>Minhas Reclamações</strong> — você é avisado quando a administração
+          responder.
         </p>
         <Botao
           onClick={() => {
-            setEnviado(false);
-            setForm({ category: "BARULHO", description: "", attachmentUrl: "" });
+            setCriada(null);
+            setForm(FORM_VAZIO);
           }}
         >
           Abrir outra reclamação
@@ -133,31 +107,32 @@ function AbaNovaReclamacao({ onCriada }) {
             Categoria
           </label>
           <select
-            name="category"
-            value={form.category}
+            name="categoria"
+            value={form.categoria}
             onChange={handleForm}
             className="w-full bg-surface-container-highest/40 border-none rounded-xl py-3 px-4 text-on-surface focus:ring-2 focus:ring-primary/50 focus:outline-none backdrop-blur-sm transition-all"
           >
             {CATEGORIAS.map((c) => (
               <option key={c} value={c}>
-                {catLabel(c)}
+                {rotuloCategoria(c)}
               </option>
             ))}
           </select>
         </div>
         <TextArea
           label="Descrição"
-          name="description"
-          value={form.description}
+          name="descricao"
+          value={form.descricao}
           onChange={handleForm}
           rows={4}
+          maxLength={5000}
           placeholder="Descreva o problema com o máximo de detalhes possível..."
           required
         />
         <Campo
           label="URL do Anexo (opcional)"
-          name="attachmentUrl"
-          value={form.attachmentUrl}
+          name="anexoUrl"
+          value={form.anexoUrl}
           onChange={handleForm}
           placeholder="https://..."
         />
@@ -169,6 +144,43 @@ function AbaNovaReclamacao({ onCriada }) {
           </Botao>
         </div>
       </form>
+    </div>
+  );
+}
+
+// ─── Histórico ───────────────────────────────
+function Historico({ interacoes }) {
+  if (!interacoes?.length) {
+    return (
+      <div className="bg-surface-container-highest/20 rounded-xl p-3 flex items-center gap-2 text-on-surface-variant">
+        <Icone name="hourglass_empty" className="text-lg opacity-50" />
+        <p className="text-sm">Aguardando resposta da administração.</p>
+      </div>
+    );
+  }
+  return (
+    <div>
+      <p className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant mb-2">
+        Respostas da administração
+      </p>
+      <div className="space-y-2">
+        {interacoes.map((i) => (
+          <div
+            key={i.id}
+            className="bg-surface-container-highest/30 rounded-xl p-3 border-l-2 border-primary/40 space-y-1"
+          >
+            <p className="text-sm text-on-surface whitespace-pre-line">{i.mensagem}</p>
+            <div className="flex flex-wrap items-center gap-2 text-xs text-on-surface-variant">
+              <span>{dataHora(i.criadoEm)}</span>
+              {i.statusNovo && (
+                <span className={`font-semibold px-2 py-0.5 rounded-full ${statusReclamacao(i.statusNovo).cor}`}>
+                  {i.statusAnterior ? `${statusReclamacao(i.statusAnterior).rotulo} → ` : ""}{statusReclamacao(i.statusNovo).rotulo}
+                </span>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
@@ -188,111 +200,108 @@ function AbaMinhasReclamacoes({ reclamacoes }) {
 
   return (
     <div className="space-y-3">
-      {reclamacoes.map((rec) => (
-        <div key={rec.id} className="glass-panel rounded-2xl overflow-hidden">
-          <button
-            className="w-full flex items-center justify-between px-6 py-4 text-left cursor-pointer hover:bg-veu/5 transition-all"
-            onClick={() => setExpandido(expandido === rec.id ? null : rec.id)}
-          >
-            <div className="flex items-center gap-4">
-              <div
-                className={`w-10 h-10 rounded-xl flex items-center justify-center ${STATUS_COLOR[rec.status]}`}
-              >
-                <Icone name={STATUS_ICON[rec.status]} className="text-xl" />
-              </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <p className="font-semibold text-on-surface">{catLabel(rec.category)}</p>
-                  <span className="text-xs text-on-surface-variant font-mono">{rec.protocolNumber}</span>
+      {reclamacoes.map((rec) => {
+        const st = statusReclamacao(rec.status);
+        return (
+          <div key={rec.id} className="glass-panel rounded-2xl overflow-hidden">
+            <button
+              className="w-full flex items-center justify-between gap-3 px-6 py-4 text-left cursor-pointer hover:bg-veu/5 transition-all"
+              onClick={() => setExpandido(expandido === rec.id ? null : rec.id)}
+            >
+              <div className="flex items-center gap-4 min-w-0">
+                <div className={`w-10 h-10 shrink-0 rounded-xl flex items-center justify-center ${st.cor}`}>
+                  <Icone name={st.icone} className="text-xl" />
                 </div>
-                <p className="text-xs text-on-surface-variant line-clamp-1 max-w-md">{rec.description}</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <span
-                className={`text-xs font-semibold px-3 py-1 rounded-full ${STATUS_COLOR[rec.status]}`}
-              >
-                {rec.status.replace("_", " ")}
-              </span>
-              <Icone
-                name={expandido === rec.id ? "expand_less" : "expand_more"}
-                className="text-on-surface-variant text-xl"
-              />
-            </div>
-          </button>
-
-          {expandido === rec.id && (
-            <div className="px-6 pb-5 border-t border-veu/5 pt-4 space-y-5">
-              <div className="grid grid-cols-2 gap-3">
-                <div className="bg-surface-container-highest/30 rounded-xl p-3">
-                  <p className="text-xs text-on-surface-variant mb-1">Protocolo</p>
-                  <p className="text-sm font-semibold text-on-surface font-mono">{rec.protocolNumber}</p>
-                </div>
-                <div className="bg-surface-container-highest/30 rounded-xl p-3">
-                  <p className="text-xs text-on-surface-variant mb-1">Registrada em</p>
-                  <p className="text-sm font-semibold text-on-surface">
-                    {rec.createdAt?.replace("T", " ")}
-                  </p>
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-x-2">
+                    <p className="font-semibold text-on-surface">{rotuloCategoria(rec.categoria)}</p>
+                    <span className="text-xs text-on-surface-variant font-mono">{rec.protocolo}</span>
+                  </div>
+                  <p className="text-xs text-on-surface-variant line-clamp-1 max-w-md">{rec.descricao}</p>
                 </div>
               </div>
-
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant mb-1">
-                  Descrição
-                </p>
-                <p className="text-sm text-on-surface bg-surface-container-highest/30 rounded-xl p-3">
-                  {rec.description}
-                </p>
+              <div className="flex items-center gap-3 shrink-0">
+                <span className={`text-xs font-semibold px-3 py-1 rounded-full ${st.cor}`}>{st.rotulo}</span>
+                <Icone
+                  name={expandido === rec.id ? "expand_less" : "expand_more"}
+                  className="text-on-surface-variant text-xl"
+                />
               </div>
+            </button>
 
-              {rec.attachmentUrl && (
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant mb-1">
-                    Anexo
-                  </p>
-                  <a
-                    href={rec.attachmentUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-sm font-semibold text-primary hover:underline"
-                  >
-                    Ver arquivo
-                  </a>
-                </div>
-              )}
-
-              {/* Respostas do admin */}
-              {(rec.interactions?.length ?? 0) > 0 ? (
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant mb-2">
-                    Respostas da administração
-                  </p>
-                  <div className="space-y-2">
-                    {(rec.interactions || []).map((i) => (
-                      <div
-                        key={i.id}
-                        className="bg-surface-container-highest/30 rounded-xl p-3 border-l-2 border-primary/40"
-                      >
-                        <p className="text-sm text-on-surface">{i.response}</p>
-                        <span
-                          className={`mt-1 inline-block text-xs font-semibold px-2 py-0.5 rounded-full ${STATUS_COLOR[i.status]}`}
-                        >
-                          {i.status.replace("_", " ")}
-                        </span>
-                      </div>
-                    ))}
+            {expandido === rec.id && (
+              <div className="px-6 pb-5 border-t border-veu/5 pt-4 space-y-5">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div className="bg-surface-container-highest/30 rounded-xl p-3">
+                    <p className="text-xs text-on-surface-variant mb-1">Protocolo</p>
+                    <p className="text-sm font-semibold text-on-surface font-mono">{rec.protocolo}</p>
+                  </div>
+                  <div className="bg-surface-container-highest/30 rounded-xl p-3">
+                    <p className="text-xs text-on-surface-variant mb-1">Registrada em</p>
+                    <p className="text-sm font-semibold text-on-surface">{dataHora(rec.criadoEm)}</p>
+                  </div>
+                  <div className="bg-surface-container-highest/30 rounded-xl p-3">
+                    <p className="text-xs text-on-surface-variant mb-1">Tempo</p>
+                    <p className="text-sm font-semibold text-on-surface">{tempoDaOcorrencia(rec)}</p>
                   </div>
                 </div>
-              ) : (
-                <div className="bg-surface-container-highest/20 rounded-xl p-3 flex items-center gap-2 text-on-surface-variant">
-                  <Icone name="hourglass_empty" className="text-lg opacity-50" />
-                  <p className="text-sm">Aguardando resposta da administração.</p>
+
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant mb-1">
+                    Descrição
+                  </p>
+                  <p className="text-sm text-on-surface bg-surface-container-highest/30 rounded-xl p-3 whitespace-pre-line">
+                    {rec.descricao}
+                  </p>
                 </div>
-              )}
-            </div>
-          )}
-        </div>
-      ))}
+
+                {rec.anexoUrl && (
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant mb-1">
+                      Anexo
+                    </p>
+                    <a
+                      href={rec.anexoUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm font-semibold text-primary hover:underline"
+                    >
+                      Ver arquivo
+                    </a>
+                  </div>
+                )}
+
+                {rec.ordensServico?.length > 0 && (
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant mb-2">
+                      Ordens de serviço
+                    </p>
+                    <div className="space-y-2">
+                      {rec.ordensServico.map((os) => (
+                        <div
+                          key={os.id}
+                          className="bg-surface-container-highest/30 rounded-xl p-3 flex flex-wrap items-center justify-between gap-2"
+                        >
+                          <div className="flex items-center gap-2">
+                            <Icone name="construction" className="text-lg text-on-surface-variant" />
+                            <span className="text-sm font-mono text-on-surface">{os.numero}</span>
+                            <span className="text-xs text-on-surface-variant">prazo {formatarData(os.prazo)}</span>
+                          </div>
+                          <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${statusOs(os.status).cor}`}>
+                            {statusOs(os.status).rotulo}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <Historico interacoes={rec.interacoes} />
+              </div>
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -308,7 +317,7 @@ export function MinhasReclamacoes() {
     (async () => {
       try {
         const res = await reclamacoesApi.listarMinhas();
-        if (ok) setReclamacoes(res.data.reclamacoes || []);
+        if (ok) setReclamacoes(res.data || []);
       } catch {
         if (ok) setReclamacoes([]);
       } finally {
@@ -322,7 +331,6 @@ export function MinhasReclamacoes() {
 
   const handleCriada = (nova) => {
     setReclamacoes((prev) => [nova, ...prev]);
-    setAba("minhas");
   };
 
   const tabs = [
@@ -331,7 +339,7 @@ export function MinhasReclamacoes() {
   ];
 
   return (
-    <div className="min-h-screen w-full pt-4 pb-20 px-6">
+    <div className="min-h-screen w-full pt-4 pb-20 px-4 sm:px-6">
       <div className="max-w-4xl mx-auto space-y-8">
         {/* Header */}
         <header>
@@ -347,7 +355,7 @@ export function MinhasReclamacoes() {
         </header>
 
         {/* Tabs */}
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           {tabs.map((t) => (
             <button
               key={t.id}
