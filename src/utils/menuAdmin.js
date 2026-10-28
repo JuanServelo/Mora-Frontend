@@ -76,6 +76,15 @@ export const ADM_LINKS = [
     description: "Indicadores operacionais e estratégicos",
     perfis: CONDOMINIO,
   },
+  // Sem `modulo` — a previsão de inadimplência é do ia-service, não de um
+  // módulo do plano.
+  {
+    to: "/adm/assistente",
+    label: "Assistente IA",
+    icon: "smart_toy",
+    description: "Perguntas sobre o risco de atraso das unidades",
+    perfis: CONDOMINIO,
+  },
   // Sem `modulo` — o síndico precisa sempre ver seu plano.
   {
     to: "/adm/meu-plano",
